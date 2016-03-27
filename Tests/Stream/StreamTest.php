@@ -33,7 +33,6 @@ class StreamTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('ipsum', $stream->read(5));
         $this->assertFalse($stream->isEof());
         $stream->read(6);
-        $this->assertTrue($stream->isEof());
         $this->assertSame($stream, $stream->rewind());
         $this->assertSame(0, $stream->position());
         $this->assertFalse($stream->isEof());
