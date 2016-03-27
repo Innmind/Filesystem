@@ -47,7 +47,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase
     public function testThrowWhenPositionNotSeekable()
     {
         $resource = fopen('php://temp', 'r+');
-        fwrite($resource, $lorem = 'Lorem ipsum dolor');
+        fwrite($resource, 'Lorem ipsum dolor');
 
         $stream = new Stream($resource);
 
