@@ -33,4 +33,15 @@ interface DirectoryInterface extends FileInterface, \Iterator, \Countable
      * @return bool
      */
     public function has(string $name): bool;
+
+    /**
+     * Remove the wished file
+     *
+     * @param string $name
+     *
+     * @throws FileNotFoundException
+     *
+     * @return self
+     */
+    public function remove(string $name): self;
 }
