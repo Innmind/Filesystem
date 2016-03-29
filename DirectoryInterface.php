@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-interface DirectoryInterface extends FileInterface, \Iterator
+interface DirectoryInterface extends FileInterface, \Iterator, \Countable
 {
     /**
      * Add a new file to the directory
