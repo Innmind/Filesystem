@@ -15,7 +15,8 @@
         "issues": "http://github.com/Innmind/filesystem/issues"
     },
     "require": {
-        "php": ">=7.0"
+        "php": ">=7.0",
+        "innmind/immutable": "^1.5"
     },
     "autoload": {
         "psr-0": {
