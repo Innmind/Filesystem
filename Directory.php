@@ -95,7 +95,10 @@ class Directory implements DirectoryInterface
      */
     public function remove(string $name): DirectoryInterface
     {
-        $this->loadDirectory();
+        if (!$this->has($name)) {
+            throw new FileNotFoundException;
+        }
+
         $directory = clone $this;
         $directory->content = null;
         $directory->files = $this->files->remove($name);
