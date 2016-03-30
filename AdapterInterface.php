@@ -6,7 +6,7 @@ namespace Innmind\Filesystem;
 /**
  * Layer between value objects and concrete implementation
  */
-interface AdpaterInterface
+interface AdapterInterface
 {
     /**
      * Persist the file to concrete filesystem
