@@ -15,7 +15,7 @@ interface AdpaterInterface
      *
      * @return self
      */
-    public function persist(FileInterface $file): self;
+    public function add(FileInterface $file): self;
 
     /**
      * Return the file with the given name
