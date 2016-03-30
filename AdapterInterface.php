@@ -36,4 +36,15 @@ interface AdpaterInterface
      * @return bool
      */
     public function has(string $file): bool;
+
+    /**
+     * Remove the file with the given name
+     *
+     * @param string $file
+     *
+     * @throws FileNotFoundException
+     *
+     * @return self
+     */
+    public function remove(string $file): self;
 }
