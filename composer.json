@@ -16,7 +16,8 @@
     },
     "require": {
         "php": ">=7.0",
-        "innmind/immutable": "^1.5"
+        "innmind/immutable": "^1.5",
+        "symfony/filesystem": "^3.0"
     },
     "autoload": {
         "psr-0": {
