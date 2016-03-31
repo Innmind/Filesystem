@@ -44,4 +44,14 @@ interface DirectoryInterface extends FileInterface, \Iterator, \Countable
      * @return self
      */
     public function remove(string $name): self;
+
+    /**
+     * Replace a file at a given path
+     *
+     * @param string $path
+     * @param FileInterface $file
+     *
+     * @return self
+     */
+    public function replaceAt(string $path, FileInterface $file): self;
 }

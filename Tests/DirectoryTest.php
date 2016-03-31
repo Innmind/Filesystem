@@ -138,4 +138,34 @@ class DirectoryTest extends \PHPUnit_Framework_TestCase
             (string) $d->content()
         );
     }
+
+    public function testReplaceAt()
+    {
+        $d = (new Directory('foobar'))
+            ->add(
+                (new Directory('foo'))
+                    ->add(
+                        (new Directory('bar'))
+                            ->add(
+                                (new Directory('baz'))
+                                    ->add(new File('baz.md', new StringStream('baz')))
+                            )
+                    )
+            );
+
+        $d2 = $d->replaceAt(
+            'foo/bar/baz',
+            new File('baz.md', new StringStream('updated'))
+        );
+        $this->assertInstanceOf(DirectoryInterface::class, $d2);
+        $this->assertNotSame($d, $d2);
+        $this->assertSame(
+            'baz',
+            (string) $d->get('foo')->get('bar')->get('baz')->get('baz.md')->content()
+        );
+        $this->assertSame(
+            'updated',
+            (string) $d2->get('foo')->get('bar')->get('baz')->get('baz.md')->content()
+        );
+    }
 }

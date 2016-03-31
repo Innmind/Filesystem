@@ -7,7 +7,10 @@ use Innmind\Filesystem\{
     Stream\StringStream,
     Exception\FileNotFoundException
 };
-use Innmind\Immutable\Map;
+use Innmind\Immutable\{
+    Map,
+    StringPrimitive as Str
+};
 
 class Directory implements DirectoryInterface
 {
@@ -104,6 +107,29 @@ class Directory implements DirectoryInterface
         $directory->files = $this->files->remove($name);
 
         return $directory;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function replaceAt(string $path, FileInterface $file): DirectoryInterface
+    {
+        $pieces = (new Str($path))->split('/');
+        $directory = $this;
+
+        while ($pieces->count() > 0) {
+            $target = $pieces
+                ->reduce(
+                    function(DirectoryInterface $parent, Str $seek) {
+                        return $parent->get((string) $seek);
+                    },
+                    $directory
+                )
+                ->add($target ?? $file);
+            $pieces = $pieces->pop();
+        }
+
+        return $directory->add($target);
     }
 
     /**
