@@ -138,7 +138,7 @@ class FilesystemAdapter implements AdapterInterface
         if (is_dir($path)) {
             $object = new Directory(
                 $file,
-                (function ($folder) {
+                (function($folder) {
                     $handle = opendir($folder);
 
                     while (($name = readdir($handle)) !== false) {

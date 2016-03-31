@@ -16,7 +16,7 @@ class Directory implements DirectoryInterface
     private $files;
     private $generator;
 
-    public function __construct(string $name, \Generator $generator= null)
+    public function __construct(string $name, \Generator $generator = null)
     {
         $this->name = new Name($name);
         $this->generator = $generator;

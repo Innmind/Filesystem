@@ -95,13 +95,13 @@ class LazyAdapter implements LazyAdapterInterface
     {
         $this->toAdd = $this
             ->toAdd
-            ->foreach(function (string $name, FileInterface $file) {
+            ->foreach(function(string $name, FileInterface $file) {
                 $this->adapter->add($file);
             })
             ->clear();
         $this
             ->toRemove
-            ->foreach(function (string $name) {
+            ->foreach(function(string $name) {
                 if ($this->adapter->has($name)) {
                     $this->adapter->remove($name);
                 }
