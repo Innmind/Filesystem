@@ -112,10 +112,14 @@ class FilesystemAdapter implements AdapterInterface
             return;
         }
 
-        $this->filesystem->dumpFile(
-            $path,
-            (string) $file->content()
-        );
+        $stream = $file->content();
+        $stream->rewind();
+        $handle = fopen($path, 'w');
+
+        while (!$stream->isEof()) {
+            fwrite($handle, $stream->read(8192));
+        }
+
         $this->files = $this->files->put($path, $file);
     }
 
