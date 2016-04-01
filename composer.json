@@ -1,0 +1,28 @@
+{
+    "name": "innmind/filesystem",
+    "type": "library",
+    "description": "Filesystem abstraction layer",
+    "keywords": ["filesystem"],
+    "homepage": "http://github.com/Innmind/filesystem",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Baptiste Langlade",
+            "email": "langlade.baptiste@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "http://github.com/Innmind/filesystem/issues"
+    },
+    "require": {
+        "php": ">=7.0",
+        "innmind/immutable": "^1.5",
+        "symfony/filesystem": "^3.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Innmind\\Filesystem": ""
+        }
+    },
+    "target-dir": "Innmind/Filesystem"
+}
