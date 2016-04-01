@@ -1,5 +1,13 @@
 # Filesystem
 
+| `master` | `develop` |
+|----------|-----------|
+| [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/Filesystem/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Innmind/Filesystem/?branch=master) | [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/Filesystem/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Filesystem/?branch=develop) |
+| [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/Filesystem/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Innmind/Filesystem/?branch=master) | [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/Filesystem/badges/coverage.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Filesystem/?branch=develop) |
+| [![Build Status](https://scrutinizer-ci.com/g/Innmind/Filesystem/badges/build.png?b=master)](https://scrutinizer-ci.com/g/Innmind/Filesystem/build-status/master) | [![Build Status](https://scrutinizer-ci.com/g/Innmind/Filesystem/badges/build.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Filesystem/build-status/develop) |
+
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/6989139f-91d2-495d-808e-2fec284acdca/big.png)](https://insight.sensiolabs.com/projects/6989139f-91d2-495d-808e-2fec284acdca)
+
 Filesystem abstraction layer, the goal is to provide a model where you design how you put your files into directories without worrying where it will be persisted.
 
 The whole model is structures around files, directories, streams and adapters. [`File`](File.php), [`Directory`](Directory.php) and [`Stream`](Stream/Stream.php) are immutable objects.
