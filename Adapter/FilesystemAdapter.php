@@ -55,7 +55,7 @@ class FilesystemAdapter implements AdapterInterface
      */
     public function has(string $file): bool
     {
-        return $this->filesystem->exists($this->path . '/' . $file);
+        return $this->filesystem->exists($this->path.'/'.$file);
     }
 
     /**
@@ -67,7 +67,7 @@ class FilesystemAdapter implements AdapterInterface
             throw new FileNotFoundException;
         }
 
-        $this->filesystem->remove($this->path . '/' . $file);
+        $this->filesystem->remove($this->path.'/'.$file);
 
         return $this;
     }
@@ -83,7 +83,7 @@ class FilesystemAdapter implements AdapterInterface
     private function createFileAt(string $path, FileInterface $file)
     {
         if ($file instanceof DirectoryInterface) {
-            $folder = $path . '/' . (string) $file->name();
+            $folder = $path.'/'.(string) $file->name();
 
             if (
                 $this->files->contains($folder) &&
@@ -103,7 +103,7 @@ class FilesystemAdapter implements AdapterInterface
             return;
         }
 
-        $path .= '/' . (string) $file->name();
+        $path .= '/'.(string) $file->name();
 
         if (
             $this->files->contains($path) &&
@@ -133,7 +133,7 @@ class FilesystemAdapter implements AdapterInterface
      */
     private function open(string $folder, string $file): FileInterface
     {
-        $path = $folder . '/' . $file;
+        $path = $folder.'/'.$file;
 
         if ($this->files->contains($path)) {
             return $this->files->get($path);
