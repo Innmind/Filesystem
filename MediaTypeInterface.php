@@ -3,6 +3,8 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
+use Innmind\Immutable\MapInterface;
+
 interface MediaTypeInterface
 {
     public function topLevel(): string;
