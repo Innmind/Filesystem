@@ -6,12 +6,15 @@ namespace Innmind\Filesystem\MediaType;
 use Innmind\Filesystem\{
     MediaTypeInterface,
     Exception\InvalidArgumentException,
-    Exception\InvalidTopLevelTypeException
+    Exception\InvalidTopLevelTypeException,
+    Exception\InvalidMediaTypeStringException
 };
 use Innmind\Immutable\{
     MapInterface,
     SetInterface,
-    Set
+    Set,
+    StringPrimitive as Str,
+    Map
 };
 
 final class MediaType implements MediaTypeInterface
@@ -102,5 +105,61 @@ final class MediaType implements MediaTypeInterface
         }
 
         return self::$topLevels;
+    }
+
+    /**
+     * Build an object out of a string
+     *
+     * @param string $string
+     *
+     * @return self
+     */
+    public static function fromString(string $string): self
+    {
+        $string = new Str($string);
+        $pattern = sprintf(
+            '~%s/[\w\-.]+(\+\w+)?([;,] [\w\-.]+=[\w\-.]+)?~',
+            self::topLevels()->join('|')
+        );
+
+        if (!$string->match($pattern)) {
+            throw new InvalidMediaTypeStringException;
+        }
+
+        $splits = $string->pregSplit('~[;,] ~');
+        $matches = $splits
+            ->get(0)
+            ->getMatches(sprintf(
+                '~^(?<topLevel>%s)/(?<subType>[\w\-.]+)(\+(?<suffix>\w+))?$~',
+                self::topLevels()->join('|')
+            ));
+
+        $topLevel = $matches->get('topLevel');
+        $subType = $matches->get('subType');
+        $suffix = $matches->hasKey('suffix') ? $matches->get('suffix') : '';
+        $params = new Map('string', ParameterInterface::class);
+
+        $splits
+            ->shift()
+            ->each(function(int $idx, Str $param) use (&$params) {
+                $matches = $param->getMatches(
+                    '~^(?<key>[\w\-.]+)=(?<value>[\w\-.]+)$~'
+                );
+
+                $params = $params->put(
+                    (string) $matches->get('key'),
+                    new Parameter(
+                        (string) $matches->get('key'),
+                        (string) $matches->get('value')
+                    )
+                );
+            });
+
+        return new self(
+            (string) $topLevel,
+            (string) $subType,
+            (string) $suffix,
+            $params
+        );
     }
 }

@@ -46,4 +46,28 @@ class MediaTypeTest extends \PHPUnit_Framework_TestCase
     {
         new MediaType('foo', 'bar', '', new Map('string', ParameterInterface::class));
     }
+
+    public function testFromString()
+    {
+        $m = MediaType::fromString(
+            'application/tree.octet-stream+suffix; charset=UTF-8, another=param, me=too'
+        );
+
+        $this->assertInstanceOf(MediaType::class, $m);
+        $this->assertSame('application', $m->topLevel());
+        $this->assertSame('tree.octet-stream', $m->subType());
+        $this->assertSame('suffix', $m->suffix());
+        $this->assertSame(3, $m->parameters()->size());
+        $this->assertSame('UTF-8', $m->parameters()->get('charset')->value());
+        $this->assertSame('param', $m->parameters()->get('another')->value());
+        $this->assertSame('too', $m->parameters()->get('me')->value());
+    }
+
+    /**
+     * @expectedException Innmind\Filesystem\Exception\InvalidMediaTypeStringException
+     */
+    public function testThrowWhenInvalidMediaTypeString()
+    {
+        MediaType::fromString('foo');
+    }
 }
