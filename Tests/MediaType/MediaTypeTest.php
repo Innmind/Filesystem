@@ -31,6 +31,19 @@ class MediaTypeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('application/json+whatever; charset=UTF-8', (string) $m);
     }
 
+    public function testStringCast()
+    {
+        $this->assertSame(
+            'application/json',
+            (string) new MediaType(
+                'application',
+                'json',
+                '',
+                new Map('string', ParameterInterface::class)
+            )
+        );
+    }
+
     /**
      * @expectedException Innmind\Filesystem\Exception\InvalidArgumentException
      */
