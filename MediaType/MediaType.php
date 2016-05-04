@@ -80,7 +80,7 @@ final class MediaType implements MediaTypeInterface
             $this->topLevel,
             $this->subType,
             !empty($this->suffix) ? '+'.$this->suffix : '',
-            !empty($parameters) ? '; '.$parameters : ''
+            $parameters->length() > 0 ? '; '.$parameters : ''
         );
     }
 
