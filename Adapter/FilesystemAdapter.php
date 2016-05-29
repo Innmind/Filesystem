@@ -94,6 +94,15 @@ class FilesystemAdapter implements AdapterInterface
 
             $this->filesystem->mkdir($folder);
 
+            foreach (scandir($folder) as $filename) {
+                if (
+                    !in_array($filename, ['.', '..']) &&
+                    !$file->has($filename)
+                ) {
+                    $this->filesystem->remove($folder.'/'.$filename);
+                }
+            }
+
             foreach ($file as $subFile) {
                 $this->createFileAt($folder, $subFile);
             }
