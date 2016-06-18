@@ -104,4 +104,19 @@ class FilesystemAdapterTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($a->get('foo')->has('bar'));
         $a->remove('foo');
     }
+
+    public function testLoadWithMediaType()
+    {
+        $a = new FilesystemAdapter('/tmp');
+        file_put_contents(
+            '/tmp/some_content.html',
+            '<!DOCTYPE html><html><body><answer value="42"/></body></html>'
+        );
+
+        $this->assertSame(
+            'text/html',
+            (string) $a->get('some_content.html')->mediaType()
+        );
+        $a->remove('some_content.html');
+    }
 }

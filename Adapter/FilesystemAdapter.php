@@ -12,7 +12,8 @@ use Innmind\Filesystem\{
     Stream\Stream,
     Exception\FileNotFoundException,
     Event\FileWasAdded,
-    Event\FileWasRemoved
+    Event\FileWasRemoved,
+    MediaType\MediaType
 };
 use Innmind\Immutable\{
     Map,
@@ -175,7 +176,8 @@ class FilesystemAdapter implements AdapterInterface
                 $file,
                 new Stream(
                     fopen($path, 'r')
-                )
+                ),
+                MediaType::fromString(mime_content_type($path))
             );
         }
 
