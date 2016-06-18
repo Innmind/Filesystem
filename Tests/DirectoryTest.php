@@ -7,7 +7,9 @@ use Innmind\Filesystem\{
     Directory,
     DirectoryInterface,
     File,
-    Stream\StringStream
+    Stream\StringStream,
+    Event\FileWasAdded,
+    Event\FileWasRemoved
 };
 
 class DirectoryTest extends \PHPUnit_Framework_TestCase
@@ -19,6 +21,8 @@ class DirectoryTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(DirectoryInterface::class, $d);
         $this->assertSame('foo', (string) $d->name());
         $this->assertSame('', (string) $d->content());
+        $this->assertSame('text/directory', (string) $d->mediaType());
+        $this->assertSame($d->mediaType(), $d->mediaType());
     }
 
     public function testAdd()
@@ -27,7 +31,7 @@ class DirectoryTest extends \PHPUnit_Framework_TestCase
         $d->content(); //force generation of files list, to be sure it's not cloned
 
         $d2 = $d->add(
-            new File('foo', new StringStream('bar'))
+            $file = new File('foo', new StringStream('bar'))
         );
 
         $this->assertInstanceOf(DirectoryInterface::class, $d2);
@@ -36,6 +40,13 @@ class DirectoryTest extends \PHPUnit_Framework_TestCase
         $this->assertNotSame($d->content(), $d2->content());
         $this->assertSame('', (string) $d->content());
         $this->assertSame('foo', (string) $d2->content());
+        $this->assertSame(0, $d->recordedEvents()->count());
+        $this->assertSame(1, $d2->recordedEvents()->count());
+        $this->assertInstanceOf(
+            FileWasAdded::class,
+            $d2->recordedEvents()->current()
+        );
+        $this->assertSame($file, $d2->recordedEvents()->current()->file());
     }
 
     public function testGet()
@@ -77,6 +88,13 @@ class DirectoryTest extends \PHPUnit_Framework_TestCase
         $this->assertNotSame($d->content(), $d2->content());
         $this->assertSame('bar', (string) $d->content());
         $this->assertSame('', (string) $d2->content());
+        $this->assertSame(1, $d->recordedEvents()->count());
+        $this->assertSame(2, $d2->recordedEvents()->count());
+        $this->assertInstanceOf(
+            FileWasRemoved::class,
+            $d2->recordedEvents()->get(1)
+        );
+        $this->assertSame('bar', $d2->recordedEvents()->get(1)->file());
     }
 
     /**

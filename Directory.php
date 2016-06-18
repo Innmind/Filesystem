@@ -5,25 +5,39 @@ namespace Innmind\Filesystem;
 
 use Innmind\Filesystem\{
     Stream\StringStream,
-    Exception\FileNotFoundException
+    Exception\FileNotFoundException,
+    Event\FileWasAdded,
+    Event\FileWasRemoved,
+    MediaType\MediaType,
+    MediaType\ParameterInterface
 };
 use Innmind\Immutable\{
     Map,
     StringPrimitive as Str
 };
+use Innmind\EventBus\EventRecorder;
 
 class Directory implements DirectoryInterface
 {
+    use EventRecorder;
+
     private $name;
     private $content;
     private $files;
     private $generator;
+    private $mediaType;
 
     public function __construct(string $name, \Generator $generator = null)
     {
         $this->name = new Name($name);
         $this->generator = $generator;
         $this->files = new Map('string', FileInterface::class);
+        $this->mediaType = new MediaType(
+            'text',
+            'directory',
+            '',
+            new Map('string', ParameterInterface::class)
+        );
     }
 
     /**
@@ -55,6 +69,11 @@ class Directory implements DirectoryInterface
         return $this->content;
     }
 
+    public function mediaType(): MediaTypeInterface
+    {
+        return $this->mediaType;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -67,6 +86,7 @@ class Directory implements DirectoryInterface
             (string) $file->name(),
             $file
         );
+        $directory->record(new FileWasAdded($file));
 
         return $directory;
     }
@@ -105,6 +125,7 @@ class Directory implements DirectoryInterface
         $directory = clone $this;
         $directory->content = null;
         $directory->files = $this->files->remove($name);
+        $directory->record(new FileWasRemoved($name));
 
         return $directory;
     }

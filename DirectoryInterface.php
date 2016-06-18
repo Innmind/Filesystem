@@ -3,7 +3,9 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-interface DirectoryInterface extends FileInterface, \Iterator, \Countable
+use Innmind\EventBus\ContainsRecordedEventsInterface;
+
+interface DirectoryInterface extends FileInterface, ContainsRecordedEventsInterface, \Iterator, \Countable
 {
     /**
      * Add a new file to the directory
