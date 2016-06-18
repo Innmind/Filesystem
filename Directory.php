@@ -5,15 +5,20 @@ namespace Innmind\Filesystem;
 
 use Innmind\Filesystem\{
     Stream\StringStream,
-    Exception\FileNotFoundException
+    Exception\FileNotFoundException,
+    Event\FileWasAdded,
+    Event\FileWasRemoved
 };
 use Innmind\Immutable\{
     Map,
     StringPrimitive as Str
 };
+use Innmind\EventBus\EventRecorder;
 
 class Directory implements DirectoryInterface
 {
+    use EventRecorder;
+
     private $name;
     private $content;
     private $files;
@@ -67,6 +72,7 @@ class Directory implements DirectoryInterface
             (string) $file->name(),
             $file
         );
+        $directory->record(new FileWasAdded($file));
 
         return $directory;
     }
@@ -105,6 +111,7 @@ class Directory implements DirectoryInterface
         $directory = clone $this;
         $directory->content = null;
         $directory->files = $this->files->remove($name);
+        $directory->record(new FileWasRemoved($name));
 
         return $directory;
     }
