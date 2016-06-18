@@ -18,4 +18,6 @@ interface FileInterface
      * @return StreamInterface
      */
     public function content(): StreamInterface;
+
+    public function mediaType(): MediaTypeInterface;
 }

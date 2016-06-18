@@ -7,7 +7,8 @@ use Innmind\Filesystem\{
     File,
     FileInterface,
     Stream\StringStream,
-    NameInterface
+    NameInterface,
+    MediaType\MediaType
 };
 
 class FileTest extends \PHPUnit_Framework_TestCase
@@ -20,6 +21,10 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(NameInterface::class, $f->name());
         $this->assertSame('foo', (string) $f->name());
         $this->assertSame($c, $f->content());
+        $this->assertSame(
+            'application/octet-stream',
+            (string) $f->mediaType()
+        );
     }
 
     public function testWithContent()
@@ -31,5 +36,16 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($f->name(), $f2->name());
         $this->assertSame($c, $f->content());
         $this->assertSame($c2, $f2->content());
+    }
+
+    public function testMediaType()
+    {
+        $f = new File(
+            'foo',
+            new StringStream('bar'),
+            $mt = MediaType::fromString('application/json')
+        );
+
+        $this->assertSame($mt, $f->mediaType());
     }
 }

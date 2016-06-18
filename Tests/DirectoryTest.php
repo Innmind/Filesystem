@@ -21,6 +21,8 @@ class DirectoryTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(DirectoryInterface::class, $d);
         $this->assertSame('foo', (string) $d->name());
         $this->assertSame('', (string) $d->content());
+        $this->assertSame('text/directory', (string) $d->mediaType());
+        $this->assertSame($d->mediaType(), $d->mediaType());
     }
 
     public function testAdd()

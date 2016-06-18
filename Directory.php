@@ -7,7 +7,9 @@ use Innmind\Filesystem\{
     Stream\StringStream,
     Exception\FileNotFoundException,
     Event\FileWasAdded,
-    Event\FileWasRemoved
+    Event\FileWasRemoved,
+    MediaType\MediaType,
+    MediaType\ParameterInterface
 };
 use Innmind\Immutable\{
     Map,
@@ -23,12 +25,19 @@ class Directory implements DirectoryInterface
     private $content;
     private $files;
     private $generator;
+    private $mediaType;
 
     public function __construct(string $name, \Generator $generator = null)
     {
         $this->name = new Name($name);
         $this->generator = $generator;
         $this->files = new Map('string', FileInterface::class);
+        $this->mediaType = new MediaType(
+            'text',
+            'directory',
+            '',
+            new Map('string', ParameterInterface::class)
+        );
     }
 
     /**
@@ -58,6 +67,11 @@ class Directory implements DirectoryInterface
         $this->rewind();
 
         return $this->content;
+    }
+
+    public function mediaType(): MediaTypeInterface
+    {
+        return $this->mediaType;
     }
 
     /**
