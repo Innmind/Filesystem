@@ -104,6 +104,10 @@ class FilesystemAdapter implements AdapterInterface
             $file
                 ->recordedEvents()
                 ->foreach(function($event) use ($folder) {
+                    if ($this->handledEvents->contains($event)) {
+                        return;
+                    }
+
                     switch (true) {
                         case $event instanceof FileWasRemoved:
                             $this
