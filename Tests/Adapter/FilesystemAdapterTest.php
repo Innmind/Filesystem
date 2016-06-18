@@ -83,6 +83,23 @@ class FilesystemAdapterTest extends \PHPUnit_Framework_TestCase
         $a->add($d);
         $d = $d->remove('bar');
         $a->add($d);
+        $this->assertSame(2, $d->recordedEvents()->count());
+        $a = new FilesystemAdapter('/tmp');
+        $this->assertFalse($a->get('foo')->has('bar'));
+        $a->remove('foo');
+    }
+
+    public function testDoesntFailWhenAddindSameDirectoryTwiceThatContainsARemovedFile()
+    {
+        $a = new FilesystemAdapter('/tmp');
+
+        $d = new Directory('foo');
+        $d = $d->add(new File('bar', new StringStream('some content')));
+        $a->add($d);
+        $d = $d->remove('bar');
+        $a->add($d);
+        $a->add($d);
+        $this->assertSame(2, $d->recordedEvents()->count());
         $a = new FilesystemAdapter('/tmp');
         $this->assertFalse($a->get('foo')->has('bar'));
         $a->remove('foo');

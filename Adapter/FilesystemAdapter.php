@@ -10,9 +10,14 @@ use Innmind\Filesystem\{
     Directory,
     DirectoryInterface,
     Stream\Stream,
-    Exception\FileNotFoundException
+    Exception\FileNotFoundException,
+    Event\FileWasAdded,
+    Event\FileWasRemoved
 };
-use Innmind\Immutable\Map;
+use Innmind\Immutable\{
+    Map,
+    Set
+};
 use Symfony\Component\Filesystem\Filesystem;
 
 class FilesystemAdapter implements AdapterInterface
@@ -20,12 +25,14 @@ class FilesystemAdapter implements AdapterInterface
     private $path;
     private $filesystem;
     private $files;
+    private $handledEvents;
 
     public function __construct(string $path)
     {
         $this->path = $path;
         $this->filesystem = new Filesystem;
         $this->files = new Map('string', FileInterface::class);
+        $this->handledEvents = new Set('object');
     }
 
     /**
@@ -93,20 +100,22 @@ class FilesystemAdapter implements AdapterInterface
             }
 
             $this->filesystem->mkdir($folder);
+            $file
+                ->recordedEvents()
+                ->foreach(function($event) use ($folder) {
+                    switch (true) {
+                        case $event instanceof FileWasRemoved:
+                            $this
+                                ->filesystem
+                                ->remove($folder.'/'.$event->file());
+                            break;
+                        case $event instanceof FileWasAdded:
+                            $this->createFileAt($folder, $event->file());
+                            break;
+                    }
 
-            foreach (scandir($folder) as $filename) {
-                if (
-                    !in_array($filename, ['.', '..']) &&
-                    !$file->has($filename)
-                ) {
-                    $this->filesystem->remove($folder.'/'.$filename);
-                }
-            }
-
-            foreach ($file as $subFile) {
-                $this->createFileAt($folder, $subFile);
-            }
-
+                    $this->handledEvents = $this->handledEvents->add($event);
+                });
             $this->files = $this->files->put($folder, $file);
 
             return;
