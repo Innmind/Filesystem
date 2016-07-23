@@ -97,7 +97,7 @@ class LazyAdapter implements LazyAdapterInterface
         return $this
             ->adapter
             ->all()
-            ->filter(function(string $name, FileInterface $file): bool {
+            ->filter(function(string $name): bool {
                 return !$this->toRemove->contains($name);
             })
             ->merge($this->toAdd);
