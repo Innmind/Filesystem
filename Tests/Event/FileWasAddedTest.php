@@ -12,7 +12,7 @@ class FileWasAddedTest extends \PHPUnit_Framework_TestCase
 {
     public function testInterface()
     {
-        $file = $this->getMock(FileInterface::class);
+        $file = $this->createMock(FileInterface::class);
 
         $event = new FileWasAdded($file);
 
