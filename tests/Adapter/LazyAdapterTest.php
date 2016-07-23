@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Tests\Adapter;
+namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter\LazyAdapter,

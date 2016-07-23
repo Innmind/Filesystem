@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Tests\Event;
+namespace Tests\Innmind\Filesystem\Event;
 
 use Innmind\Filesystem\Event\FileWasRemoved;
 
