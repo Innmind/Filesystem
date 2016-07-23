@@ -124,10 +124,6 @@ class FilesystemAdapterTest extends \PHPUnit_Framework_TestCase
 
     public function testAll()
     {
-        if (!is_dir('/tmp/test')) {
-            mkdir('/tmp/test');
-        }
-
         $adapter = new FilesystemAdapter('/tmp/test');
         $adapter->add($foo = new File(
             'foo',

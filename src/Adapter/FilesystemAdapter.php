@@ -38,6 +38,10 @@ class FilesystemAdapter implements AdapterInterface
         $this->filesystem = new Filesystem;
         $this->files = new Map('string', FileInterface::class);
         $this->handledEvents = new Set('object');
+
+        if (!$this->filesystem->exists($this->path)) {
+            $this->filesystem->mkdir($this->path);
+        }
     }
 
     /**
