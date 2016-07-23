@@ -21,9 +21,9 @@
         "innmind/event-bus": "^1.0"
     },
     "autoload": {
-        "psr-0": {
-            "Innmind\\Filesystem": ""
+        "psr-4": {
+            "Innmind\\Filesystem\\": "src/",
+            "Tests\\Innmind\\Filesystem\\": "tests/"
         }
-    },
-    "target-dir": "Innmind/Filesystem"
+    }
 }
