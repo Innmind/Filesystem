@@ -17,9 +17,13 @@ use Innmind\Filesystem\{
 };
 use Innmind\Immutable\{
     Map,
-    Set
+    Set,
+    MapInterface
 };
-use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\{
+    Filesystem\Filesystem,
+    Finder\Finder
+};
 
 class FilesystemAdapter implements AdapterInterface
 {
@@ -78,6 +82,24 @@ class FilesystemAdapter implements AdapterInterface
         $this->filesystem->remove($this->path.'/'.$file);
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function all(): MapInterface
+    {
+        $files = Finder::create()->in($this->path);
+        $map = new Map('string', FileInterface::class);
+
+        foreach ($files as $file) {
+            $map = $map->put(
+                $file->getRelativePathname(),
+                $this->get($file->getRelativePathname())
+            );
+        }
+
+        return $map;
     }
 
     /**

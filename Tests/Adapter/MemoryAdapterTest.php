@@ -6,8 +6,12 @@ namespace Innmind\Filesystem\Tests\Adapter;
 use Innmind\Filesystem\{
     Adapter\MemoryAdapter,
     AdapterInterface,
-    Directory
+    Directory,
+    FileInterface,
+    File,
+    Stream\StringStream
 };
+use Innmind\Immutable\MapInterface;
 
 class MemoryAdapterTest extends \PHPUnit_Framework_TestCase
 {
@@ -41,5 +45,31 @@ class MemoryAdapterTest extends \PHPUnit_Framework_TestCase
     public function testThrowWhenRemovingUnknownFile()
     {
         (new MemoryAdapter)->remove('foo');
+    }
+
+    public function testAll()
+    {
+        $adapter = new MemoryAdapter;
+        $adapter->add($foo = new File(
+            'foo',
+            new StringStream('foo')
+        ));
+        $adapter->add($bar = new File(
+            'bar',
+            new StringStream('bar')
+        ));
+
+        $all = $adapter->all();
+        $this->assertInstanceOf(MapInterface::class, $all);
+        $this->assertSame('string', (string) $all->keyType());
+        $this->assertSame(FileInterface::class, (string) $all->valueType());
+        $this->assertSame(
+            ['foo', 'bar'],
+            $all->keys()->toPrimitive()
+        );
+        $this->assertSame(
+            [$foo, $bar],
+            $all->values()->toPrimitive()
+        );
     }
 }

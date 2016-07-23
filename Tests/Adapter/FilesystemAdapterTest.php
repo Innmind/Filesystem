@@ -7,9 +7,11 @@ use Innmind\Filesystem\{
     Adapter\FilesystemAdapter,
     AdapterInterface,
     File,
+    FileInterface,
     Directory,
     Stream\StringStream
 };
+use Innmind\Immutable\MapInterface;
 
 class FilesystemAdapterTest extends \PHPUnit_Framework_TestCase
 {
@@ -118,5 +120,33 @@ class FilesystemAdapterTest extends \PHPUnit_Framework_TestCase
             (string) $a->get('some_content.html')->mediaType()
         );
         $a->remove('some_content.html');
+    }
+
+    public function testAll()
+    {
+        if (!is_dir('/tmp/test')) {
+            mkdir('/tmp/test');
+        }
+
+        $adapter = new FilesystemAdapter('/tmp/test');
+        $adapter->add($foo = new File(
+            'foo',
+            new StringStream('foo')
+        ));
+        file_put_contents('/tmp/test/bar', 'bar');
+
+        $all = $adapter->all();
+        $this->assertInstanceOf(MapInterface::class, $all);
+        $this->assertSame('string', (string) $all->keyType());
+        $this->assertSame(FileInterface::class, (string) $all->valueType());
+        $this->assertSame(
+            ['bar', 'foo'],
+            $all->keys()->toPrimitive()
+        );
+        $this->assertSame($foo, $adapter->get('foo'));
+        $this->assertSame('bar', (string) $adapter->get('bar')->content());
+        $adapter
+            ->remove('foo')
+            ->remove('bar');
     }
 }
