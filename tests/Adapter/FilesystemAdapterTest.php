@@ -135,7 +135,7 @@ class FilesystemAdapterTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(MapInterface::class, $all);
         $this->assertSame('string', (string) $all->keyType());
         $this->assertSame(FileInterface::class, (string) $all->valueType());
-        $this->assertSame(
+        $this->assertEquals(
             ['bar', 'foo'],
             $all->keys()->toPrimitive()
         );
