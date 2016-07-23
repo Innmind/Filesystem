@@ -8,7 +8,10 @@ use Innmind\Filesystem\{
     FileInterface,
     Exception\FileNotFoundException
 };
-use Innmind\Immutable\Map;
+use Innmind\Immutable\{
+    Map,
+    MapInterface
+};
 
 class MemoryAdapter implements AdapterInterface
 {
@@ -64,5 +67,13 @@ class MemoryAdapter implements AdapterInterface
         $this->files = $this->files->remove($file);
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function all(): MapInterface
+    {
+        return $this->files;
     }
 }

@@ -1,14 +1,18 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Tests\Adapter;
+namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter\LazyAdapter,
     Adapter\MemoryAdapter,
     LazyAdapterInterface,
-    Directory
+    Directory,
+    FileInterface,
+    File,
+    Stream\StringStream
 };
+use Innmind\Immutable\MapInterface;
 
 class LazyAdapterTest extends \PHPUnit_Framework_TestCase
 {
@@ -80,5 +84,21 @@ class LazyAdapterTest extends \PHPUnit_Framework_TestCase
         $l = new LazyAdapter(new MemoryAdapter);
 
         $l->remove('foo');
+    }
+
+    public function testAll()
+    {
+        $memory = new MemoryAdapter;
+        $lazy = new LazyAdapter($memory);
+        $memory->add(new File('foo', new StringStream('')));
+        $lazy->remove('foo');
+        $lazy->add($bar = new File('bar', new StringStream('')));
+
+        $all = $lazy->all();
+        $this->assertInstanceOf(MapInterface::class, $all);
+        $this->assertSame('string', (string) $all->keyType());
+        $this->assertSame(FileInterface::class, (string) $all->valueType());
+        $this->assertCount(1, $all);
+        $this->assertSame($bar, $all->get('bar'));
     }
 }

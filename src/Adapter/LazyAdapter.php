@@ -11,7 +11,8 @@ use Innmind\Filesystem\{
 };
 use Innmind\Immutable\{
     Map,
-    Set
+    Set,
+    MapInterface
 };
 
 class LazyAdapter implements LazyAdapterInterface
@@ -86,6 +87,20 @@ class LazyAdapter implements LazyAdapterInterface
         $this->toAdd = $this->toAdd->remove($file);
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function all(): MapInterface
+    {
+        return $this
+            ->adapter
+            ->all()
+            ->filter(function(string $name): bool {
+                return !$this->toRemove->contains($name);
+            })
+            ->merge($this->toAdd);
     }
 
     /**

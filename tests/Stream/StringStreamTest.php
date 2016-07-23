@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Tests\Stream;
+namespace Tests\Innmind\Filesystem\Stream;
 
 use Innmind\Filesystem\{
     Stream\StringStream,

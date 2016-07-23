@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Tests\Event;
+namespace Tests\Innmind\Filesystem\Event;
 
 use Innmind\Filesystem\{
     Event\FileWasAdded,
@@ -12,7 +12,7 @@ class FileWasAddedTest extends \PHPUnit_Framework_TestCase
 {
     public function testInterface()
     {
-        $file = $this->getMock(FileInterface::class);
+        $file = $this->createMock(FileInterface::class);
 
         $event = new FileWasAdded($file);
 
