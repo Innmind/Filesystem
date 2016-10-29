@@ -9,7 +9,7 @@ use Innmind\Filesystem\{
     File,
     Directory,
     DirectoryInterface,
-    Stream\Stream,
+    Stream\LazyStream,
     Exception\FileNotFoundException,
     Event\FileWasAdded,
     Event\FileWasRemoved,
@@ -204,9 +204,7 @@ class FilesystemAdapter implements AdapterInterface
         } else {
             $object = new File(
                 $file,
-                new Stream(
-                    fopen($path, 'r')
-                ),
+                new LazyStream($path),
                 MediaType::fromString(mime_content_type($path))
             );
         }

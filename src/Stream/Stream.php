@@ -15,6 +15,9 @@ class Stream implements StreamInterface
     private $resource;
     private $size;
 
+    /**
+     * @param resource $resource
+     */
     public function __construct($resource)
     {
         if (!is_resource($resource)) {
@@ -25,6 +28,11 @@ class Stream implements StreamInterface
         $stats = fstat($resource);
         $this->size = $stats['size'] ?? null;
         $this->rewind();
+    }
+
+    public static function fromPath(string $path): self
+    {
+        return new self(fopen($path, 'r'));
     }
 
     /**
