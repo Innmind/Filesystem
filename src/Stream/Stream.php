@@ -27,6 +27,11 @@ class Stream implements StreamInterface
         $this->rewind();
     }
 
+    public static function fromPath(string $path): self
+    {
+        return new self(fopen($path, 'r'));
+    }
+
     /**
      * {@inheritdoc}
      */

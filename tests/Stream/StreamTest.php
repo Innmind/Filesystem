@@ -52,4 +52,17 @@ class StreamTest extends \PHPUnit_Framework_TestCase
 
         $stream->seek(200);
     }
+
+    public function testFromPath()
+    {
+        file_put_contents(
+            $path = tempnam(sys_get_temp_dir(), 'whatever'),
+            'foo'
+        );
+
+        $stream = Stream::fromPath($path);
+
+        $this->assertInstanceOf(Stream::class, $stream);
+        $this->assertSame('foo', (string) $stream);
+    }
 }

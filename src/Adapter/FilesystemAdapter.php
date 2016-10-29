@@ -204,9 +204,7 @@ class FilesystemAdapter implements AdapterInterface
         } else {
             $object = new File(
                 $file,
-                new Stream(
-                    fopen($path, 'r')
-                ),
+                Stream::fromPath($path),
                 MediaType::fromString(mime_content_type($path))
             );
         }
