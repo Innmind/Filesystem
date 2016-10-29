@@ -15,6 +15,9 @@ class Stream implements StreamInterface
     private $resource;
     private $size;
 
+    /**
+     * @param resource $resource
+     */
     public function __construct($resource)
     {
         if (!is_resource($resource)) {
