@@ -126,7 +126,7 @@ final class MediaType implements MediaTypeInterface
             throw new InvalidMediaTypeStringException;
         }
 
-        $splits = $string->pregSplit('~[;,] ~');
+        $splits = $string->pregSplit('~[;,] ?~');
         $matches = $splits
             ->get(0)
             ->getMatches(sprintf(

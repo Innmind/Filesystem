@@ -63,7 +63,7 @@ class MediaTypeTest extends \PHPUnit_Framework_TestCase
     public function testFromString()
     {
         $m = MediaType::fromString(
-            'application/tree.octet-stream+suffix; charset=UTF-8, another=param, me=too'
+            'application/tree.octet-stream+suffix;charset=UTF-8, another=param,me=too'
         );
 
         $this->assertInstanceOf(MediaType::class, $m);
@@ -74,6 +74,10 @@ class MediaTypeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('UTF-8', $m->parameters()->get('charset')->value());
         $this->assertSame('param', $m->parameters()->get('another')->value());
         $this->assertSame('too', $m->parameters()->get('me')->value());
+        $this->assertSame(
+            'application/tree.octet-stream+suffix; charset=UTF-8, another=param, me=too',
+            (string) $m
+        );
     }
 
     /**
