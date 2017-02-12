@@ -13,8 +13,9 @@ use Innmind\Filesystem\{
     Stream\StringStream
 };
 use Innmind\Immutable\MapInterface;
+use PHPUnit\Framework\TestCase;
 
-class LazyAdapterTest extends \PHPUnit_Framework_TestCase
+class LazyAdapterTest extends TestCase
 {
     public function testInterface()
     {

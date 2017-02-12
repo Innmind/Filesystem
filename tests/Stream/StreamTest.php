@@ -7,8 +7,9 @@ use Innmind\Filesystem\{
     Stream\Stream,
     StreamInterface
 };
+use PHPUnit\Framework\TestCase;
 
-class StreamTest extends \PHPUnit_Framework_TestCase
+class StreamTest extends TestCase
 {
     /**
      * @expectedException Innmind\Filesystem\Exception\InvalidArgumentException

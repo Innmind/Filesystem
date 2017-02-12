@@ -8,8 +8,9 @@ use Innmind\Filesystem\{
     StreamInterface,
     Exception\PositionNotSeekableException
 };
+use PHPUnit\Framework\TestCase;
 
-class NullStreamTest extends \PHPUnit_Framework_TestCase
+class NullStreamTest extends TestCase
 {
     public function testInterface()
     {

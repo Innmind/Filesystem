@@ -7,8 +7,9 @@ use Innmind\Filesystem\{
     Stream\StringStream,
     StreamInterface
 };
+use PHPUnit\Framework\TestCase;
 
-class StringStreamTest extends \PHPUnit_Framework_TestCase
+class StringStreamTest extends TestCase
 {
     public function testInterface()
     {

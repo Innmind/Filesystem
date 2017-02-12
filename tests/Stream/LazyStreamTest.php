@@ -7,8 +7,9 @@ use Innmind\Filesystem\{
     Stream\LazyStream,
     StreamInterface
 };
+use PHPUnit\Framework\TestCase;
 
-class LazyStreamTest extends \PHPUnit_Framework_TestCase
+class LazyStreamTest extends TestCase
 {
     private $stream;
 

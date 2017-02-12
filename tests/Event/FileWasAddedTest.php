@@ -7,8 +7,9 @@ use Innmind\Filesystem\{
     Event\FileWasAdded,
     FileInterface
 };
+use PHPUnit\Framework\TestCase;
 
-class FileWasAddedTest extends \PHPUnit_Framework_TestCase
+class FileWasAddedTest extends TestCase
 {
     public function testInterface()
     {

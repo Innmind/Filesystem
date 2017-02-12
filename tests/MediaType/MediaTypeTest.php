@@ -10,8 +10,9 @@ use Innmind\Filesystem\{
     MediaType\ParameterInterface
 };
 use Innmind\Immutable\Map;
+use PHPUnit\Framework\TestCase;
 
-class MediaTypeTest extends \PHPUnit_Framework_TestCase
+class MediaTypeTest extends TestCase
 {
     public function testInterface()
     {
