@@ -10,8 +10,9 @@ use Innmind\Filesystem\{
     MediaType\ParameterInterface
 };
 use Innmind\Immutable\Map;
+use PHPUnit\Framework\TestCase;
 
-class MediaTypeTest extends \PHPUnit_Framework_TestCase
+class MediaTypeTest extends TestCase
 {
     public function testInterface()
     {
@@ -37,9 +38,7 @@ class MediaTypeTest extends \PHPUnit_Framework_TestCase
             'application/json',
             (string) new MediaType(
                 'application',
-                'json',
-                '',
-                new Map('string', ParameterInterface::class)
+                'json'
             )
         );
     }
@@ -57,7 +56,7 @@ class MediaTypeTest extends \PHPUnit_Framework_TestCase
      */
     public function testThrowWhenTheTopLevelIsInvalid()
     {
-        new MediaType('foo', 'bar', '', new Map('string', ParameterInterface::class));
+        new MediaType('foo', 'bar');
     }
 
     public function testFromString()

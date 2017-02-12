@@ -13,7 +13,7 @@ use Innmind\Immutable\{
     MapInterface,
     SetInterface,
     Set,
-    StringPrimitive as Str,
+    Str,
     Map
 };
 
@@ -28,9 +28,11 @@ final class MediaType implements MediaTypeInterface
     public function __construct(
         string $topLevel,
         string $subType,
-        string $suffix,
-        MapInterface $parameters
+        string $suffix = '',
+        MapInterface $parameters = null
     ) {
+        $parameters = $parameters ?? new Map('string', ParameterInterface::class);
+
         if (
             (string) $parameters->keyType() !== 'string' ||
             (string) $parameters->valueType() !== ParameterInterface::class
@@ -122,7 +124,7 @@ final class MediaType implements MediaTypeInterface
             self::topLevels()->join('|')
         );
 
-        if (!$string->match($pattern)) {
+        if (!$string->matches($pattern)) {
             throw new InvalidMediaTypeStringException;
         }
 
@@ -136,12 +138,12 @@ final class MediaType implements MediaTypeInterface
 
         $topLevel = $matches->get('topLevel');
         $subType = $matches->get('subType');
-        $suffix = $matches->hasKey('suffix') ? $matches->get('suffix') : '';
+        $suffix = $matches->contains('suffix') ? $matches->get('suffix') : '';
         $params = new Map('string', ParameterInterface::class);
 
         $splits
-            ->shift()
-            ->each(function(int $idx, Str $param) use (&$params) {
+            ->drop(1)
+            ->foreach(function(Str $param) use (&$params) {
                 $matches = $param->getMatches(
                     '~^(?<key>[\w\-.]+)=(?<value>[\w\-.]+)$~'
                 );

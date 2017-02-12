@@ -13,7 +13,7 @@ use Innmind\Filesystem\{
 };
 use Innmind\Immutable\{
     Map,
-    StringPrimitive as Str
+    Str
 };
 use Innmind\EventBus\EventRecorder;
 
@@ -141,13 +141,13 @@ class Directory implements DirectoryInterface
         while ($pieces->count() > 0) {
             $target = $pieces
                 ->reduce(
-                    function(DirectoryInterface $parent, Str $seek) {
+                    $directory,
+                    function(DirectoryInterface $parent, Str $seek): DirectoryInterface {
                         return $parent->get((string) $seek);
-                    },
-                    $directory
+                    }
                 )
                 ->add($target ?? $file);
-            $pieces = $pieces->pop();
+            $pieces = $pieces->dropEnd(1);
         }
 
         return $directory->add($target);

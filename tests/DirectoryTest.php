@@ -11,8 +11,9 @@ use Innmind\Filesystem\{
     Event\FileWasAdded,
     Event\FileWasRemoved
 };
+use PHPUnit\Framework\TestCase;
 
-class DirectoryTest extends \PHPUnit_Framework_TestCase
+class DirectoryTest extends TestCase
 {
     public function testInterface()
     {

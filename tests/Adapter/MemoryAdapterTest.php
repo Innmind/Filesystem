@@ -12,8 +12,9 @@ use Innmind\Filesystem\{
     Stream\StringStream
 };
 use Innmind\Immutable\MapInterface;
+use PHPUnit\Framework\TestCase;
 
-class MemoryAdapterTest extends \PHPUnit_Framework_TestCase
+class MemoryAdapterTest extends TestCase
 {
     public function testInterface()
     {

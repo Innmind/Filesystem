@@ -7,8 +7,9 @@ use Innmind\Filesystem\{
     MediaTypeInterface,
     MediaType\NullMediaType
 };
+use PHPUnit\Framework\TestCase;
 
-class NullMediaTypeTest extends \PHPUnit_Framework_TestCase
+class NullMediaTypeTest extends TestCase
 {
     public function testInterface()
     {
