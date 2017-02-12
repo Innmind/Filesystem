@@ -38,8 +38,7 @@ class MediaTypeTest extends TestCase
             'application/json',
             (string) new MediaType(
                 'application',
-                'json',
-                ''
+                'json'
             )
         );
     }
@@ -57,7 +56,7 @@ class MediaTypeTest extends TestCase
      */
     public function testThrowWhenTheTopLevelIsInvalid()
     {
-        new MediaType('foo', 'bar', '');
+        new MediaType('foo', 'bar');
     }
 
     public function testFromString()

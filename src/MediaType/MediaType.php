@@ -28,7 +28,7 @@ final class MediaType implements MediaTypeInterface
     public function __construct(
         string $topLevel,
         string $subType,
-        string $suffix,
+        string $suffix = '',
         MapInterface $parameters = null
     ) {
         $parameters = $parameters ?? new Map('string', ParameterInterface::class);
