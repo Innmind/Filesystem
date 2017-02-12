@@ -29,8 +29,10 @@ final class MediaType implements MediaTypeInterface
         string $topLevel,
         string $subType,
         string $suffix,
-        MapInterface $parameters
+        MapInterface $parameters = null
     ) {
+        $parameters = $parameters ?? new Map('string', ParameterInterface::class);
+
         if (
             (string) $parameters->keyType() !== 'string' ||
             (string) $parameters->valueType() !== ParameterInterface::class

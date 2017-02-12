@@ -39,8 +39,7 @@ class MediaTypeTest extends TestCase
             (string) new MediaType(
                 'application',
                 'json',
-                '',
-                new Map('string', ParameterInterface::class)
+                ''
             )
         );
     }
@@ -58,7 +57,7 @@ class MediaTypeTest extends TestCase
      */
     public function testThrowWhenTheTopLevelIsInvalid()
     {
-        new MediaType('foo', 'bar', '', new Map('string', ParameterInterface::class));
+        new MediaType('foo', 'bar', '');
     }
 
     public function testFromString()
