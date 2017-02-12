@@ -23,7 +23,11 @@
     },
     "autoload": {
         "psr-4": {
-            "Innmind\\Filesystem\\": "src/",
+            "Innmind\\Filesystem\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
             "Tests\\Innmind\\Filesystem\\": "tests/"
         }
     },
