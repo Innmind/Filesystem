@@ -16,9 +16,9 @@
     },
     "require": {
         "php": ">=7.0",
-        "innmind/immutable": "^1.5",
+        "innmind/immutable": "~2.0",
         "symfony/filesystem": "^3.0",
-        "innmind/event-bus": "^1.0",
+        "innmind/event-bus": "~2.0",
         "symfony/finder": "~3.0"
     },
     "autoload": {

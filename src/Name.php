@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem;
 
 use Innmind\Filesystem\Exception\InvalidArgumentException;
-use Innmind\Immutable\StringPrimitive as Str;
+use Innmind\Immutable\Str;
 
 class Name implements NameInterface
 {
@@ -12,7 +12,7 @@ class Name implements NameInterface
 
     public function __construct(string $name)
     {
-        if ((new Str($name))->match('|/|')) {
+        if ((new Str($name))->matches('|/|')) {
             throw new InvalidArgumentException(
                 'A file name can\'t contain a slash'
             );
