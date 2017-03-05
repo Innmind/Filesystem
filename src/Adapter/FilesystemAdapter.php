@@ -184,10 +184,6 @@ class FilesystemAdapter implements AdapterInterface
     {
         $path = $folder.'/'.$file;
 
-        if ($this->files->contains($path)) {
-            return $this->files->get($path);
-        }
-
         if (is_dir($path)) {
             $object = new Directory(
                 $file,
