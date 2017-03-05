@@ -18,15 +18,14 @@ class FilesystemAdapterTest extends TestCase
 {
     public function testInterface()
     {
-        $a = new FilesystemAdapter('/tmp');
+        $adapter = new FilesystemAdapter('/tmp');
 
-        $this->assertInstanceOf(AdapterInterface::class, $a);
-        $this->assertFalse($a->has('foo'));
-        $this->assertSame($a, $a->add($d = new Directory('foo')));
-        $this->assertTrue($a->has('foo'));
-        $this->assertSame($d, $a->get('foo'));
-        $this->assertSame($a, $a->remove('foo'));
-        $this->assertFalse($a->has('foo'));
+        $this->assertInstanceOf(AdapterInterface::class, $adapter);
+        $this->assertFalse($adapter->has('foo'));
+        $this->assertSame($adapter, $adapter->add(new Directory('foo')));
+        $this->assertTrue($adapter->has('foo'));
+        $this->assertSame($adapter, $adapter->remove('foo'));
+        $this->assertFalse($adapter->has('foo'));
     }
 
     /**
@@ -47,34 +46,38 @@ class FilesystemAdapterTest extends TestCase
 
     public function testCreateNestedStructure()
     {
-        $a = new FilesystemAdapter('/tmp');
+        $adapter = new FilesystemAdapter('/tmp');
 
-        $d = (new Directory('foo'))
-            ->add($f = new File('foo.md', new StringStream('# Foo')))
+        $directory = (new Directory('foo'))
+            ->add(new File('foo.md', new StringStream('# Foo')))
             ->add(
-                $d2 = (new Directory('bar'))
-                    ->add($f2 = new File('bar.md', new StringStream('# Bar')))
+                (new Directory('bar'))
+                    ->add(new File('bar.md', new StringStream('# Bar')))
             );
-        $a->add($d);
-        $this->assertSame($d, $a->get('foo'));
-        $this->assertSame($f, $a->get('foo')->get('foo.md'));
-        $this->assertSame($d2, $a->get('foo')->get('bar'));
-        $this->assertSame($f2, $a->get('foo')->get('bar')->get('bar.md'));
-
-        $a = new FilesystemAdapter('/tmp');
-        //check it's really persisted (otherwise it will throw)
-        $a->get('foo');
+        $adapter->add($directory);
         $this->assertSame(
             '# Foo',
-            (string) $a->get('foo')->get('foo.md')->content()
+            (string) $adapter->get('foo')->get('foo.md')->content()
         );
-        $a->get('foo')->get('bar');
         $this->assertSame(
             '# Bar',
-            (string) $a->get('foo')->get('bar')->get('bar.md')->content()
+            (string) $adapter->get('foo')->get('bar')->get('bar.md')->content()
         );
 
-        $a->remove('foo');
+        $adapter = new FilesystemAdapter('/tmp');
+        //check it's really persisted (otherwise it will throw)
+        $adapter->get('foo');
+        $this->assertSame(
+            '# Foo',
+            (string) $adapter->get('foo')->get('foo.md')->content()
+        );
+        $adapter->get('foo')->get('bar');
+        $this->assertSame(
+            '# Bar',
+            (string) $adapter->get('foo')->get('bar')->get('bar.md')->content()
+        );
+
+        $adapter->remove('foo');
     }
 
     public function testRemoveFileWhenRemovedFromFolder()
@@ -126,7 +129,7 @@ class FilesystemAdapterTest extends TestCase
     public function testAll()
     {
         $adapter = new FilesystemAdapter('/tmp/test');
-        $adapter->add($foo = new File(
+        $adapter->add(new File(
             'foo',
             new StringStream('foo')
         ));
@@ -139,7 +142,7 @@ class FilesystemAdapterTest extends TestCase
         $this->assertCount(2, $all);
         $this->assertTrue($all->contains('foo'));
         $this->assertTrue($all->contains('bar'));
-        $this->assertSame($foo, $adapter->get('foo'));
+        $this->assertSame('foo', (string) $adapter->get('foo')->content());
         $this->assertSame('bar', (string) $adapter->get('bar')->content());
         $adapter
             ->remove('foo')
