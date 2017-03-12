@@ -16,8 +16,7 @@ class File implements FileInterface
 
     public function __construct(
         string $name,
-        StreamInterface
-        $content,
+        StreamInterface $content,
         MediaType $mediaType = null
     ) {
         $this->name = new Name($name);
