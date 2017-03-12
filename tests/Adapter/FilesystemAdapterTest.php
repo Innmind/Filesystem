@@ -9,7 +9,8 @@ use Innmind\Filesystem\{
     File,
     FileInterface,
     Directory,
-    Stream\StringStream
+    Stream\StringStream,
+    MediaType\NullMediaType
 };
 use Innmind\Immutable\MapInterface;
 use PHPUnit\Framework\TestCase;
@@ -147,5 +148,16 @@ class FilesystemAdapterTest extends TestCase
         $adapter
             ->remove('foo')
             ->remove('bar');
+    }
+
+    public function testFallbackToNullMediaTypeWhenDetectedWhenIsNotAnOfficialOne()
+    {
+        file_put_contents('/tmp/test/bar', '');
+        $adapter = new FilesystemAdapter('/tmp/test');
+
+        $this->assertInstanceOf(
+            NullMediaType::class,
+            $adapter->get('bar')->mediaType()
+        );
     }
 }

@@ -11,9 +11,11 @@ use Innmind\Filesystem\{
     DirectoryInterface,
     Stream\LazyStream,
     Exception\FileNotFoundException,
+    Exception\InvalidMediaTypeStringException,
     Event\FileWasAdded,
     Event\FileWasRemoved,
-    MediaType\MediaType
+    MediaType\MediaType,
+    MediaType\NullMediaType
 };
 use Innmind\Immutable\{
     Map,
@@ -198,10 +200,16 @@ class FilesystemAdapter implements AdapterInterface
                 })($path)
             );
         } else {
+            try {
+                $mediaType = MediaType::fromString(mime_content_type($path));
+            } catch (InvalidMediaTypeStringException $e) {
+                $mediaType = new NullMediaType;
+            }
+
             $object = new File(
                 $file,
                 new LazyStream($path),
-                MediaType::fromString(mime_content_type($path))
+                $mediaType
             );
         }
 
