@@ -97,6 +97,7 @@ final class MediaType implements MediaTypeInterface
             self::$topLevels = (new Set('string'))
                 ->add('application')
                 ->add('audio')
+                ->add('font')
                 ->add('example')
                 ->add('image')
                 ->add('message')

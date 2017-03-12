@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Filesystem\MediaType\{
-    MediaType,
-    NullMediaType
-};
+use Innmind\Filesystem\MediaType\NullMediaType;
 
 class File implements FileInterface
 {
@@ -16,9 +13,8 @@ class File implements FileInterface
 
     public function __construct(
         string $name,
-        StreamInterface
-        $content,
-        MediaType $mediaType = null
+        StreamInterface $content,
+        MediaTypeInterface $mediaType = null
     ) {
         $this->name = new Name($name);
         $this->content = $content;
