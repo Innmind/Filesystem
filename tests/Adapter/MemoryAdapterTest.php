@@ -33,7 +33,7 @@ class MemoryAdapterTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFoundException
+     * @expectedException Innmind\Filesystem\Exception\FileNotFound
      */
     public function testThrowWhenGettingUnknownFile()
     {
@@ -41,7 +41,7 @@ class MemoryAdapterTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFoundException
+     * @expectedException Innmind\Filesystem\Exception\FileNotFound
      */
     public function testThrowWhenRemovingUnknownFile()
     {

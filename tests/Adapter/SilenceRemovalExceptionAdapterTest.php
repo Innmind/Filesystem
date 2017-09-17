@@ -7,7 +7,7 @@ use Innmind\Filesystem\{
     Adapter\SilenceRemovalExceptionAdapter,
     Adapter,
     File,
-    Exception\FileNotFoundException
+    Exception\FileNotFound
 };
 use Innmind\Immutable\MapInterface;
 use PHPUnit\Framework\TestCase;
@@ -96,7 +96,7 @@ class SilenceRemovalExceptionAdapterTest extends TestCase
             ->method('remove')
             ->with('foo')
             ->will(
-                $this->throwException(new FileNotFoundException)
+                $this->throwException(new FileNotFound)
             );
 
         $this->assertSame($adapter, $adapter->remove('foo'));

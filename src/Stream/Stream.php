@@ -6,8 +6,8 @@ namespace Innmind\Filesystem\Stream;
 use Innmind\Filesystem\{
     Stream as StreamInterface,
     Exception\InvalidArgumentException,
-    Exception\StreamSizeUnknownException,
-    Exception\PositionNotSeekableException
+    Exception\StreamSizeUnknown,
+    Exception\PositionNotSeekable
 };
 
 class Stream implements StreamInterface
@@ -61,7 +61,7 @@ class Stream implements StreamInterface
     public function size(): int
     {
         if (!$this->knowsSize()) {
-            throw new StreamSizeUnknownException;
+            throw new StreamSizeUnknown;
         }
 
         return $this->size;
@@ -99,7 +99,7 @@ class Stream implements StreamInterface
         $status = fseek($this->resource, $position, $whence);
 
         if ($status === -1) {
-            throw new PositionNotSeekableException;
+            throw new PositionNotSeekable;
         }
 
         return $this;

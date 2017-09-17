@@ -6,7 +6,7 @@ namespace Tests\Innmind\Filesystem\Stream;
 use Innmind\Filesystem\{
     Stream\NullStream,
     Stream as StreamInterface,
-    Exception\PositionNotSeekableException
+    Exception\PositionNotSeekable
 };
 use PHPUnit\Framework\TestCase;
 
@@ -25,7 +25,7 @@ class NullStreamTest extends TestCase
         $this->assertTrue($stream->isEof());
         $this->assertSame($stream, $stream->rewind());
         $this->assertSame('', $stream->read(42));
-        $this->expectException(PositionNotSeekableException::class);
+        $this->expectException(PositionNotSeekable::class);
         $stream->seek(42);
     }
 }

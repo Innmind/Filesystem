@@ -5,7 +5,7 @@ namespace Innmind\Filesystem\Stream;
 
 use Innmind\Filesystem\{
     Stream as StreamInterface,
-    Exception\PositionNotSeekableException
+    Exception\PositionNotSeekable
 };
 
 final class NullStream implements StreamInterface
@@ -63,7 +63,7 @@ final class NullStream implements StreamInterface
      */
     public function seek(int $position, int $whence = self::SEEK_SET): StreamInterface
     {
-        throw new PositionNotSeekableException;
+        throw new PositionNotSeekable;
     }
 
     /**

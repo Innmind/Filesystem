@@ -52,7 +52,7 @@ class MediaTypeTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\InvalidTopLevelTypeException
+     * @expectedException Innmind\Filesystem\Exception\InvalidTopLevelType
      */
     public function testThrowWhenTheTopLevelIsInvalid()
     {
@@ -80,7 +80,7 @@ class MediaTypeTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\InvalidMediaTypeStringException
+     * @expectedException Innmind\Filesystem\Exception\InvalidMediaTypeString
      */
     public function testThrowWhenInvalidMediaTypeString()
     {

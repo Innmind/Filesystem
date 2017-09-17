@@ -59,7 +59,7 @@ class DirectoryTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFoundException
+     * @expectedException Innmind\Filesystem\Exception\FileNotFound
      */
     public function testThrowWhenGettingUnknownFile()
     {
@@ -99,7 +99,7 @@ class DirectoryTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFoundException
+     * @expectedException Innmind\Filesystem\Exception\FileNotFound
      */
     public function testThrowWhenRemovingUnknownFile()
     {

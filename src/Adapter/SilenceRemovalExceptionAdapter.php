@@ -6,7 +6,7 @@ namespace Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     Adapter,
     File,
-    Exception\FileNotFoundException
+    Exception\FileNotFound
 };
 use Innmind\Immutable\MapInterface;
 
@@ -52,7 +52,7 @@ final class SilenceRemovalExceptionAdapter implements Adapter
     {
         try {
             $this->adapter->remove($file);
-        } catch (FileNotFoundException $e) {
+        } catch (FileNotFound $e) {
             //pass
         }
 

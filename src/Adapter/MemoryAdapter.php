@@ -6,7 +6,7 @@ namespace Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     Adapter,
     File,
-    Exception\FileNotFoundException
+    Exception\FileNotFound
 };
 use Innmind\Immutable\{
     Map,
@@ -41,7 +41,7 @@ class MemoryAdapter implements Adapter
     public function get(string $file): File
     {
         if (!$this->has($file)) {
-            throw new FileNotFoundException;
+            throw new FileNotFound;
         }
 
         return $this->files->get($file);
@@ -61,7 +61,7 @@ class MemoryAdapter implements Adapter
     public function remove(string $file): Adapter
     {
         if (!$this->has($file)) {
-            throw new FileNotFoundException;
+            throw new FileNotFound;
         }
 
         $this->files = $this->files->remove($file);

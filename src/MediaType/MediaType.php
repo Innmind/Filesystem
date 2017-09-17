@@ -6,8 +6,8 @@ namespace Innmind\Filesystem\MediaType;
 use Innmind\Filesystem\{
     MediaType as MediaTypeInterface,
     Exception\InvalidArgumentException,
-    Exception\InvalidTopLevelTypeException,
-    Exception\InvalidMediaTypeStringException
+    Exception\InvalidTopLevelType,
+    Exception\InvalidMediaTypeString
 };
 use Innmind\Immutable\{
     MapInterface,
@@ -41,7 +41,7 @@ final class MediaType implements MediaTypeInterface
         }
 
         if (!self::topLevels()->contains($topLevel)) {
-            throw new InvalidTopLevelTypeException;
+            throw new InvalidTopLevelType;
         }
 
         $this->topLevel = $topLevel;
@@ -126,7 +126,7 @@ final class MediaType implements MediaTypeInterface
         );
 
         if (!$string->matches($pattern)) {
-            throw new InvalidMediaTypeStringException;
+            throw new InvalidMediaTypeString;
         }
 
         $splits = $string->pregSplit('~[;,] ?~');

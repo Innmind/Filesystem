@@ -42,7 +42,7 @@ class StreamTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\PositionNotSeekableException
+     * @expectedException Innmind\Filesystem\Exception\PositionNotSeekable
      */
     public function testThrowWhenPositionNotSeekable()
     {

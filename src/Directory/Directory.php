@@ -8,7 +8,7 @@ use Innmind\Filesystem\{
     Name,
     Stream,
     File,
-    Exception\FileNotFoundException,
+    Exception\FileNotFound,
     Event\FileWasAdded,
     Event\FileWasRemoved,
     MediaType,
@@ -100,7 +100,7 @@ class Directory implements DirectoryInterface
     public function get(string $name): File
     {
         if (!$this->has($name)) {
-            throw new FileNotFoundException;
+            throw new FileNotFound;
         }
 
         return $this->files->get($name);
@@ -122,7 +122,7 @@ class Directory implements DirectoryInterface
     public function remove(string $name): DirectoryInterface
     {
         if (!$this->has($name)) {
-            throw new FileNotFoundException;
+            throw new FileNotFound;
         }
 
         $directory = clone $this;

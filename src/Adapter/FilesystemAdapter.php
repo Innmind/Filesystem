@@ -8,8 +8,8 @@ use Innmind\Filesystem\{
     File,
     Directory,
     Stream\LazyStream,
-    Exception\FileNotFoundException,
-    Exception\InvalidMediaTypeStringException,
+    Exception\FileNotFound,
+    Exception\InvalidMediaTypeString,
     Event\FileWasAdded,
     Event\FileWasRemoved,
     MediaType\MediaType,
@@ -60,7 +60,7 @@ class FilesystemAdapter implements Adapter
     public function get(string $file): File
     {
         if (!$this->has($file)) {
-            throw new FileNotFoundException;
+            throw new FileNotFound;
         }
 
         return $this->open($this->path, $file);
@@ -80,7 +80,7 @@ class FilesystemAdapter implements Adapter
     public function remove(string $file): Adapter
     {
         if (!$this->has($file)) {
-            throw new FileNotFoundException;
+            throw new FileNotFound;
         }
 
         $this->filesystem->remove($this->path.'/'.$file);
@@ -200,7 +200,7 @@ class FilesystemAdapter implements Adapter
         } else {
             try {
                 $mediaType = MediaType::fromString(mime_content_type($path));
-            } catch (InvalidMediaTypeStringException $e) {
+            } catch (InvalidMediaTypeString $e) {
                 $mediaType = new NullMediaType;
             }
 
