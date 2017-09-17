@@ -5,11 +5,11 @@ namespace Innmind\Filesystem\File;
 
 use Innmind\Filesystem\{
     File as FileInterface,
-    Stream,
     Name,
     MediaType,
     MediaType\NullMediaType
 };
+use Innmind\Stream\Readable;
 
 class File implements FileInterface
 {
@@ -19,7 +19,7 @@ class File implements FileInterface
 
     public function __construct(
         string $name,
-        Stream $content,
+        Readable $content,
         MediaType $mediaType = null
     ) {
         $this->name = new Name\Name($name);
@@ -38,7 +38,7 @@ class File implements FileInterface
     /**
      * {@inheritdoc}
      */
-    public function content(): Stream
+    public function content(): Readable
     {
         return $this->content;
     }
@@ -53,7 +53,7 @@ class File implements FileInterface
      *
      * @return self
      */
-    public function withContent(Stream $content): self
+    public function withContent(Readable $content): self
     {
         $file = clone $this;
         $file->content = $content;

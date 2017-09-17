@@ -3,81 +3,73 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\Stream;
 
-use Innmind\Filesystem\{
-    Stream as StreamInterface,
+use Innmind\Stream\{
+    Stream,
+    Readable,
+    Stream\Position,
+    Stream\Position\Mode,
+    Stream\Size,
     Exception\PositionNotSeekable
 };
+use Innmind\Immutable\Str;
 
-final class NullStream implements StreamInterface
+final class NullStream implements Readable
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString(): string
+    private $closed = false;
+
+    public function close(): Stream
     {
-        return '';
+        $this->closed = true;
+
+        return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function close(): StreamInterface
+    public function closed(): bool
+    {
+        return $this->closed;
+    }
+
+    public function position(): Position
+    {
+        return new Position(0);
+    }
+
+    public function seek(Position $position, Mode $mode = null): Stream
+    {
+        throw new PositionNotSeekable;
+    }
+
+    public function rewind(): Stream
     {
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function size(): int
+    public function end(): bool
     {
-        return 0;
+        return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    public function size(): Size
+    {
+        return new Size(0);
+    }
+
     public function knowsSize(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function position(): int
+    public function read(int $length = null): Str
     {
-        return 0;
+        return new Str('');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isEof(): bool
+    public function readLine(): Str
     {
-        return true;
+        return new Str('');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function seek(int $position, int $whence = self::SEEK_SET): StreamInterface
-    {
-        throw new PositionNotSeekable;
-    }
-
-    /**
-     * {@inheritd oc}
-     */
-    public function rewind(): StreamInterface
-    {
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function read(int $length): string
+    public function __toString(): string
     {
         return '';
     }

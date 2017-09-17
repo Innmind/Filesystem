@@ -6,14 +6,15 @@ namespace Innmind\Filesystem\Directory;
 use Innmind\Filesystem\{
     Directory as DirectoryInterface,
     Name,
-    Stream,
     File,
+    Stream\StringStream,
     Exception\FileNotFound,
     Event\FileWasAdded,
     Event\FileWasRemoved,
     MediaType,
     MediaType\Parameter
 };
+use Innmind\Stream\Readable;
 use Innmind\Immutable\{
     Map,
     Str
@@ -54,14 +55,14 @@ class Directory implements DirectoryInterface
     /**
      * {@inheritdoc}
      */
-    public function content(): Stream
+    public function content(): Readable
     {
-        if ($this->content instanceof Stream) {
+        if ($this->content instanceof Readable) {
             return $this->content;
         }
 
         $this->loadDirectory();
-        $this->content = new Stream\StringStream(
+        $this->content = new StringStream(
             (string) $this
                 ->files
                 ->keys()

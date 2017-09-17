@@ -165,8 +165,8 @@ class FilesystemAdapter implements Adapter
         $stream->rewind();
         $handle = fopen($path, 'w');
 
-        while (!$stream->isEof()) {
-            fwrite($handle, $stream->read(8192));
+        while (!$stream->end()) {
+            fwrite($handle, (string) $stream->read(8192));
         }
 
         $this->files = $this->files->put($path, $file);

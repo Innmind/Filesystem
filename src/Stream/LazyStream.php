@@ -3,12 +3,17 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\Stream;
 
-use Innmind\Filesystem\{
-    Stream as StreamInterface,
-    Exception\InvalidArgumentException
+use Innmind\Filesystem\Exception\InvalidArgumentException;
+use Innmind\Stream\{
+    Stream,
+    Readable,
+    Stream\Position,
+    Stream\Position\Mode,
+    Stream\Size
 };
+use Innmind\Immutable\Str;
 
-final class LazyStream implements StreamInterface
+final class LazyStream implements Readable
 {
     private $path;
     private $stream;
@@ -22,95 +27,78 @@ final class LazyStream implements StreamInterface
         $this->path = $path;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString(): string
+    public function close(): Stream
     {
-        return (string) $this->init();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function close(): StreamInterface
-    {
-        $this->init()->close();
+        $this->stream()->close();
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function size(): int
+    public function closed(): bool
     {
-        return $this->init()->size();
+        return $this->stream()->closed();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function knowsSize(): bool
+    public function position(): Position
     {
-        return $this->init()->knowsSize();
+        return $this->stream()->position();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function position(): int
+    public function seek(Position $position, Mode $mode = null): Stream
     {
-        return $this->init()->position();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isEof(): bool
-    {
-        return $this->init()->isEof();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function seek(int $position, int $whence = self::SEEK_SET): StreamInterface
-    {
-        $this->init()->seek($position, $whence);
+        $this->stream()->seek($position, $mode);
 
         return $this;
     }
 
-    /**
-     * {@inheritd oc}
-     */
-    public function rewind(): StreamInterface
+    public function rewind(): Stream
     {
         if ($this->isInitialized()) {
-            $this->init()->rewind();
+            $this->stream()->rewind();
         }
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function read(int $length): string
+    public function end(): bool
     {
-        return $this->init()->read($length);
+        return $this->stream()->end();
+    }
+
+    public function size(): Size
+    {
+        return $this->stream()->size();
+    }
+
+    public function knowsSize(): bool
+    {
+        return $this->stream()->knowsSize();
+    }
+
+    public function read(int $length = null): Str
+    {
+        return $this->stream()->read($length);
+    }
+
+    public function readLine(): Str
+    {
+        return $this->stream()->readLine();
+    }
+
+    public function __toString(): string
+    {
+        return (string) $this->stream();
     }
 
     public function isInitialized(): bool
     {
-        return $this->stream instanceof Stream;
+        return $this->stream instanceof Readable;
     }
 
-    private function init()
+    private function stream()
     {
         if (!$this->isInitialized()) {
-            $this->stream = Stream::fromPath($this->path);
+            $this->stream = new Readable\Stream(fopen($this->path, 'r'));
         }
 
         return $this->stream;

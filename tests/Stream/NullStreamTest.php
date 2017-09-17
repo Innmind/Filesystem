@@ -3,9 +3,10 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Filesystem\Stream;
 
-use Innmind\Filesystem\{
-    Stream\NullStream,
-    Stream as StreamInterface,
+use Innmind\Filesystem\Stream\NullStream;
+use Innmind\Stream\{
+    Readable,
+    Stream\Position,
     Exception\PositionNotSeekable
 };
 use PHPUnit\Framework\TestCase;
@@ -16,16 +17,16 @@ class NullStreamTest extends TestCase
     {
         $stream = new NullStream;
 
-        $this->assertInstanceOf(StreamInterface::class, $stream);
+        $this->assertInstanceOf(Readable::class, $stream);
         $this->assertSame('', (string) $stream);
         $this->assertSame($stream, $stream->close());
         $this->assertTrue($stream->knowsSize());
-        $this->assertSame(0, $stream->size());
-        $this->assertSame(0, $stream->position());
-        $this->assertTrue($stream->isEof());
+        $this->assertSame(0, $stream->size()->toInt());
+        $this->assertSame(0, $stream->position()->toInt());
+        $this->assertTrue($stream->end());
         $this->assertSame($stream, $stream->rewind());
-        $this->assertSame('', $stream->read(42));
+        $this->assertSame('', (string) $stream->read(42));
         $this->expectException(PositionNotSeekable::class);
-        $stream->seek(42);
+        $stream->seek(new Position(42));
     }
 }

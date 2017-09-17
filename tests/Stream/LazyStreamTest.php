@@ -3,9 +3,10 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Filesystem\Stream;
 
-use Innmind\Filesystem\{
-    Stream\LazyStream,
-    Stream as StreamInterface
+use Innmind\Filesystem\Stream\LazyStream;
+use Innmind\Stream\{
+    Readable,
+    Stream\Position
 };
 use PHPUnit\Framework\TestCase;
 
@@ -26,7 +27,7 @@ class LazyStreamTest extends TestCase
     {
         $stream = new LazyStream('foo');
 
-        $this->assertInstanceOf(StreamInterface::class, $stream);
+        $this->assertInstanceOf(Readable::class, $stream);
         $this->assertFalse($stream->isInitialized());
     }
 
@@ -50,7 +51,7 @@ class LazyStreamTest extends TestCase
 
     public function testSize()
     {
-        $this->assertSame(17, $this->stream->size());
+        $this->assertSame(17, $this->stream->size()->toInt());
         $this->assertTrue($this->stream->isInitialized());
     }
 
@@ -62,25 +63,25 @@ class LazyStreamTest extends TestCase
 
     public function testPosition()
     {
-        $this->assertSame(0, $this->stream->position());
+        $this->assertSame(0, $this->stream->position()->toInt());
         $this->assertTrue($this->stream->isInitialized());
     }
 
-    public function testIsEof()
+    public function testEnd()
     {
-        $this->assertFalse($this->stream->isEof());
+        $this->assertFalse($this->stream->end());
         $this->assertTrue($this->stream->isInitialized());
     }
 
     public function testSeek()
     {
-        $this->assertSame($this->stream, $this->stream->seek(3));
+        $this->assertSame($this->stream, $this->stream->seek(new Position(3)));
         $this->assertTrue($this->stream->isInitialized());
     }
 
     public function testRead()
     {
-        $this->assertSame('lorem', $this->stream->read(5));
+        $this->assertSame('lorem', (string) $this->stream->read(5));
         $this->assertTrue($this->stream->isInitialized());
     }
 }
