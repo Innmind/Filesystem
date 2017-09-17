@@ -11,8 +11,7 @@ use Innmind\Filesystem\{
     Exception\FileNotFound,
     Event\FileWasAdded,
     Event\FileWasRemoved,
-    MediaType,
-    MediaType\Parameter
+    MediaType
 };
 use Innmind\Stream\Readable;
 use Innmind\Immutable\{
@@ -38,9 +37,7 @@ class Directory implements DirectoryInterface
         $this->files = new Map('string', File::class);
         $this->mediaType = new MediaType\MediaType(
             'text',
-            'directory',
-            '',
-            new Map('string', Parameter::class)
+            'directory'
         );
     }
 
