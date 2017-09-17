@@ -4,10 +4,10 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Filesystem\MediaType;
 
 use Innmind\Filesystem\{
-    MediaTypeInterface,
+    MediaType as MediaTypeInterface,
     MediaType\MediaType,
-    MediaType\Parameter,
-    MediaType\ParameterInterface
+    MediaType\Parameter as ParameterInterface,
+    MediaType\Parameter\Parameter
 };
 use Innmind\Immutable\Map;
 use PHPUnit\Framework\TestCase;
@@ -44,7 +44,8 @@ class MediaTypeTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\InvalidArgumentException
+     * @expectedException TypeError
+     * @expectedExceptionMessage Argument 4 must be of type MapInterface<string, Innmind\Filesystem\MediaType\Parameter>
      */
     public function testThrowWhenInvalidListOfParameters()
     {
@@ -52,7 +53,7 @@ class MediaTypeTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\InvalidTopLevelTypeException
+     * @expectedException Innmind\Filesystem\Exception\InvalidTopLevelType
      */
     public function testThrowWhenTheTopLevelIsInvalid()
     {
@@ -80,7 +81,7 @@ class MediaTypeTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\InvalidMediaTypeStringException
+     * @expectedException Innmind\Filesystem\Exception\InvalidMediaTypeString
      */
     public function testThrowWhenInvalidMediaTypeString()
     {

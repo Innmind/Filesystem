@@ -5,10 +5,10 @@ namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter\FilesystemAdapter,
-    AdapterInterface,
-    File,
-    FileInterface,
-    Directory,
+    Adapter,
+    File\File,
+    File as FileInterface,
+    Directory\Directory,
     Stream\StringStream,
     MediaType\NullMediaType
 };
@@ -21,7 +21,7 @@ class FilesystemAdapterTest extends TestCase
     {
         $adapter = new FilesystemAdapter('/tmp');
 
-        $this->assertInstanceOf(AdapterInterface::class, $adapter);
+        $this->assertInstanceOf(Adapter::class, $adapter);
         $this->assertFalse($adapter->has('foo'));
         $this->assertSame($adapter, $adapter->add(new Directory('foo')));
         $this->assertTrue($adapter->has('foo'));
@@ -30,7 +30,7 @@ class FilesystemAdapterTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFoundException
+     * @expectedException Innmind\Filesystem\Exception\FileNotFound
      */
     public function testThrowWhenGettingUnknownFile()
     {
@@ -38,7 +38,7 @@ class FilesystemAdapterTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFoundException
+     * @expectedException Innmind\Filesystem\Exception\FileNotFound
      */
     public function testThrowWhenRemovingUnknownFile()
     {

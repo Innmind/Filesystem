@@ -4,10 +4,9 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\MediaType;
 
 use Innmind\Filesystem\{
-    MediaTypeInterface,
-    Exception\InvalidArgumentException,
-    Exception\InvalidTopLevelTypeException,
-    Exception\InvalidMediaTypeStringException
+    MediaType as MediaTypeInterface,
+    Exception\InvalidTopLevelType,
+    Exception\InvalidMediaTypeString
 };
 use Innmind\Immutable\{
     MapInterface,
@@ -31,17 +30,20 @@ final class MediaType implements MediaTypeInterface
         string $suffix = '',
         MapInterface $parameters = null
     ) {
-        $parameters = $parameters ?? new Map('string', ParameterInterface::class);
+        $parameters = $parameters ?? new Map('string', Parameter::class);
 
         if (
             (string) $parameters->keyType() !== 'string' ||
-            (string) $parameters->valueType() !== ParameterInterface::class
+            (string) $parameters->valueType() !== Parameter::class
         ) {
-            throw new InvalidArgumentException;
+            throw new \TypeError(sprintf(
+                'Argument 4 must be of type MapInterface<string, %s>',
+                Parameter::class
+            ));
         }
 
         if (!self::topLevels()->contains($topLevel)) {
-            throw new InvalidTopLevelTypeException;
+            throw new InvalidTopLevelType;
         }
 
         $this->topLevel = $topLevel;
@@ -126,7 +128,7 @@ final class MediaType implements MediaTypeInterface
         );
 
         if (!$string->matches($pattern)) {
-            throw new InvalidMediaTypeStringException;
+            throw new InvalidMediaTypeString;
         }
 
         $splits = $string->pregSplit('~[;,] ?~');
@@ -140,7 +142,7 @@ final class MediaType implements MediaTypeInterface
         $topLevel = $matches->get('topLevel');
         $subType = $matches->get('subType');
         $suffix = $matches->contains('suffix') ? $matches->get('suffix') : '';
-        $params = new Map('string', ParameterInterface::class);
+        $params = new Map('string', Parameter::class);
 
         $splits
             ->drop(1)
@@ -151,7 +153,7 @@ final class MediaType implements MediaTypeInterface
 
                 $params = $params->put(
                     (string) $matches->get('key'),
-                    new Parameter(
+                    new Parameter\Parameter(
                         (string) $matches->get('key'),
                         (string) $matches->get('value')
                     )

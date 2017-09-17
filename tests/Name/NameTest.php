@@ -1,11 +1,11 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Tests;
+namespace Innmind\Filesystem\Tests\Name;
 
 use Innmind\Filesystem\{
-    Name,
-    NameInterface
+    Name\Name,
+    Name as NameInterface
 };
 use PHPUnit\Framework\TestCase;
 
@@ -20,7 +20,7 @@ class NameTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\InvalidArgumentException
+     * @expectedException Innmind\Filesystem\Exception\DomainException
      * @expectedExceptionMessage A file name can't contain a slash
      */
     public function testThrowWhenABuildingNameWithASlash()

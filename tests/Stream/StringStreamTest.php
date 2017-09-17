@@ -3,9 +3,10 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Filesystem\Stream;
 
-use Innmind\Filesystem\{
-    Stream\StringStream,
-    StreamInterface
+use Innmind\Filesystem\Stream\StringStream;
+use Innmind\Stream\{
+    Readable,
+    Stream\Position
 };
 use PHPUnit\Framework\TestCase;
 
@@ -15,28 +16,18 @@ class StringStreamTest extends TestCase
     {
         $stream = new StringStream($lorem = 'Lorem ipsum dolor');
 
-        $this->assertInstanceOf(StreamInterface::class, $stream);
+        $this->assertInstanceOf(Readable::class, $stream);
         $this->assertTrue($stream->knowsSize());
-        $this->assertSame(17, $stream->size());
-        $this->assertSame(0, $stream->position());
-        $this->assertSame($stream, $stream->seek(6));
-        $this->assertSame('ipsum', $stream->read(5));
-        $this->assertFalse($stream->isEof());
+        $this->assertSame(17, $stream->size()->toInt());
+        $this->assertSame(0, $stream->position()->toInt());
+        $this->assertSame($stream, $stream->seek(new Position(6)));
+        $this->assertSame('ipsum', (string) $stream->read(5));
+        $this->assertFalse($stream->end());
         $stream->read(6);
         $this->assertSame($stream, $stream->rewind());
-        $this->assertSame(0, $stream->position());
-        $this->assertFalse($stream->isEof());
+        $this->assertSame(0, $stream->position()->toInt());
+        $this->assertFalse($stream->end());
         $this->assertSame($lorem, (string) $stream);
         $this->assertSame($stream, $stream->close());
-    }
-
-    /**
-     * @expectedException Innmind\Filesystem\Exception\PositionNotSeekableException
-     */
-    public function testThrowWhenPositionNotSeekable()
-    {
-        $stream = new StringStream('Lorem ipsum dolor');
-
-        $stream->seek(200);
     }
 }

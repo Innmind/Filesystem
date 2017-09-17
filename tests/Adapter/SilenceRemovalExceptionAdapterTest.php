@@ -5,9 +5,9 @@ namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter\SilenceRemovalExceptionAdapter,
-    AdapterInterface,
-    FileInterface,
-    Exception\FileNotFoundException
+    Adapter,
+    File,
+    Exception\FileNotFound
 };
 use Innmind\Immutable\MapInterface;
 use PHPUnit\Framework\TestCase;
@@ -17,9 +17,9 @@ class SilenceRemovalExceptionAdapterTest extends TestCase
     public function testInterface()
     {
         $this->assertInstanceOf(
-            AdapterInterface::class,
+            Adapter::class,
             new SilenceRemovalExceptionAdapter(
-                $this->createMock(AdapterInterface::class)
+                $this->createMock(Adapter::class)
             )
         );
     }
@@ -27,9 +27,9 @@ class SilenceRemovalExceptionAdapterTest extends TestCase
     public function testAdd()
     {
         $adapter = new SilenceRemovalExceptionAdapter(
-            $inner = $this->createMock(AdapterInterface::class)
+            $inner = $this->createMock(Adapter::class)
         );
-        $file = $this->createMock(FileInterface::class);
+        $file = $this->createMock(File::class);
         $inner
             ->expects($this->once())
             ->method('add')
@@ -41,9 +41,9 @@ class SilenceRemovalExceptionAdapterTest extends TestCase
     public function testGet()
     {
         $adapter = new SilenceRemovalExceptionAdapter(
-            $inner = $this->createMock(AdapterInterface::class)
+            $inner = $this->createMock(Adapter::class)
         );
-        $file = $this->createMock(FileInterface::class);
+        $file = $this->createMock(File::class);
         $inner
             ->expects($this->once())
             ->method('get')
@@ -56,7 +56,7 @@ class SilenceRemovalExceptionAdapterTest extends TestCase
     public function testHas()
     {
         $adapter = new SilenceRemovalExceptionAdapter(
-            $inner = $this->createMock(AdapterInterface::class)
+            $inner = $this->createMock(Adapter::class)
         );
         $inner
             ->expects($this->at(0))
@@ -76,7 +76,7 @@ class SilenceRemovalExceptionAdapterTest extends TestCase
     public function testRemove()
     {
         $adapter = new SilenceRemovalExceptionAdapter(
-            $inner = $this->createMock(AdapterInterface::class)
+            $inner = $this->createMock(Adapter::class)
         );
         $inner
             ->expects($this->once())
@@ -89,14 +89,14 @@ class SilenceRemovalExceptionAdapterTest extends TestCase
     public function testRemoveSafelyWhenFileNotFound()
     {
         $adapter = new SilenceRemovalExceptionAdapter(
-            $inner = $this->createMock(AdapterInterface::class)
+            $inner = $this->createMock(Adapter::class)
         );
         $inner
             ->expects($this->once())
             ->method('remove')
             ->with('foo')
             ->will(
-                $this->throwException(new FileNotFoundException)
+                $this->throwException(new FileNotFound)
             );
 
         $this->assertSame($adapter, $adapter->remove('foo'));
@@ -105,7 +105,7 @@ class SilenceRemovalExceptionAdapterTest extends TestCase
     public function testAll()
     {
         $adapter = new SilenceRemovalExceptionAdapter(
-            $inner = $this->createMock(AdapterInterface::class)
+            $inner = $this->createMock(Adapter::class)
         );
         $inner
             ->expects($this->once())

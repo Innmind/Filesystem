@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\MediaType;
 
-use Innmind\Filesystem\MediaTypeInterface;
+use Innmind\Filesystem\MediaType as MediaTypeInterface;
 use Innmind\Immutable\{
     MapInterface,
     Map
@@ -15,7 +15,7 @@ final class NullMediaType implements MediaTypeInterface
 
     public function __construct()
     {
-        $this->parameters = new Map('string', ParameterInterface::class);
+        $this->parameters = new Map('string', Parameter::class);
     }
 
     public function topLevel(): string

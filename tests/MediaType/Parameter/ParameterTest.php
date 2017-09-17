@@ -1,11 +1,11 @@
 <?php
 declare(strict_types = 1);
 
-namespace Tests\Innmind\Filesystem\MediaType;
+namespace Tests\Innmind\Filesystem\MediaType\Parameter;
 
 use Innmind\Filesystem\MediaType\{
-    Parameter,
-    ParameterInterface
+    Parameter\Parameter,
+    Parameter as ParameterInterface
 };
 use PHPUnit\Framework\TestCase;
 

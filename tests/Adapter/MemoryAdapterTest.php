@@ -5,10 +5,10 @@ namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter\MemoryAdapter,
-    AdapterInterface,
-    Directory,
-    FileInterface,
-    File,
+    Adapter,
+    Directory\Directory,
+    File as FileInterface,
+    File\File,
     Stream\StringStream
 };
 use Innmind\Immutable\MapInterface;
@@ -20,7 +20,7 @@ class MemoryAdapterTest extends TestCase
     {
         $a = new MemoryAdapter;
 
-        $this->assertInstanceOf(AdapterInterface::class, $a);
+        $this->assertInstanceOf(Adapter::class, $a);
         $this->assertFalse($a->has('foo'));
         $this->assertSame(
             $a,
@@ -33,7 +33,7 @@ class MemoryAdapterTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFoundException
+     * @expectedException Innmind\Filesystem\Exception\FileNotFound
      */
     public function testThrowWhenGettingUnknownFile()
     {
@@ -41,7 +41,7 @@ class MemoryAdapterTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFoundException
+     * @expectedException Innmind\Filesystem\Exception\FileNotFound
      */
     public function testThrowWhenRemovingUnknownFile()
     {

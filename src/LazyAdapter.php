@@ -7,7 +7,7 @@ namespace Innmind\Filesystem;
  * All modifications are kept in memory and are really persisted to
  * implementation when `persist` is explicitly called
  */
-interface LazyAdapterInterface extends AdapterInterface
+interface LazyAdapter extends Adapter
 {
     /**
      * Really persist all modifications to underlying implementation

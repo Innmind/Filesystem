@@ -5,14 +5,14 @@ namespace Innmind\Filesystem;
 
 use Innmind\Immutable\MapInterface;
 
-interface MediaTypeInterface
+interface MediaType
 {
     public function topLevel(): string;
     public function subType(): string;
     public function suffix(): string;
 
     /**
-     * @return MapInterface<string, ParameterInterface>
+     * @return MapInterface<string, Parameter>
      */
     public function parameters(): MapInterface;
     public function __toString(): string;

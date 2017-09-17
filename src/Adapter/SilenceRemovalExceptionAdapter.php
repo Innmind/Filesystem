@@ -4,17 +4,17 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    AdapterInterface,
-    FileInterface,
-    Exception\FileNotFoundException
+    Adapter,
+    File,
+    Exception\FileNotFound
 };
 use Innmind\Immutable\MapInterface;
 
-final class SilenceRemovalExceptionAdapter implements AdapterInterface
+final class SilenceRemovalExceptionAdapter implements Adapter
 {
     private $adapter;
 
-    public function __construct(AdapterInterface $adapter)
+    public function __construct(Adapter $adapter)
     {
         $this->adapter = $adapter;
     }
@@ -22,7 +22,7 @@ final class SilenceRemovalExceptionAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function add(FileInterface $file): AdapterInterface
+    public function add(File $file): Adapter
     {
         $this->adapter->add($file);
 
@@ -32,7 +32,7 @@ final class SilenceRemovalExceptionAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function get(string $file): FileInterface
+    public function get(string $file): File
     {
         return $this->adapter->get($file);
     }
@@ -48,11 +48,11 @@ final class SilenceRemovalExceptionAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): AdapterInterface
+    public function remove(string $file): Adapter
     {
         try {
             $this->adapter->remove($file);
-        } catch (FileNotFoundException $e) {
+        } catch (FileNotFound $e) {
             //pass
         }
 

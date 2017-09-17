@@ -6,10 +6,10 @@ namespace Tests\Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     Adapter\LazyAdapter,
     Adapter\MemoryAdapter,
-    LazyAdapterInterface,
-    Directory,
-    FileInterface,
-    File,
+    LazyAdapter as LazyAdapterInterface,
+    Directory\Directory,
+    File as FileInterface,
+    File\File,
     Stream\StringStream
 };
 use Innmind\Immutable\MapInterface;
@@ -68,7 +68,7 @@ class LazyAdapterTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFoundException
+     * @expectedException Innmind\Filesystem\Exception\FileNotFound
      */
     public function testThrowWhenGettingUnknwonFile()
     {
@@ -78,7 +78,7 @@ class LazyAdapterTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFoundException
+     * @expectedException Innmind\Filesystem\Exception\FileNotFound
      */
     public function testThrowWhenRemovingUnknwonFile()
     {

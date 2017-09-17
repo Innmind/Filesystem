@@ -4,29 +4,29 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    AdapterInterface,
-    FileInterface
+    Adapter,
+    File
 };
 use Innmind\Immutable\{
     MapInterface,
     Map
 };
 
-final class CacheOpenedFilesAdapter implements AdapterInterface
+final class CacheOpenedFilesAdapter implements Adapter
 {
     private $files;
     private $filesystem;
 
-    public function __construct(AdapterInterface $filesystem)
+    public function __construct(Adapter $filesystem)
     {
         $this->filesystem = $filesystem;
-        $this->files = new Map('string', FileInterface::class);
+        $this->files = new Map('string', File::class);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function add(FileInterface $file): AdapterInterface
+    public function add(File $file): Adapter
     {
         $this->filesystem->add($file);
         $this->files = $this->files->put(
@@ -40,7 +40,7 @@ final class CacheOpenedFilesAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function get(string $file): FileInterface
+    public function get(string $file): File
     {
         if ($this->files->contains($file)) {
             return $this->files->get($file);
@@ -70,7 +70,7 @@ final class CacheOpenedFilesAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): AdapterInterface
+    public function remove(string $file): Adapter
     {
         $this->files = $this->files->remove($file);
         $this->filesystem->remove($file);

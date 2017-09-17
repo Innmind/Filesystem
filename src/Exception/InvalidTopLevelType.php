@@ -3,6 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\Exception;
 
-class StreamSizeUnknownException extends RuntimeException
+class InvalidTopLevelType extends DomainException
 {
 }
