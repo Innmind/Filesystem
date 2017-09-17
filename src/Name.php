@@ -8,10 +8,5 @@ namespace Innmind\Filesystem;
  */
 interface Name
 {
-    /**
-     * Return the name of the file
-     *
-     * @return string
-     */
     public function __toString(): string;
 }

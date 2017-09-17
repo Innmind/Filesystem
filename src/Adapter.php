@@ -10,43 +10,16 @@ use Innmind\Immutable\MapInterface;
  */
 interface Adapter
 {
-    /**
-     * Persist the file to concrete filesystem
-     *
-     * @param File $file
-     *
-     * @return self
-     */
     public function add(File $file): self;
 
     /**
-     * Return the file with the given name
-     *
-     * @param string $file
-     *
-     * @throws FileNotFoundException
-     *
-     * @return File
+     * @throws FileNotFound
      */
     public function get(string $file): File;
-
-    /**
-     * Check if the file exists
-     *
-     * @param string $file
-     *
-     * @return bool
-     */
     public function has(string $file): bool;
 
     /**
-     * Remove the file with the given name
-     *
-     * @param string $file
-     *
-     * @throws FileNotFoundException
-     *
-     * @return self
+     * @throws FileNotFound
      */
     public function remove(string $file): self;
 
