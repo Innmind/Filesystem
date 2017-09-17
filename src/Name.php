@@ -3,29 +3,15 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Filesystem\Exception\InvalidArgumentException;
-use Innmind\Immutable\Str;
-
-class Name implements NameInterface
+/**
+ * Represent the name of a file
+ */
+interface Name
 {
-    private $name;
-
-    public function __construct(string $name)
-    {
-        if ((new Str($name))->matches('|/|')) {
-            throw new InvalidArgumentException(
-                'A file name can\'t contain a slash'
-            );
-        }
-
-        $this->name = $name;
-    }
-
     /**
-     * {@inheritdoc}
+     * Return the name of the file
+     *
+     * @return string
      */
-    public function __toString(): string
-    {
-        return $this->name;
-    }
+    public function __toString(): string;
 }

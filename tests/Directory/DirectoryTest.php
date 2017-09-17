@@ -1,11 +1,11 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Tests;
+namespace Innmind\Filesystem\Tests\Directory;
 
 use Innmind\Filesystem\{
-    Directory,
-    DirectoryInterface,
+    Directory\Directory,
+    Directory as DirectoryInterface,
     File,
     Stream\StringStream,
     Event\FileWasAdded,
@@ -32,7 +32,7 @@ class DirectoryTest extends TestCase
         $d->content(); //force generation of files list, to be sure it's not cloned
 
         $d2 = $d->add(
-            $file = new File('foo', new StringStream('bar'))
+            $file = new File\File('foo', new StringStream('bar'))
         );
 
         $this->assertInstanceOf(DirectoryInterface::class, $d2);
@@ -53,7 +53,7 @@ class DirectoryTest extends TestCase
     public function testGet()
     {
         $d = (new Directory('foo'))
-            ->add($f = new File('bar', new StringStream('baz')));
+            ->add($f = new File\File('bar', new StringStream('baz')));
 
         $this->assertSame($f, $d->get('bar'));
     }
@@ -69,7 +69,7 @@ class DirectoryTest extends TestCase
     public function testHas()
     {
         $d = (new Directory('foo'))
-            ->add(new File('bar', new StringStream('baz')));
+            ->add(new File\File('bar', new StringStream('baz')));
 
         $this->assertFalse($d->has('baz'));
         $this->assertTrue($d->has('bar'));
@@ -78,7 +78,7 @@ class DirectoryTest extends TestCase
     public function testRemove()
     {
         $d = (new Directory('foo'))
-            ->add(new File('bar', new StringStream('baz')));
+            ->add(new File\File('bar', new StringStream('baz')));
         $d->content(); //force generation of files list, to be sure it's not cloned
 
         $d2 = $d->remove('bar');
@@ -112,7 +112,7 @@ class DirectoryTest extends TestCase
         $this->assertSame(
             1,
             (new Directory('foo'))
-                ->add(new File('bar', new StringStream('baz')))
+                ->add(new File\File('bar', new StringStream('baz')))
                 ->count()
         );
     }
@@ -120,9 +120,9 @@ class DirectoryTest extends TestCase
     public function testIterator()
     {
         $d = (new Directory('foo'))
-            ->add($f1 = new File('bar', new StringStream('baz')))
-            ->add($f2 = new File('baz', new StringStream('baz')))
-            ->add($f3 = new File('foobar', new StringStream('baz')));
+            ->add($f1 = new File\File('bar', new StringStream('baz')))
+            ->add($f2 = new File\File('baz', new StringStream('baz')))
+            ->add($f3 = new File\File('foobar', new StringStream('baz')));
 
         $this->assertSame($f1, $d->current());
         $this->assertSame($f1->name(), $d->key());
@@ -143,9 +143,9 @@ class DirectoryTest extends TestCase
         $d = new Directory(
             'foo',
             (function () {
-                yield new File('foo', new StringStream('foo'));
-                yield new File('bar', new StringStream('bar'));
-                yield new File('foobar', new StringStream('foobar'));
+                yield new File\File('foo', new StringStream('foo'));
+                yield new File\File('bar', new StringStream('bar'));
+                yield new File\File('foobar', new StringStream('foobar'));
                 yield new Directory('sub');
             })()
         );
@@ -167,14 +167,14 @@ class DirectoryTest extends TestCase
                         (new Directory('bar'))
                             ->add(
                                 (new Directory('baz'))
-                                    ->add(new File('baz.md', new StringStream('baz')))
+                                    ->add(new File\File('baz.md', new StringStream('baz')))
                             )
                     )
             );
 
         $d2 = $d->replaceAt(
             'foo/bar/baz',
-            new File('baz.md', new StringStream('updated'))
+            new File\File('baz.md', new StringStream('updated'))
         );
         $this->assertInstanceOf(DirectoryInterface::class, $d2);
         $this->assertNotSame($d, $d2);

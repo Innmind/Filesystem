@@ -5,7 +5,7 @@ namespace Tests\Innmind\Filesystem\Stream;
 
 use Innmind\Filesystem\{
     Stream\NullStream,
-    StreamInterface,
+    Stream as StreamInterface,
     Exception\PositionNotSeekableException
 };
 use PHPUnit\Framework\TestCase;

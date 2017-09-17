@@ -3,55 +3,21 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Filesystem\MediaType\NullMediaType;
-
-class File implements FileInterface
+interface File
 {
-    private $name;
-    private $content;
-    private $mediaType;
-
-    public function __construct(
-        string $name,
-        StreamInterface $content,
-        MediaTypeInterface $mediaType = null
-    ) {
-        $this->name = new Name($name);
-        $this->content = $content;
-        $this->mediaType = $mediaType ?? new NullMediaType;
-    }
-
     /**
-     * {@inheritdo}
-     */
-    public function name(): NameInterface
-    {
-        return $this->name;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function content(): StreamInterface
-    {
-        return $this->content;
-    }
-
-    public function mediaType(): MediaTypeInterface
-    {
-        return $this->mediaType;
-    }
-
-    /**
-     * New file reference with a different content
+     * Return the name of the file
      *
-     * @return self
+     * @return NameInterface
      */
-    public function withContent(StreamInterface $content): self
-    {
-        $file = clone $this;
-        $file->content = $content;
+    public function name(): Name;
 
-        return $file;
-    }
+    /**
+     * Return the content stream of the file
+     *
+     * @return StreamInterface
+     */
+    public function content(): Stream;
+
+    public function mediaType(): MediaType;
 }

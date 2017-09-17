@@ -3,230 +3,57 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Filesystem\{
-    Stream\StringStream,
-    Exception\FileNotFoundException,
-    Event\FileWasAdded,
-    Event\FileWasRemoved,
-    MediaType\MediaType,
-    MediaType\ParameterInterface
-};
-use Innmind\Immutable\{
-    Map,
-    Str
-};
-use Innmind\EventBus\EventRecorder;
+use Innmind\EventBus\ContainsRecordedEventsInterface;
 
-class Directory implements DirectoryInterface
+interface Directory extends File, ContainsRecordedEventsInterface, \Iterator, \Countable
 {
-    use EventRecorder;
-
-    private $name;
-    private $content;
-    private $files;
-    private $generator;
-    private $mediaType;
-
-    public function __construct(string $name, \Generator $generator = null)
-    {
-        $this->name = new Name($name);
-        $this->generator = $generator;
-        $this->files = new Map('string', FileInterface::class);
-        $this->mediaType = new MediaType(
-            'text',
-            'directory',
-            '',
-            new Map('string', ParameterInterface::class)
-        );
-    }
-
     /**
-     * {@inheritdoc}
-     */
-    public function name(): NameInterface
-    {
-        return $this->name;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function content(): StreamInterface
-    {
-        if ($this->content instanceof StreamInterface) {
-            return $this->content;
-        }
-
-        $this->loadDirectory();
-        $this->content = new StringStream(
-            (string) $this
-                ->files
-                ->keys()
-                ->join("\n")
-        );
-        $this->rewind();
-
-        return $this->content;
-    }
-
-    public function mediaType(): MediaTypeInterface
-    {
-        return $this->mediaType;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function add(FileInterface $file): DirectoryInterface
-    {
-        $this->loadDirectory();
-        $directory = clone $this;
-        $directory->content = null;
-        $directory->files = $this->files->put(
-            (string) $file->name(),
-            $file
-        );
-        $directory->record(new FileWasAdded($file));
-
-        return $directory;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function get(string $name): FileInterface
-    {
-        if (!$this->has($name)) {
-            throw new FileNotFoundException;
-        }
-
-        return $this->files->get($name);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function has(string $name): bool
-    {
-        $this->loadDirectory();
-
-        return $this->files->contains($name);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function remove(string $name): DirectoryInterface
-    {
-        if (!$this->has($name)) {
-            throw new FileNotFoundException;
-        }
-
-        $directory = clone $this;
-        $directory->content = null;
-        $directory->files = $this->files->remove($name);
-        $directory->record(new FileWasRemoved($name));
-
-        return $directory;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function replaceAt(string $path, FileInterface $file): DirectoryInterface
-    {
-        $pieces = (new Str($path))->split('/');
-        $directory = $this;
-
-        while ($pieces->count() > 0) {
-            $target = $pieces
-                ->reduce(
-                    $directory,
-                    function(DirectoryInterface $parent, Str $seek): DirectoryInterface {
-                        return $parent->get((string) $seek);
-                    }
-                )
-                ->add($target ?? $file);
-            $pieces = $pieces->dropEnd(1);
-        }
-
-        return $directory->add($target);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function current()
-    {
-        $this->loadDirectory();
-
-        return $this->files->current();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function key()
-    {
-        return $this->current()->name();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function next()
-    {
-        $this->loadDirectory();
-        $this->files->next();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rewind()
-    {
-        $this->loadDirectory();
-        $this->files->rewind();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function valid(): bool
-    {
-        $this->loadDirectory();
-
-        return $this->files->valid();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function count()
-    {
-        $this->loadDirectory();
-
-        return $this->files->size();
-    }
-
-    /**
-     * Load all files of the directory
+     * Add a new file to the directory
      *
-     * @return void
+     * @param File $file
+     *
+     * @return self
      */
-    private function loadDirectory()
-    {
-        if ($this->generator === null) {
-            return;
-        }
+    public function add(File $file): self;
 
-        foreach ($this->generator as $file) {
-            $this->files = $this->files->put(
-                (string) $file->name(),
-                $file
-            );
-        }
+    /**
+     * Return the file with the given name
+     *
+     * @param string $name
+     *
+     * @throws FileNotFoundException
+     *
+     * @return File
+     */
+    public function get(string $name): File;
 
-        $this->generator = null;
-    }
+    /**
+     * Check if the file exists in the current directory
+     *
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function has(string $name): bool;
+
+    /**
+     * Remove the wished file
+     *
+     * @param string $name
+     *
+     * @throws FileNotFoundException
+     *
+     * @return self
+     */
+    public function remove(string $name): self;
+
+    /**
+     * Replace a file at a given path
+     *
+     * @param string $path
+     * @param File $file
+     *
+     * @return self
+     */
+    public function replaceAt(string $path, File $file): self;
 }

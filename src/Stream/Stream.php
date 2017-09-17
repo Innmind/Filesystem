@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\Stream;
 
 use Innmind\Filesystem\{
-    StreamInterface,
+    Stream as StreamInterface,
     Exception\InvalidArgumentException,
     Exception\StreamSizeUnknownException,
     Exception\PositionNotSeekableException

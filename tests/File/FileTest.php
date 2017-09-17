@@ -1,13 +1,13 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Tests;
+namespace Innmind\Filesystem\Tests\File;
 
 use Innmind\Filesystem\{
-    File,
-    FileInterface,
+    File\File,
+    File as FileInterface,
     Stream\StringStream,
-    NameInterface,
+    Name,
     MediaType\MediaType
 };
 use PHPUnit\Framework\TestCase;
@@ -19,7 +19,7 @@ class FileTest extends TestCase
         $f = new File('foo', $c = new StringStream('bar'));
 
         $this->assertInstanceOf(FileInterface::class, $f);
-        $this->assertInstanceOf(NameInterface::class, $f->name());
+        $this->assertInstanceOf(Name::class, $f->name());
         $this->assertSame('foo', (string) $f->name());
         $this->assertSame($c, $f->content());
         $this->assertSame(

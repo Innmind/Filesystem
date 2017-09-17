@@ -4,10 +4,10 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Filesystem\MediaType;
 
 use Innmind\Filesystem\{
-    MediaTypeInterface,
+    MediaType as MediaTypeInterface,
     MediaType\MediaType,
-    MediaType\Parameter,
-    MediaType\ParameterInterface
+    MediaType\Parameter as ParameterInterface,
+    MediaType\Parameter\Parameter
 };
 use Innmind\Immutable\Map;
 use PHPUnit\Framework\TestCase;

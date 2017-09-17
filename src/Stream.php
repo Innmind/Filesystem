@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-interface StreamInterface
+interface Stream
 {
     const SEEK_SET = SEEK_SET;
     const SEEK_CUR = SEEK_CUR;

@@ -4,9 +4,9 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    LazyAdapterInterface,
-    AdapterInterface,
-    FileInterface,
+    LazyAdapter as LazyAdapterInterface,
+    Adapter,
+    File,
     Exception\FileNotFoundException
 };
 use Innmind\Immutable\{
@@ -21,17 +21,17 @@ class LazyAdapter implements LazyAdapterInterface
     private $toAdd;
     private $toRemove;
 
-    public function __construct(AdapterInterface $adapter)
+    public function __construct(Adapter $adapter)
     {
         $this->adapter = $adapter;
-        $this->toAdd = new Map('string', FileInterface::class);
+        $this->toAdd = new Map('string', File::class);
         $this->toRemove = new Set('string');
     }
 
     /**
      * {@inheritdoc}
      */
-    public function add(FileInterface $file): AdapterInterface
+    public function add(File $file): Adapter
     {
         $this->toAdd = $this->toAdd->put(
             (string) $file->name(),
@@ -45,7 +45,7 @@ class LazyAdapter implements LazyAdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function get(string $file): FileInterface
+    public function get(string $file): File
     {
         if (!$this->has($file)) {
             throw new FileNotFoundException;
@@ -77,7 +77,7 @@ class LazyAdapter implements LazyAdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): AdapterInterface
+    public function remove(string $file): Adapter
     {
         if (!$this->has($file)) {
             throw new FileNotFoundException;
@@ -110,7 +110,7 @@ class LazyAdapter implements LazyAdapterInterface
     {
         $this->toAdd = $this
             ->toAdd
-            ->foreach(function(string $name, FileInterface $file) {
+            ->foreach(function(string $name, File $file) {
                 $this->adapter->add($file);
             })
             ->clear();

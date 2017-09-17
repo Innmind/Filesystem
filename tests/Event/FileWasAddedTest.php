@@ -5,7 +5,7 @@ namespace Tests\Innmind\Filesystem\Event;
 
 use Innmind\Filesystem\{
     Event\FileWasAdded,
-    FileInterface
+    File
 };
 use PHPUnit\Framework\TestCase;
 
@@ -13,7 +13,7 @@ class FileWasAddedTest extends TestCase
 {
     public function testInterface()
     {
-        $file = $this->createMock(FileInterface::class);
+        $file = $this->createMock(File::class);
 
         $event = new FileWasAdded($file);
 

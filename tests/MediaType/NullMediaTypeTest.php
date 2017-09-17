@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Filesystem\MediaType;
 
 use Innmind\Filesystem\{
-    MediaTypeInterface,
+    MediaType as MediaTypeInterface,
     MediaType\NullMediaType
 };
 use PHPUnit\Framework\TestCase;

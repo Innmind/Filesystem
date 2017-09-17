@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\MediaType;
 
 use Innmind\Filesystem\{
-    MediaTypeInterface,
+    MediaType as MediaTypeInterface,
     Exception\InvalidArgumentException,
     Exception\InvalidTopLevelTypeException,
     Exception\InvalidMediaTypeStringException
@@ -31,11 +31,11 @@ final class MediaType implements MediaTypeInterface
         string $suffix = '',
         MapInterface $parameters = null
     ) {
-        $parameters = $parameters ?? new Map('string', ParameterInterface::class);
+        $parameters = $parameters ?? new Map('string', Parameter::class);
 
         if (
             (string) $parameters->keyType() !== 'string' ||
-            (string) $parameters->valueType() !== ParameterInterface::class
+            (string) $parameters->valueType() !== Parameter::class
         ) {
             throw new InvalidArgumentException;
         }
@@ -140,7 +140,7 @@ final class MediaType implements MediaTypeInterface
         $topLevel = $matches->get('topLevel');
         $subType = $matches->get('subType');
         $suffix = $matches->contains('suffix') ? $matches->get('suffix') : '';
-        $params = new Map('string', ParameterInterface::class);
+        $params = new Map('string', Parameter::class);
 
         $splits
             ->drop(1)
@@ -151,7 +151,7 @@ final class MediaType implements MediaTypeInterface
 
                 $params = $params->put(
                     (string) $matches->get('key'),
-                    new Parameter(
+                    new Parameter\Parameter(
                         (string) $matches->get('key'),
                         (string) $matches->get('value')
                     )

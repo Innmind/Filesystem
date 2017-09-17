@@ -1,11 +1,11 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Tests;
+namespace Innmind\Filesystem\Tests\Name;
 
 use Innmind\Filesystem\{
-    Name,
-    NameInterface
+    Name\Name,
+    Name as NameInterface
 };
 use PHPUnit\Framework\TestCase;
 

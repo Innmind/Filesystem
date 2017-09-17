@@ -5,9 +5,9 @@ namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter\CacheOpenedFilesAdapter,
-    AdapterInterface,
-    FileInterface,
-    Name
+    Adapter,
+    File,
+    Name\Name
 };
 use Innmind\Immutable\Map;
 use PHPUnit\Framework\TestCase;
@@ -17,9 +17,9 @@ class CacheOpenedFilesAdapterTest extends TestCase
     public function testInterface()
     {
         $this->assertInstanceOf(
-            AdapterInterface::class,
+            Adapter::class,
             new CacheOpenedFilesAdapter(
-                $this->createMock(AdapterInterface::class)
+                $this->createMock(Adapter::class)
             )
         );
     }
@@ -27,9 +27,9 @@ class CacheOpenedFilesAdapterTest extends TestCase
     public function testAdd()
     {
         $filesystem = new CacheOpenedFilesAdapter(
-            $inner = $this->createMock(AdapterInterface::class)
+            $inner = $this->createMock(Adapter::class)
         );
-        $file = $this->createMock(FileInterface::class);
+        $file = $this->createMock(File::class);
         $file
             ->method('name')
             ->willReturn(new Name('foo'));
@@ -45,9 +45,9 @@ class CacheOpenedFilesAdapterTest extends TestCase
     public function testGet()
     {
         $filesystem = new CacheOpenedFilesAdapter(
-            $inner = $this->createMock(AdapterInterface::class)
+            $inner = $this->createMock(Adapter::class)
         );
-        $file = $this->createMock(FileInterface::class);
+        $file = $this->createMock(File::class);
         $file
             ->method('name')
             ->willReturn(new Name('foo'));
@@ -64,7 +64,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
     public function testHasFromInnerAdapter()
     {
         $filesystem = new CacheOpenedFilesAdapter(
-            $inner = $this->createMock(AdapterInterface::class)
+            $inner = $this->createMock(Adapter::class)
         );
         $inner
             ->expects($this->once())
@@ -78,12 +78,12 @@ class CacheOpenedFilesAdapterTest extends TestCase
     public function testHasFromCache()
     {
         $filesystem = new CacheOpenedFilesAdapter(
-            $inner = $this->createMock(AdapterInterface::class)
+            $inner = $this->createMock(Adapter::class)
         );
         $inner
             ->expects($this->never())
             ->method('has');
-        $file = $this->createMock(FileInterface::class);
+        $file = $this->createMock(File::class);
         $file
             ->method('name')
             ->willReturn(new Name('foo'));
@@ -95,9 +95,9 @@ class CacheOpenedFilesAdapterTest extends TestCase
     public function testRemove()
     {
         $filesystem = new CacheOpenedFilesAdapter(
-            $inner = $this->createMock(AdapterInterface::class)
+            $inner = $this->createMock(Adapter::class)
         );
-        $file = $this->createMock(FileInterface::class);
+        $file = $this->createMock(File::class);
         $file
             ->method('name')
             ->willReturn(new Name('foo'));
@@ -109,7 +109,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with('foo')
-            ->willReturn($expected = $this->createMock(FileInterface::class));
+            ->willReturn($expected = $this->createMock(File::class));
         $filesystem->add($file);
 
         $this->assertSame($filesystem, $filesystem->remove('foo'));
@@ -119,9 +119,9 @@ class CacheOpenedFilesAdapterTest extends TestCase
     public function testAll()
     {
         $filesystem = new CacheOpenedFilesAdapter(
-            $inner = $this->createMock(AdapterInterface::class)
+            $inner = $this->createMock(Adapter::class)
         );
-        $file = $this->createMock(FileInterface::class);
+        $file = $this->createMock(File::class);
         $file
             ->method('name')
             ->willReturn(new Name('foo'));
@@ -129,7 +129,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
             ->expects($this->once())
             ->method('all')
             ->willReturn(
-                $expected = (new Map('string', FileInterface::class))
+                $expected = (new Map('string', File::class))
                     ->put('foo', $file)
             );
 

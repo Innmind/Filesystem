@@ -5,7 +5,7 @@ namespace Tests\Innmind\Filesystem\Stream;
 
 use Innmind\Filesystem\{
     Stream\StringStream,
-    StreamInterface
+    Stream as StreamInterface
 };
 use PHPUnit\Framework\TestCase;
 

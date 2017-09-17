@@ -8,16 +8,16 @@ use Innmind\Immutable\MapInterface;
 /**
  * Layer between value objects and concrete implementation
  */
-interface AdapterInterface
+interface Adapter
 {
     /**
      * Persist the file to concrete filesystem
      *
-     * @param FileInterface $file
+     * @param File $file
      *
      * @return self
      */
-    public function add(FileInterface $file): self;
+    public function add(File $file): self;
 
     /**
      * Return the file with the given name
@@ -26,9 +26,9 @@ interface AdapterInterface
      *
      * @throws FileNotFoundException
      *
-     * @return FileInterface
+     * @return File
      */
-    public function get(string $file): FileInterface;
+    public function get(string $file): File;
 
     /**
      * Check if the file exists
@@ -51,7 +51,7 @@ interface AdapterInterface
     public function remove(string $file): self;
 
     /**
-     * @return MapInterface<string, FileInterface>
+     * @return MapInterface<string, File>
      */
     public function all(): MapInterface;
 }

@@ -4,8 +4,8 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    AdapterInterface,
-    FileInterface,
+    Adapter,
+    File,
     Exception\FileNotFoundException
 };
 use Innmind\Immutable\{
@@ -13,19 +13,19 @@ use Innmind\Immutable\{
     MapInterface
 };
 
-class MemoryAdapter implements AdapterInterface
+class MemoryAdapter implements Adapter
 {
     private $files;
 
     public function __construct()
     {
-        $this->files = new Map('string', FileInterface::class);
+        $this->files = new Map('string', File::class);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function add(FileInterface $file): AdapterInterface
+    public function add(File $file): Adapter
     {
         $this->files = $this->files->put(
             (string) $file->name(),
@@ -38,7 +38,7 @@ class MemoryAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function get(string $file): FileInterface
+    public function get(string $file): File
     {
         if (!$this->has($file)) {
             throw new FileNotFoundException;
@@ -58,7 +58,7 @@ class MemoryAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): AdapterInterface
+    public function remove(string $file): Adapter
     {
         if (!$this->has($file)) {
             throw new FileNotFoundException;

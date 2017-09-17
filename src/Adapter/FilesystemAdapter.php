@@ -4,11 +4,9 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    AdapterInterface,
-    FileInterface,
+    Adapter,
     File,
     Directory,
-    DirectoryInterface,
     Stream\LazyStream,
     Exception\FileNotFoundException,
     Exception\InvalidMediaTypeStringException,
@@ -27,7 +25,7 @@ use Symfony\Component\{
     Finder\Finder
 };
 
-class FilesystemAdapter implements AdapterInterface
+class FilesystemAdapter implements Adapter
 {
     private $path;
     private $filesystem;
@@ -38,7 +36,7 @@ class FilesystemAdapter implements AdapterInterface
     {
         $this->path = $path;
         $this->filesystem = new Filesystem;
-        $this->files = new Map('string', FileInterface::class);
+        $this->files = new Map('string', File::class);
         $this->handledEvents = new Set('object');
 
         if (!$this->filesystem->exists($this->path)) {
@@ -49,7 +47,7 @@ class FilesystemAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function add(FileInterface $file): AdapterInterface
+    public function add(File $file): Adapter
     {
         $this->createFileAt($this->path, $file);
 
@@ -59,7 +57,7 @@ class FilesystemAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function get(string $file): FileInterface
+    public function get(string $file): File
     {
         if (!$this->has($file)) {
             throw new FileNotFoundException;
@@ -79,7 +77,7 @@ class FilesystemAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): AdapterInterface
+    public function remove(string $file): Adapter
     {
         if (!$this->has($file)) {
             throw new FileNotFoundException;
@@ -96,7 +94,7 @@ class FilesystemAdapter implements AdapterInterface
     public function all(): MapInterface
     {
         $files = Finder::create()->in($this->path);
-        $map = new Map('string', FileInterface::class);
+        $map = new Map('string', File::class);
 
         foreach ($files as $file) {
             $map = $map->put(
@@ -112,13 +110,13 @@ class FilesystemAdapter implements AdapterInterface
      * Create the wished file at the given absolute path
      *
      * @param string $path
-     * @param FileInterface $file
+     * @param File $file
      *
      * @return void
      */
-    private function createFileAt(string $path, FileInterface $file)
+    private function createFileAt(string $path, File $file)
     {
-        if ($file instanceof DirectoryInterface) {
+        if ($file instanceof Directory) {
             $folder = $path.'/'.(string) $file->name();
 
             if (
@@ -180,14 +178,14 @@ class FilesystemAdapter implements AdapterInterface
      * @param string $folder
      * @param string $file
      *
-     * @return FileInterface
+     * @return File
      */
-    private function open(string $folder, string $file): FileInterface
+    private function open(string $folder, string $file): File
     {
         $path = $folder.'/'.$file;
 
         if (is_dir($path)) {
-            $object = new Directory(
+            $object = new Directory\Directory(
                 $file,
                 (function($folder) {
                     $handle = opendir($folder);
@@ -206,7 +204,7 @@ class FilesystemAdapter implements AdapterInterface
                 $mediaType = new NullMediaType;
             }
 
-            $object = new File(
+            $object = new File\File(
                 $file,
                 new LazyStream($path),
                 $mediaType
