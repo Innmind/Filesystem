@@ -5,7 +5,7 @@ namespace Innmind\Filesystem\Name;
 
 use Innmind\Filesystem\{
     Name as NameInterface,
-    Exception\InvalidArgumentException
+    Exception\DomainException
 };
 use Innmind\Immutable\Str;
 
@@ -16,7 +16,7 @@ class Name implements NameInterface
     public function __construct(string $name)
     {
         if ((new Str($name))->matches('|/|')) {
-            throw new InvalidArgumentException(
+            throw new DomainException(
                 'A file name can\'t contain a slash'
             );
         }

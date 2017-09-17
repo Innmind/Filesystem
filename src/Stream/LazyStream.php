@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\Stream;
 
-use Innmind\Filesystem\Exception\InvalidArgumentException;
+use Innmind\Filesystem\Exception\DomainException;
 use Innmind\Stream\{
     Stream,
     Readable,
@@ -21,7 +21,7 @@ final class LazyStream implements Readable
     public function __construct(string $path)
     {
         if (empty($path)) {
-            throw new InvalidArgumentException;
+            throw new DomainException;
         }
 
         $this->path = $path;

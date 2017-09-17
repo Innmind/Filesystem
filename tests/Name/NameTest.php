@@ -20,7 +20,7 @@ class NameTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\InvalidArgumentException
+     * @expectedException Innmind\Filesystem\Exception\DomainException
      * @expectedExceptionMessage A file name can't contain a slash
      */
     public function testThrowWhenABuildingNameWithASlash()

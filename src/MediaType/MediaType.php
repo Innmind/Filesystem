@@ -5,7 +5,6 @@ namespace Innmind\Filesystem\MediaType;
 
 use Innmind\Filesystem\{
     MediaType as MediaTypeInterface,
-    Exception\InvalidArgumentException,
     Exception\InvalidTopLevelType,
     Exception\InvalidMediaTypeString
 };
@@ -37,7 +36,10 @@ final class MediaType implements MediaTypeInterface
             (string) $parameters->keyType() !== 'string' ||
             (string) $parameters->valueType() !== Parameter::class
         ) {
-            throw new InvalidArgumentException;
+            throw new \TypeError(sprintf(
+                'Argument 4 must be of type MapInterface<string, %s>',
+                Parameter::class
+            ));
         }
 
         if (!self::topLevels()->contains($topLevel)) {

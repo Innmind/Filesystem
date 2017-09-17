@@ -44,7 +44,8 @@ class MediaTypeTest extends TestCase
     }
 
     /**
-     * @expectedException Innmind\Filesystem\Exception\InvalidArgumentException
+     * @expectedException TypeError
+     * @expectedExceptionMessage Argument 4 must be of type MapInterface<string, Innmind\Filesystem\MediaType\Parameter>
      */
     public function testThrowWhenInvalidListOfParameters()
     {
