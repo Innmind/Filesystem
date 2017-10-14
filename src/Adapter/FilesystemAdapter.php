@@ -93,7 +93,7 @@ class FilesystemAdapter implements Adapter
      */
     public function all(): MapInterface
     {
-        $files = Finder::create()->in($this->path);
+        $files = Finder::create()->depth('== 0')->in($this->path);
         $map = new Map('string', File::class);
 
         foreach ($files as $file) {

@@ -135,19 +135,24 @@ class FilesystemAdapterTest extends TestCase
             new StringStream('foo')
         ));
         file_put_contents('/tmp/test/bar', 'bar');
+        mkdir('/tmp/test/baz');
+        file_put_contents('/tmp/test/baz/foobar', 'baz');
 
         $all = $adapter->all();
         $this->assertInstanceOf(MapInterface::class, $all);
         $this->assertSame('string', (string) $all->keyType());
         $this->assertSame(FileInterface::class, (string) $all->valueType());
-        $this->assertCount(2, $all);
+        $this->assertCount(3, $all);
         $this->assertTrue($all->contains('foo'));
         $this->assertTrue($all->contains('bar'));
+        $this->assertTrue($all->contains('baz'));
         $this->assertSame('foo', (string) $adapter->get('foo')->content());
         $this->assertSame('bar', (string) $adapter->get('bar')->content());
+        $this->assertInstanceOf(Directory::class, $adapter->get('baz'));
         $adapter
             ->remove('foo')
-            ->remove('bar');
+            ->remove('bar')
+            ->remove('baz');
     }
 
     public function testFallbackToNullMediaTypeWhenDetectedWhenIsNotAnOfficialOne()
