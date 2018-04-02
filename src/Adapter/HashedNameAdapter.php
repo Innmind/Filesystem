@@ -10,7 +10,7 @@ use Innmind\Filesystem\{
     Name\Hashed,
     Name\Name,
     Exception\LogicException,
-    Exception\FileNotFound,
+    Exception\FileNotFound
 };
 use Innmind\Immutable\MapInterface;
 

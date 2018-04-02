@@ -5,7 +5,7 @@ namespace Tests\Innmind\Filesystem\Name;
 
 use Innmind\Filesystem\{
     Name\Hashed,
-    Name,
+    Name
 };
 use PHPUnit\Framework\TestCase;
 

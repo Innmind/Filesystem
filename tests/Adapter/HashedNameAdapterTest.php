@@ -11,7 +11,7 @@ use Innmind\Filesystem\{
     File,
     Stream\StringStream,
     Exception\LogicException,
-    Exception\FileNotFound,
+    Exception\FileNotFound
 };
 use Innmind\Immutable\MapInterface;
 use Symfony\Component\Filesystem\Filesystem;
