@@ -31,6 +31,7 @@ class FilesystemAdapterTest extends TestCase
 
     /**
      * @expectedException Innmind\Filesystem\Exception\FileNotFound
+     * @expectedExceptionMessage foo
      */
     public function testThrowWhenGettingUnknownFile()
     {
@@ -39,6 +40,7 @@ class FilesystemAdapterTest extends TestCase
 
     /**
      * @expectedException Innmind\Filesystem\Exception\FileNotFound
+     * @expectedExceptionMessage foo
      */
     public function testThrowWhenRemovingUnknownFile()
     {

@@ -69,6 +69,7 @@ class LazyAdapterTest extends TestCase
 
     /**
      * @expectedException Innmind\Filesystem\Exception\FileNotFound
+     * @expectedExceptionMessage foo
      */
     public function testThrowWhenGettingUnknwonFile()
     {
@@ -79,6 +80,7 @@ class LazyAdapterTest extends TestCase
 
     /**
      * @expectedException Innmind\Filesystem\Exception\FileNotFound
+     * @expectedExceptionMessage foo
      */
     public function testThrowWhenRemovingUnknwonFile()
     {
