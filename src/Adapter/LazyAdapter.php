@@ -48,7 +48,7 @@ class LazyAdapter implements LazyAdapterInterface
     public function get(string $file): File
     {
         if (!$this->has($file)) {
-            throw new FileNotFound;
+            throw new FileNotFound($file);
         }
 
         if ($this->toAdd->contains($file)) {
@@ -80,7 +80,7 @@ class LazyAdapter implements LazyAdapterInterface
     public function remove(string $file): Adapter
     {
         if (!$this->has($file)) {
-            throw new FileNotFound;
+            throw new FileNotFound($file);
         }
 
         $this->toRemove = $this->toRemove->add($file);

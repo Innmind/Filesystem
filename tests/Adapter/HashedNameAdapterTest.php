@@ -84,6 +84,7 @@ class HashedNameAdapterTest extends TestCase
         );
 
         $this->expectException(FileNotFound::class);
+        $this->expectExceptionMessage('foo');
 
         $filesystem->get('foo');
     }
@@ -116,6 +117,7 @@ class HashedNameAdapterTest extends TestCase
         );
 
         $this->expectException(FileNotFound::class);
+        $this->expectExceptionMessage('foo');
 
         $filesystem->remove('foo');
     }

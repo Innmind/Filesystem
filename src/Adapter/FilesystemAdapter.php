@@ -60,7 +60,7 @@ class FilesystemAdapter implements Adapter
     public function get(string $file): File
     {
         if (!$this->has($file)) {
-            throw new FileNotFound;
+            throw new FileNotFound($file);
         }
 
         return $this->open($this->path, $file);
@@ -80,7 +80,7 @@ class FilesystemAdapter implements Adapter
     public function remove(string $file): Adapter
     {
         if (!$this->has($file)) {
-            throw new FileNotFound;
+            throw new FileNotFound($file);
         }
 
         $this->filesystem->remove($this->path.'/'.$file);

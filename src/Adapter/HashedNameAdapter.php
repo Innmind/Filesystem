@@ -69,7 +69,7 @@ final class HashedNameAdapter implements Adapter
     public function get(string $file): File
     {
         if (!$this->has($file)) {
-            throw new FileNotFound;
+            throw new FileNotFound($file);
         }
 
         $originalName = $file;
@@ -116,7 +116,7 @@ final class HashedNameAdapter implements Adapter
     public function remove(string $file): Adapter
     {
         if (!$this->has($file)) {
-            throw new FileNotFound;
+            throw new FileNotFound($file);
         }
 
         $name = new Hashed(new Name($file));

@@ -41,7 +41,7 @@ class MemoryAdapter implements Adapter
     public function get(string $file): File
     {
         if (!$this->has($file)) {
-            throw new FileNotFound;
+            throw new FileNotFound($file);
         }
 
         return $this->files->get($file);
@@ -61,7 +61,7 @@ class MemoryAdapter implements Adapter
     public function remove(string $file): Adapter
     {
         if (!$this->has($file)) {
-            throw new FileNotFound;
+            throw new FileNotFound($file);
         }
 
         $this->files = $this->files->remove($file);
