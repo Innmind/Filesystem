@@ -134,7 +134,7 @@ final class MediaType implements MediaTypeInterface
         $splits = $string->pregSplit('~[;,] ?~');
         $matches = $splits
             ->get(0)
-            ->getMatches(sprintf(
+            ->capture(sprintf(
                 '~^(?<topLevel>%s)/(?<subType>[\w\-.]+)(\+(?<suffix>\w+))?$~',
                 self::topLevels()->join('|')
             ));
@@ -147,7 +147,7 @@ final class MediaType implements MediaTypeInterface
         $splits
             ->drop(1)
             ->foreach(function(Str $param) use (&$params) {
-                $matches = $param->getMatches(
+                $matches = $param->capture(
                     '~^(?<key>[\w\-.]+)=(?<value>[\w\-.]+)$~'
                 );
 

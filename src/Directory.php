@@ -3,9 +3,9 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\EventBus\ContainsRecordedEventsInterface;
+use Innmind\Immutable\StreamInterface;
 
-interface Directory extends File, ContainsRecordedEventsInterface, \Iterator, \Countable
+interface Directory extends File, \Iterator, \Countable
 {
     public function add(File $file): self;
 
@@ -20,4 +20,9 @@ interface Directory extends File, ContainsRecordedEventsInterface, \Iterator, \C
      */
     public function remove(string $name): self;
     public function replaceAt(string $path, File $file): self;
+
+    /**
+     * @return StreamInterface<object>
+     */
+    public function modifications(): StreamInterface;
 }

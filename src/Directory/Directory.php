@@ -16,19 +16,19 @@ use Innmind\Filesystem\{
 use Innmind\Stream\Readable;
 use Innmind\Immutable\{
     Map,
-    Str
+    Str,
+    StreamInterface,
+    Stream
 };
-use Innmind\EventBus\EventRecorder;
 
 class Directory implements DirectoryInterface
 {
-    use EventRecorder;
-
     private $name;
     private $content;
     private $files;
     private $generator;
     private $mediaType;
+    private $modifications;
 
     public function __construct(string $name, \Generator $generator = null)
     {
@@ -39,6 +39,7 @@ class Directory implements DirectoryInterface
             'text',
             'directory'
         );
+        $this->modifications = Stream::of('object');
     }
 
     /**
@@ -157,6 +158,14 @@ class Directory implements DirectoryInterface
     /**
      * {@inheritdoc}
      */
+    public function modifications(): StreamInterface
+    {
+        return $this->modifications;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function current()
     {
         $this->loadDirectory();
@@ -229,5 +238,10 @@ class Directory implements DirectoryInterface
         }
 
         $this->generator = null;
+    }
+
+    private function record($event): void
+    {
+        $this->modifications = $this->modifications->add($event);
     }
 }

@@ -41,13 +41,13 @@ class DirectoryTest extends TestCase
         $this->assertNotSame($d->content(), $d2->content());
         $this->assertSame('', (string) $d->content());
         $this->assertSame('foo', (string) $d2->content());
-        $this->assertSame(0, $d->recordedEvents()->count());
-        $this->assertSame(1, $d2->recordedEvents()->count());
+        $this->assertSame(0, $d->modifications()->count());
+        $this->assertSame(1, $d2->modifications()->count());
         $this->assertInstanceOf(
             FileWasAdded::class,
-            $d2->recordedEvents()->current()
+            $d2->modifications()->current()
         );
-        $this->assertSame($file, $d2->recordedEvents()->current()->file());
+        $this->assertSame($file, $d2->modifications()->current()->file());
     }
 
     public function testGet()
@@ -89,13 +89,13 @@ class DirectoryTest extends TestCase
         $this->assertNotSame($d->content(), $d2->content());
         $this->assertSame('bar', (string) $d->content());
         $this->assertSame('', (string) $d2->content());
-        $this->assertSame(1, $d->recordedEvents()->count());
-        $this->assertSame(2, $d2->recordedEvents()->count());
+        $this->assertSame(1, $d->modifications()->count());
+        $this->assertSame(2, $d2->modifications()->count());
         $this->assertInstanceOf(
             FileWasRemoved::class,
-            $d2->recordedEvents()->get(1)
+            $d2->modifications()->get(1)
         );
-        $this->assertSame('bar', $d2->recordedEvents()->get(1)->file());
+        $this->assertSame('bar', $d2->modifications()->get(1)->file());
     }
 
     /**
