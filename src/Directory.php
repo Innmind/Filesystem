@@ -3,9 +3,9 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\EventBus\ContainsRecordedEventsInterface;
+use Innmind\EventBus\ContainsRecordedEvents;
 
-interface Directory extends File, ContainsRecordedEventsInterface, \Iterator, \Countable
+interface Directory extends File, ContainsRecordedEvents, \Iterator, \Countable
 {
     public function add(File $file): self;
 
