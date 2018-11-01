@@ -92,7 +92,7 @@ class FilesystemAdapterTest extends TestCase
         $a->add($d);
         $d = $d->remove('bar');
         $a->add($d);
-        $this->assertSame(2, $d->recordedEvents()->count());
+        $this->assertSame(2, $d->modifications()->count());
         $a = new FilesystemAdapter('/tmp');
         $this->assertFalse($a->get('foo')->has('bar'));
         $a->remove('foo');
@@ -108,7 +108,7 @@ class FilesystemAdapterTest extends TestCase
         $d = $d->remove('bar');
         $a->add($d);
         $a->add($d);
-        $this->assertSame(2, $d->recordedEvents()->count());
+        $this->assertSame(2, $d->modifications()->count());
         $a = new FilesystemAdapter('/tmp');
         $this->assertFalse($a->get('foo')->has('bar'));
         $a->remove('foo');

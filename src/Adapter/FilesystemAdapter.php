@@ -128,7 +128,7 @@ class FilesystemAdapter implements Adapter
 
             $this->filesystem->mkdir($folder);
             $file
-                ->recordedEvents()
+                ->modifications()
                 ->foreach(function($event) use ($folder) {
                     if ($this->handledEvents->contains($event)) {
                         return;
