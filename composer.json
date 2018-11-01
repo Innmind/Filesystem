@@ -15,7 +15,7 @@
         "issues": "http://github.com/Innmind/filesystem/issues"
     },
     "require": {
-        "php": "~7.1",
+        "php": "~7.2",
         "innmind/immutable": "~2.10",
         "symfony/filesystem": "^3.0|~4.0",
         "innmind/event-bus": "~3.0",
