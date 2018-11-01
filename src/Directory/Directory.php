@@ -18,7 +18,7 @@ use Innmind\Immutable\{
     Map,
     Str,
     StreamInterface,
-    Stream,
+    Stream
 };
 
 class Directory implements DirectoryInterface
