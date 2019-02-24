@@ -27,6 +27,7 @@ use Symfony\Component\{
 
 class FilesystemAdapter implements Adapter
 {
+    private const INVALID_FILES = ['.', '..'];
     private $path;
     private $filesystem;
     private $files;
@@ -71,6 +72,10 @@ class FilesystemAdapter implements Adapter
      */
     public function has(string $file): bool
     {
+        if (\in_array($file, self::INVALID_FILES, true)) {
+            return false;
+        }
+
         return $this->filesystem->exists($this->path.'/'.$file);
     }
 
@@ -191,6 +196,10 @@ class FilesystemAdapter implements Adapter
                     $handle = opendir($folder);
 
                     while (($name = readdir($handle)) !== false) {
+                        if (\in_array($name, self::INVALID_FILES, true)) {
+                            continue;
+                        }
+
                         yield $this->open($folder, $name);
                     }
 

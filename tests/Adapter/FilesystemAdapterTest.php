@@ -10,7 +10,8 @@ use Innmind\Filesystem\{
     File as FileInterface,
     Directory\Directory,
     Stream\StringStream,
-    MediaType\NullMediaType
+    MediaType\NullMediaType,
+    Exception\FileNotFound
 };
 use Innmind\Immutable\MapInterface;
 use PHPUnit\Framework\TestCase;
@@ -166,5 +167,20 @@ class FilesystemAdapterTest extends TestCase
             NullMediaType::class,
             $adapter->get('bar')->mediaType()
         );
+    }
+
+    public function testDotPseudoFilesAreNotListedInDirectory()
+    {
+        @mkdir('/tmp/test');
+        $adapter = new FilesystemAdapter('/tmp');
+
+        $this->assertFalse($adapter->get('test')->has('.'));
+        $this->assertFalse($adapter->get('test')->has('..'));
+        $this->assertFalse($adapter->has('.'));
+        $this->assertFalse($adapter->has('..'));
+
+        $this->expectException(FileNotFound::class);
+
+        $adapter->get('..');
     }
 }
