@@ -15,8 +15,8 @@ final class Hashed implements Name
 
     public function __construct(Name $name)
     {
-        $extension = pathinfo((string) $name, PATHINFO_EXTENSION);
-        $hash = Str::of(sha1(pathinfo((string) $name, PATHINFO_BASENAME)));
+        $extension = \pathinfo((string) $name, PATHINFO_EXTENSION);
+        $hash = Str::of(\sha1(\pathinfo((string) $name, PATHINFO_BASENAME)));
 
         $this->first = (string) $hash->substring(0, 2);
         $this->second = (string) $hash->substring(2, 2);

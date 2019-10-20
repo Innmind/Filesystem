@@ -168,10 +168,10 @@ class FilesystemAdapter implements Adapter
 
         $stream = $file->content();
         $stream->rewind();
-        $handle = fopen($path, 'w');
+        $handle = \fopen($path, 'w');
 
         while (!$stream->end()) {
-            fwrite($handle, (string) $stream->read(8192));
+            \fwrite($handle, (string) $stream->read(8192));
         }
 
         $this->files = $this->files->put($path, $file);
@@ -189,11 +189,11 @@ class FilesystemAdapter implements Adapter
     {
         $path = $folder.'/'.$file;
 
-        if (is_dir($path)) {
+        if (\is_dir($path)) {
             $object = new Directory\Directory(
                 $file,
                 (function($folder) {
-                    $handle = opendir($folder);
+                    $handle = \opendir($folder);
 
                     while (($name = readdir($handle)) !== false) {
                         if (\in_array($name, self::INVALID_FILES, true)) {
@@ -203,12 +203,12 @@ class FilesystemAdapter implements Adapter
                         yield $this->open($folder, $name);
                     }
 
-                    closedir($handle);
+                    \closedir($handle);
                 })($path)
             );
         } else {
             try {
-                $mediaType = MediaType::fromString(mime_content_type($path));
+                $mediaType = MediaType::of(\mime_content_type($path));
             } catch (InvalidMediaTypeString $e) {
                 $mediaType = new NullMediaType;
             }

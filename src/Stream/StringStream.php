@@ -18,8 +18,8 @@ final class StringStream implements Readable
 
     public function __construct(string $content)
     {
-        $resource = fopen('php://temp', 'r+');
-        fwrite($resource, $content);
+        $resource = \fopen('php://temp', 'r+');
+        \fwrite($resource, $content);
 
         $this->stream = new Readable\Stream($resource);
     }

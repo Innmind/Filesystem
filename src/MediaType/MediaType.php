@@ -36,7 +36,7 @@ final class MediaType implements MediaTypeInterface
             (string) $parameters->keyType() !== 'string' ||
             (string) $parameters->valueType() !== Parameter::class
         ) {
-            throw new \TypeError(sprintf(
+            throw new \TypeError(\sprintf(
                 'Argument 4 must be of type MapInterface<string, %s>',
                 Parameter::class
             ));
@@ -119,10 +119,10 @@ final class MediaType implements MediaTypeInterface
      *
      * @return self
      */
-    public static function fromString(string $string): self
+    public static function of(string $string): self
     {
         $string = new Str($string);
-        $pattern = sprintf(
+        $pattern = \sprintf(
             '~%s/[\w\-.]+(\+\w+)?([;,] [\w\-.]+=[\w\-.]+)?~',
             self::topLevels()->join('|')
         );
@@ -166,5 +166,14 @@ final class MediaType implements MediaTypeInterface
             (string) $suffix,
             $params
         );
+    }
+
+    /**
+     * @deprecated
+     * @see self::of()
+     */
+    public static function fromString(string $string): self
+    {
+        return self::of($string);
     }
 }

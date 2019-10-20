@@ -160,6 +160,11 @@ class FilesystemAdapterTest extends TestCase
 
     public function testFallbackToNullMediaTypeWhenDetectedWhenIsNotAnOfficialOne()
     {
+        if (\PHP_MAJOR_VERSION === 7 && \PHP_MINOR_VERSION === 4) {
+            // php 7.4 correctly reads the media type of the file
+            return;
+        }
+
         file_put_contents('/tmp/test/bar', '');
         $adapter = new FilesystemAdapter('/tmp/test');
 
