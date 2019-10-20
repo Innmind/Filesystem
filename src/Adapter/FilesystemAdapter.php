@@ -208,7 +208,7 @@ class FilesystemAdapter implements Adapter
             );
         } else {
             try {
-                $mediaType = MediaType::fromString(mime_content_type($path));
+                $mediaType = MediaType::of(mime_content_type($path));
             } catch (InvalidMediaTypeString $e) {
                 $mediaType = new NullMediaType;
             }
