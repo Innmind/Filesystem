@@ -119,7 +119,7 @@ final class MediaType implements MediaTypeInterface
      *
      * @return self
      */
-    public static function fromString(string $string): self
+    public static function of(string $string): self
     {
         $string = new Str($string);
         $pattern = sprintf(
@@ -166,5 +166,14 @@ final class MediaType implements MediaTypeInterface
             (string) $suffix,
             $params
         );
+    }
+
+    /**
+     * @deprecated
+     * @see self::of()
+     */
+    public static function fromString(string $string): self
+    {
+        return self::of($string);
     }
 }
