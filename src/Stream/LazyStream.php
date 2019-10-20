@@ -98,7 +98,7 @@ final class LazyStream implements Readable
     private function stream()
     {
         if (!$this->isInitialized()) {
-            $this->stream = new Readable\Stream(fopen($this->path, 'r'));
+            $this->stream = new Readable\Stream(\fopen($this->path, 'r'));
         }
 
         return $this->stream;

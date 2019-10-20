@@ -28,7 +28,7 @@ final class Parameter implements ParameterInterface
 
     public function __toString(): string
     {
-        return sprintf(
+        return \sprintf(
             '%s=%s',
             $this->name,
             $this->value
