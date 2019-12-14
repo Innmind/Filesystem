@@ -75,15 +75,11 @@ class LazyAdapterTest extends TestCase
         $l->get('foo');
     }
 
-    /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFound
-     * @expectedExceptionMessage foo
-     */
-    public function testThrowWhenRemovingUnknwonFile()
+    public function testRemovingUnknwonFileDoesntThrow()
     {
         $l = new LazyAdapter(new MemoryAdapter);
 
-        $l->remove('foo');
+        $this->assertNull($l->remove('foo'));
     }
 
     public function testAll()

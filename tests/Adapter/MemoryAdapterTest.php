@@ -41,13 +41,9 @@ class MemoryAdapterTest extends TestCase
         (new MemoryAdapter)->get('foo');
     }
 
-    /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFound
-     * @expectedExceptionMessage foo
-     */
-    public function testThrowWhenRemovingUnknownFile()
+    public function testRemovingUnknownFileDoesntThrow()
     {
-        (new MemoryAdapter)->remove('foo');
+        $this->assertNull((new MemoryAdapter)->remove('foo'));
     }
 
     public function testAll()

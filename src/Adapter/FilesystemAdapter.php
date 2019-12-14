@@ -80,10 +80,6 @@ class FilesystemAdapter implements Adapter
      */
     public function remove(string $file): void
     {
-        if (!$this->contains($file)) {
-            throw new FileNotFound($file);
-        }
-
         $this->filesystem->remove($this->path.'/'.$file);
     }
 

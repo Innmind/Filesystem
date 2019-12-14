@@ -39,13 +39,9 @@ class FilesystemAdapterTest extends TestCase
         (new FilesystemAdapter('/tmp'))->get('foo');
     }
 
-    /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFound
-     * @expectedExceptionMessage foo
-     */
-    public function testThrowWhenRemovingUnknownFile()
+    public function testRemovingUnknownFileDoesntThrow()
     {
-        (new FilesystemAdapter('/tmp'))->remove('foo');
+        $this->assertNull((new FilesystemAdapter('/tmp'))->remove('foo'));
     }
 
     public function testCreateNestedStructure()

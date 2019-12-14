@@ -76,10 +76,6 @@ class LazyAdapter implements LazyAdapterInterface
      */
     public function remove(string $file): void
     {
-        if (!$this->contains($file)) {
-            throw new FileNotFound($file);
-        }
-
         $this->toRemove = $this->toRemove->add($file);
         $this->toAdd = $this->toAdd->remove($file);
     }

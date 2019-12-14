@@ -114,7 +114,7 @@ final class HashedNameAdapter implements Adapter
     public function remove(string $file): void
     {
         if (!$this->contains($file)) {
-            throw new FileNotFound($file);
+            return;
         }
 
         $name = new Hashed(new Name($file));

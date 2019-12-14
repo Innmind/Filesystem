@@ -112,15 +112,12 @@ class HashedNameAdapterTest extends TestCase
         $this->assertInstanceOf(Directory::class, $files->get(1));
     }
 
-    public function testThrowWhenRemovingUnknownFile()
+    public function testRemovingUnknownFileDoesntThrow()
     {
         $filesystem = new HashedNameAdapter(
             new FilesystemAdapter('/tmp/hashed')
         );
 
-        $this->expectException(FileNotFound::class);
-        $this->expectExceptionMessage('foo');
-
-        $filesystem->remove('foo');
+        $this->assertNull($filesystem->remove('foo'));
     }
 }

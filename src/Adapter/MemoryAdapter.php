@@ -55,10 +55,6 @@ class MemoryAdapter implements Adapter
      */
     public function remove(string $file): void
     {
-        if (!$this->contains($file)) {
-            throw new FileNotFound($file);
-        }
-
         $this->files = $this->files->remove($file);
     }
 
