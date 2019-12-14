@@ -13,7 +13,7 @@ use Innmind\Filesystem\{
     MediaType\NullMediaType,
     Exception\FileNotFound
 };
-use Innmind\Immutable\MapInterface;
+use Innmind\Immutable\Map;
 use PHPUnit\Framework\TestCase;
 
 class FilesystemAdapterTest extends TestCase
@@ -61,11 +61,11 @@ class FilesystemAdapterTest extends TestCase
         $adapter->add($directory);
         $this->assertSame(
             '# Foo',
-            (string) $adapter->get('foo')->get('foo.md')->content()
+            $adapter->get('foo')->get('foo.md')->content()->toString()
         );
         $this->assertSame(
             '# Bar',
-            (string) $adapter->get('foo')->get('bar')->get('bar.md')->content()
+            $adapter->get('foo')->get('bar')->get('bar.md')->content()->toString()
         );
 
         $adapter = new FilesystemAdapter('/tmp');
@@ -73,12 +73,12 @@ class FilesystemAdapterTest extends TestCase
         $adapter->get('foo');
         $this->assertSame(
             '# Foo',
-            (string) $adapter->get('foo')->get('foo.md')->content()
+            $adapter->get('foo')->get('foo.md')->content()->toString()
         );
         $adapter->get('foo')->get('bar');
         $this->assertSame(
             '# Bar',
-            (string) $adapter->get('foo')->get('bar')->get('bar.md')->content()
+            $adapter->get('foo')->get('bar')->get('bar.md')->content()->toString()
         );
 
         $adapter->remove('foo');
@@ -142,15 +142,15 @@ class FilesystemAdapterTest extends TestCase
         file_put_contents('/tmp/test/baz/foobar', 'baz');
 
         $all = $adapter->all();
-        $this->assertInstanceOf(MapInterface::class, $all);
+        $this->assertInstanceOf(Map::class, $all);
         $this->assertSame('string', (string) $all->keyType());
         $this->assertSame(FileInterface::class, (string) $all->valueType());
         $this->assertCount(3, $all);
         $this->assertTrue($all->contains('foo'));
         $this->assertTrue($all->contains('bar'));
         $this->assertTrue($all->contains('baz'));
-        $this->assertSame('foo', (string) $adapter->get('foo')->content());
-        $this->assertSame('bar', (string) $adapter->get('bar')->content());
+        $this->assertSame('foo', $adapter->get('foo')->content()->toString());
+        $this->assertSame('bar', $adapter->get('bar')->content()->toString());
         $this->assertInstanceOf(Directory::class, $adapter->get('baz'));
         $adapter
             ->remove('foo')

@@ -9,12 +9,11 @@ use Innmind\Filesystem\{
     Exception\InvalidMediaTypeString
 };
 use Innmind\Immutable\{
-    MapInterface,
-    SetInterface,
+    Map,
     Set,
     Str,
-    Map
 };
+use function Innmind\Immutable\join;
 
 final class MediaType implements MediaTypeInterface
 {
@@ -28,16 +27,16 @@ final class MediaType implements MediaTypeInterface
         string $topLevel,
         string $subType,
         string $suffix = '',
-        MapInterface $parameters = null
+        Map $parameters = null
     ) {
-        $parameters = $parameters ?? new Map('string', Parameter::class);
+        $parameters = $parameters ?? Map::of('string', Parameter::class);
 
         if (
             (string) $parameters->keyType() !== 'string' ||
             (string) $parameters->valueType() !== Parameter::class
         ) {
             throw new \TypeError(\sprintf(
-                'Argument 4 must be of type MapInterface<string, %s>',
+                'Argument 4 must be of type Map<string, %s>',
                 Parameter::class
             ));
         }
@@ -70,33 +69,39 @@ final class MediaType implements MediaTypeInterface
     /**
      * {@inheritdoc}
      */
-    public function parameters(): MapInterface
+    public function parameters(): Map
     {
         return $this->parameters;
     }
 
     public function __toString(): string
     {
-        $parameters = $this->parameters->join(', ');
+        $parameters = join(
+            ', ',
+            $this
+                ->parameters
+                ->values()
+                ->toSequenceOf('string', fn($param) => yield (string) $param),
+        );
 
         return sprintf(
             '%s/%s%s%s',
             $this->topLevel,
             $this->subType,
             !empty($this->suffix) ? '+'.$this->suffix : '',
-            $parameters->length() > 0 ? '; '.$parameters : ''
+            $parameters->length() > 0 ? '; '.$parameters->toString() : ''
         );
     }
 
     /**
      * List of allowed top levels
      *
-     * @return SetInterface<string>
+     * @return Set<string>
      */
-    public static function topLevels(): SetInterface
+    public static function topLevels(): Set
     {
         if (self::$topLevels === null) {
-            self::$topLevels = (new Set('string'))
+            self::$topLevels = Set::of('string')
                 ->add('application')
                 ->add('audio')
                 ->add('font')
@@ -121,10 +126,10 @@ final class MediaType implements MediaTypeInterface
      */
     public static function of(string $string): self
     {
-        $string = new Str($string);
+        $string = Str::of($string);
         $pattern = \sprintf(
             '~%s/[\w\-.]+(\+\w+)?([;,] [\w\-.]+=[\w\-.]+)?~',
-            self::topLevels()->join('|')
+            join('|', self::topLevels())->toString()
         );
 
         if (!$string->matches($pattern)) {
@@ -136,13 +141,13 @@ final class MediaType implements MediaTypeInterface
             ->get(0)
             ->capture(sprintf(
                 '~^(?<topLevel>%s)/(?<subType>[\w\-.]+)(\+(?<suffix>\w+))?$~',
-                self::topLevels()->join('|')
+                join('|', self::topLevels())->toString()
             ));
 
         $topLevel = $matches->get('topLevel');
         $subType = $matches->get('subType');
-        $suffix = $matches->contains('suffix') ? $matches->get('suffix') : '';
-        $params = new Map('string', Parameter::class);
+        $suffix = $matches->contains('suffix') ? $matches->get('suffix') : Str::of('');
+        $params = Map::of('string', Parameter::class);
 
         $splits
             ->drop(1)
@@ -152,18 +157,18 @@ final class MediaType implements MediaTypeInterface
                 );
 
                 $params = $params->put(
-                    (string) $matches->get('key'),
+                    $matches->get('key')->toString(),
                     new Parameter\Parameter(
-                        (string) $matches->get('key'),
-                        (string) $matches->get('value')
+                        $matches->get('key')->toString(),
+                        $matches->get('value')->toString()
                     )
                 );
             });
 
         return new self(
-            (string) $topLevel,
-            (string) $subType,
-            (string) $suffix,
+            $topLevel->toString(),
+            $subType->toString(),
+            $suffix->toString(),
             $params
         );
     }

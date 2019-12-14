@@ -129,7 +129,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
             ->expects($this->once())
             ->method('all')
             ->willReturn(
-                $expected = (new Map('string', File::class))
+                $expected = Map::of('string', File::class)
                     ->put('foo', $file)
             );
 

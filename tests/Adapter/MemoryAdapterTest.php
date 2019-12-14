@@ -11,7 +11,8 @@ use Innmind\Filesystem\{
     File\File,
     Stream\StringStream
 };
-use Innmind\Immutable\MapInterface;
+use Innmind\Immutable\Map;
+use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 
 class MemoryAdapterTest extends TestCase
@@ -63,16 +64,16 @@ class MemoryAdapterTest extends TestCase
         ));
 
         $all = $adapter->all();
-        $this->assertInstanceOf(MapInterface::class, $all);
+        $this->assertInstanceOf(Map::class, $all);
         $this->assertSame('string', (string) $all->keyType());
         $this->assertSame(FileInterface::class, (string) $all->valueType());
         $this->assertSame(
             ['foo', 'bar'],
-            $all->keys()->toPrimitive()
+            unwrap($all->keys())
         );
         $this->assertSame(
             [$foo, $bar],
-            $all->values()->toPrimitive()
+            unwrap($all->values())
         );
     }
 }

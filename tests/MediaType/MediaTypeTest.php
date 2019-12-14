@@ -20,7 +20,7 @@ class MediaTypeTest extends TestCase
             'application',
             'json',
             'whatever',
-            $p = (new Map('string', ParameterInterface::class))
+            $p = Map::of('string', ParameterInterface::class)
                 ->put('charset', new Parameter('charset', 'UTF-8'))
         );
 
@@ -45,11 +45,11 @@ class MediaTypeTest extends TestCase
 
     /**
      * @expectedException TypeError
-     * @expectedExceptionMessage Argument 4 must be of type MapInterface<string, Innmind\Filesystem\MediaType\Parameter>
+     * @expectedExceptionMessage Argument 4 must be of type Map<string, Innmind\Filesystem\MediaType\Parameter>
      */
     public function testThrowWhenInvalidListOfParameters()
     {
-        new MediaType('application', 'foo', '', new Map('int', 'int'));
+        new MediaType('application', 'foo', '', Map::of('int', 'int'));
     }
 
     /**

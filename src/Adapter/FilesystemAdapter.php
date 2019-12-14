@@ -18,7 +18,6 @@ use Innmind\Filesystem\{
 use Innmind\Immutable\{
     Map,
     Set,
-    MapInterface
 };
 use Symfony\Component\{
     Filesystem\Filesystem,
@@ -37,8 +36,8 @@ class FilesystemAdapter implements Adapter
     {
         $this->path = $path;
         $this->filesystem = new Filesystem;
-        $this->files = new Map('string', File::class);
-        $this->handledEvents = new Set('object');
+        $this->files = Map::of('string', File::class);
+        $this->handledEvents = Set::objects();
 
         if (!$this->filesystem->exists($this->path)) {
             $this->filesystem->mkdir($this->path);
@@ -96,10 +95,10 @@ class FilesystemAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function all(): MapInterface
+    public function all(): Map
     {
         $files = Finder::create()->depth('== 0')->in($this->path);
-        $map = new Map('string', File::class);
+        $map = Map::of('string', File::class);
 
         foreach ($files as $file) {
             $map = $map->put(
@@ -171,7 +170,7 @@ class FilesystemAdapter implements Adapter
         $handle = \fopen($path, 'w');
 
         while (!$stream->end()) {
-            \fwrite($handle, (string) $stream->read(8192));
+            \fwrite($handle, $stream->read(8192)->toString());
         }
 
         $this->files = $this->files->put($path, $file);

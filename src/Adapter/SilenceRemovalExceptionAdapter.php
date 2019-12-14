@@ -8,7 +8,7 @@ use Innmind\Filesystem\{
     File,
     Exception\FileNotFound
 };
-use Innmind\Immutable\MapInterface;
+use Innmind\Immutable\Map;
 
 final class SilenceRemovalExceptionAdapter implements Adapter
 {
@@ -62,7 +62,7 @@ final class SilenceRemovalExceptionAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function all(): MapInterface
+    public function all(): Map
     {
         return $this->adapter->all();
     }

@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Immutable\StreamInterface;
+use Innmind\Immutable\Sequence;
 
 interface Directory extends File, \Iterator, \Countable
 {
@@ -22,7 +22,7 @@ interface Directory extends File, \Iterator, \Countable
     public function replaceAt(string $path, File $file): self;
 
     /**
-     * @return StreamInterface<object>
+     * @return Sequence<object>
      */
-    public function modifications(): StreamInterface;
+    public function modifications(): Sequence;
 }

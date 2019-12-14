@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Immutable\MapInterface;
+use Innmind\Immutable\Map;
 
 /**
  * Layer between value objects and concrete implementation
@@ -24,7 +24,7 @@ interface Adapter
     public function remove(string $file): self;
 
     /**
-     * @return MapInterface<string, File>
+     * @return Map<string, File>
      */
-    public function all(): MapInterface;
+    public function all(): Map;
 }

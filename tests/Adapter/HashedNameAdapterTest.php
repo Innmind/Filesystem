@@ -13,7 +13,7 @@ use Innmind\Filesystem\{
     Exception\LogicException,
     Exception\FileNotFound
 };
-use Innmind\Immutable\MapInterface;
+use Innmind\Immutable\Map;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 
@@ -59,6 +59,7 @@ class HashedNameAdapterTest extends TestCase
                 ->get('ee')
                 ->get('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33')
                 ->content()
+                ->toString()
         );
 
         $file = new File\File('foo', new StringStream('content bis'));
@@ -71,6 +72,7 @@ class HashedNameAdapterTest extends TestCase
                 ->get('ee')
                 ->get('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33')
                 ->content()
+                ->toString()
         );
 
         $this->assertSame($filesystem, $filesystem->remove('foo'));
@@ -100,14 +102,14 @@ class HashedNameAdapterTest extends TestCase
 
         $all = $filesystem->all();
 
-        $this->assertInstanceOf(MapInterface::class, $all);
+        $this->assertInstanceOf(Map::class, $all);
         $this->assertSame('string', (string) $all->keyType());
         $this->assertSame(File::class, (string) $all->valueType());
         $this->assertCount(2, $all);
         //as described in the method comment we return the inner structure instead of the files
-        $this->assertInstanceOf(Directory::class, $all->current());
-        $all->next();
-        $this->assertInstanceOf(Directory::class, $all->current());
+        $files = $all->values();
+        $this->assertInstanceOf(Directory::class, $files->get(0));
+        $this->assertInstanceOf(Directory::class, $files->get(1));
     }
 
     public function testThrowWhenRemovingUnknownFile()

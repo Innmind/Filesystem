@@ -33,19 +33,19 @@ class LazyStreamTest extends TestCase
 
     public function testDoesntInitializeWhenRewindingUninitializedStream()
     {
-        $this->assertSame($this->stream, $this->stream->rewind());
+        $this->assertNull($this->stream->rewind());
         $this->assertFalse($this->stream->isInitialized());
     }
 
     public function testCast()
     {
-        $this->assertSame('lorem ipsum dolor', (string) $this->stream);
+        $this->assertSame('lorem ipsum dolor', $this->stream->toString());
         $this->assertTrue($this->stream->isInitialized());
     }
 
     public function testClose()
     {
-        $this->assertSame($this->stream, $this->stream->close());
+        $this->assertNull($this->stream->close());
         $this->assertTrue($this->stream->isInitialized());
     }
 
@@ -75,13 +75,13 @@ class LazyStreamTest extends TestCase
 
     public function testSeek()
     {
-        $this->assertSame($this->stream, $this->stream->seek(new Position(3)));
+        $this->assertNull($this->stream->seek(new Position(3)));
         $this->assertTrue($this->stream->isInitialized());
     }
 
     public function testRead()
     {
-        $this->assertSame('lorem', (string) $this->stream->read(5));
+        $this->assertSame('lorem', $this->stream->read(5)->toString());
         $this->assertTrue($this->stream->isInitialized());
     }
 }

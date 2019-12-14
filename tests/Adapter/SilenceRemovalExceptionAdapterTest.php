@@ -9,7 +9,7 @@ use Innmind\Filesystem\{
     File,
     Exception\FileNotFound
 };
-use Innmind\Immutable\MapInterface;
+use Innmind\Immutable\Map;
 use PHPUnit\Framework\TestCase;
 
 class SilenceRemovalExceptionAdapterTest extends TestCase
@@ -111,7 +111,7 @@ class SilenceRemovalExceptionAdapterTest extends TestCase
             ->expects($this->once())
             ->method('all')
             ->willReturn(
-                $all = $this->createMock(MapInterface::class)
+                $all = Map::of('string', File::class)
             );
 
         $this->assertSame($all, $adapter->all());

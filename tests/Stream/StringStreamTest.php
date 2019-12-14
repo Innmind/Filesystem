@@ -20,14 +20,14 @@ class StringStreamTest extends TestCase
         $this->assertTrue($stream->knowsSize());
         $this->assertSame(17, $stream->size()->toInt());
         $this->assertSame(0, $stream->position()->toInt());
-        $this->assertSame($stream, $stream->seek(new Position(6)));
-        $this->assertSame('ipsum', (string) $stream->read(5));
+        $this->assertNull($stream->seek(new Position(6)));
+        $this->assertSame('ipsum', $stream->read(5)->toString());
         $this->assertFalse($stream->end());
         $stream->read(6);
-        $this->assertSame($stream, $stream->rewind());
+        $this->assertNull($stream->rewind());
         $this->assertSame(0, $stream->position()->toInt());
         $this->assertFalse($stream->end());
-        $this->assertSame($lorem, (string) $stream);
-        $this->assertSame($stream, $stream->close());
+        $this->assertSame($lorem, $stream->toString());
+        $this->assertNull($stream->close());
     }
 }

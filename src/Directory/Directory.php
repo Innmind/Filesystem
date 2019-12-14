@@ -14,32 +14,32 @@ use Innmind\Filesystem\{
     MediaType
 };
 use Innmind\Stream\Readable;
+use Innmind\
 use Innmind\Immutable\{
     Map,
     Str,
-    StreamInterface,
-    Stream
+    Sequence,
 };
 
 class Directory implements DirectoryInterface
 {
     private Name $name;
     private ?Readable $content = null;
-    private Map $files;
+    private array $files;
     private ?\Generator $generator;
     private MediaType $mediaType;
-    private Stream $modifications;
+    private Sequence $modifications;
 
     public function __construct(string $name, \Generator $generator = null)
     {
         $this->name = new Name\Name($name);
         $this->generator = $generator;
-        $this->files = new Map('string', File::class);
+        $this->files = [];
         $this->mediaType = new MediaType\MediaType(
             'text',
             'directory'
         );
-        $this->modifications = Stream::of('object');
+        $this->modifications = Sequence::objects();
     }
 
     /**
@@ -61,10 +61,7 @@ class Directory implements DirectoryInterface
 
         $this->loadDirectory();
         $this->content = new StringStream(
-            (string) $this
-                ->files
-                ->keys()
-                ->join("\n")
+            \implode("\n", \array_keys($this->files))
         );
         $this->rewind();
 
@@ -84,10 +81,7 @@ class Directory implements DirectoryInterface
         $this->loadDirectory();
         $directory = clone $this;
         $directory->content = null;
-        $directory->files = $this->files->put(
-            (string) $file->name(),
-            $file
-        );
+        $directory->files[(string) $file->name()] = $file;
         $directory->record(new FileWasAdded($file));
 
         return $directory;
@@ -102,7 +96,7 @@ class Directory implements DirectoryInterface
             throw new FileNotFound;
         }
 
-        return $this->files->get($name);
+        return $this->files[$name];
     }
 
     /**
@@ -112,7 +106,7 @@ class Directory implements DirectoryInterface
     {
         $this->loadDirectory();
 
-        return $this->files->contains($name);
+        return \array_key_exists($name, $this->files);
     }
 
     /**
@@ -126,7 +120,7 @@ class Directory implements DirectoryInterface
 
         $directory = clone $this;
         $directory->content = null;
-        $directory->files = $this->files->remove($name);
+        unset($directory->files[$name]);
         $directory->record(new FileWasRemoved($name));
 
         return $directory;
@@ -137,7 +131,7 @@ class Directory implements DirectoryInterface
      */
     public function replaceAt(string $path, File $file): DirectoryInterface
     {
-        $pieces = (new Str($path))->split('/');
+        $pieces = Str::of($path)->split('/');
         $directory = $this;
 
         while ($pieces->count() > 0) {
@@ -145,7 +139,7 @@ class Directory implements DirectoryInterface
                 ->reduce(
                     $directory,
                     function(DirectoryInterface $parent, Str $seek): DirectoryInterface {
-                        return $parent->get((string) $seek);
+                        return $parent->get($seek->toString());
                     }
                 )
                 ->add($target ?? $file);
@@ -158,7 +152,7 @@ class Directory implements DirectoryInterface
     /**
      * {@inheritdoc}
      */
-    public function modifications(): StreamInterface
+    public function modifications(): Sequence
     {
         return $this->modifications;
     }
@@ -170,7 +164,7 @@ class Directory implements DirectoryInterface
     {
         $this->loadDirectory();
 
-        return $this->files->current();
+        return \current($this->files);
     }
 
     /**
@@ -187,7 +181,7 @@ class Directory implements DirectoryInterface
     public function next()
     {
         $this->loadDirectory();
-        $this->files->next();
+        \next($this->files);
     }
 
     /**
@@ -196,7 +190,7 @@ class Directory implements DirectoryInterface
     public function rewind()
     {
         $this->loadDirectory();
-        $this->files->rewind();
+        \reset($this->files);
     }
 
     /**
@@ -206,7 +200,7 @@ class Directory implements DirectoryInterface
     {
         $this->loadDirectory();
 
-        return $this->files->valid();
+        return \key($this->files) !== null;
     }
 
     /**
@@ -216,7 +210,7 @@ class Directory implements DirectoryInterface
     {
         $this->loadDirectory();
 
-        return $this->files->size();
+        return \count($this->files);
     }
 
     /**
@@ -231,10 +225,7 @@ class Directory implements DirectoryInterface
         }
 
         foreach ($this->generator as $file) {
-            $this->files = $this->files->put(
-                (string) $file->name(),
-                $file
-            );
+            $this->files[(string) $file->name()] = $file;
         }
 
         $this->generator = null;

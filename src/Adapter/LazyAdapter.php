@@ -12,7 +12,6 @@ use Innmind\Filesystem\{
 use Innmind\Immutable\{
     Map,
     Set,
-    MapInterface
 };
 
 class LazyAdapter implements LazyAdapterInterface
@@ -24,8 +23,8 @@ class LazyAdapter implements LazyAdapterInterface
     public function __construct(Adapter $adapter)
     {
         $this->adapter = $adapter;
-        $this->toAdd = new Map('string', File::class);
-        $this->toRemove = new Set('string');
+        $this->toAdd = Map::of('string', File::class);
+        $this->toRemove = Set::strings();
     }
 
     /**
@@ -92,7 +91,7 @@ class LazyAdapter implements LazyAdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function all(): MapInterface
+    public function all(): Map
     {
         return $this
             ->adapter
@@ -108,12 +107,12 @@ class LazyAdapter implements LazyAdapterInterface
      */
     public function persist(): LazyAdapterInterface
     {
-        $this->toAdd = $this
+        $this
             ->toAdd
             ->foreach(function(string $name, File $file) {
                 $this->adapter->add($file);
-            })
-            ->clear();
+            });
+        $this->toAdd = $this->toAdd->clear();
         $this
             ->toRemove
             ->foreach(function(string $name) {
@@ -121,7 +120,7 @@ class LazyAdapter implements LazyAdapterInterface
                     $this->adapter->remove($name);
                 }
             });
-        $this->toRemove = new Set('string');
+        $this->toRemove = Set::strings();
 
         return $this;
     }

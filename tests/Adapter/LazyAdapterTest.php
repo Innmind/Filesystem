@@ -12,7 +12,7 @@ use Innmind\Filesystem\{
     File\File,
     Stream\StringStream
 };
-use Innmind\Immutable\MapInterface;
+use Innmind\Immutable\Map;
 use PHPUnit\Framework\TestCase;
 
 class LazyAdapterTest extends TestCase
@@ -98,7 +98,7 @@ class LazyAdapterTest extends TestCase
         $lazy->add($bar = new File('bar', new StringStream('')));
 
         $all = $lazy->all();
-        $this->assertInstanceOf(MapInterface::class, $all);
+        $this->assertInstanceOf(Map::class, $all);
         $this->assertSame('string', (string) $all->keyType());
         $this->assertSame(FileInterface::class, (string) $all->valueType());
         $this->assertCount(1, $all);

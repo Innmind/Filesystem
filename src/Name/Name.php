@@ -15,7 +15,7 @@ class Name implements NameInterface
 
     public function __construct(string $name)
     {
-        if ((new Str($name))->matches('|/|')) {
+        if (Str::of($name)->matches('|/|')) {
             throw new DomainException(
                 'A file name can\'t contain a slash'
             );

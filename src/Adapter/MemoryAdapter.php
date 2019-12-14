@@ -8,10 +8,7 @@ use Innmind\Filesystem\{
     File,
     Exception\FileNotFound
 };
-use Innmind\Immutable\{
-    Map,
-    MapInterface
-};
+use Innmind\Immutable\Map;
 
 class MemoryAdapter implements Adapter
 {
@@ -19,7 +16,7 @@ class MemoryAdapter implements Adapter
 
     public function __construct()
     {
-        $this->files = new Map('string', File::class);
+        $this->files = Map::of('string', File::class);
     }
 
     /**
@@ -72,7 +69,7 @@ class MemoryAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function all(): MapInterface
+    public function all(): Map
     {
         return $this->files;
     }

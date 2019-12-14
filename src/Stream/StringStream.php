@@ -24,11 +24,9 @@ final class StringStream implements Readable
         $this->stream = new Readable\Stream($resource);
     }
 
-    public function close(): Stream
+    public function close(): void
     {
         $this->stream->close();
-
-        return $this;
     }
 
     public function closed(): bool
@@ -41,18 +39,14 @@ final class StringStream implements Readable
         return $this->stream->position();
     }
 
-    public function seek(Position $position, Mode $mode = null): Stream
+    public function seek(Position $position, Mode $mode = null): void
     {
         $this->stream->seek($position, $mode);
-
-        return $this;
     }
 
-    public function rewind(): Stream
+    public function rewind(): void
     {
         $this->stream->rewind();
-
-        return $this;
     }
 
     public function end(): bool
@@ -80,8 +74,8 @@ final class StringStream implements Readable
         return $this->stream->readLine();
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
-        return (string) $this->stream;
+        return $this->stream->toString();
     }
 }

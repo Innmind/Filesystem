@@ -18,14 +18,14 @@ class NullStreamTest extends TestCase
         $stream = new NullStream;
 
         $this->assertInstanceOf(Readable::class, $stream);
-        $this->assertSame('', (string) $stream);
-        $this->assertSame($stream, $stream->close());
+        $this->assertSame('', $stream->toString());
+        $this->assertNull($stream->close());
         $this->assertTrue($stream->knowsSize());
         $this->assertSame(0, $stream->size()->toInt());
         $this->assertSame(0, $stream->position()->toInt());
         $this->assertTrue($stream->end());
-        $this->assertSame($stream, $stream->rewind());
-        $this->assertSame('', (string) $stream->read(42));
+        $this->assertNull($stream->rewind());
+        $this->assertSame('', $stream->read(42)->toString());
         $this->expectException(PositionNotSeekable::class);
         $stream->seek(new Position(42));
     }

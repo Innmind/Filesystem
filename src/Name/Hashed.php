@@ -18,9 +18,9 @@ final class Hashed implements Name
         $extension = \pathinfo((string) $name, PATHINFO_EXTENSION);
         $hash = Str::of(\sha1(\pathinfo((string) $name, PATHINFO_BASENAME)));
 
-        $this->first = (string) $hash->substring(0, 2);
-        $this->second = (string) $hash->substring(2, 2);
-        $this->remaining = $hash->substring(4).($extension ? '.'.$extension : '');
+        $this->first = $hash->substring(0, 2)->toString();
+        $this->second = $hash->substring(2, 2)->toString();
+        $this->remaining = $hash->substring(4)->toString().($extension ? '.'.$extension : '');
         $this->original = (string) $name;
     }
 

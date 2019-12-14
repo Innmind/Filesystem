@@ -7,10 +7,7 @@ use Innmind\Filesystem\{
     Adapter,
     File
 };
-use Innmind\Immutable\{
-    MapInterface,
-    Map
-};
+use Innmind\Immutable\Map;
 
 final class CacheOpenedFilesAdapter implements Adapter
 {
@@ -20,7 +17,7 @@ final class CacheOpenedFilesAdapter implements Adapter
     public function __construct(Adapter $filesystem)
     {
         $this->filesystem = $filesystem;
-        $this->files = new Map('string', File::class);
+        $this->files = Map::of('string', File::class);
     }
 
     /**
@@ -81,7 +78,7 @@ final class CacheOpenedFilesAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function all(): MapInterface
+    public function all(): Map
     {
         $this->files = $this->filesystem->all();
 

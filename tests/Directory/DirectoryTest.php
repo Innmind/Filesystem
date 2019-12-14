@@ -21,7 +21,7 @@ class DirectoryTest extends TestCase
 
         $this->assertInstanceOf(DirectoryInterface::class, $d);
         $this->assertSame('foo', (string) $d->name());
-        $this->assertSame('', (string) $d->content());
+        $this->assertSame('', $d->content()->toString());
         $this->assertSame('text/directory', (string) $d->mediaType());
         $this->assertSame($d->mediaType(), $d->mediaType());
     }
@@ -39,15 +39,15 @@ class DirectoryTest extends TestCase
         $this->assertNotSame($d, $d2);
         $this->assertSame($d->name(), $d2->name());
         $this->assertNotSame($d->content(), $d2->content());
-        $this->assertSame('', (string) $d->content());
-        $this->assertSame('foo', (string) $d2->content());
+        $this->assertSame('', $d->content()->toString());
+        $this->assertSame('foo', $d2->content()->toString());
         $this->assertSame(0, $d->modifications()->count());
         $this->assertSame(1, $d2->modifications()->count());
         $this->assertInstanceOf(
             FileWasAdded::class,
-            $d2->modifications()->current()
+            $d2->modifications()->first()
         );
-        $this->assertSame($file, $d2->modifications()->current()->file());
+        $this->assertSame($file, $d2->modifications()->first()->file());
     }
 
     public function testGet()
@@ -87,8 +87,8 @@ class DirectoryTest extends TestCase
         $this->assertNotSame($d, $d2);
         $this->assertSame($d->name(), $d2->name());
         $this->assertNotSame($d->content(), $d2->content());
-        $this->assertSame('bar', (string) $d->content());
-        $this->assertSame('', (string) $d2->content());
+        $this->assertSame('bar', $d->content()->toString());
+        $this->assertSame('', $d2->content()->toString());
         $this->assertSame(1, $d->modifications()->count());
         $this->assertSame(2, $d2->modifications()->count());
         $this->assertInstanceOf(
@@ -154,7 +154,7 @@ class DirectoryTest extends TestCase
         $this->assertSame('foo', (string) $d->key());
         $this->assertSame(
             'foo' . "\n" . 'bar' . "\n" . 'foobar' . "\n" . 'sub',
-            (string) $d->content()
+            $d->content()->toString()
         );
     }
 
@@ -180,11 +180,11 @@ class DirectoryTest extends TestCase
         $this->assertNotSame($d, $d2);
         $this->assertSame(
             'baz',
-            (string) $d->get('foo')->get('bar')->get('baz')->get('baz.md')->content()
+            $d->get('foo')->get('bar')->get('baz')->get('baz.md')->content()->toString()
         );
         $this->assertSame(
             'updated',
-            (string) $d2->get('foo')->get('bar')->get('baz')->get('baz.md')->content()
+            $d2->get('foo')->get('bar')->get('baz')->get('baz.md')->content()->toString()
         );
     }
 }

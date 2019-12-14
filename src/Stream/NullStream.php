@@ -17,11 +17,9 @@ final class NullStream implements Readable
 {
     private bool $closed = false;
 
-    public function close(): Stream
+    public function close(): void
     {
         $this->closed = true;
-
-        return $this;
     }
 
     public function closed(): bool
@@ -34,14 +32,13 @@ final class NullStream implements Readable
         return new Position(0);
     }
 
-    public function seek(Position $position, Mode $mode = null): Stream
+    public function seek(Position $position, Mode $mode = null): void
     {
         throw new PositionNotSeekable;
     }
 
-    public function rewind(): Stream
+    public function rewind(): void
     {
-        return $this;
     }
 
     public function end(): bool
@@ -61,15 +58,15 @@ final class NullStream implements Readable
 
     public function read(int $length = null): Str
     {
-        return new Str('');
+        return Str::of('');
     }
 
     public function readLine(): Str
     {
-        return new Str('');
+        return Str::of('');
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return '';
     }
