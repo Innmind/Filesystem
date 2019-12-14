@@ -6,9 +6,9 @@ namespace Innmind\Filesystem\Tests\File;
 use Innmind\Filesystem\{
     File\File,
     File as FileInterface,
-    Stream\StringStream,
     Name,
 };
+use Innmind\Stream\Readable\Stream;
 use Innmind\MediaType\MediaType;
 use PHPUnit\Framework\TestCase;
 
@@ -16,7 +16,7 @@ class FileTest extends TestCase
 {
     public function testInterface()
     {
-        $f = new File('foo', $c = new StringStream('bar'));
+        $f = new File('foo', $c = Stream::ofContent('bar'));
 
         $this->assertInstanceOf(FileInterface::class, $f);
         $this->assertInstanceOf(Name::class, $f->name());
@@ -30,8 +30,8 @@ class FileTest extends TestCase
 
     public function testWithContent()
     {
-        $f = new File('foo', $c = new StringStream('bar'));
-        $f2 = $f->withContent($c2 = new StringStream('baz'));
+        $f = new File('foo', $c = Stream::ofContent('bar'));
+        $f2 = $f->withContent($c2 = Stream::ofContent('baz'));
 
         $this->assertNotSame($f, $f2);
         $this->assertSame($f->name(), $f2->name());
@@ -43,7 +43,7 @@ class FileTest extends TestCase
     {
         $f = new File(
             'foo',
-            new StringStream('bar'),
+            Stream::ofContent('bar'),
             $mt = MediaType::of('application/json')
         );
 

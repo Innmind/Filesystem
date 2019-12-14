@@ -7,7 +7,6 @@ use Innmind\Filesystem\{
     Directory as DirectoryInterface,
     Name,
     File,
-    Stream\StringStream,
     Exception\FileNotFound,
     Event\FileWasAdded,
     Event\FileWasRemoved,
@@ -59,7 +58,7 @@ class Directory implements DirectoryInterface
         }
 
         $this->loadDirectory();
-        $this->content = new StringStream(
+        $this->content = Readable\Stream::ofContent(
             \implode("\n", \array_keys($this->files))
         );
         $this->rewind();

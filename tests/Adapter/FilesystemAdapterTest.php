@@ -9,10 +9,10 @@ use Innmind\Filesystem\{
     File\File,
     File as FileInterface,
     Directory\Directory,
-    Stream\StringStream,
     MediaType\NullMediaType,
     Exception\FileNotFound
 };
+use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Map;
 use PHPUnit\Framework\TestCase;
 
@@ -49,10 +49,10 @@ class FilesystemAdapterTest extends TestCase
         $adapter = new FilesystemAdapter('/tmp');
 
         $directory = (new Directory('foo'))
-            ->add(new File('foo.md', new StringStream('# Foo')))
+            ->add(new File('foo.md', Stream::ofContent('# Foo')))
             ->add(
                 (new Directory('bar'))
-                    ->add(new File('bar.md', new StringStream('# Bar')))
+                    ->add(new File('bar.md', Stream::ofContent('# Bar')))
             );
         $adapter->add($directory);
         $this->assertSame(
@@ -85,7 +85,7 @@ class FilesystemAdapterTest extends TestCase
         $a = new FilesystemAdapter('/tmp');
 
         $d = new Directory('foo');
-        $d = $d->add(new File('bar', new StringStream('some content')));
+        $d = $d->add(new File('bar', Stream::ofContent('some content')));
         $a->add($d);
         $d = $d->remove('bar');
         $a->add($d);
@@ -100,7 +100,7 @@ class FilesystemAdapterTest extends TestCase
         $a = new FilesystemAdapter('/tmp');
 
         $d = new Directory('foo');
-        $d = $d->add(new File('bar', new StringStream('some content')));
+        $d = $d->add(new File('bar', Stream::ofContent('some content')));
         $a->add($d);
         $d = $d->remove('bar');
         $a->add($d);
@@ -131,7 +131,7 @@ class FilesystemAdapterTest extends TestCase
         $adapter = new FilesystemAdapter('/tmp/test');
         $adapter->add(new File(
             'foo',
-            new StringStream('foo')
+            Stream::ofContent('foo')
         ));
         file_put_contents('/tmp/test/bar', 'bar');
         mkdir('/tmp/test/baz');

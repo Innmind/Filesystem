@@ -9,10 +9,10 @@ use Innmind\Filesystem\{
     Adapter,
     Directory,
     File,
-    Stream\StringStream,
     Exception\LogicException,
     Exception\FileNotFound
 };
+use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Map;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
@@ -47,7 +47,7 @@ class HashedNameAdapterTest extends TestCase
             $inner = new FilesystemAdapter('/tmp/hashed')
         );
 
-        $file = new File\File('foo', new StringStream('content'));
+        $file = new File\File('foo', Stream::ofContent('content'));
 
         $this->assertFalse($filesystem->contains('foo'));
         $this->assertNull($filesystem->add($file));
@@ -62,7 +62,7 @@ class HashedNameAdapterTest extends TestCase
                 ->toString()
         );
 
-        $file = new File\File('foo', new StringStream('content bis'));
+        $file = new File\File('foo', Stream::ofContent('content bis'));
 
         $this->assertNull($filesystem->add($file));
         $this->assertSame(
@@ -97,8 +97,8 @@ class HashedNameAdapterTest extends TestCase
             new FilesystemAdapter('/tmp/hashed')
         );
 
-        $filesystem->add(new File\File('foo', new StringStream('content')));
-        $filesystem->add(new File\File('bar', new StringStream('content')));
+        $filesystem->add(new File\File('foo', Stream::ofContent('content')));
+        $filesystem->add(new File\File('bar', Stream::ofContent('content')));
 
         $all = $filesystem->all();
 

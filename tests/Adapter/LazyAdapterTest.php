@@ -10,8 +10,8 @@ use Innmind\Filesystem\{
     Directory\Directory,
     File as FileInterface,
     File\File,
-    Stream\StringStream
 };
+use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Map;
 use PHPUnit\Framework\TestCase;
 
@@ -86,9 +86,9 @@ class LazyAdapterTest extends TestCase
     {
         $memory = new MemoryAdapter;
         $lazy = new LazyAdapter($memory);
-        $memory->add(new File('foo', new StringStream('')));
+        $memory->add(new File('foo', Stream::ofContent('')));
         $lazy->remove('foo');
-        $lazy->add($bar = new File('bar', new StringStream('')));
+        $lazy->add($bar = new File('bar', Stream::ofContent('')));
 
         $all = $lazy->all();
         $this->assertInstanceOf(Map::class, $all);

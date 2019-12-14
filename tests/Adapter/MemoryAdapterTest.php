@@ -9,8 +9,8 @@ use Innmind\Filesystem\{
     Directory\Directory,
     File as FileInterface,
     File\File,
-    Stream\StringStream
 };
+use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Map;
 use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
@@ -51,11 +51,11 @@ class MemoryAdapterTest extends TestCase
         $adapter = new MemoryAdapter;
         $adapter->add($foo = new File(
             'foo',
-            new StringStream('foo')
+            Stream::ofContent('foo')
         ));
         $adapter->add($bar = new File(
             'bar',
-            new StringStream('bar')
+            Stream::ofContent('bar')
         ));
 
         $all = $adapter->all();
