@@ -113,7 +113,7 @@ class Directory implements DirectoryInterface
     public function remove(string $name): DirectoryInterface
     {
         if (!$this->contains($name)) {
-            throw new FileNotFound;
+            return $this;;
         }
 
         $directory = clone $this;

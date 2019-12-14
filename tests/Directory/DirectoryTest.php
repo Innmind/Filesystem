@@ -98,12 +98,11 @@ class DirectoryTest extends TestCase
         $this->assertSame('bar', $d2->modifications()->get(1)->file());
     }
 
-    /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFound
-     */
-    public function testThrowWhenRemovingUnknownFile()
+    public function testRemovingUnknownFileDoesntThrow()
     {
-        (new Directory('foo'))->remove('bar');
+        $dir = new Directory('foo');
+
+        $this->assertSame($dir, $dir->remove('bar'));
     }
 
     public function testCount()

@@ -14,10 +14,6 @@ interface Directory extends File, \Iterator, \Countable
      */
     public function get(string $name): File;
     public function contains(string $name): bool;
-
-    /**
-     * @throws FileNotFound
-     */
     public function remove(string $name): self;
     public function replaceAt(string $path, File $file): self;
 
