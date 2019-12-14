@@ -9,6 +9,7 @@ use Innmind\Filesystem\{
     Directory\Directory,
     File as FileInterface,
     File\File,
+    Exception\FileNotFound,
 };
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Map;
@@ -32,12 +33,11 @@ class MemoryAdapterTest extends TestCase
         $this->assertFalse($a->contains('foo'));
     }
 
-    /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFound
-     * @expectedExceptionMessage foo
-     */
     public function testThrowWhenGettingUnknownFile()
     {
+        $this->expectException(FileNotFound::class);
+        $this->expectExceptionMessage('foo');
+
         (new MemoryAdapter)->get('foo');
     }
 

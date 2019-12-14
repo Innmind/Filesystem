@@ -10,6 +10,7 @@ use Innmind\Filesystem\{
     Directory\Directory,
     File as FileInterface,
     File\File,
+    Exception\FileNotFound,
 };
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Map;
@@ -64,13 +65,12 @@ class LazyAdapterTest extends TestCase
         $this->assertSame($d, $a->get('foo'));
     }
 
-    /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFound
-     * @expectedExceptionMessage foo
-     */
     public function testThrowWhenGettingUnknwonFile()
     {
         $l = new LazyAdapter(new MemoryAdapter);
+
+        $this->expectException(FileNotFound::class);
+        $this->expectExceptionMessage('foo');
 
         $l->get('foo');
     }

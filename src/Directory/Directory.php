@@ -91,7 +91,7 @@ class Directory implements DirectoryInterface
     public function get(string $name): File
     {
         if (!$this->contains($name)) {
-            throw new FileNotFound;
+            throw new FileNotFound($name);
         }
 
         return $this->files[$name];

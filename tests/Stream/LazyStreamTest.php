@@ -14,7 +14,7 @@ class LazyStreamTest extends TestCase
 {
     private $stream;
 
-    public function setUp()
+    public function setUp(): void
     {
         file_put_contents(
             $path = tempnam(sys_get_temp_dir(), 'lazy_stream'),

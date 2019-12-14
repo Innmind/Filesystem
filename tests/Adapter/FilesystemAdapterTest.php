@@ -10,7 +10,7 @@ use Innmind\Filesystem\{
     File as FileInterface,
     Directory\Directory,
     MediaType\NullMediaType,
-    Exception\FileNotFound
+    Exception\FileNotFound,
 };
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Map;
@@ -30,12 +30,11 @@ class FilesystemAdapterTest extends TestCase
         $this->assertFalse($adapter->contains('foo'));
     }
 
-    /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFound
-     * @expectedExceptionMessage foo
-     */
     public function testThrowWhenGettingUnknownFile()
     {
+        $this->expectException(FileNotFound::class);
+        $this->expectExceptionMessage('foo');
+
         (new FilesystemAdapter('/tmp'))->get('foo');
     }
 

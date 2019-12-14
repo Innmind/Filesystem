@@ -8,7 +8,8 @@ use Innmind\Filesystem\{
     Directory as DirectoryInterface,
     File,
     Event\FileWasAdded,
-    Event\FileWasRemoved
+    Event\FileWasRemoved,
+    Exception\FileNotFound,
 };
 use Innmind\Stream\Readable\Stream;
 use PHPUnit\Framework\TestCase;
@@ -58,11 +59,11 @@ class DirectoryTest extends TestCase
         $this->assertSame($f, $d->get('bar'));
     }
 
-    /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFound
-     */
     public function testThrowWhenGettingUnknownFile()
     {
+        $this->expectException(FileNotFound::class);
+        $this->expectExceptionMessage('bar');
+
         (new Directory('foo'))->get('bar');
     }
 

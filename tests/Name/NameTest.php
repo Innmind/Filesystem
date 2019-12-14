@@ -5,7 +5,8 @@ namespace Innmind\Filesystem\Tests\Name;
 
 use Innmind\Filesystem\{
     Name\Name,
-    Name as NameInterface
+    Name as NameInterface,
+    Exception\DomainException,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -19,12 +20,11 @@ class NameTest extends TestCase
         $this->assertSame('foo', $n->toString());
     }
 
-    /**
-     * @expectedException Innmind\Filesystem\Exception\DomainException
-     * @expectedExceptionMessage A file name can't contain a slash
-     */
     public function testThrowWhenABuildingNameWithASlash()
     {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('A file name can\'t contain a slash');
+
         new Name('foo/bar');
     }
 }

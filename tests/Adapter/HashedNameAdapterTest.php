@@ -19,7 +19,7 @@ use PHPUnit\Framework\TestCase;
 
 class HashedNameAdapterTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         (new Filesystem)->remove('/tmp/hashed');
     }
