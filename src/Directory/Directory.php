@@ -85,7 +85,7 @@ final class Directory implements DirectoryInterface
      */
     public function add(File $file): DirectoryInterface
     {
-        $files = $this->files->filter(static fn(File $known): bool => $known->name()->toString() !== $file->name()->toString());
+        $files = $this->files->filter(static fn(File $known): bool => !$known->name()->equals($file->name()));
 
         $directory = clone $this;
         $directory->content = null;
@@ -100,8 +100,6 @@ final class Directory implements DirectoryInterface
      */
     public function get(Name $name): File
     {
-        $name = $name->toString();
-
         $file = $this->files->reduce(
             null,
             static function(?File $found, File $file) use ($name): ?File {
@@ -109,7 +107,7 @@ final class Directory implements DirectoryInterface
                     return $found;
                 }
 
-                if ($file->name()->toString() === $name) {
+                if ($file->name()->equals($name)) {
                     return $file;
                 }
 
@@ -118,7 +116,7 @@ final class Directory implements DirectoryInterface
         );
 
         if (\is_null($file)) {
-            throw new FileNotFound($name);
+            throw new FileNotFound($name->toString());
         }
 
         return $file;
@@ -129,11 +127,9 @@ final class Directory implements DirectoryInterface
      */
     public function contains(Name $name): bool
     {
-        $name = $name->toString();
-
         return $this->files->reduce(
             false,
-            static fn(bool $found, File $file): bool => $found || $file->name()->toString() === $name,
+            static fn(bool $found, File $file): bool => $found || $file->name()->equals($name),
         );
     }
 
@@ -148,7 +144,7 @@ final class Directory implements DirectoryInterface
 
         $directory = clone $this;
         $directory->content = null;
-        $directory->files = $this->files->filter(static fn(File $file) => $file->name()->toString() !== $name->toString());
+        $directory->files = $this->files->filter(static fn(File $file) => !$file->name()->equals($name));
         $directory->record(new FileWasRemoved($name));
 
         return $directory;

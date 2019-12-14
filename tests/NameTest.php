@@ -25,4 +25,10 @@ class NameTest extends TestCase
 
         new Name('foo/bar');
     }
+
+    public function testEquals()
+    {
+        $this->assertTrue((new Name('foo'))->equals(new Name('foo')));
+        $this->assertFalse((new Name('foo'))->equals(new Name('bar')));
+    }
 }

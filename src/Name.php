@@ -8,19 +8,24 @@ use Innmind\Immutable\Str;
 
 final class Name
 {
-    private string $name;
+    private string $value;
 
-    public function __construct(string $name)
+    public function __construct(string $value)
     {
-        if (Str::of($name)->matches('|/|')) {
+        if (Str::of($value)->matches('|/|')) {
             throw new DomainException('A file name can\'t contain a slash');
         }
 
-        $this->name = $name;
+        $this->value = $value;
+    }
+
+    public function equals(self $name): bool
+    {
+        return $this->value === $name->value;
     }
 
     public function toString(): string
     {
-        return $this->name;
+        return $this->value;
     }
 }
