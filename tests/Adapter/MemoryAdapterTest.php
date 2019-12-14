@@ -12,7 +12,7 @@ use Innmind\Filesystem\{
     Exception\FileNotFound,
 };
 use Innmind\Stream\Readable\Stream;
-use Innmind\Immutable\Map;
+use Innmind\Immutable\Set;
 use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 
@@ -59,16 +59,11 @@ class MemoryAdapterTest extends TestCase
         ));
 
         $all = $adapter->all();
-        $this->assertInstanceOf(Map::class, $all);
-        $this->assertSame('string', (string) $all->keyType());
-        $this->assertSame(FileInterface::class, (string) $all->valueType());
-        $this->assertSame(
-            ['foo', 'bar'],
-            unwrap($all->keys())
-        );
+        $this->assertInstanceOf(Set::class, $all);
+        $this->assertSame(FileInterface::class, $all->type());
         $this->assertSame(
             [$foo, $bar],
-            unwrap($all->values())
+            unwrap($all),
         );
     }
 }

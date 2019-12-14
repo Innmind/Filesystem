@@ -7,7 +7,10 @@ use Innmind\Filesystem\{
     Adapter,
     File,
 };
-use Innmind\Immutable\Map;
+use Innmind\Immutable\{
+    Map,
+    Set,
+};
 
 final class CacheOpenedFilesAdapter implements Adapter
 {
@@ -74,10 +77,15 @@ final class CacheOpenedFilesAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function all(): Map
+    public function all(): Set
     {
-        $this->files = $this->filesystem->all();
+        $all = $this->filesystem->all();
+        $this->files = $all->toMapOf(
+            'string',
+            File::class,
+            static fn(File $file): \Generator => yield $file->name()->toString() => $file,
+        );
 
-        return $this->files;
+        return $all;
     }
 }

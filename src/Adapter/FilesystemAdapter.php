@@ -86,19 +86,16 @@ class FilesystemAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function all(): Map
+    public function all(): Set
     {
         $files = Finder::create()->depth('== 0')->in($this->path);
-        $map = Map::of('string', File::class);
+        $set = Set::of(File::class);
 
         foreach ($files as $file) {
-            $map = ($map)(
-                $file->getRelativePathname(),
-                $this->get($file->getRelativePathname()),
-            );
+            $set = ($set)($this->get($file->getRelativePathname()));
         }
 
-        return $map;
+        return $set;
     }
 
     /**

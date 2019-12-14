@@ -12,7 +12,7 @@ use Innmind\Filesystem\{
     Exception\LogicException,
     Exception\FileNotFound,
 };
-use Innmind\Immutable\Map;
+use Innmind\Immutable\Set;
 
 /**
  * Take the name of a file hashes it and persist files in subdirectories
@@ -130,7 +130,7 @@ final class HashedNameAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function all(): Map
+    public function all(): Set
     {
         //this is not ideal but the names can't be determined from the hashes
         return $this->filesystem->all();

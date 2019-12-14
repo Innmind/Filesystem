@@ -9,7 +9,7 @@ use Innmind\Filesystem\{
     File,
     Name\Name
 };
-use Innmind\Immutable\Map;
+use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
 
 class CacheOpenedFilesAdapterTest extends TestCase
@@ -129,8 +129,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
             ->expects($this->once())
             ->method('all')
             ->willReturn(
-                $expected = Map::of('string', File::class)
-                    ->put('foo', $file)
+                $expected = Set::of(File::class, $file)
             );
 
         $this->assertSame($expected, $filesystem->all());

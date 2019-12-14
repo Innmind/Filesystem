@@ -83,15 +83,17 @@ class LazyAdapter implements LazyAdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function all(): Map
+    public function all(): Set
     {
         return $this
             ->adapter
             ->all()
-            ->filter(function(string $name): bool {
-                return !$this->toRemove->contains($name);
+            ->filter(function(File $file): bool {
+                return !$this->toRemove->contains($file->name()->toString());
             })
-            ->merge($this->toAdd);
+            ->merge(
+                $this->toAdd->values()->toSetOf(File::class)
+            );
     }
 
     /**

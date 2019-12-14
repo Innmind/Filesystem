@@ -13,7 +13,8 @@ use Innmind\Filesystem\{
     Exception\FileNotFound
 };
 use Innmind\Stream\Readable\Stream;
-use Innmind\Immutable\Map;
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\unwrap;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 
@@ -102,14 +103,13 @@ class HashedNameAdapterTest extends TestCase
 
         $all = $filesystem->all();
 
-        $this->assertInstanceOf(Map::class, $all);
-        $this->assertSame('string', (string) $all->keyType());
-        $this->assertSame(File::class, (string) $all->valueType());
+        $this->assertInstanceOf(Set::class, $all);
+        $this->assertSame(File::class, $all->type());
         $this->assertCount(2, $all);
         //as described in the method comment we return the inner structure instead of the files
-        $files = $all->values();
-        $this->assertInstanceOf(Directory::class, $files->get(0));
-        $this->assertInstanceOf(Directory::class, $files->get(1));
+        $files = unwrap($all);
+        $this->assertInstanceOf(Directory::class, $files[0]);
+        $this->assertInstanceOf(Directory::class, $files[1]);
     }
 
     public function testRemovingUnknownFileDoesntThrow()

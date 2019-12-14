@@ -13,7 +13,8 @@ use Innmind\Filesystem\{
     Exception\FileNotFound,
 };
 use Innmind\Stream\Readable\Stream;
-use Innmind\Immutable\Map;
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 
 class LazyAdapterTest extends TestCase
@@ -91,10 +92,9 @@ class LazyAdapterTest extends TestCase
         $lazy->add($bar = new File('bar', Stream::ofContent('')));
 
         $all = $lazy->all();
-        $this->assertInstanceOf(Map::class, $all);
-        $this->assertSame('string', (string) $all->keyType());
-        $this->assertSame(FileInterface::class, (string) $all->valueType());
+        $this->assertInstanceOf(Set::class, $all);
+        $this->assertSame(FileInterface::class, $all->type());
         $this->assertCount(1, $all);
-        $this->assertSame($bar, $all->get('bar'));
+        $this->assertSame([$bar], unwrap($all));
     }
 }

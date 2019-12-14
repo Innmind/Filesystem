@@ -8,7 +8,10 @@ use Innmind\Filesystem\{
     File,
     Exception\FileNotFound,
 };
-use Innmind\Immutable\Map;
+use Innmind\Immutable\{
+    Map,
+    Set,
+};
 
 class MemoryAdapter implements Adapter
 {
@@ -61,8 +64,8 @@ class MemoryAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function all(): Map
+    public function all(): Set
     {
-        return $this->files;
+        return $this->files->values()->toSetOf(File::class);
     }
 }

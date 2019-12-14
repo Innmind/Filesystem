@@ -13,7 +13,7 @@ use Innmind\Filesystem\{
     Exception\FileNotFound,
 };
 use Innmind\Stream\Readable\Stream;
-use Innmind\Immutable\Map;
+use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
 
 class FilesystemAdapterTest extends TestCase
@@ -137,10 +137,14 @@ class FilesystemAdapterTest extends TestCase
         file_put_contents('/tmp/test/baz/foobar', 'baz');
 
         $all = $adapter->all();
-        $this->assertInstanceOf(Map::class, $all);
-        $this->assertSame('string', (string) $all->keyType());
-        $this->assertSame(FileInterface::class, (string) $all->valueType());
+        $this->assertInstanceOf(Set::class, $all);
+        $this->assertSame(FileInterface::class, $all->type());
         $this->assertCount(3, $all);
+        $all = $all->toMapOf(
+            'string',
+            FileInterface::class,
+            fn($file) => yield $file->name()->toString() => $file,
+        );
         $this->assertTrue($all->contains('foo'));
         $this->assertTrue($all->contains('bar'));
         $this->assertTrue($all->contains('baz'));
