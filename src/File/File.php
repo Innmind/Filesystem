@@ -6,10 +6,9 @@ namespace Innmind\Filesystem\File;
 use Innmind\Filesystem\{
     File as FileInterface,
     Name,
-    MediaType,
-    MediaType\NullMediaType
 };
 use Innmind\Stream\Readable;
+use Innmind\MediaType\MediaType;
 
 class File implements FileInterface
 {
@@ -24,7 +23,7 @@ class File implements FileInterface
     ) {
         $this->name = new Name\Name($name);
         $this->content = $content;
-        $this->mediaType = $mediaType ?? new NullMediaType;
+        $this->mediaType = $mediaType ?? MediaType::null();
     }
 
     /**

@@ -8,8 +8,8 @@ use Innmind\Filesystem\{
     File as FileInterface,
     Stream\StringStream,
     Name,
-    MediaType\MediaType
 };
+use Innmind\MediaType\MediaType;
 use PHPUnit\Framework\TestCase;
 
 class FileTest extends TestCase
@@ -24,7 +24,7 @@ class FileTest extends TestCase
         $this->assertSame($c, $f->content());
         $this->assertSame(
             'application/octet-stream',
-            (string) $f->mediaType()
+            $f->mediaType()->toString()
         );
     }
 
@@ -44,7 +44,7 @@ class FileTest extends TestCase
         $f = new File(
             'foo',
             new StringStream('bar'),
-            $mt = MediaType::fromString('application/json')
+            $mt = MediaType::of('application/json')
         );
 
         $this->assertSame($mt, $f->mediaType());

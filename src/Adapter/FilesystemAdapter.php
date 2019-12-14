@@ -12,9 +12,8 @@ use Innmind\Filesystem\{
     Exception\InvalidMediaTypeString,
     Event\FileWasAdded,
     Event\FileWasRemoved,
-    MediaType\MediaType,
-    MediaType\NullMediaType
 };
+use Innmind\MediaType\MediaType;
 use Innmind\Immutable\{
     Map,
     Set,
@@ -209,7 +208,7 @@ class FilesystemAdapter implements Adapter
             try {
                 $mediaType = MediaType::of(\mime_content_type($path));
             } catch (InvalidMediaTypeString $e) {
-                $mediaType = new NullMediaType;
+                $mediaType = MediaType::null();
             }
 
             $object = new File\File(

@@ -22,7 +22,7 @@ class DirectoryTest extends TestCase
         $this->assertInstanceOf(DirectoryInterface::class, $d);
         $this->assertSame('foo', (string) $d->name());
         $this->assertSame('', $d->content()->toString());
-        $this->assertSame('text/directory', (string) $d->mediaType());
+        $this->assertSame('text/directory', $d->mediaType()->toString());
         $this->assertSame($d->mediaType(), $d->mediaType());
     }
 

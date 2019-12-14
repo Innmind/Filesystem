@@ -125,7 +125,7 @@ class FilesystemAdapterTest extends TestCase
 
         $this->assertSame(
             'text/html',
-            (string) $a->get('some_content.html')->mediaType()
+            $a->get('some_content.html')->mediaType()->toString()
         );
         $a->remove('some_content.html');
     }
