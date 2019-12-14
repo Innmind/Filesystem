@@ -35,7 +35,7 @@ class MemoryAdapter implements Adapter
      */
     public function get(string $file): File
     {
-        if (!$this->has($file)) {
+        if (!$this->contains($file)) {
             throw new FileNotFound($file);
         }
 
@@ -45,7 +45,7 @@ class MemoryAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function has(string $file): bool
+    public function contains(string $file): bool
     {
         return $this->files->contains($file);
     }
@@ -55,7 +55,7 @@ class MemoryAdapter implements Adapter
      */
     public function remove(string $file): void
     {
-        if (!$this->has($file)) {
+        if (!$this->contains($file)) {
             throw new FileNotFound($file);
         }
 

@@ -53,13 +53,13 @@ final class CacheOpenedFilesAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function has(string $file): bool
+    public function contains(string $file): bool
     {
         if ($this->files->contains($file)) {
             return true;
         }
 
-        return $this->filesystem->has($file);
+        return $this->filesystem->contains($file);
     }
 
     /**

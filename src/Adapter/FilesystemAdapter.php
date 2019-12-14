@@ -56,7 +56,7 @@ class FilesystemAdapter implements Adapter
      */
     public function get(string $file): File
     {
-        if (!$this->has($file)) {
+        if (!$this->contains($file)) {
             throw new FileNotFound($file);
         }
 
@@ -66,7 +66,7 @@ class FilesystemAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function has(string $file): bool
+    public function contains(string $file): bool
     {
         if (\in_array($file, self::INVALID_FILES, true)) {
             return false;
@@ -80,7 +80,7 @@ class FilesystemAdapter implements Adapter
      */
     public function remove(string $file): void
     {
-        if (!$this->has($file)) {
+        if (!$this->contains($file)) {
             throw new FileNotFound($file);
         }
 

@@ -37,13 +37,13 @@ final class HashedNameAdapter implements Adapter
 
         $name = new Hashed($file->name());
 
-        if ($this->filesystem->has($name->first())) {
+        if ($this->filesystem->contains($name->first())) {
             $first = $this->filesystem->get($name->first());
         } else {
             $first = new Directory\Directory($name->first());
         }
 
-        if ($first->has($name->second())) {
+        if ($first->contains($name->second())) {
             $second = $first->get($name->second());
         } else {
             $second = new Directory\Directory($name->second());
@@ -66,7 +66,7 @@ final class HashedNameAdapter implements Adapter
      */
     public function get(string $file): File
     {
-        if (!$this->has($file)) {
+        if (!$this->contains($file)) {
             throw new FileNotFound($file);
         }
 
@@ -85,11 +85,11 @@ final class HashedNameAdapter implements Adapter
         );
     }
 
-    public function has(string $file): bool
+    public function contains(string $file): bool
     {
         $name = new Hashed(new Name($file));
 
-        if (!$this->filesystem->has($name->first())) {
+        if (!$this->filesystem->contains($name->first())) {
             return false;
         }
 
@@ -105,7 +105,7 @@ final class HashedNameAdapter implements Adapter
             return false;
         }
 
-        return $directory->has($name->remaining());
+        return $directory->contains($name->remaining());
     }
 
     /**
@@ -113,7 +113,7 @@ final class HashedNameAdapter implements Adapter
      */
     public function remove(string $file): void
     {
-        if (!$this->has($file)) {
+        if (!$this->contains($file)) {
             throw new FileNotFound($file);
         }
 

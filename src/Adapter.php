@@ -16,7 +16,7 @@ interface Adapter
      * @throws FileNotFound
      */
     public function get(string $file): File;
-    public function has(string $file): bool;
+    public function contains(string $file): bool;
 
     /**
      * @throws FileNotFound

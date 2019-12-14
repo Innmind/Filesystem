@@ -91,7 +91,7 @@ class Directory implements DirectoryInterface
      */
     public function get(string $name): File
     {
-        if (!$this->has($name)) {
+        if (!$this->contains($name)) {
             throw new FileNotFound;
         }
 
@@ -101,7 +101,7 @@ class Directory implements DirectoryInterface
     /**
      * {@inheritdoc}
      */
-    public function has(string $name): bool
+    public function contains(string $name): bool
     {
         $this->loadDirectory();
 
@@ -113,7 +113,7 @@ class Directory implements DirectoryInterface
      */
     public function remove(string $name): DirectoryInterface
     {
-        if (!$this->has($name)) {
+        if (!$this->contains($name)) {
             throw new FileNotFound;
         }
 

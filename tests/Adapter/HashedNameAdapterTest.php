@@ -49,9 +49,9 @@ class HashedNameAdapterTest extends TestCase
 
         $file = new File\File('foo', new StringStream('content'));
 
-        $this->assertFalse($filesystem->has('foo'));
+        $this->assertFalse($filesystem->contains('foo'));
         $this->assertNull($filesystem->add($file));
-        $this->assertTrue($filesystem->has('foo'));
+        $this->assertTrue($filesystem->contains('foo'));
         $this->assertSame(
             'content',
             (string) $inner
@@ -76,7 +76,7 @@ class HashedNameAdapterTest extends TestCase
         );
 
         $this->assertNull($filesystem->remove('foo'));
-        $this->assertFalse($filesystem->has('foo'));
+        $this->assertFalse($filesystem->contains('foo'));
     }
 
     public function testThrowWhenGettingUnknownFile()

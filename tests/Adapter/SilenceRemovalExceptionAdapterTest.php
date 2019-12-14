@@ -53,24 +53,24 @@ class SilenceRemovalExceptionAdapterTest extends TestCase
         $this->assertSame($file, $adapter->get('foo'));
     }
 
-    public function testHas()
+    public function testContains()
     {
         $adapter = new SilenceRemovalExceptionAdapter(
             $inner = $this->createMock(Adapter::class)
         );
         $inner
             ->expects($this->at(0))
-            ->method('has')
+            ->method('contains')
             ->with('foo')
             ->willReturn(true);
         $inner
             ->expects($this->at(1))
-            ->method('has')
+            ->method('contains')
             ->with('foo')
             ->willReturn(false);
 
-        $this->assertTrue($adapter->has('foo'));
-        $this->assertFalse($adapter->has('foo'));
+        $this->assertTrue($adapter->contains('foo'));
+        $this->assertFalse($adapter->contains('foo'));
     }
 
     public function testRemove()

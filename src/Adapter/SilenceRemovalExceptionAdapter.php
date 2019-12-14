@@ -38,9 +38,9 @@ final class SilenceRemovalExceptionAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function has(string $file): bool
+    public function contains(string $file): bool
     {
-        return $this->adapter->has($file);
+        return $this->adapter->contains($file);
     }
 
     /**

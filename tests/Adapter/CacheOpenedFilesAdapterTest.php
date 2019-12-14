@@ -61,35 +61,35 @@ class CacheOpenedFilesAdapterTest extends TestCase
         $this->assertSame($file, $filesystem->get('foo'));
     }
 
-    public function testHasFromInnerAdapter()
+    public function testContainsFromInnerAdapter()
     {
         $filesystem = new CacheOpenedFilesAdapter(
             $inner = $this->createMock(Adapter::class)
         );
         $inner
             ->expects($this->once())
-            ->method('has')
+            ->method('contains')
             ->with('foo')
             ->willReturn(true);
 
-        $this->assertTrue($filesystem->has('foo'));
+        $this->assertTrue($filesystem->contains('foo'));
     }
 
-    public function testHasFromCache()
+    public function testContainsFromCache()
     {
         $filesystem = new CacheOpenedFilesAdapter(
             $inner = $this->createMock(Adapter::class)
         );
         $inner
             ->expects($this->never())
-            ->method('has');
+            ->method('contains');
         $file = $this->createMock(File::class);
         $file
             ->method('name')
             ->willReturn(new Name('foo'));
         $filesystem->add($file);
 
-        $this->assertTrue($filesystem->has('foo'));
+        $this->assertTrue($filesystem->contains('foo'));
     }
 
     public function testRemove()

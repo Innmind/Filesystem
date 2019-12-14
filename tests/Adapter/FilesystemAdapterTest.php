@@ -23,11 +23,11 @@ class FilesystemAdapterTest extends TestCase
         $adapter = new FilesystemAdapter('/tmp');
 
         $this->assertInstanceOf(Adapter::class, $adapter);
-        $this->assertFalse($adapter->has('foo'));
+        $this->assertFalse($adapter->contains('foo'));
         $this->assertNull($adapter->add(new Directory('foo')));
-        $this->assertTrue($adapter->has('foo'));
+        $this->assertTrue($adapter->contains('foo'));
         $this->assertNull($adapter->remove('foo'));
-        $this->assertFalse($adapter->has('foo'));
+        $this->assertFalse($adapter->contains('foo'));
     }
 
     /**
@@ -95,7 +95,7 @@ class FilesystemAdapterTest extends TestCase
         $a->add($d);
         $this->assertSame(2, $d->modifications()->count());
         $a = new FilesystemAdapter('/tmp');
-        $this->assertFalse($a->get('foo')->has('bar'));
+        $this->assertFalse($a->get('foo')->contains('bar'));
         $a->remove('foo');
     }
 
@@ -111,7 +111,7 @@ class FilesystemAdapterTest extends TestCase
         $a->add($d);
         $this->assertSame(2, $d->modifications()->count());
         $a = new FilesystemAdapter('/tmp');
-        $this->assertFalse($a->get('foo')->has('bar'));
+        $this->assertFalse($a->get('foo')->contains('bar'));
         $a->remove('foo');
     }
 
@@ -178,10 +178,10 @@ class FilesystemAdapterTest extends TestCase
         @mkdir('/tmp/test');
         $adapter = new FilesystemAdapter('/tmp');
 
-        $this->assertFalse($adapter->get('test')->has('.'));
-        $this->assertFalse($adapter->get('test')->has('..'));
-        $this->assertFalse($adapter->has('.'));
-        $this->assertFalse($adapter->has('..'));
+        $this->assertFalse($adapter->get('test')->contains('.'));
+        $this->assertFalse($adapter->get('test')->contains('..'));
+        $this->assertFalse($adapter->contains('.'));
+        $this->assertFalse($adapter->contains('..'));
 
         $this->expectException(FileNotFound::class);
 

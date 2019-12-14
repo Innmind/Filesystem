@@ -66,13 +66,13 @@ class DirectoryTest extends TestCase
         (new Directory('foo'))->get('bar');
     }
 
-    public function testHas()
+    public function testContains()
     {
         $d = (new Directory('foo'))
             ->add(new File\File('bar', new StringStream('baz')));
 
-        $this->assertFalse($d->has('baz'));
-        $this->assertTrue($d->has('bar'));
+        $this->assertFalse($d->contains('baz'));
+        $this->assertTrue($d->contains('bar'));
     }
 
     public function testRemove()

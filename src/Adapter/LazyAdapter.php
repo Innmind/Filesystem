@@ -44,7 +44,7 @@ class LazyAdapter implements LazyAdapterInterface
      */
     public function get(string $file): File
     {
-        if (!$this->has($file)) {
+        if (!$this->contains($file)) {
             throw new FileNotFound($file);
         }
 
@@ -58,7 +58,7 @@ class LazyAdapter implements LazyAdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function has(string $file): bool
+    public function contains(string $file): bool
     {
         if ($this->toRemove->contains($file)) {
             return false;
@@ -68,7 +68,7 @@ class LazyAdapter implements LazyAdapterInterface
             return true;
         }
 
-        return $this->adapter->has($file);
+        return $this->adapter->contains($file);
     }
 
     /**
@@ -76,7 +76,7 @@ class LazyAdapter implements LazyAdapterInterface
      */
     public function remove(string $file): void
     {
-        if (!$this->has($file)) {
+        if (!$this->contains($file)) {
             throw new FileNotFound($file);
         }
 
@@ -112,7 +112,7 @@ class LazyAdapter implements LazyAdapterInterface
         $this
             ->toRemove
             ->foreach(function(string $name) {
-                if ($this->adapter->has($name)) {
+                if ($this->adapter->contains($name)) {
                     $this->adapter->remove($name);
                 }
             });

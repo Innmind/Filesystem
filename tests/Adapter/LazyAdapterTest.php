@@ -22,21 +22,21 @@ class LazyAdapterTest extends TestCase
         $l = new LazyAdapter($a = new MemoryAdapter);
 
         $this->assertInstanceOf(LazyAdapterInterface::class, $l);
-        $this->assertFalse($l->has('foo'));
+        $this->assertFalse($l->contains('foo'));
         $this->assertNull(
             $l->add($d = new Directory('foo'))
         );
-        $this->assertTrue($l->has('foo'));
-        $this->assertFalse($a->has('foo'));
+        $this->assertTrue($l->contains('foo'));
+        $this->assertFalse($a->contains('foo'));
         $this->assertNull($l->persist());
-        $this->assertTrue($l->has('foo'));
-        $this->assertTrue($a->has('foo'));
+        $this->assertTrue($l->contains('foo'));
+        $this->assertTrue($a->contains('foo'));
         $this->assertNull($l->remove('foo'));
-        $this->assertFalse($l->has('foo'));
-        $this->assertTrue($a->has('foo'));
+        $this->assertFalse($l->contains('foo'));
+        $this->assertTrue($a->contains('foo'));
         $l->persist();
-        $this->assertFalse($l->has('foo'));
-        $this->assertFalse($a->has('foo'));
+        $this->assertFalse($l->contains('foo'));
+        $this->assertFalse($a->contains('foo'));
     }
 
     public function testRemoveUnpersistedAddedFile()
@@ -46,8 +46,8 @@ class LazyAdapterTest extends TestCase
         $l->add(new Directory('foo'));
         $l->remove('foo');
         $l->persist();
-        $this->assertFalse($l->has('foo'));
-        $this->assertFalse($a->has('foo'));
+        $this->assertFalse($l->contains('foo'));
+        $this->assertFalse($a->contains('foo'));
     }
 
     public function testAddUnpersistedRemovedFile()
@@ -58,8 +58,8 @@ class LazyAdapterTest extends TestCase
         $l->remove('foo');
         $l->add($d = new Directory('foo'));
         $l->persist();
-        $this->assertTrue($l->has('foo'));
-        $this->assertTrue($a->has('foo'));
+        $this->assertTrue($l->contains('foo'));
+        $this->assertTrue($a->contains('foo'));
         $this->assertSame($d, $l->get('foo'));
         $this->assertSame($d, $a->get('foo'));
     }

@@ -13,7 +13,7 @@ interface Directory extends File, \Iterator, \Countable
      * @throws FileNotFound
      */
     public function get(string $name): File;
-    public function has(string $name): bool;
+    public function contains(string $name): bool;
 
     /**
      * @throws FileNotFound
