@@ -95,7 +95,7 @@ final class FilesystemAdapter implements Adapter
                 $files = Finder::create()->depth('== 0')->in($path);
 
                 foreach ($files as $file) {
-                    yield $adapter->get(new Name\Name($file->getRelativePathname()));
+                    yield $adapter->get(new Name($file->getRelativePathname()));
                 }
             })($this, $this->path),
         );

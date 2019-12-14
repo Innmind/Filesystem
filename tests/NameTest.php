@@ -1,11 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Tests\Name;
+namespace Innmind\Filesystem\Tests;
 
 use Innmind\Filesystem\{
-    Name\Name,
-    Name as NameInterface,
+    Name,
     Exception\DomainException,
 };
 use PHPUnit\Framework\TestCase;
@@ -16,7 +15,6 @@ class NameTest extends TestCase
     {
         $n = new Name('foo');
 
-        $this->assertInstanceOf(NameInterface::class, $n);
         $this->assertSame('foo', $n->toString());
     }
 

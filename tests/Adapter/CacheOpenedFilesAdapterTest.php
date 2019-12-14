@@ -7,8 +7,9 @@ use Innmind\Filesystem\{
     Adapter\CacheOpenedFilesAdapter,
     Adapter,
     File,
-    Name\Name,
+    Name,
 };
+use Innmind\Stream\Readable;
 use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
 
@@ -109,7 +110,10 @@ class CacheOpenedFilesAdapterTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(new Name('foo'))
-            ->willReturn($expected = $this->createMock(File::class));
+            ->willReturn($expected = new File\File(
+                'foo',
+                $this->createMock(Readable::class),
+            ));
         $filesystem->add($file);
 
         $this->assertNull($filesystem->remove(new Name('foo')));

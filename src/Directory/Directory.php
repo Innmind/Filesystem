@@ -37,7 +37,7 @@ final class Directory implements DirectoryInterface
 
         assertSet(File::class, $files, 2);
 
-        $this->name = new Name\Name($name);
+        $this->name = new Name($name);
         $this->files = $files;
         $this->mediaType = new MediaType(
             'text',
@@ -167,7 +167,7 @@ final class Directory implements DirectoryInterface
                 ->reduce(
                     $directory,
                     function(DirectoryInterface $parent, Str $seek): DirectoryInterface {
-                        return $parent->get(new Name\Name($seek->toString()));
+                        return $parent->get(new Name($seek->toString()));
                     }
                 )
                 ->add($target ?? $file);

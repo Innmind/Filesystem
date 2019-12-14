@@ -9,7 +9,7 @@ use Innmind\Filesystem\{
     Directory\Directory,
     File as FileInterface,
     File\File,
-    Name\Name,
+    Name,
     Exception\FileNotFound,
 };
 use Innmind\Stream\Readable\Stream;

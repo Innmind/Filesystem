@@ -7,7 +7,7 @@ use Innmind\Filesystem\{
     Adapter\FilesystemAdapter,
     Adapter,
     File\File,
-    Name\Name,
+    Name,
     File as FileInterface,
     Directory\Directory,
     MediaType\NullMediaType,

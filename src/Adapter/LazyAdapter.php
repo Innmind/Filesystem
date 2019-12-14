@@ -111,7 +111,7 @@ final class LazyAdapter implements LazyAdapterInterface
         $this
             ->toRemove
             ->foreach(function(string $name) {
-                $name = new Name\Name($name);
+                $name = new Name($name);
 
                 if ($this->adapter->contains($name)) {
                     $this->adapter->remove($name);

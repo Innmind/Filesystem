@@ -7,7 +7,6 @@ use Innmind\Filesystem\{
     Adapter,
     File,
     Directory,
-    Name\Hashed,
     Name,
     Exception\LogicException,
     Exception\FileNotFound,
@@ -147,9 +146,9 @@ final class HashedNameAdapter implements Adapter
         $extension = \pathinfo($name->toString(), PATHINFO_EXTENSION);
         $hash = Str::of(\sha1(\pathinfo($name->toString(), PATHINFO_BASENAME)));
 
-        $first = new Name\Name($hash->substring(0, 2)->toString());
-        $second = new Name\Name($hash->substring(2, 2)->toString());
-        $remaining = new Name\Name($hash->substring(4)->toString().($extension ? '.'.$extension : ''));
+        $first = new Name($hash->substring(0, 2)->toString());
+        $second = new Name($hash->substring(2, 2)->toString());
+        $remaining = new Name($hash->substring(4)->toString().($extension ? '.'.$extension : ''));
 
         return [$first, $second, $remaining];
     }

@@ -9,7 +9,7 @@ use Innmind\Filesystem\{
     Adapter,
     Directory,
     File,
-    Name\Name,
+    Name,
     Exception\LogicException,
     Exception\FileNotFound
 };

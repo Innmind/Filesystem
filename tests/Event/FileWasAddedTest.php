@@ -5,7 +5,7 @@ namespace Tests\Innmind\Filesystem\Event;
 
 use Innmind\Filesystem\{
     Event\FileWasAdded,
-    File
+    File,
 };
 use PHPUnit\Framework\TestCase;
 

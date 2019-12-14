@@ -5,7 +5,7 @@ namespace Tests\Innmind\Filesystem\Event;
 
 use Innmind\Filesystem\{
     Event\FileWasRemoved,
-    Name\Name,
+    Name,
 };
 use PHPUnit\Framework\TestCase;
 

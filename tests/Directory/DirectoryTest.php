@@ -7,7 +7,7 @@ use Innmind\Filesystem\{
     Directory\Directory,
     Directory as DirectoryInterface,
     File,
-    Name\Name,
+    Name,
     Event\FileWasAdded,
     Event\FileWasRemoved,
     Exception\FileNotFound,

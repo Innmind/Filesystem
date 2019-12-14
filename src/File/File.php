@@ -21,7 +21,7 @@ final class File implements FileInterface
         Readable $content,
         MediaType $mediaType = null
     ) {
-        $this->name = new Name\Name($name);
+        $this->name = new Name($name);
         $this->content = $content;
         $this->mediaType = $mediaType ?? MediaType::null();
     }
