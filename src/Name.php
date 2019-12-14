@@ -8,5 +8,5 @@ namespace Innmind\Filesystem;
  */
 interface Name
 {
-    public function __toString(): string;
+    public function toString(): string;
 }

@@ -20,7 +20,7 @@ class FileTest extends TestCase
 
         $this->assertInstanceOf(FileInterface::class, $f);
         $this->assertInstanceOf(Name::class, $f->name());
-        $this->assertSame('foo', (string) $f->name());
+        $this->assertSame('foo', $f->name()->toString());
         $this->assertSame($c, $f->content());
         $this->assertSame(
             'application/octet-stream',

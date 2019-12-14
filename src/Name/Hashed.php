@@ -15,13 +15,13 @@ final class Hashed implements Name
 
     public function __construct(Name $name)
     {
-        $extension = \pathinfo((string) $name, PATHINFO_EXTENSION);
-        $hash = Str::of(\sha1(\pathinfo((string) $name, PATHINFO_BASENAME)));
+        $extension = \pathinfo($name->toString(), PATHINFO_EXTENSION);
+        $hash = Str::of(\sha1(\pathinfo($name->toString(), PATHINFO_BASENAME)));
 
         $this->first = $hash->substring(0, 2)->toString();
         $this->second = $hash->substring(2, 2)->toString();
         $this->remaining = $hash->substring(4)->toString().($extension ? '.'.$extension : '');
-        $this->original = (string) $name;
+        $this->original = $name->toString();
     }
 
     public function first(): string
@@ -39,7 +39,7 @@ final class Hashed implements Name
         return $this->remaining;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->original;
     }

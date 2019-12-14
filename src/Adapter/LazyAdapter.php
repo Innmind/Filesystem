@@ -33,10 +33,10 @@ class LazyAdapter implements LazyAdapterInterface
     public function add(File $file): Adapter
     {
         $this->toAdd = $this->toAdd->put(
-            (string) $file->name(),
+            $file->name()->toString(),
             $file
         );
-        $this->toRemove = $this->toRemove->remove((string) $file->name());
+        $this->toRemove = $this->toRemove->remove($file->name()->toString());
 
         return $this;
     }

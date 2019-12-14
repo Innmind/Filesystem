@@ -20,7 +20,7 @@ class DirectoryTest extends TestCase
         $d = new Directory('foo');
 
         $this->assertInstanceOf(DirectoryInterface::class, $d);
-        $this->assertSame('foo', (string) $d->name());
+        $this->assertSame('foo', $d->name()->toString());
         $this->assertSame('', $d->content()->toString());
         $this->assertSame('text/directory', $d->mediaType()->toString());
         $this->assertSame($d->mediaType(), $d->mediaType());
@@ -151,7 +151,7 @@ class DirectoryTest extends TestCase
         );
 
         $this->assertSame(4, $d->count());
-        $this->assertSame('foo', (string) $d->key());
+        $this->assertSame('foo', $d->key()->toString());
         $this->assertSame(
             'foo' . "\n" . 'bar' . "\n" . 'foobar' . "\n" . 'sub',
             $d->content()->toString()

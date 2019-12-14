@@ -80,7 +80,7 @@ class Directory implements DirectoryInterface
         $this->loadDirectory();
         $directory = clone $this;
         $directory->content = null;
-        $directory->files[(string) $file->name()] = $file;
+        $directory->files[$file->name()->toString()] = $file;
         $directory->record(new FileWasAdded($file));
 
         return $directory;
@@ -224,7 +224,7 @@ class Directory implements DirectoryInterface
         }
 
         foreach ($this->generator as $file) {
-            $this->files[(string) $file->name()] = $file;
+            $this->files[$file->name()->toString()] = $file;
         }
 
         $this->generator = null;

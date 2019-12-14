@@ -25,7 +25,7 @@ class MemoryAdapter implements Adapter
     public function add(File $file): Adapter
     {
         $this->files = $this->files->put(
-            (string) $file->name(),
+            $file->name()->toString(),
             $file
         );
 

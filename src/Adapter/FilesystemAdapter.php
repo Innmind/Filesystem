@@ -120,7 +120,7 @@ class FilesystemAdapter implements Adapter
     private function createFileAt(string $path, File $file)
     {
         if ($file instanceof Directory) {
-            $folder = $path.'/'.(string) $file->name();
+            $folder = $path.'/'.$file->name()->toString();
 
             if (
                 $this->files->contains($folder) &&
@@ -155,7 +155,7 @@ class FilesystemAdapter implements Adapter
             return;
         }
 
-        $path .= '/'.(string) $file->name();
+        $path .= '/'.$file->name()->toString();
 
         if (
             $this->files->contains($path) &&

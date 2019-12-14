@@ -27,7 +27,7 @@ final class CacheOpenedFilesAdapter implements Adapter
     {
         $this->filesystem->add($file);
         $this->files = $this->files->put(
-            (string) $file->name(),
+            $file->name()->toString(),
             $file
         );
 
@@ -45,7 +45,7 @@ final class CacheOpenedFilesAdapter implements Adapter
 
         $file = $this->filesystem->get($file);
         $this->files = $this->files->put(
-            (string) $file->name(),
+            $file->name()->toString(),
             $file
         );
 

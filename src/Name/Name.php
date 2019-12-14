@@ -27,7 +27,7 @@ class Name implements NameInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->name;
     }

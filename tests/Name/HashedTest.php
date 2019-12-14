@@ -22,7 +22,7 @@ class HashedTest extends TestCase
         $this->assertSame($first, $name->first());
         $this->assertSame($second, $name->second());
         $this->assertSame($remaining, $name->remaining());
-        $this->assertSame($value, (string) $name);
+        $this->assertSame($value, $name->toString());
     }
 
     public function cases(): array
