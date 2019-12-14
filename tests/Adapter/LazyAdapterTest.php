@@ -27,7 +27,7 @@ class LazyAdapterTest extends TestCase
         $this->assertInstanceOf(LazyAdapterInterface::class, $l);
         $this->assertFalse($l->contains(new Name('foo')));
         $this->assertNull(
-            $l->add($d = new Directory('foo'))
+            $l->add($d = new Directory(new Name('foo')))
         );
         $this->assertTrue($l->contains(new Name('foo')));
         $this->assertFalse($a->contains(new Name('foo')));
@@ -46,7 +46,7 @@ class LazyAdapterTest extends TestCase
     {
         $l = new LazyAdapter($a = new MemoryAdapter);
 
-        $l->add(new Directory('foo'));
+        $l->add(new Directory(new Name('foo')));
         $l->remove(new Name('foo'));
         $l->persist();
         $this->assertFalse($l->contains(new Name('foo')));
@@ -57,9 +57,9 @@ class LazyAdapterTest extends TestCase
     {
         $l = new LazyAdapter($a = new MemoryAdapter);
 
-        $a->add(new Directory('foo'));
+        $a->add(new Directory(new Name('foo')));
         $l->remove(new Name('foo'));
-        $l->add($d = new Directory('foo'));
+        $l->add($d = new Directory(new Name('foo')));
         $l->persist();
         $this->assertTrue($l->contains(new Name('foo')));
         $this->assertTrue($a->contains(new Name('foo')));
@@ -88,9 +88,9 @@ class LazyAdapterTest extends TestCase
     {
         $memory = new MemoryAdapter;
         $lazy = new LazyAdapter($memory);
-        $memory->add(new File('foo', Stream::ofContent('')));
+        $memory->add(new File(new Name('foo'), Stream::ofContent('')));
         $lazy->remove(new Name('foo'));
-        $lazy->add($bar = new File('bar', Stream::ofContent('')));
+        $lazy->add($bar = new File(new Name('bar'), Stream::ofContent('')));
 
         $all = $lazy->all();
         $this->assertInstanceOf(Set::class, $all);

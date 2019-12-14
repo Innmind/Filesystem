@@ -20,7 +20,7 @@ class DirectoryTest extends TestCase
 {
     public function testInterface()
     {
-        $d = new Directory('foo');
+        $d = new Directory(new Name('foo'));
 
         $this->assertInstanceOf(DirectoryInterface::class, $d);
         $this->assertSame('foo', $d->name()->toString());
@@ -31,11 +31,11 @@ class DirectoryTest extends TestCase
 
     public function testAdd()
     {
-        $d = new Directory('foo');
+        $d = new Directory(new Name('foo'));
         $d->content(); //force generation of files list, to be sure it's not cloned
 
         $d2 = $d->add(
-            $file = new File\File('foo', Stream::ofContent('bar'))
+            $file = new File\File(new Name('foo'), Stream::ofContent('bar'))
         );
 
         $this->assertInstanceOf(DirectoryInterface::class, $d2);
@@ -55,8 +55,8 @@ class DirectoryTest extends TestCase
 
     public function testGet()
     {
-        $d = (new Directory('foo'))
-            ->add($f = new File\File('bar', Stream::ofContent('baz')));
+        $d = (new Directory(new Name('foo')))
+            ->add($f = new File\File(new Name('bar'), Stream::ofContent('baz')));
 
         $this->assertSame($f, $d->get(new Name('bar')));
     }
@@ -66,13 +66,13 @@ class DirectoryTest extends TestCase
         $this->expectException(FileNotFound::class);
         $this->expectExceptionMessage('bar');
 
-        (new Directory('foo'))->get(new Name('bar'));
+        (new Directory(new Name('foo')))->get(new Name('bar'));
     }
 
     public function testContains()
     {
-        $d = (new Directory('foo'))
-            ->add(new File\File('bar', Stream::ofContent('baz')));
+        $d = (new Directory(new Name('foo')))
+            ->add(new File\File(new Name('bar'), Stream::ofContent('baz')));
 
         $this->assertFalse($d->contains(new Name('baz')));
         $this->assertTrue($d->contains(new Name('bar')));
@@ -80,8 +80,8 @@ class DirectoryTest extends TestCase
 
     public function testRemove()
     {
-        $d = (new Directory('foo'))
-            ->add(new File\File('bar', Stream::ofContent('baz')));
+        $d = (new Directory(new Name('foo')))
+            ->add(new File\File(new Name('bar'), Stream::ofContent('baz')));
         $d->content(); //force generation of files list, to be sure it's not cloned
 
         $d2 = $d->remove(new Name('bar'));
@@ -103,7 +103,7 @@ class DirectoryTest extends TestCase
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $dir = new Directory('foo');
+        $dir = new Directory(new Name('foo'));
 
         $this->assertSame($dir, $dir->remove(new Name('bar')));
     }
@@ -111,12 +111,12 @@ class DirectoryTest extends TestCase
     public function testGenerator()
     {
         $d = new Directory(
-            'foo',
+            new Name('foo'),
             Set::defer(File::class, (function () {
-                yield new File\File('foo', Stream::ofContent('foo'));
-                yield new File\File('bar', Stream::ofContent('bar'));
-                yield new File\File('foobar', Stream::ofContent('foobar'));
-                yield new Directory('sub');
+                yield new File\File(new Name('foo'), Stream::ofContent('foo'));
+                yield new File\File(new Name('bar'), Stream::ofContent('bar'));
+                yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
+                yield new Directory(new Name('sub'));
             })()),
         );
 
@@ -128,21 +128,21 @@ class DirectoryTest extends TestCase
 
     public function testReplaceAt()
     {
-        $d = (new Directory('foobar'))
+        $d = (new Directory(new Name('foobar')))
             ->add(
-                (new Directory('foo'))
+                (new Directory(new Name('foo')))
                     ->add(
-                        (new Directory('bar'))
+                        (new Directory(new Name('bar')))
                             ->add(
-                                (new Directory('baz'))
-                                    ->add(new File\File('baz.md', Stream::ofContent('baz')))
+                                (new Directory(new Name('baz')))
+                                    ->add(new File\File(new Name('baz.md'), Stream::ofContent('baz')))
                             )
                     )
             );
 
         $d2 = $d->replaceAt(
             'foo/bar/baz',
-            new File\File('baz.md', Stream::ofContent('updated'))
+            new File\File(new Name('baz.md'), Stream::ofContent('updated'))
         );
         $this->assertInstanceOf(DirectoryInterface::class, $d2);
         $this->assertNotSame($d, $d2);
@@ -159,12 +159,12 @@ class DirectoryTest extends TestCase
     public function testForeach()
     {
         $directory = new Directory(
-            'foo',
+            new Name('foo'),
             Set::defer(File::class, (function () {
-                yield new File\File('foo', Stream::ofContent('foo'));
-                yield new File\File('bar', Stream::ofContent('bar'));
-                yield new File\File('foobar', Stream::ofContent('foobar'));
-                yield new Directory('sub');
+                yield new File\File(new Name('foo'), Stream::ofContent('foo'));
+                yield new File\File(new Name('bar'), Stream::ofContent('bar'));
+                yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
+                yield new Directory(new Name('sub'));
             })()),
         );
 
@@ -178,12 +178,12 @@ class DirectoryTest extends TestCase
     public function testReduce()
     {
         $directory = new Directory(
-            'foo',
+            new Name('foo'),
             Set::defer(File::class, (function () {
-                yield new File\File('foo', Stream::ofContent('foo'));
-                yield new File\File('bar', Stream::ofContent('bar'));
-                yield new File\File('foobar', Stream::ofContent('foobar'));
-                yield new Directory('sub');
+                yield new File\File(new Name('foo'), Stream::ofContent('foo'));
+                yield new File\File(new Name('bar'), Stream::ofContent('bar'));
+                yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
+                yield new Directory(new Name('sub'));
             })()),
         );
 

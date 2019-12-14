@@ -25,7 +25,7 @@ class FilesystemAdapterTest extends TestCase
 
         $this->assertInstanceOf(Adapter::class, $adapter);
         $this->assertFalse($adapter->contains(new Name('foo')));
-        $this->assertNull($adapter->add(new Directory('foo')));
+        $this->assertNull($adapter->add(new Directory(new Name('foo'))));
         $this->assertTrue($adapter->contains(new Name('foo')));
         $this->assertNull($adapter->remove(new Name('foo')));
         $this->assertFalse($adapter->contains(new Name('foo')));
@@ -48,11 +48,11 @@ class FilesystemAdapterTest extends TestCase
     {
         $adapter = new FilesystemAdapter('/tmp');
 
-        $directory = (new Directory('foo'))
-            ->add(new File('foo.md', Stream::ofContent('# Foo')))
+        $directory = (new Directory(new Name('foo')))
+            ->add(new File(new Name('foo.md'), Stream::ofContent('# Foo')))
             ->add(
-                (new Directory('bar'))
-                    ->add(new File('bar.md', Stream::ofContent('# Bar')))
+                (new Directory(new Name('bar')))
+                    ->add(new File(new Name('bar.md'), Stream::ofContent('# Bar')))
             );
         $adapter->add($directory);
         $this->assertSame(
@@ -84,8 +84,8 @@ class FilesystemAdapterTest extends TestCase
     {
         $a = new FilesystemAdapter('/tmp');
 
-        $d = new Directory('foo');
-        $d = $d->add(new File('bar', Stream::ofContent('some content')));
+        $d = new Directory(new Name('foo'));
+        $d = $d->add(new File(new Name('bar'), Stream::ofContent('some content')));
         $a->add($d);
         $d = $d->remove(new Name('bar'));
         $a->add($d);
@@ -99,8 +99,8 @@ class FilesystemAdapterTest extends TestCase
     {
         $a = new FilesystemAdapter('/tmp');
 
-        $d = new Directory('foo');
-        $d = $d->add(new File('bar', Stream::ofContent('some content')));
+        $d = new Directory(new Name('foo'));
+        $d = $d->add(new File(new Name('bar'), Stream::ofContent('some content')));
         $a->add($d);
         $d = $d->remove(new Name('bar'));
         $a->add($d);
@@ -130,7 +130,7 @@ class FilesystemAdapterTest extends TestCase
     {
         $adapter = new FilesystemAdapter('/tmp/test');
         $adapter->add(new File(
-            'foo',
+            new Name('foo'),
             Stream::ofContent('foo')
         ));
         file_put_contents('/tmp/test/bar', 'bar');

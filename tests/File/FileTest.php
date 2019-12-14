@@ -16,11 +16,10 @@ class FileTest extends TestCase
 {
     public function testInterface()
     {
-        $f = new File('foo', $c = Stream::ofContent('bar'));
+        $f = new File($name = new Name('foo'), $c = Stream::ofContent('bar'));
 
         $this->assertInstanceOf(FileInterface::class, $f);
-        $this->assertInstanceOf(Name::class, $f->name());
-        $this->assertSame('foo', $f->name()->toString());
+        $this->assertSame($name, $f->name());
         $this->assertSame($c, $f->content());
         $this->assertSame(
             'application/octet-stream',
@@ -30,7 +29,7 @@ class FileTest extends TestCase
 
     public function testWithContent()
     {
-        $f = new File('foo', $c = Stream::ofContent('bar'));
+        $f = new File(new Name('foo'), $c = Stream::ofContent('bar'));
         $f2 = $f->withContent($c2 = Stream::ofContent('baz'));
 
         $this->assertNotSame($f, $f2);
@@ -42,7 +41,7 @@ class FileTest extends TestCase
     public function testMediaType()
     {
         $f = new File(
-            'foo',
+            new Name('foo'),
             Stream::ofContent('bar'),
             $mt = MediaType::of('application/json')
         );

@@ -49,7 +49,7 @@ class HashedNameAdapterTest extends TestCase
             $inner = new FilesystemAdapter('/tmp/hashed')
         );
 
-        $file = new File\File('foo', Stream::ofContent('content'));
+        $file = new File\File(new Name('foo'), Stream::ofContent('content'));
 
         $this->assertFalse($filesystem->contains(new Name('foo')));
         $this->assertNull($filesystem->add($file));
@@ -64,7 +64,7 @@ class HashedNameAdapterTest extends TestCase
                 ->toString()
         );
 
-        $file = new File\File('foo', Stream::ofContent('content bis'));
+        $file = new File\File(new Name('foo'), Stream::ofContent('content bis'));
 
         $this->assertNull($filesystem->add($file));
         $this->assertSame(
@@ -99,8 +99,8 @@ class HashedNameAdapterTest extends TestCase
             new FilesystemAdapter('/tmp/hashed')
         );
 
-        $filesystem->add(new File\File('foo', Stream::ofContent('content')));
-        $filesystem->add(new File\File('bar', Stream::ofContent('content')));
+        $filesystem->add(new File\File(new Name('foo'), Stream::ofContent('content')));
+        $filesystem->add(new File\File(new Name('bar'), Stream::ofContent('content')));
 
         $all = $filesystem->all();
 

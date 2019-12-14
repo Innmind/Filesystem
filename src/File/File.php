@@ -17,11 +17,11 @@ final class File implements FileInterface
     private MediaType $mediaType;
 
     public function __construct(
-        string $name,
+        Name $name,
         Readable $content,
         MediaType $mediaType = null
     ) {
-        $this->name = new Name($name);
+        $this->name = $name;
         $this->content = $content;
         $this->mediaType = $mediaType ?? MediaType::null();
     }

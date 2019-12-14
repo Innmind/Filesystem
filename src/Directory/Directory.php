@@ -31,13 +31,13 @@ final class Directory implements DirectoryInterface
     private MediaType $mediaType;
     private Sequence $modifications;
 
-    public function __construct(string $name, Set $files = null)
+    public function __construct(Name $name, Set $files = null)
     {
         $files ??= Set::of(File::class);
 
         assertSet(File::class, $files, 2);
 
-        $this->name = new Name($name);
+        $this->name = $name;
         $this->files = $files;
         $this->mediaType = new MediaType(
             'text',

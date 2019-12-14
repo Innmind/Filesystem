@@ -111,7 +111,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
             ->method('get')
             ->with(new Name('foo'))
             ->willReturn($expected = new File\File(
-                'foo',
+                new Name('foo'),
                 $this->createMock(Readable::class),
             ));
         $filesystem->add($file);

@@ -171,7 +171,7 @@ final class FilesystemAdapter implements Adapter
 
         if (\is_dir($path)) {
             $object = new Directory\Directory(
-                $file,
+                new Name($file),
                 Set::defer(File::class, (function($folder) {
                     $handle = \opendir($folder);
 
@@ -194,7 +194,7 @@ final class FilesystemAdapter implements Adapter
             }
 
             $object = new File\File(
-                $file,
+                new Name($file),
                 new LazyStream($path),
                 $mediaType,
             );

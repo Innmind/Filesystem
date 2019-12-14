@@ -42,20 +42,20 @@ final class HashedNameAdapter implements Adapter
         if ($this->filesystem->contains($hashes[0])) {
             $first = $this->filesystem->get($hashes[0]);
         } else {
-            $first = new Directory\Directory($hashes[0]->toString());
+            $first = new Directory\Directory($hashes[0]);
         }
 
         if ($first->contains($hashes[1])) {
             $second = $first->get($hashes[1]);
         } else {
-            $second = new Directory\Directory($hashes[1]->toString());
+            $second = new Directory\Directory($hashes[1]);
         }
 
         $this->filesystem->add(
             $first->add(
                 $second->add(
                     new File\File(
-                        $hashes[2]->toString(),
+                        $hashes[2],
                         $file->content(),
                     ),
                 ),
@@ -81,7 +81,7 @@ final class HashedNameAdapter implements Adapter
             ->get($hashes[2]);
 
         return new File\File(
-            $originalName->toString(),
+            $originalName,
             $file->content(),
             $file->mediaType(),
         );

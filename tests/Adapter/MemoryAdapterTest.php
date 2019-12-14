@@ -26,7 +26,7 @@ class MemoryAdapterTest extends TestCase
         $this->assertInstanceOf(Adapter::class, $a);
         $this->assertFalse($a->contains(new Name('foo')));
         $this->assertNull(
-            $a->add($d = new Directory('foo'))
+            $a->add($d = new Directory(new Name('foo')))
         );
         $this->assertTrue($a->contains(new Name('foo')));
         $this->assertSame($d, $a->get(new Name('foo')));
@@ -51,11 +51,11 @@ class MemoryAdapterTest extends TestCase
     {
         $adapter = new MemoryAdapter;
         $adapter->add($foo = new File(
-            'foo',
+            new Name('foo'),
             Stream::ofContent('foo')
         ));
         $adapter->add($bar = new File(
-            'bar',
+            new Name('bar'),
             Stream::ofContent('bar')
         ));
 
