@@ -9,7 +9,7 @@ use Innmind\Filesystem\{
 };
 use Innmind\Immutable\Str;
 
-class Name implements NameInterface
+final class Name implements NameInterface
 {
     private string $name;
 
