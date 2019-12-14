@@ -5,7 +5,7 @@ namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter,
-    File
+    File,
 };
 use Innmind\Immutable\Map;
 
@@ -26,9 +26,9 @@ final class CacheOpenedFilesAdapter implements Adapter
     public function add(File $file): void
     {
         $this->filesystem->add($file);
-        $this->files = $this->files->put(
+        $this->files = ($this->files)(
             $file->name()->toString(),
-            $file
+            $file,
         );
     }
 
@@ -42,9 +42,9 @@ final class CacheOpenedFilesAdapter implements Adapter
         }
 
         $file = $this->filesystem->get($file);
-        $this->files = $this->files->put(
+        $this->files = ($this->files)(
             $file->name()->toString(),
-            $file
+            $file,
         );
 
         return $file;

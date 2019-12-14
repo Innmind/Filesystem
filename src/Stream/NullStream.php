@@ -9,7 +9,7 @@ use Innmind\Stream\{
     Stream\Position,
     Stream\Position\Mode,
     Stream\Size,
-    Exception\PositionNotSeekable
+    Exception\PositionNotSeekable,
 };
 use Innmind\Immutable\Str;
 

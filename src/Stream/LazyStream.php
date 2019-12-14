@@ -9,7 +9,7 @@ use Innmind\Stream\{
     Readable,
     Stream\Position,
     Stream\Position\Mode,
-    Stream\Size
+    Stream\Size,
 };
 use Innmind\Immutable\Str;
 
@@ -89,7 +89,7 @@ final class LazyStream implements Readable
         return $this->stream instanceof Readable;
     }
 
-    private function stream()
+    private function stream(): Readable
     {
         if (!$this->isInitialized()) {
             $this->stream = new Readable\Stream(\fopen($this->path, 'r'));

@@ -7,7 +7,7 @@ use Innmind\Filesystem\{
     LazyAdapter as LazyAdapterInterface,
     Adapter,
     File,
-    Exception\FileNotFound
+    Exception\FileNotFound,
 };
 use Innmind\Immutable\{
     Map,
@@ -32,9 +32,9 @@ class LazyAdapter implements LazyAdapterInterface
      */
     public function add(File $file): void
     {
-        $this->toAdd = $this->toAdd->put(
+        $this->toAdd = ($this->toAdd)(
             $file->name()->toString(),
-            $file
+            $file,
         );
         $this->toRemove = $this->toRemove->remove($file->name()->toString());
     }
@@ -76,7 +76,7 @@ class LazyAdapter implements LazyAdapterInterface
      */
     public function remove(string $file): void
     {
-        $this->toRemove = $this->toRemove->add($file);
+        $this->toRemove = ($this->toRemove)($file);
         $this->toAdd = $this->toAdd->remove($file);
     }
 

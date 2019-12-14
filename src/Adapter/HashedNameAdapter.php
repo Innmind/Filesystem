@@ -10,7 +10,7 @@ use Innmind\Filesystem\{
     Name\Hashed,
     Name\Name,
     Exception\LogicException,
-    Exception\FileNotFound
+    Exception\FileNotFound,
 };
 use Innmind\Immutable\Map;
 
@@ -54,10 +54,10 @@ final class HashedNameAdapter implements Adapter
                 $second->add(
                     new File\File(
                         $name->remaining(),
-                        $file->content()
-                    )
-                )
-            )
+                        $file->content(),
+                    ),
+                ),
+            ),
         );
     }
 
@@ -81,7 +81,7 @@ final class HashedNameAdapter implements Adapter
         return new File\File(
             $originalName,
             $file->content(),
-            $file->mediaType()
+            $file->mediaType(),
         );
     }
 
@@ -122,7 +122,7 @@ final class HashedNameAdapter implements Adapter
         $first = $first->add(
             $first
             ->get($name->second())
-            ->remove($name->remaining())
+            ->remove($name->remaining()),
         );
         $this->filesystem->add($first);
     }

@@ -6,7 +6,7 @@ namespace Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     Adapter,
     File,
-    Exception\FileNotFound
+    Exception\FileNotFound,
 };
 use Innmind\Immutable\Map;
 
@@ -24,9 +24,9 @@ class MemoryAdapter implements Adapter
      */
     public function add(File $file): void
     {
-        $this->files = $this->files->put(
+        $this->files = ($this->files)(
             $file->name()->toString(),
-            $file
+            $file,
         );
     }
 

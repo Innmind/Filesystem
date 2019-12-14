@@ -20,7 +20,7 @@ use Innmind\Immutable\{
 };
 use Symfony\Component\{
     Filesystem\Filesystem,
-    Finder\Finder
+    Finder\Finder,
 };
 
 class FilesystemAdapter implements Adapter
@@ -92,9 +92,9 @@ class FilesystemAdapter implements Adapter
         $map = Map::of('string', File::class);
 
         foreach ($files as $file) {
-            $map = $map->put(
+            $map = ($map)(
                 $file->getRelativePathname(),
-                $this->get($file->getRelativePathname())
+                $this->get($file->getRelativePathname()),
             );
         }
 
@@ -103,9 +103,6 @@ class FilesystemAdapter implements Adapter
 
     /**
      * Create the wished file at the given absolute path
-     *
-     * @param string $path
-     * @param File $file
      */
     private function createFileAt(string $path, File $file): void
     {
@@ -138,9 +135,9 @@ class FilesystemAdapter implements Adapter
                             break;
                     }
 
-                    $this->handledEvents = $this->handledEvents->add($event);
+                    $this->handledEvents = ($this->handledEvents)($event);
                 });
-            $this->files = $this->files->put($folder, $file);
+            $this->files = ($this->files)($folder, $file);
 
             return;
         }
@@ -162,16 +159,11 @@ class FilesystemAdapter implements Adapter
             \fwrite($handle, $stream->read(8192)->toString());
         }
 
-        $this->files = $this->files->put($path, $file);
+        $this->files = ($this->files)($path, $file);
     }
 
     /**
      * Open the file in the given folder
-     *
-     * @param string $folder
-     * @param string $file
-     *
-     * @return File
      */
     private function open(string $folder, string $file): File
     {
@@ -183,7 +175,7 @@ class FilesystemAdapter implements Adapter
                 (function($folder) {
                     $handle = \opendir($folder);
 
-                    while (($name = readdir($handle)) !== false) {
+                    while (($name = \readdir($handle)) !== false) {
                         if (\in_array($name, self::INVALID_FILES, true)) {
                             continue;
                         }
@@ -192,7 +184,7 @@ class FilesystemAdapter implements Adapter
                     }
 
                     \closedir($handle);
-                })($path)
+                })($path),
             );
         } else {
             try {
@@ -204,11 +196,11 @@ class FilesystemAdapter implements Adapter
             $object = new File\File(
                 $file,
                 new LazyStream($path),
-                $mediaType
+                $mediaType,
             );
         }
 
-        $this->files = $this->files->put($path, $object);
+        $this->files = ($this->files)($path, $object);
 
         return $object;
     }

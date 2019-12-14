@@ -35,7 +35,7 @@ class Directory implements DirectoryInterface
         $this->files = [];
         $this->mediaType = new MediaType(
             'text',
-            'directory'
+            'directory',
         );
         $this->modifications = Sequence::objects();
     }
@@ -213,10 +213,8 @@ class Directory implements DirectoryInterface
 
     /**
      * Load all files of the directory
-     *
-     * @return void
      */
-    private function loadDirectory()
+    private function loadDirectory(): void
     {
         if ($this->generator === null) {
             return;
