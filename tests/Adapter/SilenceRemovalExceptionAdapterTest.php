@@ -35,7 +35,7 @@ class SilenceRemovalExceptionAdapterTest extends TestCase
             ->method('add')
             ->with($file);
 
-        $this->assertSame($adapter, $adapter->add($file));
+        $this->assertNull($adapter->add($file));
     }
 
     public function testGet()
@@ -83,7 +83,7 @@ class SilenceRemovalExceptionAdapterTest extends TestCase
             ->method('remove')
             ->with('foo');
 
-        $this->assertSame($adapter, $adapter->remove('foo'));
+        $this->assertNull($adapter->remove('foo'));
     }
 
     public function testRemoveSafelyWhenFileNotFound()
@@ -99,7 +99,7 @@ class SilenceRemovalExceptionAdapterTest extends TestCase
                 $this->throwException(new FileNotFound)
             );
 
-        $this->assertSame($adapter, $adapter->remove('foo'));
+        $this->assertNull($adapter->remove('foo'));
     }
 
     public function testAll()

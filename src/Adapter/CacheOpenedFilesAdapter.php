@@ -23,15 +23,13 @@ final class CacheOpenedFilesAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function add(File $file): Adapter
+    public function add(File $file): void
     {
         $this->filesystem->add($file);
         $this->files = $this->files->put(
             $file->name()->toString(),
             $file
         );
-
-        return $this;
     }
 
     /**
@@ -67,12 +65,10 @@ final class CacheOpenedFilesAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): Adapter
+    public function remove(string $file): void
     {
         $this->files = $this->files->remove($file);
         $this->filesystem->remove($file);
-
-        return $this;
     }
 
     /**

@@ -46,11 +46,9 @@ class FilesystemAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function add(File $file): Adapter
+    public function add(File $file): void
     {
         $this->createFileAt($this->path, $file);
-
-        return $this;
     }
 
     /**
@@ -80,15 +78,13 @@ class FilesystemAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): Adapter
+    public function remove(string $file): void
     {
         if (!$this->has($file)) {
             throw new FileNotFound($file);
         }
 
         $this->filesystem->remove($this->path.'/'.$file);
-
-        return $this;
     }
 
     /**
@@ -114,10 +110,8 @@ class FilesystemAdapter implements Adapter
      *
      * @param string $path
      * @param File $file
-     *
-     * @return void
      */
-    private function createFileAt(string $path, File $file)
+    private function createFileAt(string $path, File $file): void
     {
         if ($file instanceof Directory) {
             $folder = $path.'/'.$file->name()->toString();

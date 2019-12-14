@@ -29,7 +29,7 @@ final class HashedNameAdapter implements Adapter
         $this->filesystem = $filesystem;
     }
 
-    public function add(File $file): Adapter
+    public function add(File $file): void
     {
         if ($file instanceof Directory) {
             throw new LogicException;
@@ -59,8 +59,6 @@ final class HashedNameAdapter implements Adapter
                 )
             )
         );
-
-        return $this;
     }
 
     /**
@@ -113,7 +111,7 @@ final class HashedNameAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): Adapter
+    public function remove(string $file): void
     {
         if (!$this->has($file)) {
             throw new FileNotFound($file);
@@ -127,8 +125,6 @@ final class HashedNameAdapter implements Adapter
             ->remove($name->remaining())
         );
         $this->filesystem->add($first);
-
-        return $this;
     }
 
     /**

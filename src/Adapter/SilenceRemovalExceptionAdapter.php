@@ -22,11 +22,9 @@ final class SilenceRemovalExceptionAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function add(File $file): Adapter
+    public function add(File $file): void
     {
         $this->adapter->add($file);
-
-        return $this;
     }
 
     /**
@@ -48,15 +46,13 @@ final class SilenceRemovalExceptionAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): Adapter
+    public function remove(string $file): void
     {
         try {
             $this->adapter->remove($file);
         } catch (FileNotFound $e) {
             //pass
         }
-
-        return $this;
     }
 
     /**

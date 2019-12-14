@@ -22,14 +22,12 @@ class MemoryAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function add(File $file): Adapter
+    public function add(File $file): void
     {
         $this->files = $this->files->put(
             $file->name()->toString(),
             $file
         );
-
-        return $this;
     }
 
     /**
@@ -55,15 +53,13 @@ class MemoryAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): Adapter
+    public function remove(string $file): void
     {
         if (!$this->has($file)) {
             throw new FileNotFound($file);
         }
 
         $this->files = $this->files->remove($file);
-
-        return $this;
     }
 
     /**

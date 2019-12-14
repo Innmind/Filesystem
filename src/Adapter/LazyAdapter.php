@@ -30,15 +30,13 @@ class LazyAdapter implements LazyAdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function add(File $file): Adapter
+    public function add(File $file): void
     {
         $this->toAdd = $this->toAdd->put(
             $file->name()->toString(),
             $file
         );
         $this->toRemove = $this->toRemove->remove($file->name()->toString());
-
-        return $this;
     }
 
     /**
@@ -76,7 +74,7 @@ class LazyAdapter implements LazyAdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): Adapter
+    public function remove(string $file): void
     {
         if (!$this->has($file)) {
             throw new FileNotFound($file);
@@ -84,8 +82,6 @@ class LazyAdapter implements LazyAdapterInterface
 
         $this->toRemove = $this->toRemove->add($file);
         $this->toAdd = $this->toAdd->remove($file);
-
-        return $this;
     }
 
     /**
@@ -105,7 +101,7 @@ class LazyAdapter implements LazyAdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function persist(): LazyAdapterInterface
+    public function persist(): void
     {
         $this
             ->toAdd
@@ -121,7 +117,5 @@ class LazyAdapter implements LazyAdapterInterface
                 }
             });
         $this->toRemove = Set::strings();
-
-        return $this;
     }
 }

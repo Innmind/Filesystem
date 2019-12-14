@@ -23,16 +23,15 @@ class LazyAdapterTest extends TestCase
 
         $this->assertInstanceOf(LazyAdapterInterface::class, $l);
         $this->assertFalse($l->has('foo'));
-        $this->assertSame(
-            $l,
+        $this->assertNull(
             $l->add($d = new Directory('foo'))
         );
         $this->assertTrue($l->has('foo'));
         $this->assertFalse($a->has('foo'));
-        $this->assertSame($l, $l->persist());
+        $this->assertNull($l->persist());
         $this->assertTrue($l->has('foo'));
         $this->assertTrue($a->has('foo'));
-        $this->assertSame($l, $l->remove('foo'));
+        $this->assertNull($l->remove('foo'));
         $this->assertFalse($l->has('foo'));
         $this->assertTrue($a->has('foo'));
         $l->persist();
@@ -44,10 +43,9 @@ class LazyAdapterTest extends TestCase
     {
         $l = new LazyAdapter($a = new MemoryAdapter);
 
-        $l
-            ->add(new Directory('foo'))
-            ->remove('foo')
-            ->persist();
+        $l->add(new Directory('foo'));
+        $l->remove('foo');
+        $l->persist();
         $this->assertFalse($l->has('foo'));
         $this->assertFalse($a->has('foo'));
     }
@@ -57,10 +55,9 @@ class LazyAdapterTest extends TestCase
         $l = new LazyAdapter($a = new MemoryAdapter);
 
         $a->add(new Directory('foo'));
-        $l
-            ->remove('foo')
-            ->add($d = new Directory('foo'))
-            ->persist();
+        $l->remove('foo');
+        $l->add($d = new Directory('foo'));
+        $l->persist();
         $this->assertTrue($l->has('foo'));
         $this->assertTrue($a->has('foo'));
         $this->assertSame($d, $l->get('foo'));

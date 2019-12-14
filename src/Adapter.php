@@ -10,7 +10,7 @@ use Innmind\Immutable\Map;
  */
 interface Adapter
 {
-    public function add(File $file): self;
+    public function add(File $file): void;
 
     /**
      * @throws FileNotFound
@@ -21,7 +21,7 @@ interface Adapter
     /**
      * @throws FileNotFound
      */
-    public function remove(string $file): self;
+    public function remove(string $file): void;
 
     /**
      * @return Map<string, File>

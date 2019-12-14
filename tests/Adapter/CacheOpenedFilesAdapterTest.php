@@ -38,7 +38,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
             ->method('add')
             ->with($file);
 
-        $this->assertSame($filesystem, $filesystem->add($file));
+        $this->assertNull($filesystem->add($file));
         $this->assertSame($file, $filesystem->get('foo'));
     }
 
@@ -112,7 +112,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
             ->willReturn($expected = $this->createMock(File::class));
         $filesystem->add($file);
 
-        $this->assertSame($filesystem, $filesystem->remove('foo'));
+        $this->assertNull($filesystem->remove('foo'));
         $this->assertSame($expected, $filesystem->get('foo'));
     }
 

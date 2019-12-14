@@ -50,7 +50,7 @@ class HashedNameAdapterTest extends TestCase
         $file = new File\File('foo', new StringStream('content'));
 
         $this->assertFalse($filesystem->has('foo'));
-        $this->assertSame($filesystem, $filesystem->add($file));
+        $this->assertNull($filesystem->add($file));
         $this->assertTrue($filesystem->has('foo'));
         $this->assertSame(
             'content',
@@ -64,7 +64,7 @@ class HashedNameAdapterTest extends TestCase
 
         $file = new File\File('foo', new StringStream('content bis'));
 
-        $this->assertSame($filesystem, $filesystem->add($file));
+        $this->assertNull($filesystem->add($file));
         $this->assertSame(
             'content bis',
             (string) $inner
@@ -75,7 +75,7 @@ class HashedNameAdapterTest extends TestCase
                 ->toString()
         );
 
-        $this->assertSame($filesystem, $filesystem->remove('foo'));
+        $this->assertNull($filesystem->remove('foo'));
         $this->assertFalse($filesystem->has('foo'));
     }
 

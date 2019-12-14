@@ -24,9 +24,9 @@ class FilesystemAdapterTest extends TestCase
 
         $this->assertInstanceOf(Adapter::class, $adapter);
         $this->assertFalse($adapter->has('foo'));
-        $this->assertSame($adapter, $adapter->add(new Directory('foo')));
+        $this->assertNull($adapter->add(new Directory('foo')));
         $this->assertTrue($adapter->has('foo'));
-        $this->assertSame($adapter, $adapter->remove('foo'));
+        $this->assertNull($adapter->remove('foo'));
         $this->assertFalse($adapter->has('foo'));
     }
 
@@ -152,10 +152,9 @@ class FilesystemAdapterTest extends TestCase
         $this->assertSame('foo', $adapter->get('foo')->content()->toString());
         $this->assertSame('bar', $adapter->get('bar')->content()->toString());
         $this->assertInstanceOf(Directory::class, $adapter->get('baz'));
-        $adapter
-            ->remove('foo')
-            ->remove('bar')
-            ->remove('baz');
+        $adapter->remove('foo');
+        $adapter->remove('bar');
+        $adapter->remove('baz');
     }
 
     public function testFallbackToNullMediaTypeWhenDetectedWhenIsNotAnOfficialOne()

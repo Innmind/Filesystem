@@ -23,13 +23,12 @@ class MemoryAdapterTest extends TestCase
 
         $this->assertInstanceOf(Adapter::class, $a);
         $this->assertFalse($a->has('foo'));
-        $this->assertSame(
-            $a,
+        $this->assertNull(
             $a->add($d = new Directory('foo'))
         );
         $this->assertTrue($a->has('foo'));
         $this->assertSame($d, $a->get('foo'));
-        $this->assertSame($a, $a->remove('foo'));
+        $this->assertNull($a->remove('foo'));
         $this->assertFalse($a->has('foo'));
     }
 
