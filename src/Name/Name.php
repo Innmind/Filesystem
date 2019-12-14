@@ -11,7 +11,7 @@ use Innmind\Immutable\Str;
 
 class Name implements NameInterface
 {
-    private $name;
+    private string $name;
 
     public function __construct(string $name)
     {

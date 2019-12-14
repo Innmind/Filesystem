@@ -7,7 +7,7 @@ use Innmind\Filesystem\File;
 
 final class FileWasAdded
 {
-    private $file;
+    private File $file;
 
     public function __construct(File $file)
     {

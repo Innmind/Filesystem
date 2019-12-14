@@ -13,9 +13,9 @@ use Innmind\Stream\Readable;
 
 class File implements FileInterface
 {
-    private $name;
-    private $content;
-    private $mediaType;
+    private Name $name;
+    private Readable $content;
+    private MediaType $mediaType;
 
     public function __construct(
         string $name,

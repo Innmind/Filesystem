@@ -14,7 +14,7 @@ use Innmind\Immutable\Str;
 
 final class StringStream implements Readable
 {
-    private $stream;
+    private Readable $stream;
 
     public function __construct(string $content)
     {

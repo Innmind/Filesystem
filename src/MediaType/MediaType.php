@@ -18,11 +18,11 @@ use Innmind\Immutable\{
 
 final class MediaType implements MediaTypeInterface
 {
-    private static $topLevels;
-    private $topLevel;
-    private $subType;
-    private $suffix;
-    private $parameters;
+    private static ?Set $topLevels = null;
+    private string $topLevel;
+    private string $subType;
+    private string $suffix;
+    private Map $parameters;
 
     public function __construct(
         string $topLevel,

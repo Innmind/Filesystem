@@ -22,7 +22,7 @@ use Innmind\Immutable\MapInterface;
  */
 final class HashedNameAdapter implements Adapter
 {
-    private $filesystem;
+    private Adapter $filesystem;
 
     public function __construct(Adapter $filesystem)
     {

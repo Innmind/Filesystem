@@ -15,7 +15,7 @@ use Innmind\Immutable\{
 
 class MemoryAdapter implements Adapter
 {
-    private $files;
+    private Map $files;
 
     public function __construct()
     {

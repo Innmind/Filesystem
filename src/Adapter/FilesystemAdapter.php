@@ -28,10 +28,10 @@ use Symfony\Component\{
 class FilesystemAdapter implements Adapter
 {
     private const INVALID_FILES = ['.', '..'];
-    private $path;
-    private $filesystem;
-    private $files;
-    private $handledEvents;
+    private string $path;
+    private Filesystem $filesystem;
+    private Map $files;
+    private Set $handledEvents;
 
     public function __construct(string $path)
     {

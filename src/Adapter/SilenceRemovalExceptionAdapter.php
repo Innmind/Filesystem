@@ -12,7 +12,7 @@ use Innmind\Immutable\MapInterface;
 
 final class SilenceRemovalExceptionAdapter implements Adapter
 {
-    private $adapter;
+    private Adapter $adapter;
 
     public function __construct(Adapter $adapter)
     {

@@ -8,10 +8,10 @@ use Innmind\Immutable\Str;
 
 final class Hashed implements Name
 {
-    private $first;
-    private $second;
-    private $remaining;
-    private $original;
+    private string $first;
+    private string $second;
+    private string $remaining;
+    private string $original;
 
     public function __construct(Name $name)
     {

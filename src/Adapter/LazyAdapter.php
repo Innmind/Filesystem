@@ -17,9 +17,9 @@ use Innmind\Immutable\{
 
 class LazyAdapter implements LazyAdapterInterface
 {
-    private $adapter;
-    private $toAdd;
-    private $toRemove;
+    private Adapter $adapter;
+    private Map $toAdd;
+    private Set $toRemove;
 
     public function __construct(Adapter $adapter)
     {

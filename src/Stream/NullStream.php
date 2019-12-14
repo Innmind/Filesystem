@@ -15,7 +15,7 @@ use Innmind\Immutable\Str;
 
 final class NullStream implements Readable
 {
-    private $closed = false;
+    private bool $closed = false;
 
     public function close(): Stream
     {

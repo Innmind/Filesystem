@@ -11,7 +11,7 @@ use Innmind\Immutable\{
 
 final class NullMediaType implements MediaTypeInterface
 {
-    private $parameters;
+    private Map $parameters;
 
     public function __construct()
     {

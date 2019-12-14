@@ -15,8 +15,8 @@ use Innmind\Immutable\Str;
 
 final class LazyStream implements Readable
 {
-    private $path;
-    private $stream;
+    private string $path;
+    private ?Readable $stream = null;
 
     public function __construct(string $path)
     {

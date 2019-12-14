@@ -14,8 +14,8 @@ use Innmind\Immutable\{
 
 final class CacheOpenedFilesAdapter implements Adapter
 {
-    private $files;
-    private $filesystem;
+    private Map $files;
+    private Adapter $filesystem;
 
     public function __construct(Adapter $filesystem)
     {

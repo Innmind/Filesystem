@@ -5,7 +5,7 @@ namespace Innmind\Filesystem\Event;
 
 final class FileWasRemoved
 {
-    private $file;
+    private string $file;
 
     public function __construct(string $file)
     {

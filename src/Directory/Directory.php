@@ -23,12 +23,12 @@ use Innmind\Immutable\{
 
 class Directory implements DirectoryInterface
 {
-    private $name;
-    private $content;
-    private $files;
-    private $generator;
-    private $mediaType;
-    private $modifications;
+    private Name $name;
+    private ?Readable $content = null;
+    private Map $files;
+    private ?\Generator $generator;
+    private MediaType $mediaType;
+    private Stream $modifications;
 
     public function __construct(string $name, \Generator $generator = null)
     {
