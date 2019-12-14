@@ -206,4 +206,24 @@ class DirectoryTest extends TestCase
         }));
         $this->assertSame(4, $called);
     }
+
+    public function testReduce()
+    {
+        $directory = new Directory(
+            'foo',
+            (function () {
+                yield new File\File('foo', Stream::ofContent('foo'));
+                yield new File\File('bar', Stream::ofContent('bar'));
+                yield new File\File('foobar', Stream::ofContent('foobar'));
+                yield new Directory('sub');
+            })(),
+        );
+
+        $reduced = $directory->reduce(
+            '',
+            fn($carry, $file) => $carry.$file->name()->toString(),
+        );
+
+        $this->assertSame('foobarfoobarsub', $reduced);
+    }
 }

@@ -23,6 +23,16 @@ interface Directory extends File, \Iterator, \Countable
     public function foreach(callable $function): void;
 
     /**
+     * @template R
+     *
+     * @param R $carry
+     * @param callable(R, File): R $reducer
+     *
+     * @return R
+     */
+    public function reduce($carry, callable $reducer);
+
+    /**
      * @return Sequence<object>
      */
     public function modifications(): Sequence;

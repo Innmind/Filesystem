@@ -162,6 +162,20 @@ class Directory implements DirectoryInterface
     /**
      * {@inheritdoc}
      */
+    public function reduce($carry, callable $reducer)
+    {
+        $this->loadDirectory();
+
+        foreach ($this->files as $file) {
+            $carry = $reducer($carry, $file);
+        }
+
+        return $carry;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function modifications(): Sequence
     {
         return $this->modifications;
