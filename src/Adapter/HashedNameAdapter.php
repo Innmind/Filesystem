@@ -12,7 +12,10 @@ use Innmind\Filesystem\{
     Exception\LogicException,
     Exception\FileNotFound,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Str,
+};
 
 /**
  * Take the name of a file hashes it and persist files in subdirectories
@@ -35,25 +38,25 @@ final class HashedNameAdapter implements Adapter
             throw new LogicException;
         }
 
-        $name = new Hashed($file->name());
+        $hashes = $this->hash($file->name());
 
-        if ($this->filesystem->contains($name->first())) {
-            $first = $this->filesystem->get($name->first());
+        if ($this->filesystem->contains($hashes[0])) {
+            $first = $this->filesystem->get($hashes[0]);
         } else {
-            $first = new Directory\Directory($name->first()->toString());
+            $first = new Directory\Directory($hashes[0]->toString());
         }
 
-        if ($first->contains($name->second())) {
-            $second = $first->get($name->second());
+        if ($first->contains($hashes[1])) {
+            $second = $first->get($hashes[1]);
         } else {
-            $second = new Directory\Directory($name->second()->toString());
+            $second = new Directory\Directory($hashes[1]->toString());
         }
 
         $this->filesystem->add(
             $first->add(
                 $second->add(
                     new File\File(
-                        $name->remaining()->toString(),
+                        $hashes[2]->toString(),
                         $file->content(),
                     ),
                 ),
@@ -71,12 +74,12 @@ final class HashedNameAdapter implements Adapter
         }
 
         $originalName = $file;
-        $name = new Hashed($file);
+        $hashes = $this->hash($file);
         $file = $this
             ->filesystem
-            ->get($name->first())
-            ->get($name->second())
-            ->get($name->remaining());
+            ->get($hashes[0])
+            ->get($hashes[1])
+            ->get($hashes[2]);
 
         return new File\File(
             $originalName->toString(),
@@ -87,25 +90,25 @@ final class HashedNameAdapter implements Adapter
 
     public function contains(Name $file): bool
     {
-        $name = new Hashed($file);
+        $hashes = $this->hash($file);
 
-        if (!$this->filesystem->contains($name->first())) {
+        if (!$this->filesystem->contains($hashes[0])) {
             return false;
         }
 
-        $directory = $this->filesystem->get($name->first());
+        $directory = $this->filesystem->get($hashes[0]);
 
         if (!$directory instanceof Directory) {
             return false;
         }
 
-        $directory = $directory->get($name->second());
+        $directory = $directory->get($hashes[1]);
 
         if (!$directory instanceof Directory) {
             return false;
         }
 
-        return $directory->contains($name->remaining());
+        return $directory->contains($hashes[2]);
     }
 
     /**
@@ -117,12 +120,12 @@ final class HashedNameAdapter implements Adapter
             return;
         }
 
-        $name = new Hashed($file);
-        $first = $this->filesystem->get($name->first());
+        $hashes = $this->hash($file);
+        $first = $this->filesystem->get($hashes[0]);
         $first = $first->add(
             $first
-                ->get($name->second())
-                ->remove($name->remaining()),
+                ->get($hashes[1])
+                ->remove($hashes[2]),
         );
         $this->filesystem->add($first);
     }
@@ -134,5 +137,20 @@ final class HashedNameAdapter implements Adapter
     {
         //this is not ideal but the names can't be determined from the hashes
         return $this->filesystem->all();
+    }
+
+    /**
+     * @return array[Name, Name, Name]
+     */
+    private function hash(Name $name): array
+    {
+        $extension = \pathinfo($name->toString(), PATHINFO_EXTENSION);
+        $hash = Str::of(\sha1(\pathinfo($name->toString(), PATHINFO_BASENAME)));
+
+        $first = new Name\Name($hash->substring(0, 2)->toString());
+        $second = new Name\Name($hash->substring(2, 2)->toString());
+        $remaining = new Name\Name($hash->substring(4)->toString().($extension ? '.'.$extension : ''));
+
+        return [$first, $second, $remaining];
     }
 }
