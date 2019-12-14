@@ -171,7 +171,7 @@ class FilesystemAdapter implements Adapter
         if (\is_dir($path)) {
             $object = new Directory\Directory(
                 $file,
-                (function($folder) {
+                Set::defer(File::class, (function($folder) {
                     $handle = \opendir($folder);
 
                     while (($name = \readdir($handle)) !== false) {
@@ -183,7 +183,7 @@ class FilesystemAdapter implements Adapter
                     }
 
                     \closedir($handle);
-                })($path),
+                })($path)),
             );
         } else {
             try {

@@ -14,25 +14,31 @@ use Innmind\Filesystem\{
 use Innmind\Stream\Readable;
 use Innmind\MediaType\MediaType;
 use Innmind\Immutable\{
-    Map,
     Str,
     Sequence,
+    Set,
+};
+use function Innmind\Immutable\{
+    assertSet,
+    join,
 };
 
 class Directory implements DirectoryInterface
 {
     private Name $name;
     private ?Readable $content = null;
-    private array $files;
-    private ?\Generator $generator;
+    private Set $files;
     private MediaType $mediaType;
     private Sequence $modifications;
 
-    public function __construct(string $name, \Generator $generator = null)
+    public function __construct(string $name, Set $files = null)
     {
+        $files ??= Set::of(File::class);
+
+        assertSet(File::class, $files, 2);
+
         $this->name = new Name\Name($name);
-        $this->generator = $generator;
-        $this->files = [];
+        $this->files = $files;
         $this->mediaType = new MediaType(
             'text',
             'directory',
@@ -57,9 +63,13 @@ class Directory implements DirectoryInterface
             return $this->content;
         }
 
-        $this->loadDirectory();
         $this->content = Readable\Stream::ofContent(
-            \implode("\n", \array_keys($this->files))
+            join(
+                "\n",
+                $this
+                    ->files
+                    ->toSetOf('string', fn($file): \Generator => yield $file->name()->toString()),
+            )->toString(),
         );
 
         return $this->content;
@@ -75,10 +85,11 @@ class Directory implements DirectoryInterface
      */
     public function add(File $file): DirectoryInterface
     {
-        $this->loadDirectory();
+        $files = $this->files->filter(static fn(File $known): bool => $known->name()->toString() !== $file->name()->toString());
+
         $directory = clone $this;
         $directory->content = null;
-        $directory->files[$file->name()->toString()] = $file;
+        $directory->files = ($files)($file);
         $directory->record(new FileWasAdded($file));
 
         return $directory;
@@ -89,11 +100,26 @@ class Directory implements DirectoryInterface
      */
     public function get(string $name): File
     {
-        if (!$this->contains($name)) {
+        $file = $this->files->reduce(
+            null,
+            static function(?File $found, File $file) use ($name): ?File {
+                if ($found) {
+                    return $found;
+                }
+
+                if ($file->name()->toString() === $name) {
+                    return $file;
+                }
+
+                return null;
+            }
+        );
+
+        if (\is_null($file)) {
             throw new FileNotFound($name);
         }
 
-        return $this->files[$name];
+        return $file;
     }
 
     /**
@@ -101,9 +127,10 @@ class Directory implements DirectoryInterface
      */
     public function contains(string $name): bool
     {
-        $this->loadDirectory();
-
-        return \array_key_exists($name, $this->files);
+        return $this->files->reduce(
+            false,
+            static fn(bool $found, File $file): bool => $found || $file->name()->toString() === $name,
+        );
     }
 
     /**
@@ -117,7 +144,7 @@ class Directory implements DirectoryInterface
 
         $directory = clone $this;
         $directory->content = null;
-        unset($directory->files[$name]);
+        $directory->files = $this->files->filter(static fn(File $file) => $file->name()->toString() !== $name);
         $directory->record(new FileWasRemoved($name));
 
         return $directory;
@@ -151,11 +178,7 @@ class Directory implements DirectoryInterface
      */
     public function foreach(callable $function): void
     {
-        $this->loadDirectory();
-
-        foreach ($this->files as $file) {
-            $function($file);
-        }
+        $this->files->foreach($function);
     }
 
     /**
@@ -163,13 +186,7 @@ class Directory implements DirectoryInterface
      */
     public function reduce($carry, callable $reducer)
     {
-        $this->loadDirectory();
-
-        foreach ($this->files as $file) {
-            $carry = $reducer($carry, $file);
-        }
-
-        return $carry;
+        return $this->files->reduce($carry, $reducer);
     }
 
     /**
@@ -178,22 +195,6 @@ class Directory implements DirectoryInterface
     public function modifications(): Sequence
     {
         return $this->modifications;
-    }
-
-    /**
-     * Load all files of the directory
-     */
-    private function loadDirectory(): void
-    {
-        if ($this->generator === null) {
-            return;
-        }
-
-        foreach ($this->generator as $file) {
-            $this->files[$file->name()->toString()] = $file;
-        }
-
-        $this->generator = null;
     }
 
     private function record($event): void
