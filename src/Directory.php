@@ -18,6 +18,11 @@ interface Directory extends File, \Iterator, \Countable
     public function replaceAt(string $path, File $file): self;
 
     /**
+     * @param callable(File): void $function
+     */
+    public function foreach(callable $function): void;
+
+    /**
      * @return Sequence<object>
      */
     public function modifications(): Sequence;

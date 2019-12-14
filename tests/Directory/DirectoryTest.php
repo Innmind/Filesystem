@@ -187,4 +187,23 @@ class DirectoryTest extends TestCase
             $d2->get('foo')->get('bar')->get('baz')->get('baz.md')->content()->toString()
         );
     }
+
+    public function testForeach()
+    {
+        $directory = new Directory(
+            'foo',
+            (function () {
+                yield new File\File('foo', Stream::ofContent('foo'));
+                yield new File\File('bar', Stream::ofContent('bar'));
+                yield new File\File('foobar', Stream::ofContent('foobar'));
+                yield new Directory('sub');
+            })(),
+        );
+
+        $called = 0;
+        $this->assertNull($directory->foreach(function() use (&$called) {
+            ++$called;
+        }));
+        $this->assertSame(4, $called);
+    }
 }

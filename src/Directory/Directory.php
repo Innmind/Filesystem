@@ -150,6 +150,18 @@ class Directory implements DirectoryInterface
     /**
      * {@inheritdoc}
      */
+    public function foreach(callable $function): void
+    {
+        $this->loadDirectory();
+
+        foreach ($this->files as $file) {
+            $function($file);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function modifications(): Sequence
     {
         return $this->modifications;
