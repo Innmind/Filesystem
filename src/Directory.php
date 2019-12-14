@@ -5,7 +5,7 @@ namespace Innmind\Filesystem;
 
 use Innmind\Immutable\Sequence;
 
-interface Directory extends File, \Iterator, \Countable
+interface Directory extends File
 {
     public function add(File $file): self;
 

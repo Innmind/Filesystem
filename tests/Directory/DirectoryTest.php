@@ -106,38 +106,6 @@ class DirectoryTest extends TestCase
         $this->assertSame($dir, $dir->remove('bar'));
     }
 
-    public function testCount()
-    {
-        $this->assertSame(0, (new Directory('foo'))->count());
-        $this->assertSame(
-            1,
-            (new Directory('foo'))
-                ->add(new File\File('bar', Stream::ofContent('baz')))
-                ->count()
-        );
-    }
-
-    public function testIterator()
-    {
-        $d = (new Directory('foo'))
-            ->add($f1 = new File\File('bar', Stream::ofContent('baz')))
-            ->add($f2 = new File\File('baz', Stream::ofContent('baz')))
-            ->add($f3 = new File\File('foobar', Stream::ofContent('baz')));
-
-        $this->assertSame($f1, $d->current());
-        $this->assertSame($f1->name(), $d->key());
-        $this->assertTrue($d->valid());
-        $this->assertSame(null, $d->next());
-        $this->assertSame($f2, $d->current());
-        $this->assertSame($f2->name(), $d->key());
-        $d->next();
-        $d->next();
-        $this->assertFalse($d->valid());
-        $this->assertSame(null, $d->rewind());
-        $this->assertSame($f1, $d->current());
-        $this->assertTrue($d->valid());
-    }
-
     public function testGenerator()
     {
         $d = new Directory(
@@ -150,8 +118,6 @@ class DirectoryTest extends TestCase
             })()
         );
 
-        $this->assertSame(4, $d->count());
-        $this->assertSame('foo', $d->key()->toString());
         $this->assertSame(
             'foo' . "\n" . 'bar' . "\n" . 'foobar' . "\n" . 'sub',
             $d->content()->toString()

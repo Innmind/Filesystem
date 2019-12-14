@@ -61,7 +61,6 @@ class Directory implements DirectoryInterface
         $this->content = Readable\Stream::ofContent(
             \implode("\n", \array_keys($this->files))
         );
-        $this->rewind();
 
         return $this->content;
     }
@@ -179,62 +178,6 @@ class Directory implements DirectoryInterface
     public function modifications(): Sequence
     {
         return $this->modifications;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function current()
-    {
-        $this->loadDirectory();
-
-        return \current($this->files);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function key()
-    {
-        return $this->current()->name();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function next()
-    {
-        $this->loadDirectory();
-        \next($this->files);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rewind()
-    {
-        $this->loadDirectory();
-        \reset($this->files);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function valid(): bool
-    {
-        $this->loadDirectory();
-
-        return \key($this->files) !== null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function count()
-    {
-        $this->loadDirectory();
-
-        return \count($this->files);
     }
 
     /**
