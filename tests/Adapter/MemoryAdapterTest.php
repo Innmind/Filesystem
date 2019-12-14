@@ -9,6 +9,7 @@ use Innmind\Filesystem\{
     Directory\Directory,
     File as FileInterface,
     File\File,
+    Name\Name,
     Exception\FileNotFound,
 };
 use Innmind\Stream\Readable\Stream;
@@ -23,14 +24,14 @@ class MemoryAdapterTest extends TestCase
         $a = new MemoryAdapter;
 
         $this->assertInstanceOf(Adapter::class, $a);
-        $this->assertFalse($a->contains('foo'));
+        $this->assertFalse($a->contains(new Name('foo')));
         $this->assertNull(
             $a->add($d = new Directory('foo'))
         );
-        $this->assertTrue($a->contains('foo'));
-        $this->assertSame($d, $a->get('foo'));
-        $this->assertNull($a->remove('foo'));
-        $this->assertFalse($a->contains('foo'));
+        $this->assertTrue($a->contains(new Name('foo')));
+        $this->assertSame($d, $a->get(new Name('foo')));
+        $this->assertNull($a->remove(new Name('foo')));
+        $this->assertFalse($a->contains(new Name('foo')));
     }
 
     public function testThrowWhenGettingUnknownFile()
@@ -38,12 +39,12 @@ class MemoryAdapterTest extends TestCase
         $this->expectException(FileNotFound::class);
         $this->expectExceptionMessage('foo');
 
-        (new MemoryAdapter)->get('foo');
+        (new MemoryAdapter)->get(new Name('foo'));
     }
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $this->assertNull((new MemoryAdapter)->remove('foo'));
+        $this->assertNull((new MemoryAdapter)->remove(new Name('foo')));
     }
 
     public function testAll()

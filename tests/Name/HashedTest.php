@@ -19,9 +19,9 @@ class HashedTest extends TestCase
         $name = new Hashed(new Name\Name($value));
 
         $this->assertInstanceOf(Name::class, $name);
-        $this->assertSame($first, $name->first());
-        $this->assertSame($second, $name->second());
-        $this->assertSame($remaining, $name->remaining());
+        $this->assertSame($first, $name->first()->toString());
+        $this->assertSame($second, $name->second()->toString());
+        $this->assertSame($remaining, $name->remaining()->toString());
         $this->assertSame($value, $name->toString());
     }
 

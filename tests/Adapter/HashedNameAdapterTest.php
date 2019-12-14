@@ -9,6 +9,7 @@ use Innmind\Filesystem\{
     Adapter,
     Directory,
     File,
+    Name\Name,
     Exception\LogicException,
     Exception\FileNotFound
 };
@@ -50,15 +51,15 @@ class HashedNameAdapterTest extends TestCase
 
         $file = new File\File('foo', Stream::ofContent('content'));
 
-        $this->assertFalse($filesystem->contains('foo'));
+        $this->assertFalse($filesystem->contains(new Name('foo')));
         $this->assertNull($filesystem->add($file));
-        $this->assertTrue($filesystem->contains('foo'));
+        $this->assertTrue($filesystem->contains(new Name('foo')));
         $this->assertSame(
             'content',
             (string) $inner
-                ->get('0b')
-                ->get('ee')
-                ->get('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33')
+                ->get(new Name('0b'))
+                ->get(new Name('ee'))
+                ->get(new Name('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33'))
                 ->content()
                 ->toString()
         );
@@ -69,15 +70,15 @@ class HashedNameAdapterTest extends TestCase
         $this->assertSame(
             'content bis',
             (string) $inner
-                ->get('0b')
-                ->get('ee')
-                ->get('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33')
+                ->get(new Name('0b'))
+                ->get(new Name('ee'))
+                ->get(new Name('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33'))
                 ->content()
                 ->toString()
         );
 
-        $this->assertNull($filesystem->remove('foo'));
-        $this->assertFalse($filesystem->contains('foo'));
+        $this->assertNull($filesystem->remove(new Name('foo')));
+        $this->assertFalse($filesystem->contains(new Name('foo')));
     }
 
     public function testThrowWhenGettingUnknownFile()
@@ -89,7 +90,7 @@ class HashedNameAdapterTest extends TestCase
         $this->expectException(FileNotFound::class);
         $this->expectExceptionMessage('foo');
 
-        $filesystem->get('foo');
+        $filesystem->get(new Name('foo'));
     }
 
     public function testAll()
@@ -118,6 +119,6 @@ class HashedNameAdapterTest extends TestCase
             new FilesystemAdapter('/tmp/hashed')
         );
 
-        $this->assertNull($filesystem->remove('foo'));
+        $this->assertNull($filesystem->remove(new Name('foo')));
     }
 }

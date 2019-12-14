@@ -7,7 +7,7 @@ use Innmind\Filesystem\{
     Adapter\CacheOpenedFilesAdapter,
     Adapter,
     File,
-    Name\Name
+    Name\Name,
 };
 use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
@@ -39,7 +39,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
             ->with($file);
 
         $this->assertNull($filesystem->add($file));
-        $this->assertSame($file, $filesystem->get('foo'));
+        $this->assertSame($file, $filesystem->get(new Name('foo')));
     }
 
     public function testGet()
@@ -54,11 +54,11 @@ class CacheOpenedFilesAdapterTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('get')
-            ->with('foo')
+            ->with(new Name('foo'))
             ->willReturn($file);
 
-        $this->assertSame($file, $filesystem->get('foo'));
-        $this->assertSame($file, $filesystem->get('foo'));
+        $this->assertSame($file, $filesystem->get(new Name('foo')));
+        $this->assertSame($file, $filesystem->get(new Name('foo')));
     }
 
     public function testContainsFromInnerAdapter()
@@ -69,10 +69,10 @@ class CacheOpenedFilesAdapterTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('contains')
-            ->with('foo')
+            ->with(new Name('foo'))
             ->willReturn(true);
 
-        $this->assertTrue($filesystem->contains('foo'));
+        $this->assertTrue($filesystem->contains(new Name('foo')));
     }
 
     public function testContainsFromCache()
@@ -89,7 +89,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
             ->willReturn(new Name('foo'));
         $filesystem->add($file);
 
-        $this->assertTrue($filesystem->contains('foo'));
+        $this->assertTrue($filesystem->contains(new Name('foo')));
     }
 
     public function testRemove()
@@ -104,16 +104,16 @@ class CacheOpenedFilesAdapterTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('remove')
-            ->with('foo');
+            ->with(new Name('foo'));
         $inner
             ->expects($this->once())
             ->method('get')
-            ->with('foo')
+            ->with(new Name('foo'))
             ->willReturn($expected = $this->createMock(File::class));
         $filesystem->add($file);
 
-        $this->assertNull($filesystem->remove('foo'));
-        $this->assertSame($expected, $filesystem->get('foo'));
+        $this->assertNull($filesystem->remove(new Name('foo')));
+        $this->assertSame($expected, $filesystem->get(new Name('foo')));
     }
 
     public function testAll()
@@ -133,6 +133,6 @@ class CacheOpenedFilesAdapterTest extends TestCase
             );
 
         $this->assertSame($expected, $filesystem->all());
-        $this->assertSame($file, $filesystem->get('foo'));
+        $this->assertSame($file, $filesystem->get(new Name('foo')));
     }
 }

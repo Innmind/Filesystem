@@ -15,9 +15,9 @@ interface Adapter
     /**
      * @throws FileNotFound
      */
-    public function get(string $file): File;
-    public function contains(string $file): bool;
-    public function remove(string $file): void;
+    public function get(Name $file): File;
+    public function contains(Name $file): bool;
+    public function remove(Name $file): void;
 
     /**
      * @return Set<File>

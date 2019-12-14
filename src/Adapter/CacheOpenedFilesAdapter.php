@@ -6,6 +6,7 @@ namespace Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     Adapter,
     File,
+    Name,
 };
 use Innmind\Immutable\{
     Map,
@@ -38,10 +39,10 @@ final class CacheOpenedFilesAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function get(string $file): File
+    public function get(Name $file): File
     {
-        if ($this->files->contains($file)) {
-            return $this->files->get($file);
+        if ($this->files->contains($file->toString())) {
+            return $this->files->get($file->toString());
         }
 
         $file = $this->filesystem->get($file);
@@ -56,9 +57,9 @@ final class CacheOpenedFilesAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function contains(string $file): bool
+    public function contains(Name $file): bool
     {
-        if ($this->files->contains($file)) {
+        if ($this->files->contains($file->toString())) {
             return true;
         }
 
@@ -68,9 +69,9 @@ final class CacheOpenedFilesAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): void
+    public function remove(Name $file): void
     {
-        $this->files = $this->files->remove($file);
+        $this->files = $this->files->remove($file->toString());
         $this->filesystem->remove($file);
     }
 

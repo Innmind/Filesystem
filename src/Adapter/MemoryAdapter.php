@@ -6,6 +6,7 @@ namespace Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     Adapter,
     File,
+    Name,
     Exception\FileNotFound,
 };
 use Innmind\Immutable\{
@@ -36,29 +37,29 @@ class MemoryAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function get(string $file): File
+    public function get(Name $file): File
     {
         if (!$this->contains($file)) {
-            throw new FileNotFound($file);
+            throw new FileNotFound($file->toString());
         }
 
-        return $this->files->get($file);
+        return $this->files->get($file->toString());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function contains(string $file): bool
+    public function contains(Name $file): bool
     {
-        return $this->files->contains($file);
+        return $this->files->contains($file->toString());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): void
+    public function remove(Name $file): void
     {
-        $this->files = $this->files->remove($file);
+        $this->files = $this->files->remove($file->toString());
     }
 
     /**

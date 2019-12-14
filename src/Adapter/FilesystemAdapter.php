@@ -6,6 +6,7 @@ namespace Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     Adapter,
     File,
+    Name,
     Directory,
     Stream\LazyStream,
     Exception\FileNotFound,
@@ -54,33 +55,33 @@ class FilesystemAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function get(string $file): File
+    public function get(Name $file): File
     {
         if (!$this->contains($file)) {
-            throw new FileNotFound($file);
+            throw new FileNotFound($file->toString());
         }
 
-        return $this->open($this->path, $file);
+        return $this->open($this->path, $file->toString());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function contains(string $file): bool
+    public function contains(Name $file): bool
     {
-        if (\in_array($file, self::INVALID_FILES, true)) {
+        if (\in_array($file->toString(), self::INVALID_FILES, true)) {
             return false;
         }
 
-        return $this->filesystem->exists($this->path.'/'.$file);
+        return $this->filesystem->exists($this->path.'/'.$file->toString());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): void
+    public function remove(Name $file): void
     {
-        $this->filesystem->remove($this->path.'/'.$file);
+        $this->filesystem->remove($this->path.'/'.$file->toString());
     }
 
     /**
@@ -94,7 +95,7 @@ class FilesystemAdapter implements Adapter
                 $files = Finder::create()->depth('== 0')->in($path);
 
                 foreach ($files as $file) {
-                    yield $adapter->get($file->getRelativePathname());
+                    yield $adapter->get(new Name\Name($file->getRelativePathname()));
                 }
             })($this, $this->path),
         );
@@ -127,7 +128,7 @@ class FilesystemAdapter implements Adapter
                         case $event instanceof FileWasRemoved:
                             $this
                                 ->filesystem
-                                ->remove($folder.'/'.$event->file());
+                                ->remove($folder.'/'.$event->file()->toString());
                             break;
                         case $event instanceof FileWasAdded:
                             $this->createFileAt($folder, $event->file());

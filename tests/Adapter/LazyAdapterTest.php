@@ -10,6 +10,7 @@ use Innmind\Filesystem\{
     Directory\Directory,
     File as FileInterface,
     File\File,
+    Name\Name,
     Exception\FileNotFound,
 };
 use Innmind\Stream\Readable\Stream;
@@ -24,21 +25,21 @@ class LazyAdapterTest extends TestCase
         $l = new LazyAdapter($a = new MemoryAdapter);
 
         $this->assertInstanceOf(LazyAdapterInterface::class, $l);
-        $this->assertFalse($l->contains('foo'));
+        $this->assertFalse($l->contains(new Name('foo')));
         $this->assertNull(
             $l->add($d = new Directory('foo'))
         );
-        $this->assertTrue($l->contains('foo'));
-        $this->assertFalse($a->contains('foo'));
+        $this->assertTrue($l->contains(new Name('foo')));
+        $this->assertFalse($a->contains(new Name('foo')));
         $this->assertNull($l->persist());
-        $this->assertTrue($l->contains('foo'));
-        $this->assertTrue($a->contains('foo'));
-        $this->assertNull($l->remove('foo'));
-        $this->assertFalse($l->contains('foo'));
-        $this->assertTrue($a->contains('foo'));
+        $this->assertTrue($l->contains(new Name('foo')));
+        $this->assertTrue($a->contains(new Name('foo')));
+        $this->assertNull($l->remove(new Name('foo')));
+        $this->assertFalse($l->contains(new Name('foo')));
+        $this->assertTrue($a->contains(new Name('foo')));
         $l->persist();
-        $this->assertFalse($l->contains('foo'));
-        $this->assertFalse($a->contains('foo'));
+        $this->assertFalse($l->contains(new Name('foo')));
+        $this->assertFalse($a->contains(new Name('foo')));
     }
 
     public function testRemoveUnpersistedAddedFile()
@@ -46,10 +47,10 @@ class LazyAdapterTest extends TestCase
         $l = new LazyAdapter($a = new MemoryAdapter);
 
         $l->add(new Directory('foo'));
-        $l->remove('foo');
+        $l->remove(new Name('foo'));
         $l->persist();
-        $this->assertFalse($l->contains('foo'));
-        $this->assertFalse($a->contains('foo'));
+        $this->assertFalse($l->contains(new Name('foo')));
+        $this->assertFalse($a->contains(new Name('foo')));
     }
 
     public function testAddUnpersistedRemovedFile()
@@ -57,13 +58,13 @@ class LazyAdapterTest extends TestCase
         $l = new LazyAdapter($a = new MemoryAdapter);
 
         $a->add(new Directory('foo'));
-        $l->remove('foo');
+        $l->remove(new Name('foo'));
         $l->add($d = new Directory('foo'));
         $l->persist();
-        $this->assertTrue($l->contains('foo'));
-        $this->assertTrue($a->contains('foo'));
-        $this->assertSame($d, $l->get('foo'));
-        $this->assertSame($d, $a->get('foo'));
+        $this->assertTrue($l->contains(new Name('foo')));
+        $this->assertTrue($a->contains(new Name('foo')));
+        $this->assertSame($d, $l->get(new Name('foo')));
+        $this->assertSame($d, $a->get(new Name('foo')));
     }
 
     public function testThrowWhenGettingUnknwonFile()
@@ -73,14 +74,14 @@ class LazyAdapterTest extends TestCase
         $this->expectException(FileNotFound::class);
         $this->expectExceptionMessage('foo');
 
-        $l->get('foo');
+        $l->get(new Name('foo'));
     }
 
     public function testRemovingUnknwonFileDoesntThrow()
     {
         $l = new LazyAdapter(new MemoryAdapter);
 
-        $this->assertNull($l->remove('foo'));
+        $this->assertNull($l->remove(new Name('foo')));
     }
 
     public function testAll()
@@ -88,7 +89,7 @@ class LazyAdapterTest extends TestCase
         $memory = new MemoryAdapter;
         $lazy = new LazyAdapter($memory);
         $memory->add(new File('foo', Stream::ofContent('')));
-        $lazy->remove('foo');
+        $lazy->remove(new Name('foo'));
         $lazy->add($bar = new File('bar', Stream::ofContent('')));
 
         $all = $lazy->all();

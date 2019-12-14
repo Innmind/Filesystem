@@ -8,9 +8,9 @@ use Innmind\Immutable\Str;
 
 final class Hashed implements Name
 {
-    private string $first;
-    private string $second;
-    private string $remaining;
+    private Name $first;
+    private Name $second;
+    private Name $remaining;
     private string $original;
 
     public function __construct(Name $name)
@@ -18,23 +18,23 @@ final class Hashed implements Name
         $extension = \pathinfo($name->toString(), PATHINFO_EXTENSION);
         $hash = Str::of(\sha1(\pathinfo($name->toString(), PATHINFO_BASENAME)));
 
-        $this->first = $hash->substring(0, 2)->toString();
-        $this->second = $hash->substring(2, 2)->toString();
-        $this->remaining = $hash->substring(4)->toString().($extension ? '.'.$extension : '');
+        $this->first = new Name\Name($hash->substring(0, 2)->toString());
+        $this->second = new Name\Name($hash->substring(2, 2)->toString());
+        $this->remaining = new Name\Name($hash->substring(4)->toString().($extension ? '.'.$extension : ''));
         $this->original = $name->toString();
     }
 
-    public function first(): string
+    public function first(): Name
     {
         return $this->first;
     }
 
-    public function second(): string
+    public function second(): Name
     {
         return $this->second;
     }
 
-    public function remaining(): string
+    public function remaining(): Name
     {
         return $this->remaining;
     }

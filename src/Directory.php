@@ -12,9 +12,9 @@ interface Directory extends File
     /**
      * @throws FileNotFound
      */
-    public function get(string $name): File;
-    public function contains(string $name): bool;
-    public function remove(string $name): self;
+    public function get(Name $name): File;
+    public function contains(Name $name): bool;
+    public function remove(Name $name): self;
     public function replaceAt(string $path, File $file): self;
 
     /**

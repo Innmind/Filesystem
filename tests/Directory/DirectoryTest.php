@@ -7,6 +7,7 @@ use Innmind\Filesystem\{
     Directory\Directory,
     Directory as DirectoryInterface,
     File,
+    Name\Name,
     Event\FileWasAdded,
     Event\FileWasRemoved,
     Exception\FileNotFound,
@@ -57,7 +58,7 @@ class DirectoryTest extends TestCase
         $d = (new Directory('foo'))
             ->add($f = new File\File('bar', Stream::ofContent('baz')));
 
-        $this->assertSame($f, $d->get('bar'));
+        $this->assertSame($f, $d->get(new Name('bar')));
     }
 
     public function testThrowWhenGettingUnknownFile()
@@ -65,7 +66,7 @@ class DirectoryTest extends TestCase
         $this->expectException(FileNotFound::class);
         $this->expectExceptionMessage('bar');
 
-        (new Directory('foo'))->get('bar');
+        (new Directory('foo'))->get(new Name('bar'));
     }
 
     public function testContains()
@@ -73,8 +74,8 @@ class DirectoryTest extends TestCase
         $d = (new Directory('foo'))
             ->add(new File\File('bar', Stream::ofContent('baz')));
 
-        $this->assertFalse($d->contains('baz'));
-        $this->assertTrue($d->contains('bar'));
+        $this->assertFalse($d->contains(new Name('baz')));
+        $this->assertTrue($d->contains(new Name('bar')));
     }
 
     public function testRemove()
@@ -83,7 +84,7 @@ class DirectoryTest extends TestCase
             ->add(new File\File('bar', Stream::ofContent('baz')));
         $d->content(); //force generation of files list, to be sure it's not cloned
 
-        $d2 = $d->remove('bar');
+        $d2 = $d->remove(new Name('bar'));
 
         $this->assertInstanceOf(DirectoryInterface::class, $d2);
         $this->assertNotSame($d, $d2);
@@ -97,14 +98,14 @@ class DirectoryTest extends TestCase
             FileWasRemoved::class,
             $d2->modifications()->get(1)
         );
-        $this->assertSame('bar', $d2->modifications()->get(1)->file());
+        $this->assertSame('bar', $d2->modifications()->get(1)->file()->toString());
     }
 
     public function testRemovingUnknownFileDoesntThrow()
     {
         $dir = new Directory('foo');
 
-        $this->assertSame($dir, $dir->remove('bar'));
+        $this->assertSame($dir, $dir->remove(new Name('bar')));
     }
 
     public function testGenerator()
@@ -147,11 +148,11 @@ class DirectoryTest extends TestCase
         $this->assertNotSame($d, $d2);
         $this->assertSame(
             'baz',
-            $d->get('foo')->get('bar')->get('baz')->get('baz.md')->content()->toString()
+            $d->get(new Name('foo'))->get(new Name('bar'))->get(new Name('baz'))->get(new Name('baz.md'))->content()->toString()
         );
         $this->assertSame(
             'updated',
-            $d2->get('foo')->get('bar')->get('baz')->get('baz.md')->content()->toString()
+            $d2->get(new Name('foo'))->get(new Name('bar'))->get(new Name('baz'))->get(new Name('baz.md'))->content()->toString()
         );
     }
 

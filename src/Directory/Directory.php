@@ -98,8 +98,10 @@ class Directory implements DirectoryInterface
     /**
      * {@inheritdoc}
      */
-    public function get(string $name): File
+    public function get(Name $name): File
     {
+        $name = $name->toString();
+
         $file = $this->files->reduce(
             null,
             static function(?File $found, File $file) use ($name): ?File {
@@ -125,8 +127,10 @@ class Directory implements DirectoryInterface
     /**
      * {@inheritdoc}
      */
-    public function contains(string $name): bool
+    public function contains(Name $name): bool
     {
+        $name = $name->toString();
+
         return $this->files->reduce(
             false,
             static fn(bool $found, File $file): bool => $found || $file->name()->toString() === $name,
@@ -136,15 +140,15 @@ class Directory implements DirectoryInterface
     /**
      * {@inheritdoc}
      */
-    public function remove(string $name): DirectoryInterface
+    public function remove(Name $name): DirectoryInterface
     {
         if (!$this->contains($name)) {
-            return $this;;
+            return $this;
         }
 
         $directory = clone $this;
         $directory->content = null;
-        $directory->files = $this->files->filter(static fn(File $file) => $file->name()->toString() !== $name);
+        $directory->files = $this->files->filter(static fn(File $file) => $file->name()->toString() !== $name->toString());
         $directory->record(new FileWasRemoved($name));
 
         return $directory;
@@ -163,7 +167,7 @@ class Directory implements DirectoryInterface
                 ->reduce(
                     $directory,
                     function(DirectoryInterface $parent, Str $seek): DirectoryInterface {
-                        return $parent->get($seek->toString());
+                        return $parent->get(new Name\Name($seek->toString()));
                     }
                 )
                 ->add($target ?? $file);

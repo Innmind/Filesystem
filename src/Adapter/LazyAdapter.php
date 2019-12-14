@@ -7,6 +7,7 @@ use Innmind\Filesystem\{
     LazyAdapter as LazyAdapterInterface,
     Adapter,
     File,
+    Name,
     Exception\FileNotFound,
 };
 use Innmind\Immutable\{
@@ -42,14 +43,14 @@ class LazyAdapter implements LazyAdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function get(string $file): File
+    public function get(Name $file): File
     {
         if (!$this->contains($file)) {
-            throw new FileNotFound($file);
+            throw new FileNotFound($file->toString());
         }
 
-        if ($this->toAdd->contains($file)) {
-            return $this->toAdd->get($file);
+        if ($this->toAdd->contains($file->toString())) {
+            return $this->toAdd->get($file->toString());
         }
 
         return $this->adapter->get($file);
@@ -58,13 +59,13 @@ class LazyAdapter implements LazyAdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function contains(string $file): bool
+    public function contains(Name $file): bool
     {
-        if ($this->toRemove->contains($file)) {
+        if ($this->toRemove->contains($file->toString())) {
             return false;
         }
 
-        if ($this->toAdd->contains($file)) {
+        if ($this->toAdd->contains($file->toString())) {
             return true;
         }
 
@@ -74,10 +75,10 @@ class LazyAdapter implements LazyAdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): void
+    public function remove(Name $file): void
     {
-        $this->toRemove = ($this->toRemove)($file);
-        $this->toAdd = $this->toAdd->remove($file);
+        $this->toRemove = ($this->toRemove)($file->toString());
+        $this->toAdd = $this->toAdd->remove($file->toString());
     }
 
     /**
@@ -110,6 +111,8 @@ class LazyAdapter implements LazyAdapterInterface
         $this
             ->toRemove
             ->foreach(function(string $name) {
+                $name = new Name\Name($name);
+
                 if ($this->adapter->contains($name)) {
                     $this->adapter->remove($name);
                 }

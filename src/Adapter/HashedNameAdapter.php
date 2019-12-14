@@ -8,7 +8,7 @@ use Innmind\Filesystem\{
     File,
     Directory,
     Name\Hashed,
-    Name\Name,
+    Name,
     Exception\LogicException,
     Exception\FileNotFound,
 };
@@ -40,20 +40,20 @@ final class HashedNameAdapter implements Adapter
         if ($this->filesystem->contains($name->first())) {
             $first = $this->filesystem->get($name->first());
         } else {
-            $first = new Directory\Directory($name->first());
+            $first = new Directory\Directory($name->first()->toString());
         }
 
         if ($first->contains($name->second())) {
             $second = $first->get($name->second());
         } else {
-            $second = new Directory\Directory($name->second());
+            $second = new Directory\Directory($name->second()->toString());
         }
 
         $this->filesystem->add(
             $first->add(
                 $second->add(
                     new File\File(
-                        $name->remaining(),
+                        $name->remaining()->toString(),
                         $file->content(),
                     ),
                 ),
@@ -64,14 +64,14 @@ final class HashedNameAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function get(string $file): File
+    public function get(Name $file): File
     {
         if (!$this->contains($file)) {
-            throw new FileNotFound($file);
+            throw new FileNotFound($file->toString());
         }
 
         $originalName = $file;
-        $name = new Hashed(new Name($file));
+        $name = new Hashed($file);
         $file = $this
             ->filesystem
             ->get($name->first())
@@ -79,15 +79,15 @@ final class HashedNameAdapter implements Adapter
             ->get($name->remaining());
 
         return new File\File(
-            $originalName,
+            $originalName->toString(),
             $file->content(),
             $file->mediaType(),
         );
     }
 
-    public function contains(string $file): bool
+    public function contains(Name $file): bool
     {
-        $name = new Hashed(new Name($file));
+        $name = new Hashed($file);
 
         if (!$this->filesystem->contains($name->first())) {
             return false;
@@ -111,18 +111,18 @@ final class HashedNameAdapter implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function remove(string $file): void
+    public function remove(Name $file): void
     {
         if (!$this->contains($file)) {
             return;
         }
 
-        $name = new Hashed(new Name($file));
+        $name = new Hashed($file);
         $first = $this->filesystem->get($name->first());
         $first = $first->add(
             $first
-            ->get($name->second())
-            ->remove($name->remaining()),
+                ->get($name->second())
+                ->remove($name->remaining()),
         );
         $this->filesystem->add($first);
     }
