@@ -88,14 +88,16 @@ class FilesystemAdapter implements Adapter
      */
     public function all(): Set
     {
-        $files = Finder::create()->depth('== 0')->in($this->path);
-        $set = Set::of(File::class);
+        return Set::defer(
+            File::class,
+            (function(Adapter $adapter, string $path): \Generator {
+                $files = Finder::create()->depth('== 0')->in($path);
 
-        foreach ($files as $file) {
-            $set = ($set)($this->get($file->getRelativePathname()));
-        }
-
-        return $set;
+                foreach ($files as $file) {
+                    yield $adapter->get($file->getRelativePathname());
+                }
+            })($this, $this->path),
+        );
     }
 
     /**
