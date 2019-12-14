@@ -24,7 +24,7 @@ use Symfony\Component\{
     Finder\Finder,
 };
 
-class FilesystemAdapter implements Adapter
+final class FilesystemAdapter implements Adapter
 {
     private const INVALID_FILES = ['.', '..'];
     private string $path;

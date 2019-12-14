@@ -14,7 +14,7 @@ use Innmind\Immutable\{
     Set,
 };
 
-class MemoryAdapter implements Adapter
+final class MemoryAdapter implements Adapter
 {
     private Map $files;
 

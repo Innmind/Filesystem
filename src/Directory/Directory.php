@@ -23,7 +23,7 @@ use function Innmind\Immutable\{
     join,
 };
 
-class Directory implements DirectoryInterface
+final class Directory implements DirectoryInterface
 {
     private Name $name;
     private ?Readable $content = null;

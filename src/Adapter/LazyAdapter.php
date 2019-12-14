@@ -15,7 +15,7 @@ use Innmind\Immutable\{
     Set,
 };
 
-class LazyAdapter implements LazyAdapterInterface
+final class LazyAdapter implements LazyAdapterInterface
 {
     private Adapter $adapter;
     private Map $toAdd;

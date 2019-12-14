@@ -10,7 +10,7 @@ use Innmind\Filesystem\{
 use Innmind\Stream\Readable;
 use Innmind\MediaType\MediaType;
 
-class File implements FileInterface
+final class File implements FileInterface
 {
     private Name $name;
     private Readable $content;
