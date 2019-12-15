@@ -9,3 +9,5 @@ before_script: composer install
 script:
     - vendor/bin/phpunit --coverage-clover=coverage.clover
     - vendor/bin/psalm
+after_success:
+     - bash <(curl -s https://codecov.io/bash)
