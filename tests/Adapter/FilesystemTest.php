@@ -177,8 +177,9 @@ class FilesystemTest extends TestCase
 
     public function testDotPseudoFilesAreNotListedInDirectory()
     {
-        @mkdir('/tmp/test');
-        $adapter = new Filesystem(Path::of('/tmp/'));
+        @mkdir('/tmp/sub');
+        @mkdir('/tmp/sub/test');
+        $adapter = new Filesystem(Path::of('/tmp/sub/'));
 
         $this->assertFalse($adapter->get(new Name('test'))->contains(new Name('.')));
         $this->assertFalse($adapter->get(new Name('test'))->contains(new Name('..')));
