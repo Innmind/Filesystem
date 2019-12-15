@@ -45,7 +45,7 @@ final class LazyStream implements Readable
 
     public function rewind(): void
     {
-        if ($this->isInitialized()) {
+        if ($this->stream) {
             $this->stream()->rewind();
         }
     }
@@ -80,17 +80,8 @@ final class LazyStream implements Readable
         return $this->stream()->toString();
     }
 
-    public function isInitialized(): bool
-    {
-        return $this->stream instanceof Readable;
-    }
-
     private function stream(): Readable
     {
-        if (!$this->isInitialized()) {
-            $this->stream = Readable\Stream::open($this->path);
-        }
-
-        return $this->stream;
+        return $this->stream ?? $this->stream = Readable\Stream::open($this->path);
     }
 }
