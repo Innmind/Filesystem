@@ -163,34 +163,37 @@ final class Directory implements DirectoryInterface
      */
     public function replaceAt(Path $path, File $file): DirectoryInterface
     {
-        $pieces = Str::of($path->toString())->leftTrim('/')->split('/');
-        $directory = $this;
+        $normalizedPath = Str::of($path->toString())->leftTrim('/');
+        $pieces = $normalizedPath->split('/');
 
-        while ($pieces->count() > 0) {
-            /** @var DirectoryInterface $target */
-            $target = $pieces
-                ->reduce(
-                    $directory,
-                    function(DirectoryInterface $parent, Str $seek): DirectoryInterface {
-                        $child = $parent->get(new Name($seek->toString()));
-
-                        if (!$child instanceof DirectoryInterface) {
-                            throw new LogicException('Path doesn\'t reference a directory');
-                        }
-
-                        return $child;
-                    }
-                )
-                ->add($target ?? $file);
-            $pieces = $pieces->dropEnd(1);
+        if ($normalizedPath->empty()) {
+            return $this->add($file);
         }
 
-        if (!isset($target)) {
-            return $this;
+        $child = $this->get(new Name($pieces->first()->toString()));
+
+        if (!$child instanceof DirectoryInterface) {
+            throw new LogicException('Path doesn\'t reference a directory');
         }
 
-        /** @psalm-suppress MixedArgument */
-        return $directory->add($target);
+        if ($pieces->count() === 1) {
+            return $this->add(
+                $child->add($file),
+            );
+        }
+
+        /** @var Set<string> $names */
+        $names = $pieces->drop(1)->toSequenceOf(
+            'string',
+            static fn($name): \Generator => yield $name->toString(),
+        );
+
+        return $this->add(
+            $child->replaceAt(
+                Path::of(join('/', $names)->toString()),
+                $file,
+            ),
+        );
     }
 
     /**

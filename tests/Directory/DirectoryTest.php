@@ -159,6 +159,36 @@ class DirectoryTest extends TestCase
         );
     }
 
+    public function testReplaceAtRoot()
+    {
+        $d = (new Directory(new Name('foobar')))
+            ->add(
+                (new Directory(new Name('foo')))
+                    ->add(
+                        (new Directory(new Name('bar')))
+                            ->add(
+                                (new Directory(new Name('baz')))
+                                    ->add(new File\File(new Name('baz.md'), Stream::ofContent('baz')))
+                            )
+                    )
+            );
+
+        $d2 = $d->replaceAt(
+            Path::of('/'),
+            new File\File(new Name('foo'), Stream::ofContent('updated'))
+        );
+        $this->assertInstanceOf(DirectoryInterface::class, $d2);
+        $this->assertNotSame($d, $d2);
+        $this->assertSame(
+            'baz',
+            $d->get(new Name('foo'))->get(new Name('bar'))->get(new Name('baz'))->get(new Name('baz.md'))->content()->toString()
+        );
+        $this->assertSame(
+            'updated',
+            $d2->get(new Name('foo'))->content()->toString()
+        );
+    }
+
     public function testThrowWhenReplacingAtAPathThatDoesntReferenceADirectory()
     {
         $d = (new Directory(new Name('foobar')))
