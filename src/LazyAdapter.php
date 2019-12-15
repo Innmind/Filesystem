@@ -11,8 +11,6 @@ interface LazyAdapter extends Adapter
 {
     /**
      * Really persist all modifications to underlying implementation
-     *
-     * @return self
      */
-    public function persist(): self;
+    public function persist(): void;
 }

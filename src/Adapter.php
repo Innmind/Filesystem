@@ -3,28 +3,25 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Immutable\MapInterface;
+use Innmind\Filesystem\Exception\FileNotFound;
+use Innmind\Immutable\Set;
 
 /**
  * Layer between value objects and concrete implementation
  */
 interface Adapter
 {
-    public function add(File $file): self;
+    public function add(File $file): void;
 
     /**
      * @throws FileNotFound
      */
-    public function get(string $file): File;
-    public function has(string $file): bool;
+    public function get(Name $file): File;
+    public function contains(Name $file): bool;
+    public function remove(Name $file): void;
 
     /**
-     * @throws FileNotFound
+     * @return Set<File>
      */
-    public function remove(string $file): self;
-
-    /**
-     * @return MapInterface<string, File>
-     */
-    public function all(): MapInterface;
+    public function all(): Set;
 }

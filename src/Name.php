@@ -3,10 +3,29 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-/**
- * Represent the name of a file
- */
-interface Name
+use Innmind\Filesystem\Exception\DomainException;
+use Innmind\Immutable\Str;
+
+final class Name
 {
-    public function __toString(): string;
+    private string $value;
+
+    public function __construct(string $value)
+    {
+        if (Str::of($value)->matches('|/|')) {
+            throw new DomainException("A file name can't contain a slash, $value given");
+        }
+
+        $this->value = $value;
+    }
+
+    public function equals(self $name): bool
+    {
+        return $this->value === $name->value;
+    }
+
+    public function toString(): string
+    {
+        return $this->value;
+    }
 }

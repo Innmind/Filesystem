@@ -3,26 +3,49 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Immutable\StreamInterface;
+use Innmind\Filesystem\Exception\FileNotFound;
+use Innmind\Url\Path;
+use Innmind\Immutable\{
+    Sequence,
+    Set,
+};
 
-interface Directory extends File, \Iterator, \Countable
+interface Directory extends File
 {
     public function add(File $file): self;
 
     /**
      * @throws FileNotFound
      */
-    public function get(string $name): File;
-    public function has(string $name): bool;
+    public function get(Name $name): File;
+    public function contains(Name $name): bool;
+    public function remove(Name $name): self;
+    public function replaceAt(Path $path, File $file): self;
 
     /**
-     * @throws FileNotFound
+     * @param callable(File): void $function
      */
-    public function remove(string $name): self;
-    public function replaceAt(string $path, File $file): self;
+    public function foreach(callable $function): void;
 
     /**
-     * @return StreamInterface<object>
+     * @param callable(File): bool $predicate
+     *
+     * @return Set<File>
      */
-    public function modifications(): StreamInterface;
+    public function filter(callable $predicate): Set;
+
+    /**
+     * @template R
+     *
+     * @param R $carry
+     * @param callable(R, File): R $reducer
+     *
+     * @return R
+     */
+    public function reduce($carry, callable $reducer);
+
+    /**
+     * @return Sequence<object>
+     */
+    public function modifications(): Sequence;
 }

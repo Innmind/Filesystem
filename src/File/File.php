@@ -6,25 +6,32 @@ namespace Innmind\Filesystem\File;
 use Innmind\Filesystem\{
     File as FileInterface,
     Name,
-    MediaType,
-    MediaType\NullMediaType
 };
 use Innmind\Stream\Readable;
+use Innmind\MediaType\MediaType;
 
-class File implements FileInterface
+final class File implements FileInterface
 {
-    private $name;
-    private $content;
-    private $mediaType;
+    private Name $name;
+    private Readable $content;
+    private MediaType $mediaType;
 
     public function __construct(
-        string $name,
+        Name $name,
         Readable $content,
         MediaType $mediaType = null
     ) {
-        $this->name = new Name\Name($name);
+        $this->name = $name;
         $this->content = $content;
-        $this->mediaType = $mediaType ?? new NullMediaType;
+        $this->mediaType = $mediaType ?? MediaType::null();
+    }
+
+    public static function named(
+        string $name,
+        Readable $content,
+        MediaType $mediaType = null
+    ): self {
+        return new self(new Name($name), $content, $mediaType);
     }
 
     /**

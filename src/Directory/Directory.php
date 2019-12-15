@@ -7,39 +7,57 @@ use Innmind\Filesystem\{
     Directory as DirectoryInterface,
     Name,
     File,
-    Stream\StringStream,
     Exception\FileNotFound,
+    Exception\LogicException,
     Event\FileWasAdded,
     Event\FileWasRemoved,
-    MediaType
 };
+use Innmind\Url\Path;
 use Innmind\Stream\Readable;
+use Innmind\MediaType\MediaType;
 use Innmind\Immutable\{
-    Map,
     Str,
-    StreamInterface,
-    Stream
+    Sequence,
+    Set,
+};
+use function Innmind\Immutable\{
+    assertSet,
+    join,
 };
 
-class Directory implements DirectoryInterface
+final class Directory implements DirectoryInterface
 {
-    private $name;
-    private $content;
-    private $files;
-    private $generator;
-    private $mediaType;
-    private $modifications;
+    private Name $name;
+    private ?Readable $content = null;
+    /** @var Set<File> */
+    private Set $files;
+    private MediaType $mediaType;
+    /** @var Sequence<object> */
+    private Sequence $modifications;
 
-    public function __construct(string $name, \Generator $generator = null)
+    /**
+     * @param Set<File>|null $files
+     */
+    public function __construct(Name $name, Set $files = null)
     {
-        $this->name = new Name\Name($name);
-        $this->generator = $generator;
-        $this->files = new Map('string', File::class);
-        $this->mediaType = new MediaType\MediaType(
+        /** @var Set<File> $default */
+        $default = Set::of(File::class);
+        $files ??= $default;
+
+        assertSet(File::class, $files, 2);
+
+        $this->name = $name;
+        $this->files = $files;
+        $this->mediaType = new MediaType(
             'text',
-            'directory'
+            'directory',
         );
-        $this->modifications = Stream::of('object');
+        $this->modifications = Sequence::objects();
+    }
+
+    public static function named(string $name): self
+    {
+        return new self(new Name($name));
     }
 
     /**
@@ -59,14 +77,13 @@ class Directory implements DirectoryInterface
             return $this->content;
         }
 
-        $this->loadDirectory();
-        $this->content = new StringStream(
-            (string) $this
-                ->files
-                ->keys()
-                ->join("\n")
+        /** @var Set<string> $names */
+        $names = $this
+            ->files
+            ->toSetOf('string', fn($file): \Generator => yield $file->name()->toString());
+        $this->content = Readable\Stream::ofContent(
+            join("\n", $names)->toString(),
         );
-        $this->rewind();
 
         return $this->content;
     }
@@ -81,13 +98,11 @@ class Directory implements DirectoryInterface
      */
     public function add(File $file): DirectoryInterface
     {
-        $this->loadDirectory();
+        $files = $this->files->filter(static fn(File $known): bool => !$known->name()->equals($file->name()));
+
         $directory = clone $this;
         $directory->content = null;
-        $directory->files = $this->files->put(
-            (string) $file->name(),
-            $file
-        );
+        $directory->files = ($files)($file);
         $directory->record(new FileWasAdded($file));
 
         return $directory;
@@ -96,37 +111,53 @@ class Directory implements DirectoryInterface
     /**
      * {@inheritdoc}
      */
-    public function get(string $name): File
+    public function get(Name $name): File
     {
-        if (!$this->has($name)) {
-            throw new FileNotFound;
+        $file = $this->files->reduce(
+            null,
+            static function(?File $found, File $file) use ($name): ?File {
+                if ($found) {
+                    return $found;
+                }
+
+                if ($file->name()->equals($name)) {
+                    return $file;
+                }
+
+                return null;
+            }
+        );
+
+        if (\is_null($file)) {
+            throw new FileNotFound($name->toString());
         }
 
-        return $this->files->get($name);
+        return $file;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function has(string $name): bool
+    public function contains(Name $name): bool
     {
-        $this->loadDirectory();
-
-        return $this->files->contains($name);
+        return $this->files->reduce(
+            false,
+            static fn(bool $found, File $file): bool => $found || $file->name()->equals($name),
+        );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function remove(string $name): DirectoryInterface
+    public function remove(Name $name): DirectoryInterface
     {
-        if (!$this->has($name)) {
-            throw new FileNotFound;
+        if (!$this->contains($name)) {
+            return $this;
         }
 
         $directory = clone $this;
         $directory->content = null;
-        $directory->files = $this->files->remove($name);
+        $directory->files = $this->files->filter(static fn(File $file) => !$file->name()->equals($name));
         $directory->record(new FileWasRemoved($name));
 
         return $directory;
@@ -135,113 +166,75 @@ class Directory implements DirectoryInterface
     /**
      * {@inheritdoc}
      */
-    public function replaceAt(string $path, File $file): DirectoryInterface
+    public function replaceAt(Path $path, File $file): DirectoryInterface
     {
-        $pieces = (new Str($path))->split('/');
-        $directory = $this;
+        $normalizedPath = Str::of($path->toString())->leftTrim('/');
+        $pieces = $normalizedPath->split('/');
 
-        while ($pieces->count() > 0) {
-            $target = $pieces
-                ->reduce(
-                    $directory,
-                    function(DirectoryInterface $parent, Str $seek): DirectoryInterface {
-                        return $parent->get((string) $seek);
-                    }
-                )
-                ->add($target ?? $file);
-            $pieces = $pieces->dropEnd(1);
+        if ($normalizedPath->empty()) {
+            return $this->add($file);
         }
 
-        return $directory->add($target);
+        $child = $this->get(new Name($pieces->first()->toString()));
+
+        if (!$child instanceof DirectoryInterface) {
+            throw new LogicException('Path doesn\'t reference a directory');
+        }
+
+        if ($pieces->count() === 1) {
+            return $this->add(
+                $child->add($file),
+            );
+        }
+
+        /** @var Set<string> $names */
+        $names = $pieces->drop(1)->toSequenceOf(
+            'string',
+            static fn($name): \Generator => yield $name->toString(),
+        );
+
+        return $this->add(
+            $child->replaceAt(
+                Path::of(join('/', $names)->toString()),
+                $file,
+            ),
+        );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function modifications(): StreamInterface
+    public function foreach(callable $function): void
+    {
+        $this->files->foreach($function);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function filter(callable $predicate): Set
+    {
+        return $this->files->filter($predicate);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function reduce($carry, callable $reducer)
+    {
+        return $this->files->reduce($carry, $reducer);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function modifications(): Sequence
     {
         return $this->modifications;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function current()
+    private function record(object $event): void
     {
-        $this->loadDirectory();
-
-        return $this->files->current();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function key()
-    {
-        return $this->current()->name();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function next()
-    {
-        $this->loadDirectory();
-        $this->files->next();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rewind()
-    {
-        $this->loadDirectory();
-        $this->files->rewind();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function valid(): bool
-    {
-        $this->loadDirectory();
-
-        return $this->files->valid();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function count()
-    {
-        $this->loadDirectory();
-
-        return $this->files->size();
-    }
-
-    /**
-     * Load all files of the directory
-     *
-     * @return void
-     */
-    private function loadDirectory()
-    {
-        if ($this->generator === null) {
-            return;
-        }
-
-        foreach ($this->generator as $file) {
-            $this->files = $this->files->put(
-                (string) $file->name(),
-                $file
-            );
-        }
-
-        $this->generator = null;
-    }
-
-    private function record($event): void
-    {
-        $this->modifications = $this->modifications->add($event);
+        $this->modifications = ($this->modifications)($event);
     }
 }

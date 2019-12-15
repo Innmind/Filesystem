@@ -7,184 +7,276 @@ use Innmind\Filesystem\{
     Directory\Directory,
     Directory as DirectoryInterface,
     File,
-    Stream\StringStream,
+    Name,
     Event\FileWasAdded,
-    Event\FileWasRemoved
+    Event\FileWasRemoved,
+    Exception\FileNotFound,
+    Exception\LogicException,
 };
+use Innmind\Url\Path;
+use Innmind\Stream\Readable\Stream;
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 
 class DirectoryTest extends TestCase
 {
     public function testInterface()
     {
-        $d = new Directory('foo');
+        $d = new Directory(new Name('foo'));
 
         $this->assertInstanceOf(DirectoryInterface::class, $d);
-        $this->assertSame('foo', (string) $d->name());
-        $this->assertSame('', (string) $d->content());
-        $this->assertSame('text/directory', (string) $d->mediaType());
+        $this->assertSame('foo', $d->name()->toString());
+        $this->assertSame('', $d->content()->toString());
+        $this->assertSame('text/directory', $d->mediaType()->toString());
         $this->assertSame($d->mediaType(), $d->mediaType());
+    }
+
+    public function testNamed()
+    {
+        $directory = Directory::named('foo');
+
+        $this->assertInstanceOf(Directory::class, $directory);
+        $this->assertSame('foo', $directory->name()->toString());
     }
 
     public function testAdd()
     {
-        $d = new Directory('foo');
+        $d = new Directory(new Name('foo'));
         $d->content(); //force generation of files list, to be sure it's not cloned
 
         $d2 = $d->add(
-            $file = new File\File('foo', new StringStream('bar'))
+            $file = new File\File(new Name('foo'), Stream::ofContent('bar'))
         );
 
         $this->assertInstanceOf(DirectoryInterface::class, $d2);
         $this->assertNotSame($d, $d2);
         $this->assertSame($d->name(), $d2->name());
         $this->assertNotSame($d->content(), $d2->content());
-        $this->assertSame('', (string) $d->content());
-        $this->assertSame('foo', (string) $d2->content());
+        $this->assertSame('', $d->content()->toString());
+        $this->assertSame('foo', $d2->content()->toString());
         $this->assertSame(0, $d->modifications()->count());
         $this->assertSame(1, $d2->modifications()->count());
         $this->assertInstanceOf(
             FileWasAdded::class,
-            $d2->modifications()->current()
+            $d2->modifications()->first()
         );
-        $this->assertSame($file, $d2->modifications()->current()->file());
+        $this->assertSame($file, $d2->modifications()->first()->file());
     }
 
     public function testGet()
     {
-        $d = (new Directory('foo'))
-            ->add($f = new File\File('bar', new StringStream('baz')));
+        $d = (new Directory(new Name('foo')))
+            ->add($f = new File\File(new Name('bar'), Stream::ofContent('baz')));
 
-        $this->assertSame($f, $d->get('bar'));
+        $this->assertSame($f, $d->get(new Name('bar')));
     }
 
-    /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFound
-     */
     public function testThrowWhenGettingUnknownFile()
     {
-        (new Directory('foo'))->get('bar');
+        $this->expectException(FileNotFound::class);
+        $this->expectExceptionMessage('bar');
+
+        (new Directory(new Name('foo')))->get(new Name('bar'));
     }
 
-    public function testHas()
+    public function testContains()
     {
-        $d = (new Directory('foo'))
-            ->add(new File\File('bar', new StringStream('baz')));
+        $d = (new Directory(new Name('foo')))
+            ->add(new File\File(new Name('bar'), Stream::ofContent('baz')));
 
-        $this->assertFalse($d->has('baz'));
-        $this->assertTrue($d->has('bar'));
+        $this->assertFalse($d->contains(new Name('baz')));
+        $this->assertTrue($d->contains(new Name('bar')));
     }
 
     public function testRemove()
     {
-        $d = (new Directory('foo'))
-            ->add(new File\File('bar', new StringStream('baz')));
+        $d = (new Directory(new Name('foo')))
+            ->add(new File\File(new Name('bar'), Stream::ofContent('baz')));
         $d->content(); //force generation of files list, to be sure it's not cloned
 
-        $d2 = $d->remove('bar');
+        $d2 = $d->remove(new Name('bar'));
 
         $this->assertInstanceOf(DirectoryInterface::class, $d2);
         $this->assertNotSame($d, $d2);
         $this->assertSame($d->name(), $d2->name());
         $this->assertNotSame($d->content(), $d2->content());
-        $this->assertSame('bar', (string) $d->content());
-        $this->assertSame('', (string) $d2->content());
+        $this->assertSame('bar', $d->content()->toString());
+        $this->assertSame('', $d2->content()->toString());
         $this->assertSame(1, $d->modifications()->count());
         $this->assertSame(2, $d2->modifications()->count());
         $this->assertInstanceOf(
             FileWasRemoved::class,
             $d2->modifications()->get(1)
         );
-        $this->assertSame('bar', $d2->modifications()->get(1)->file());
+        $this->assertSame('bar', $d2->modifications()->get(1)->file()->toString());
     }
 
-    /**
-     * @expectedException Innmind\Filesystem\Exception\FileNotFound
-     */
-    public function testThrowWhenRemovingUnknownFile()
+    public function testRemovingUnknownFileDoesntThrow()
     {
-        (new Directory('foo'))->remove('bar');
-    }
+        $dir = new Directory(new Name('foo'));
 
-    public function testCount()
-    {
-        $this->assertSame(0, (new Directory('foo'))->count());
-        $this->assertSame(
-            1,
-            (new Directory('foo'))
-                ->add(new File\File('bar', new StringStream('baz')))
-                ->count()
-        );
-    }
-
-    public function testIterator()
-    {
-        $d = (new Directory('foo'))
-            ->add($f1 = new File\File('bar', new StringStream('baz')))
-            ->add($f2 = new File\File('baz', new StringStream('baz')))
-            ->add($f3 = new File\File('foobar', new StringStream('baz')));
-
-        $this->assertSame($f1, $d->current());
-        $this->assertSame($f1->name(), $d->key());
-        $this->assertTrue($d->valid());
-        $this->assertSame(null, $d->next());
-        $this->assertSame($f2, $d->current());
-        $this->assertSame($f2->name(), $d->key());
-        $d->next();
-        $d->next();
-        $this->assertFalse($d->valid());
-        $this->assertSame(null, $d->rewind());
-        $this->assertSame($f1, $d->current());
-        $this->assertTrue($d->valid());
+        $this->assertSame($dir, $dir->remove(new Name('bar')));
     }
 
     public function testGenerator()
     {
         $d = new Directory(
-            'foo',
-            (function () {
-                yield new File\File('foo', new StringStream('foo'));
-                yield new File\File('bar', new StringStream('bar'));
-                yield new File\File('foobar', new StringStream('foobar'));
-                yield new Directory('sub');
-            })()
+            new Name('foo'),
+            Set::defer(File::class, (function () {
+                yield new File\File(new Name('foo'), Stream::ofContent('foo'));
+                yield new File\File(new Name('bar'), Stream::ofContent('bar'));
+                yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
+                yield new Directory(new Name('sub'));
+            })()),
         );
 
-        $this->assertSame(4, $d->count());
-        $this->assertSame('foo', (string) $d->key());
         $this->assertSame(
             'foo' . "\n" . 'bar' . "\n" . 'foobar' . "\n" . 'sub',
-            (string) $d->content()
+            $d->content()->toString()
         );
     }
 
     public function testReplaceAt()
     {
-        $d = (new Directory('foobar'))
+        $d = (new Directory(new Name('foobar')))
             ->add(
-                (new Directory('foo'))
+                (new Directory(new Name('foo')))
                     ->add(
-                        (new Directory('bar'))
+                        (new Directory(new Name('bar')))
                             ->add(
-                                (new Directory('baz'))
-                                    ->add(new File\File('baz.md', new StringStream('baz')))
+                                (new Directory(new Name('baz')))
+                                    ->add(new File\File(new Name('baz.md'), Stream::ofContent('baz')))
                             )
                     )
             );
 
         $d2 = $d->replaceAt(
-            'foo/bar/baz',
-            new File\File('baz.md', new StringStream('updated'))
+            Path::of('/foo/bar/baz'),
+            new File\File(new Name('baz.md'), Stream::ofContent('updated'))
         );
         $this->assertInstanceOf(DirectoryInterface::class, $d2);
         $this->assertNotSame($d, $d2);
         $this->assertSame(
             'baz',
-            (string) $d->get('foo')->get('bar')->get('baz')->get('baz.md')->content()
+            $d->get(new Name('foo'))->get(new Name('bar'))->get(new Name('baz'))->get(new Name('baz.md'))->content()->toString()
         );
         $this->assertSame(
             'updated',
-            (string) $d2->get('foo')->get('bar')->get('baz')->get('baz.md')->content()
+            $d2->get(new Name('foo'))->get(new Name('bar'))->get(new Name('baz'))->get(new Name('baz.md'))->content()->toString()
         );
+    }
+
+    public function testReplaceAtRoot()
+    {
+        $d = (new Directory(new Name('foobar')))
+            ->add(
+                (new Directory(new Name('foo')))
+                    ->add(
+                        (new Directory(new Name('bar')))
+                            ->add(
+                                (new Directory(new Name('baz')))
+                                    ->add(new File\File(new Name('baz.md'), Stream::ofContent('baz')))
+                            )
+                    )
+            );
+
+        $d2 = $d->replaceAt(
+            Path::of('/'),
+            new File\File(new Name('foo'), Stream::ofContent('updated'))
+        );
+        $this->assertInstanceOf(DirectoryInterface::class, $d2);
+        $this->assertNotSame($d, $d2);
+        $this->assertSame(
+            'baz',
+            $d->get(new Name('foo'))->get(new Name('bar'))->get(new Name('baz'))->get(new Name('baz.md'))->content()->toString()
+        );
+        $this->assertSame(
+            'updated',
+            $d2->get(new Name('foo'))->content()->toString()
+        );
+    }
+
+    public function testThrowWhenReplacingAtAPathThatDoesntReferenceADirectory()
+    {
+        $d = (new Directory(new Name('foobar')))
+            ->add(
+                (new Directory(new Name('foo')))
+                    ->add(
+                        (new Directory(new Name('bar')))
+                            ->add(
+                                new File\File(new Name('baz'), Stream::ofContent('baz'))
+                            )
+                    )
+            );
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Path doesn\'t reference a directory');
+
+        $d->replaceAt(
+            Path::of('/foo/bar/baz'),
+            new File\File(new Name('baz.md'), Stream::ofContent('updated'))
+        );
+    }
+
+    public function testForeach()
+    {
+        $directory = new Directory(
+            new Name('foo'),
+            Set::defer(File::class, (function () {
+                yield new File\File(new Name('foo'), Stream::ofContent('foo'));
+                yield new File\File(new Name('bar'), Stream::ofContent('bar'));
+                yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
+                yield new Directory(new Name('sub'));
+            })()),
+        );
+
+        $called = 0;
+        $this->assertNull($directory->foreach(function() use (&$called) {
+            ++$called;
+        }));
+        $this->assertSame(4, $called);
+    }
+
+    public function testReduce()
+    {
+        $directory = new Directory(
+            new Name('foo'),
+            Set::defer(File::class, (function () {
+                yield new File\File(new Name('foo'), Stream::ofContent('foo'));
+                yield new File\File(new Name('bar'), Stream::ofContent('bar'));
+                yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
+                yield new Directory(new Name('sub'));
+            })()),
+        );
+
+        $reduced = $directory->reduce(
+            '',
+            fn($carry, $file) => $carry.$file->name()->toString(),
+        );
+
+        $this->assertSame('foobarfoobarsub', $reduced);
+    }
+
+    public function testFilter()
+    {
+        $directory = new Directory(
+            new Name('foo'),
+            Set::defer(File::class, (function () {
+                yield new File\File(new Name('foo'), Stream::ofContent('foo'));
+                yield new File\File(new Name('bar'), Stream::ofContent('bar'));
+                yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
+                yield new Directory(new Name('sub'));
+            })()),
+        );
+
+        $set = $directory->filter(
+            fn($file) => strpos($file->name()->toString(), 'foo') === 0,
+        );
+
+        $this->assertInstanceOf(Set::class, $set);
+        $this->assertSame(File::class, $set->type());
+        $this->assertSame('foo', unwrap($set)[0]->name()->toString());
+        $this->assertSame('foobar', unwrap($set)[1]->name()->toString());
     }
 }

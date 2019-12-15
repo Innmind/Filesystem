@@ -1,34 +1,40 @@
 # Filesystem
 
-| `master` | `develop` |
-|----------|-----------|
-| [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/Filesystem/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Innmind/Filesystem/?branch=master) | [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/Filesystem/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Filesystem/?branch=develop) |
-| [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/Filesystem/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Innmind/Filesystem/?branch=master) | [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/Filesystem/badges/coverage.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Filesystem/?branch=develop) |
-| [![Build Status](https://scrutinizer-ci.com/g/Innmind/Filesystem/badges/build.png?b=master)](https://scrutinizer-ci.com/g/Innmind/Filesystem/build-status/master) | [![Build Status](https://scrutinizer-ci.com/g/Innmind/Filesystem/badges/build.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Filesystem/build-status/develop) |
-
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/6989139f-91d2-495d-808e-2fec284acdca/big.png)](https://insight.sensiolabs.com/projects/6989139f-91d2-495d-808e-2fec284acdca)
+| `develop` |
+|-----------|
+| [![codecov](https://codecov.io/gh/Innmind/Filesystem/branch/develop/graph/badge.svg)](https://codecov.io/gh/Innmind/Filesystem) |
+| [![Build Status](https://github.com/Innmind/Filesystem/workflows/CI/badge.svg)](https://github.com/Innmind/Filesystem/actions?query=workflow%3ACI) |
 
 Filesystem abstraction layer, the goal is to provide a model where you design how you put your files into directories without worrying where it will be persisted.
 
-The whole model is structures around files, directories, streams and adapters. [`File`](File.php), [`Directory`](Directory.php) and [`Stream`](Stream/Stream.php) are immutable objects.
+## Installation
+
+```sh
+composer install innmind/filesystem
+```
+
+## Usage
+
+The whole model is structures around files, directories, streams and adapters. [`File`](src/File.php), [`Directory`](src/Directory.php) and [`Stream`](https://github.com/Innmind/Stream/blob/develop/src/Readable.php) are immutable objects.
 
 Example:
 ```php
 use Innmind\Filesystem\{
-    File,
-    Directory,
-    Stream\Stream,
-    Adapter\FilesystemAdapter
+    File\File,
+    Directory\Directory,
+    Name,
+    Adapter\Filesystem,
 };
+use Innmind\Url\Path;
+use Innmind\Stream\Readable\Stream;
 
-$directory = (new Directory('uploads'))
-    ->add(
-        new File(
-            $_FILES['my_upload']['name'],
-            new Stream(fopen($_FILES['my_upload']['tmp_name'], 'r'))
-        )
-    );
-$adapter = new Filesystem('/var/www/web');
+$directory = Directory::named('uploads')->add(
+    File::named(
+        $_FILES['my_upload']['name'],
+        Stream::open($_FILES['my_upload']['tmp_name'])
+    )
+);
+$adapter = new Filesystem(Path::of('/var/www/web'));
 $adapter->add($directory);
 ```
 
@@ -36,16 +42,16 @@ This example show you how you can create a new directory `uploads` in the folder
 
 **Note**: For performance reasons the filesystem adapter only persist to disk the files that have changed (achievable via the immutable nature of file objects).
 
-All adapters implements [`AdapterInterface`](AdapterInterface.php), so you can easily replace them; especially for unit tests, that's why the library comes with a [`MemoryAdapter`] that only keeps the files into memory so you won't mess up your file system.
+All adapters implements [`Adapter`](src/Adapter.php), so you can easily replace them; especially for unit tests, that's why the library comes with an [`InMemory`](src/Adapter/InMemory.php) adapter that only keeps the files into memory so you won't mess up your file system.
 
-By default when you call `add` or `remove` on an adapter the changes are directly applied, but you can change this behaviour by wrapping your adapter in another one implementing [`LazyAdapterInterface`](LazyAdapterInterface.php) (such as [`LazyAdapter`](Adapter/LazyAdapter.php)).
+By default when you call `add` or `remove` on an adapter the changes are directly applied, but you can change this behaviour by wrapping your adapter in another one implementing [`LazyAdapter`](src/LazyAdapter.php) (such as [`Lazy`](src/Adapter/Lazy.php)).
 
 Example:
 ```php
 use Innmind\Filesystem\Adapter\LazyAdapter;
 
 $directory = /*....*/ ;
-$adapter = new LazyAdapter(new FilesystemAdapter('/var/www/web'));
+$adapter = new Lazy(new Filesystem(Path::of('/var/www/web')));
 $adapter->add($directory); // nothing is written to disk
 $adapter->persist(); // every new files are persisted, and removals occur at this time as well
 ```

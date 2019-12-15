@@ -3,35 +3,29 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\Stream;
 
-use Innmind\Filesystem\Exception\DomainException;
 use Innmind\Stream\{
     Stream,
     Readable,
     Stream\Position,
     Stream\Position\Mode,
-    Stream\Size
+    Stream\Size,
 };
+use Innmind\Url\Path;
 use Innmind\Immutable\Str;
 
 final class LazyStream implements Readable
 {
-    private $path;
-    private $stream;
+    private Path $path;
+    private ?Readable $stream = null;
 
-    public function __construct(string $path)
+    public function __construct(Path $path)
     {
-        if (empty($path)) {
-            throw new DomainException;
-        }
-
         $this->path = $path;
     }
 
-    public function close(): Stream
+    public function close(): void
     {
         $this->stream()->close();
-
-        return $this;
     }
 
     public function closed(): bool
@@ -44,20 +38,16 @@ final class LazyStream implements Readable
         return $this->stream()->position();
     }
 
-    public function seek(Position $position, Mode $mode = null): Stream
+    public function seek(Position $position, Mode $mode = null): void
     {
         $this->stream()->seek($position, $mode);
-
-        return $this;
     }
 
-    public function rewind(): Stream
+    public function rewind(): void
     {
-        if ($this->isInitialized()) {
+        if ($this->stream) {
             $this->stream()->rewind();
         }
-
-        return $this;
     }
 
     public function end(): bool
@@ -85,22 +75,13 @@ final class LazyStream implements Readable
         return $this->stream()->readLine();
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
-        return (string) $this->stream();
+        return $this->stream()->toString();
     }
 
-    public function isInitialized(): bool
+    private function stream(): Readable
     {
-        return $this->stream instanceof Readable;
-    }
-
-    private function stream()
-    {
-        if (!$this->isInitialized()) {
-            $this->stream = new Readable\Stream(\fopen($this->path, 'r'));
-        }
-
-        return $this->stream;
+        return $this->stream ?? $this->stream = Readable\Stream::open($this->path);
     }
 }
