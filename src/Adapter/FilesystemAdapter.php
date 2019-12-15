@@ -69,7 +69,7 @@ final class FilesystemAdapter implements Adapter
             throw new FileNotFound($file->toString());
         }
 
-        return $this->open($this->path, $file->toString());
+        return $this->open($this->path, $file);
     }
 
     /**
@@ -173,13 +173,13 @@ final class FilesystemAdapter implements Adapter
     /**
      * Open the file in the given folder
      */
-    private function open(Path $folder, string $file): File
+    private function open(Path $folder, Name $file): File
     {
-        $path = $folder->resolve(Path::of($file));
+        $path = $folder->resolve(Path::of($file->toString()));
 
         if (\is_dir($path->toString())) {
             $object = new Directory\Directory(
-                new Name($file),
+                $file,
                 Set::defer(File::class, (function(Path $folder) {
                     $handle = \opendir($folder->toString());
 
@@ -188,11 +188,11 @@ final class FilesystemAdapter implements Adapter
                             continue;
                         }
 
-                        yield $this->open($folder, $name);
+                        yield $this->open($folder, new Name($name));
                     }
 
                     \closedir($handle);
-                })($folder->resolve(Path::of($file.'/')))),
+                })($folder->resolve(Path::of($file->toString().'/')))),
             );
         } else {
             try {
@@ -202,7 +202,7 @@ final class FilesystemAdapter implements Adapter
             }
 
             $object = new File\File(
-                new Name($file),
+                $file,
                 new LazyStream($path),
                 $mediaType,
             );
