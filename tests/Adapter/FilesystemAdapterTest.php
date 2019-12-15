@@ -176,6 +176,14 @@ class FilesystemAdapterTest extends TestCase
         $this->assertFalse($adapter->get(new Name('test'))->contains(new Name('..')));
         $this->assertFalse($adapter->contains(new Name('.')));
         $this->assertFalse($adapter->contains(new Name('..')));
+        $this->assertFalse(
+            $adapter
+                ->all()
+                ->reduce(
+                    false,
+                    fn($found, $file) => $found || $file->name()->equals(new Name('.')) || $file->name()->equals(new Name('..')),
+                ),
+        );
 
         $this->expectException(FileNotFound::class);
 
