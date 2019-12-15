@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\Stream;
 
-use Innmind\Filesystem\Exception\DomainException;
 use Innmind\Stream\{
     Stream,
     Readable,
@@ -11,19 +10,16 @@ use Innmind\Stream\{
     Stream\Position\Mode,
     Stream\Size,
 };
+use Innmind\Url\Path;
 use Innmind\Immutable\Str;
 
 final class LazyStream implements Readable
 {
-    private string $path;
+    private Path $path;
     private ?Readable $stream = null;
 
-    public function __construct(string $path)
+    public function __construct(Path $path)
     {
-        if (empty($path)) {
-            throw new DomainException;
-        }
-
         $this->path = $path;
     }
 
@@ -92,7 +88,7 @@ final class LazyStream implements Readable
     private function stream(): Readable
     {
         if (!$this->isInitialized()) {
-            $this->stream = new Readable\Stream(\fopen($this->path, 'r'));
+            $this->stream = Readable\Stream::open($this->path);
         }
 
         return $this->stream;

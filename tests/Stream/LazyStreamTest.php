@@ -6,8 +6,9 @@ namespace Tests\Innmind\Filesystem\Stream;
 use Innmind\Filesystem\Stream\LazyStream;
 use Innmind\Stream\{
     Readable,
-    Stream\Position
+    Stream\Position,
 };
+use Innmind\Url\Path;
 use PHPUnit\Framework\TestCase;
 
 class LazyStreamTest extends TestCase
@@ -20,12 +21,12 @@ class LazyStreamTest extends TestCase
             $path = tempnam(sys_get_temp_dir(), 'lazy_stream'),
             'lorem ipsum dolor'
         );
-        $this->stream = new LazyStream($path);
+        $this->stream = new LazyStream(Path::of($path));
     }
 
     public function testInterface()
     {
-        $stream = new LazyStream('foo');
+        $stream = new LazyStream(Path::of('foo'));
 
         $this->assertInstanceOf(Readable::class, $stream);
         $this->assertFalse($stream->isInitialized());

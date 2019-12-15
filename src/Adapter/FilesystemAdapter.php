@@ -57,7 +57,7 @@ final class FilesystemAdapter implements Adapter
      */
     public function add(File $file): void
     {
-        $this->createFileAt($this->path->toString(), $file);
+        $this->createFileAt($this->path, $file);
     }
 
     /**
@@ -69,7 +69,7 @@ final class FilesystemAdapter implements Adapter
             throw new FileNotFound($file->toString());
         }
 
-        return $this->open($this->path->toString(), $file->toString());
+        return $this->open($this->path, $file->toString());
     }
 
     /**
@@ -112,19 +112,19 @@ final class FilesystemAdapter implements Adapter
     /**
      * Create the wished file at the given absolute path
      */
-    private function createFileAt(string $path, File $file): void
+    private function createFileAt(Path $path, File $file): void
     {
         if ($file instanceof Directory) {
-            $folder = $path.'/'.$file->name()->toString();
+            $folder = $path->resolve(Path::of($file->name()->toString().'/'));
 
             if (
-                $this->files->contains($folder) &&
-                $this->files->get($folder) === $file
+                $this->files->contains($folder->toString()) &&
+                $this->files->get($folder->toString()) === $file
             ) {
                 return;
             }
 
-            $this->filesystem->mkdir($folder);
+            $this->filesystem->mkdir($folder->toString());
             $file
                 ->modifications()
                 ->foreach(function($event) use ($folder) {
@@ -136,7 +136,7 @@ final class FilesystemAdapter implements Adapter
                         case $event instanceof FileWasRemoved:
                             $this
                                 ->filesystem
-                                ->remove($folder.'/'.$event->file()->toString());
+                                ->remove($folder->toString().$event->file()->toString());
                             break;
                         case $event instanceof FileWasAdded:
                             $this->createFileAt($folder, $event->file());
@@ -145,43 +145,43 @@ final class FilesystemAdapter implements Adapter
 
                     $this->handledEvents = ($this->handledEvents)($event);
                 });
-            $this->files = ($this->files)($folder, $file);
+            $this->files = ($this->files)($folder->toString(), $file);
 
             return;
         }
 
-        $path .= '/'.$file->name()->toString();
+        $path = $path->resolve(Path::of($file->name()->toString()));
 
         if (
-            $this->files->contains($path) &&
-            $this->files->get($path) === $file
+            $this->files->contains($path->toString()) &&
+            $this->files->get($path->toString()) === $file
         ) {
             return;
         }
 
         $stream = $file->content();
         $stream->rewind();
-        $handle = \fopen($path, 'w');
+        $handle = \fopen($path->toString(), 'w');
 
         while (!$stream->end()) {
             \fwrite($handle, $stream->read(8192)->toString());
         }
 
-        $this->files = ($this->files)($path, $file);
+        $this->files = ($this->files)($path->toString(), $file);
     }
 
     /**
      * Open the file in the given folder
      */
-    private function open(string $folder, string $file): File
+    private function open(Path $folder, string $file): File
     {
-        $path = $folder.'/'.$file;
+        $path = $folder->resolve(Path::of($file));
 
-        if (\is_dir($path)) {
+        if (\is_dir($path->toString())) {
             $object = new Directory\Directory(
                 new Name($file),
-                Set::defer(File::class, (function($folder) {
-                    $handle = \opendir($folder);
+                Set::defer(File::class, (function(Path $folder) {
+                    $handle = \opendir($folder->toString());
 
                     while (($name = \readdir($handle)) !== false) {
                         if (\in_array($name, self::INVALID_FILES, true)) {
@@ -192,11 +192,11 @@ final class FilesystemAdapter implements Adapter
                     }
 
                     \closedir($handle);
-                })($path)),
+                })($folder->resolve(Path::of($file.'/')))),
             );
         } else {
             try {
-                $mediaType = MediaType::of(\mime_content_type($path));
+                $mediaType = MediaType::of(\mime_content_type($path->toString()));
             } catch (InvalidMediaTypeString $e) {
                 $mediaType = MediaType::null();
             }
@@ -208,7 +208,7 @@ final class FilesystemAdapter implements Adapter
             );
         }
 
-        $this->files = ($this->files)($path, $object);
+        $this->files = ($this->files)($path->toString(), $object);
 
         return $object;
     }
