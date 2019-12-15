@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    Adapter\FilesystemAdapter,
+    Adapter\Filesystem,
     Adapter,
     File\File,
     Name,
@@ -17,21 +17,21 @@ use Innmind\Filesystem\{
 use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
-use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Filesystem as FS;
 use PHPUnit\Framework\TestCase;
 
-class FilesystemAdapterTest extends TestCase
+class FilesystemTest extends TestCase
 {
     public function setUp(): void
     {
-        $fs = new Filesystem;
+        $fs = new FS;
         $fs->remove('/tmp/test');
         $fs->remove('/tmp/foo');
     }
 
     public function testInterface()
     {
-        $adapter = new FilesystemAdapter(Path::of('/tmp/'));
+        $adapter = new Filesystem(Path::of('/tmp/'));
 
         $this->assertInstanceOf(Adapter::class, $adapter);
         $this->assertFalse($adapter->contains(new Name('foo')));
@@ -46,7 +46,7 @@ class FilesystemAdapterTest extends TestCase
         $this->expectException(PathDoesntRepresentADirectory::class);
         $this->expectExceptionMessage('path/to/somewhere');
 
-        new FilesystemAdapter(Path::of('path/to/somewhere'));
+        new Filesystem(Path::of('path/to/somewhere'));
     }
 
     public function testThrowWhenGettingUnknownFile()
@@ -54,17 +54,17 @@ class FilesystemAdapterTest extends TestCase
         $this->expectException(FileNotFound::class);
         $this->expectExceptionMessage('foo');
 
-        (new FilesystemAdapter(Path::of('/tmp/')))->get(new Name('foo'));
+        (new Filesystem(Path::of('/tmp/')))->get(new Name('foo'));
     }
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $this->assertNull((new FilesystemAdapter(Path::of('/tmp/')))->remove(new Name('foo')));
+        $this->assertNull((new Filesystem(Path::of('/tmp/')))->remove(new Name('foo')));
     }
 
     public function testCreateNestedStructure()
     {
-        $adapter = new FilesystemAdapter(Path::of('/tmp/'));
+        $adapter = new Filesystem(Path::of('/tmp/'));
 
         $directory = (new Directory(new Name('foo')))
             ->add(new File(new Name('foo.md'), Stream::ofContent('# Foo')))
@@ -82,7 +82,7 @@ class FilesystemAdapterTest extends TestCase
             $adapter->get(new Name('foo'))->get(new Name('bar'))->get(new Name('bar.md'))->content()->toString()
         );
 
-        $adapter = new FilesystemAdapter(Path::of('/tmp/'));
+        $adapter = new Filesystem(Path::of('/tmp/'));
         //check it's really persisted (otherwise it will throw)
         $adapter->get(new Name('foo'));
         $this->assertSame(
@@ -100,7 +100,7 @@ class FilesystemAdapterTest extends TestCase
 
     public function testRemoveFileWhenRemovedFromFolder()
     {
-        $a = new FilesystemAdapter(Path::of('/tmp/'));
+        $a = new Filesystem(Path::of('/tmp/'));
 
         $d = new Directory(new Name('foo'));
         $d = $d->add(new File(new Name('bar'), Stream::ofContent('some content')));
@@ -108,14 +108,14 @@ class FilesystemAdapterTest extends TestCase
         $d = $d->remove(new Name('bar'));
         $a->add($d);
         $this->assertSame(2, $d->modifications()->count());
-        $a = new FilesystemAdapter(Path::of('/tmp/'));
+        $a = new Filesystem(Path::of('/tmp/'));
         $this->assertFalse($a->get(new Name('foo'))->contains(new Name('bar')));
         $a->remove(new Name('foo'));
     }
 
     public function testDoesntFailWhenAddindSameDirectoryTwiceThatContainsARemovedFile()
     {
-        $a = new FilesystemAdapter(Path::of('/tmp/'));
+        $a = new Filesystem(Path::of('/tmp/'));
 
         $d = new Directory(new Name('foo'));
         $d = $d->add(new File(new Name('bar'), Stream::ofContent('some content')));
@@ -124,14 +124,14 @@ class FilesystemAdapterTest extends TestCase
         $a->add($d);
         $a->add($d);
         $this->assertSame(2, $d->modifications()->count());
-        $a = new FilesystemAdapter(Path::of('/tmp/'));
+        $a = new Filesystem(Path::of('/tmp/'));
         $this->assertFalse($a->get(new Name('foo'))->contains(new Name('bar')));
         $a->remove(new Name('foo'));
     }
 
     public function testLoadWithMediaType()
     {
-        $a = new FilesystemAdapter(Path::of('/tmp/'));
+        $a = new Filesystem(Path::of('/tmp/'));
         file_put_contents(
             '/tmp/some_content.html',
             '<!DOCTYPE html><html><body><answer value="42"/></body></html>'
@@ -146,7 +146,7 @@ class FilesystemAdapterTest extends TestCase
 
     public function testAll()
     {
-        $adapter = new FilesystemAdapter(Path::of('/tmp/test/'));
+        $adapter = new Filesystem(Path::of('/tmp/test/'));
         $adapter->add(new File(
             new Name('foo'),
             Stream::ofContent('foo')
@@ -178,7 +178,7 @@ class FilesystemAdapterTest extends TestCase
     public function testDotPseudoFilesAreNotListedInDirectory()
     {
         @mkdir('/tmp/test');
-        $adapter = new FilesystemAdapter(Path::of('/tmp/'));
+        $adapter = new Filesystem(Path::of('/tmp/'));
 
         $this->assertFalse($adapter->get(new Name('test'))->contains(new Name('.')));
         $this->assertFalse($adapter->get(new Name('test'))->contains(new Name('..')));

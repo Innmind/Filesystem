@@ -24,15 +24,15 @@ use Innmind\Immutable\{
     Set,
 };
 use Symfony\Component\{
-    Filesystem\Filesystem,
+    Filesystem\Filesystem as FS,
     Finder\Finder,
 };
 
-final class FilesystemAdapter implements Adapter
+final class Filesystem implements Adapter
 {
     private const INVALID_FILES = ['.', '..'];
     private Path $path;
-    private Filesystem $filesystem;
+    private FS $filesystem;
     private Map $files;
     private Set $handledEvents;
 
@@ -43,7 +43,7 @@ final class FilesystemAdapter implements Adapter
         }
 
         $this->path = $path;
-        $this->filesystem = new Filesystem;
+        $this->filesystem = new FS;
         $this->files = Map::of('string', File::class);
         $this->handledEvents = Set::objects();
 

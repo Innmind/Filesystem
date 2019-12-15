@@ -13,7 +13,7 @@ use Innmind\Immutable\{
     Set,
 };
 
-final class CacheOpenedFilesAdapter implements Adapter
+final class CacheOpenedFiles implements Adapter
 {
     private Map $files;
     private Adapter $filesystem;

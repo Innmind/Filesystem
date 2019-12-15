@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    Adapter\MemoryAdapter,
+    Adapter\InMemory,
     Adapter,
     Directory\Directory,
     File as FileInterface,
@@ -17,11 +17,11 @@ use Innmind\Immutable\Set;
 use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 
-class MemoryAdapterTest extends TestCase
+class InMemoryTest extends TestCase
 {
     public function testInterface()
     {
-        $a = new MemoryAdapter;
+        $a = new InMemory;
 
         $this->assertInstanceOf(Adapter::class, $a);
         $this->assertFalse($a->contains(new Name('foo')));
@@ -39,17 +39,17 @@ class MemoryAdapterTest extends TestCase
         $this->expectException(FileNotFound::class);
         $this->expectExceptionMessage('foo');
 
-        (new MemoryAdapter)->get(new Name('foo'));
+        (new InMemory)->get(new Name('foo'));
     }
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $this->assertNull((new MemoryAdapter)->remove(new Name('foo')));
+        $this->assertNull((new InMemory)->remove(new Name('foo')));
     }
 
     public function testAll()
     {
-        $adapter = new MemoryAdapter;
+        $adapter = new InMemory;
         $adapter->add($foo = new File(
             new Name('foo'),
             Stream::ofContent('foo')

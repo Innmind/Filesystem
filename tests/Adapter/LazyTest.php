@@ -4,8 +4,8 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    Adapter\LazyAdapter,
-    Adapter\MemoryAdapter,
+    Adapter\Lazy,
+    Adapter\InMemory,
     LazyAdapter as LazyAdapterInterface,
     Directory\Directory,
     File as FileInterface,
@@ -18,11 +18,11 @@ use Innmind\Immutable\Set;
 use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 
-class LazyAdapterTest extends TestCase
+class LazyTest extends TestCase
 {
     public function testInterface()
     {
-        $l = new LazyAdapter($a = new MemoryAdapter);
+        $l = new Lazy($a = new InMemory);
 
         $this->assertInstanceOf(LazyAdapterInterface::class, $l);
         $this->assertFalse($l->contains(new Name('foo')));
@@ -44,7 +44,7 @@ class LazyAdapterTest extends TestCase
 
     public function testRemoveUnpersistedAddedFile()
     {
-        $l = new LazyAdapter($a = new MemoryAdapter);
+        $l = new Lazy($a = new InMemory);
 
         $l->add(new Directory(new Name('foo')));
         $l->remove(new Name('foo'));
@@ -55,7 +55,7 @@ class LazyAdapterTest extends TestCase
 
     public function testAddUnpersistedRemovedFile()
     {
-        $l = new LazyAdapter($a = new MemoryAdapter);
+        $l = new Lazy($a = new InMemory);
 
         $a->add(new Directory(new Name('foo')));
         $l->remove(new Name('foo'));
@@ -69,7 +69,7 @@ class LazyAdapterTest extends TestCase
 
     public function testThrowWhenGettingUnknwonFile()
     {
-        $l = new LazyAdapter(new MemoryAdapter);
+        $l = new Lazy(new InMemory);
 
         $this->expectException(FileNotFound::class);
         $this->expectExceptionMessage('foo');
@@ -79,15 +79,15 @@ class LazyAdapterTest extends TestCase
 
     public function testRemovingUnknwonFileDoesntThrow()
     {
-        $l = new LazyAdapter(new MemoryAdapter);
+        $l = new Lazy(new InMemory);
 
         $this->assertNull($l->remove(new Name('foo')));
     }
 
     public function testAll()
     {
-        $memory = new MemoryAdapter;
-        $lazy = new LazyAdapter($memory);
+        $memory = new InMemory;
+        $lazy = new Lazy($memory);
         $memory->add(new File(new Name('foo'), Stream::ofContent('')));
         $lazy->remove(new Name('foo'));
         $lazy->add($bar = new File(new Name('bar'), Stream::ofContent('')));

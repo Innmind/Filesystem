@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    Adapter\CacheOpenedFilesAdapter,
+    Adapter\CacheOpenedFiles,
     Adapter,
     File,
     Name,
@@ -13,13 +13,13 @@ use Innmind\Stream\Readable;
 use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
 
-class CacheOpenedFilesAdapterTest extends TestCase
+class CacheOpenedFilesTest extends TestCase
 {
     public function testInterface()
     {
         $this->assertInstanceOf(
             Adapter::class,
-            new CacheOpenedFilesAdapter(
+            new CacheOpenedFiles(
                 $this->createMock(Adapter::class)
             )
         );
@@ -27,7 +27,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
 
     public function testAdd()
     {
-        $filesystem = new CacheOpenedFilesAdapter(
+        $filesystem = new CacheOpenedFiles(
             $inner = $this->createMock(Adapter::class)
         );
         $file = $this->createMock(File::class);
@@ -45,7 +45,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
 
     public function testGet()
     {
-        $filesystem = new CacheOpenedFilesAdapter(
+        $filesystem = new CacheOpenedFiles(
             $inner = $this->createMock(Adapter::class)
         );
         $file = $this->createMock(File::class);
@@ -64,7 +64,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
 
     public function testContainsFromInnerAdapter()
     {
-        $filesystem = new CacheOpenedFilesAdapter(
+        $filesystem = new CacheOpenedFiles(
             $inner = $this->createMock(Adapter::class)
         );
         $inner
@@ -78,7 +78,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
 
     public function testContainsFromCache()
     {
-        $filesystem = new CacheOpenedFilesAdapter(
+        $filesystem = new CacheOpenedFiles(
             $inner = $this->createMock(Adapter::class)
         );
         $inner
@@ -95,7 +95,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
 
     public function testRemove()
     {
-        $filesystem = new CacheOpenedFilesAdapter(
+        $filesystem = new CacheOpenedFiles(
             $inner = $this->createMock(Adapter::class)
         );
         $file = $this->createMock(File::class);
@@ -122,7 +122,7 @@ class CacheOpenedFilesAdapterTest extends TestCase
 
     public function testAll()
     {
-        $filesystem = new CacheOpenedFilesAdapter(
+        $filesystem = new CacheOpenedFiles(
             $inner = $this->createMock(Adapter::class)
         );
         $file = $this->createMock(File::class);

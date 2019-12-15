@@ -22,7 +22,7 @@ use Innmind\Immutable\{
  *
  * You can't add directories via this adapter
  */
-final class HashedNameAdapter implements Adapter
+final class HashedName implements Adapter
 {
     private Adapter $filesystem;
 

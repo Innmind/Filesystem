@@ -4,8 +4,8 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    Adapter\HashedNameAdapter,
-    Adapter\FilesystemAdapter,
+    Adapter\HashedName,
+    Adapter\Filesystem,
     Adapter,
     Directory,
     File,
@@ -17,27 +17,27 @@ use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use function Innmind\Immutable\unwrap;
-use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Filesystem as FS;
 use PHPUnit\Framework\TestCase;
 
-class HashedNameAdapterTest extends TestCase
+class HashedNameTest extends TestCase
 {
     public function setUp(): void
     {
-        (new Filesystem)->remove('/tmp/hashed/');
+        (new FS)->remove('/tmp/hashed/');
     }
 
     public function testInterface()
     {
         $this->assertInstanceOf(
             Adapter::class,
-            new HashedNameAdapter($this->createMock(Adapter::class))
+            new HashedName($this->createMock(Adapter::class))
         );
     }
 
     public function testThrowWhenAddingADirectory()
     {
-        $filesystem = new HashedNameAdapter($this->createMock(Adapter::class));
+        $filesystem = new HashedName($this->createMock(Adapter::class));
 
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('A directory can\'t be hashed');
@@ -47,8 +47,8 @@ class HashedNameAdapterTest extends TestCase
 
     public function testFileLifecycle()
     {
-        $filesystem = new HashedNameAdapter(
-            $inner = new FilesystemAdapter(Path::of('/tmp/hashed/'))
+        $filesystem = new HashedName(
+            $inner = new Filesystem(Path::of('/tmp/hashed/'))
         );
 
         $file = new File\File(new Name('foo'), Stream::ofContent('content'));
@@ -85,8 +85,8 @@ class HashedNameAdapterTest extends TestCase
 
     public function testThrowWhenGettingUnknownFile()
     {
-        $filesystem = new HashedNameAdapter(
-            new FilesystemAdapter(Path::of('/tmp/hashed/'))
+        $filesystem = new HashedName(
+            new Filesystem(Path::of('/tmp/hashed/'))
         );
 
         $this->expectException(FileNotFound::class);
@@ -97,8 +97,8 @@ class HashedNameAdapterTest extends TestCase
 
     public function testAll()
     {
-        $filesystem = new HashedNameAdapter(
-            new FilesystemAdapter(Path::of('/tmp/hashed/'))
+        $filesystem = new HashedName(
+            new Filesystem(Path::of('/tmp/hashed/'))
         );
 
         $filesystem->add(new File\File(new Name('foo'), Stream::ofContent('content')));
@@ -117,8 +117,8 @@ class HashedNameAdapterTest extends TestCase
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $filesystem = new HashedNameAdapter(
-            new FilesystemAdapter(Path::of('/tmp/hashed/'))
+        $filesystem = new HashedName(
+            new Filesystem(Path::of('/tmp/hashed/'))
         );
 
         $this->assertNull($filesystem->remove(new Name('foo')));
