@@ -14,7 +14,10 @@ use Innmind\Filesystem\{
     Event\FileWasAdded,
     Event\FileWasRemoved,
 };
-use Innmind\MediaType\MediaType;
+use Innmind\MediaType\{
+    MediaType,
+    Exception\InvalidMediaTypeString,
+};
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Map,
