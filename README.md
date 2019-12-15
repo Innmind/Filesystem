@@ -15,7 +15,7 @@ composer install innmind/filesystem
 
 ## Usage
 
-The whole model is structures around files, directories, streams and adapters. [`File`](srcFile.php), [`Directory`](srcDirectory.php) and [`Stream`](https://github.com/Innmind/Stream/blob/develop/src/Readable.php) are immutable objects.
+The whole model is structures around files, directories, streams and adapters. [`File`](src/File.php), [`Directory`](src/Directory.php) and [`Stream`](https://github.com/Innmind/Stream/blob/develop/src/Readable.php) are immutable objects.
 
 Example:
 ```php
