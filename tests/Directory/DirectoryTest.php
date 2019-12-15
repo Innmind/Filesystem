@@ -32,6 +32,14 @@ class DirectoryTest extends TestCase
         $this->assertSame($d->mediaType(), $d->mediaType());
     }
 
+    public function testNamed()
+    {
+        $directory = Directory::named('foo');
+
+        $this->assertInstanceOf(Directory::class, $directory);
+        $this->assertSame('foo', $directory->name()->toString());
+    }
+
     public function testAdd()
     {
         $d = new Directory(new Name('foo'));

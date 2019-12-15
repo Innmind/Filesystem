@@ -26,6 +26,14 @@ final class File implements FileInterface
         $this->mediaType = $mediaType ?? MediaType::null();
     }
 
+    public static function named(
+        string $name,
+        Readable $content,
+        MediaType $mediaType = null
+    ): self {
+        return new self(new Name($name), $content, $mediaType);
+    }
+
     /**
      * {@inheritdo}
      */

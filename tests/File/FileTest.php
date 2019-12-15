@@ -27,6 +27,14 @@ class FileTest extends TestCase
         );
     }
 
+    public function testNamed()
+    {
+        $file = File::named('foo', Stream::ofContent(''));
+
+        $this->assertInstanceOf(File::class, $file);
+        $this->assertSame('foo', $file->name()->toString());
+    }
+
     public function testWithContent()
     {
         $f = new File(new Name('foo'), $c = Stream::ofContent('bar'));

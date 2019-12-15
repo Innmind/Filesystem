@@ -55,6 +55,11 @@ final class Directory implements DirectoryInterface
         $this->modifications = Sequence::objects();
     }
 
+    public static function named(string $name): self
+    {
+        return new self(new Name($name));
+    }
+
     /**
      * {@inheritdoc}
      */
