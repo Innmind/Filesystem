@@ -184,6 +184,14 @@ final class Directory implements DirectoryInterface
     /**
      * {@inheritdoc}
      */
+    public function filter(callable $predicate): Set
+    {
+        return $this->files->filter($predicate);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function reduce($carry, callable $reducer)
     {
         return $this->files->reduce($carry, $reducer);

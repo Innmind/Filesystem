@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    Set,
+};
 
 interface Directory extends File
 {
@@ -21,6 +24,13 @@ interface Directory extends File
      * @param callable(File): void $function
      */
     public function foreach(callable $function): void;
+
+    /**
+     * @param callable(File): bool $predicate
+     *
+     * @return Set<File>
+     */
+    public function filter(callable $predicate): Set;
 
     /**
      * @template R

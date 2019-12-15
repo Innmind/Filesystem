@@ -14,6 +14,7 @@ use Innmind\Filesystem\{
 };
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
+use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 
 class DirectoryTest extends TestCase
@@ -193,5 +194,27 @@ class DirectoryTest extends TestCase
         );
 
         $this->assertSame('foobarfoobarsub', $reduced);
+    }
+
+    public function testFilter()
+    {
+        $directory = new Directory(
+            new Name('foo'),
+            Set::defer(File::class, (function () {
+                yield new File\File(new Name('foo'), Stream::ofContent('foo'));
+                yield new File\File(new Name('bar'), Stream::ofContent('bar'));
+                yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
+                yield new Directory(new Name('sub'));
+            })()),
+        );
+
+        $set = $directory->filter(
+            fn($file) => strpos($file->name()->toString(), 'foo') === 0,
+        );
+
+        $this->assertInstanceOf(Set::class, $set);
+        $this->assertSame(File::class, $set->type());
+        $this->assertSame('foo', unwrap($set)[0]->name()->toString());
+        $this->assertSame('foobar', unwrap($set)[1]->name()->toString());
     }
 }
