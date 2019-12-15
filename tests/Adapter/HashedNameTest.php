@@ -65,6 +65,13 @@ class HashedNameTest extends TestCase
                 ->content()
                 ->toString()
         );
+        $this->assertSame(
+            'content',
+            $filesystem
+                ->get(new Name('foo'))
+                ->content()
+                ->toString(),
+        );
 
         $file = new File\File(new Name('foo'), Stream::ofContent('content bis'));
 

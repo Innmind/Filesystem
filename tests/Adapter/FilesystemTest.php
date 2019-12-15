@@ -197,4 +197,16 @@ class FilesystemTest extends TestCase
 
         $adapter->get(new Name('..'));
     }
+
+    public function testAddingTheSameFileTwiceDoesNothing()
+    {
+        $adapter = new Filesystem(Path::of('/tmp/'));
+        $file = new File(
+            new Name('foo'),
+            Stream::ofContent('foo'),
+        );
+
+        $this->assertNull($adapter->add($file));
+        $this->assertNull($adapter->add($file));
+    }
 }

@@ -98,4 +98,16 @@ class LazyTest extends TestCase
         $this->assertCount(1, $all);
         $this->assertSame([$bar], unwrap($all));
     }
+
+    public function testGetFileAddedButNotYetPersisted()
+    {
+        $filesystem = new Lazy(new InMemory);
+        $file = new File(
+            new Name('foo'),
+            Stream::ofContent(''),
+        );
+
+        $this->assertNull($filesystem->add($file));
+        $this->assertSame($file, $filesystem->get($file->name()));
+    }
 }
