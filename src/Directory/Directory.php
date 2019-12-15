@@ -197,8 +197,8 @@ final class Directory implements DirectoryInterface
         return $this->modifications;
     }
 
-    private function record($event): void
+    private function record(object $event): void
     {
-        $this->modifications = $this->modifications->add($event);
+        $this->modifications = ($this->modifications)($event);
     }
 }

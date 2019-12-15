@@ -127,7 +127,7 @@ final class FilesystemAdapter implements Adapter
             $this->filesystem->mkdir($folder->toString());
             $file
                 ->modifications()
-                ->foreach(function($event) use ($folder) {
+                ->foreach(function(object $event) use ($folder) {
                     if ($this->handledEvents->contains($event)) {
                         return;
                     }
