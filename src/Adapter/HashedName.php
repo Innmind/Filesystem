@@ -40,12 +40,14 @@ final class HashedName implements Adapter
         $hashes = $this->hash($file->name());
 
         if ($this->filesystem->contains($hashes[0])) {
+            /** @var Directory $first */
             $first = $this->filesystem->get($hashes[0]);
         } else {
             $first = new Directory\Directory($hashes[0]);
         }
 
         if ($first->contains($hashes[1])) {
+            /** @var Directory $second */
             $second = $first->get($hashes[1]);
         } else {
             $second = new Directory\Directory($hashes[1]);
@@ -74,11 +76,11 @@ final class HashedName implements Adapter
 
         $originalName = $file;
         $hashes = $this->hash($file);
-        $file = $this
-            ->filesystem
-            ->get($hashes[0])
-            ->get($hashes[1])
-            ->get($hashes[2]);
+        /** @var Directory $first */
+        $first = $this->filesystem->get($hashes[0]);
+        /** @var Directory $second */
+        $second = $first->get($hashes[1]);
+        $file = $second->get($hashes[2]);
 
         return new File\File(
             $originalName,
@@ -120,11 +122,12 @@ final class HashedName implements Adapter
         }
 
         $hashes = $this->hash($file);
+        /** @var Directory $first */
         $first = $this->filesystem->get($hashes[0]);
+        /** @var Directory $second */
+        $second = $first->get($hashes[1]);
         $first = $first->add(
-            $first
-                ->get($hashes[1])
-                ->remove($hashes[2]),
+            $second->remove($hashes[2]),
         );
         $this->filesystem->add($first);
     }
@@ -139,7 +142,7 @@ final class HashedName implements Adapter
     }
 
     /**
-     * @return array[Name, Name, Name]
+     * @return array{0: Name, 1: Name, 2: Name}
      */
     private function hash(Name $name): array
     {

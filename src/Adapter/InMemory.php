@@ -16,10 +16,12 @@ use Innmind\Immutable\{
 
 final class InMemory implements Adapter
 {
+    /** @var Map<string, File> */
     private Map $files;
 
     public function __construct()
     {
+        /** @var Map<string, File> */
         $this->files = Map::of('string', File::class);
     }
 

@@ -15,12 +15,14 @@ use Innmind\Immutable\{
 
 final class CacheOpenedFiles implements Adapter
 {
+    /** @var Map<string, File> */
     private Map $files;
     private Adapter $filesystem;
 
     public function __construct(Adapter $filesystem)
     {
         $this->filesystem = $filesystem;
+        /** @var Map<string, File> */
         $this->files = Map::of('string', File::class);
     }
 
@@ -81,6 +83,7 @@ final class CacheOpenedFiles implements Adapter
     public function all(): Set
     {
         $all = $this->filesystem->all();
+        /** @var Map<string, File> */
         $this->files = $all->toMapOf(
             'string',
             File::class,

@@ -8,6 +8,7 @@ use Innmind\Filesystem\{
     Name,
     File,
     Exception\FileNotFound,
+    Exception\LogicException,
     Event\FileWasAdded,
     Event\FileWasRemoved,
 };
@@ -28,13 +29,20 @@ final class Directory implements DirectoryInterface
 {
     private Name $name;
     private ?Readable $content = null;
+    /** @var Set<File> */
     private Set $files;
     private MediaType $mediaType;
+    /** @var Sequence<object> */
     private Sequence $modifications;
 
+    /**
+     * @param Set<File>|null $files
+     */
     public function __construct(Name $name, Set $files = null)
     {
-        $files ??= Set::of(File::class);
+        /** @var Set<File> $default */
+        $default = Set::of(File::class);
+        $files ??= $default;
 
         assertSet(File::class, $files, 2);
 
@@ -64,13 +72,12 @@ final class Directory implements DirectoryInterface
             return $this->content;
         }
 
+        /** @var Set<string> $names */
+        $names = $this
+            ->files
+            ->toSetOf('string', fn($file): \Generator => yield $file->name()->toString());
         $this->content = Readable\Stream::ofContent(
-            join(
-                "\n",
-                $this
-                    ->files
-                    ->toSetOf('string', fn($file): \Generator => yield $file->name()->toString()),
-            )->toString(),
+            join("\n", $names)->toString(),
         );
 
         return $this->content;
@@ -160,17 +167,29 @@ final class Directory implements DirectoryInterface
         $directory = $this;
 
         while ($pieces->count() > 0) {
+            /** @var DirectoryInterface $target */
             $target = $pieces
                 ->reduce(
                     $directory,
                     function(DirectoryInterface $parent, Str $seek): DirectoryInterface {
-                        return $parent->get(new Name($seek->toString()));
+                        $child = $parent->get(new Name($seek->toString()));
+
+                        if (!$child instanceof DirectoryInterface) {
+                            throw new LogicException('Path doesn\'t reference a directory');
+                        }
+
+                        return $child;
                     }
                 )
                 ->add($target ?? $file);
             $pieces = $pieces->dropEnd(1);
         }
 
+        if (!isset($target)) {
+            return $this;
+        }
+
+        /** @psalm-suppress MixedArgument */
         return $directory->add($target);
     }
 

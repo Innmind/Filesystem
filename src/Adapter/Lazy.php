@@ -18,12 +18,15 @@ use Innmind\Immutable\{
 final class Lazy implements LazyAdapterInterface
 {
     private Adapter $adapter;
+    /** @var Map<string, File> */
     private Map $toAdd;
+    /** @var Set<string> */
     private Set $toRemove;
 
     public function __construct(Adapter $adapter)
     {
         $this->adapter = $adapter;
+        /** @var Map<string, File> */
         $this->toAdd = Map::of('string', File::class);
         $this->toRemove = Set::strings();
     }

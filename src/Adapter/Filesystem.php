@@ -26,6 +26,7 @@ use Innmind\Immutable\{
 use Symfony\Component\{
     Filesystem\Filesystem as FS,
     Finder\Finder,
+    Finder\SplFileInfo,
 };
 
 final class Filesystem implements Adapter
@@ -97,11 +98,13 @@ final class Filesystem implements Adapter
      */
     public function all(): Set
     {
+        /** @var Set<File> */
         return Set::defer(
             File::class,
             (function(Adapter $adapter, string $path): \Generator {
                 $files = Finder::create()->depth('== 0')->in($path);
 
+                /** @var SplFileInfo $file */
                 foreach ($files as $file) {
                     yield $adapter->get(new Name($file->getRelativePathname()));
                 }
@@ -178,22 +181,22 @@ final class Filesystem implements Adapter
         $path = $folder->resolve(Path::of($file->toString()));
 
         if (\is_dir($path->toString())) {
-            $object = new Directory\Directory(
-                $file,
-                Set::defer(File::class, (function(Path $folder) {
-                    $handle = \opendir($folder->toString());
+            /** @var Set<File> $files */
+            $files = Set::defer(File::class, (function(Path $folder): \Generator {
+                $handle = \opendir($folder->toString());
 
-                    while (($name = \readdir($handle)) !== false) {
-                        if (\in_array($name, self::INVALID_FILES, true)) {
-                            continue;
-                        }
-
-                        yield $this->open($folder, new Name($name));
+                while (($name = \readdir($handle)) !== false) {
+                    if (\in_array($name, self::INVALID_FILES, true)) {
+                        continue;
                     }
 
-                    \closedir($handle);
-                })($folder->resolve(Path::of($file->toString().'/')))),
-            );
+                    yield $this->open($folder, new Name($name));
+                }
+
+                \closedir($handle);
+            })($folder->resolve(Path::of($file->toString().'/'))));
+
+            $object = new Directory\Directory($file, $files);
         } else {
             try {
                 $mediaType = MediaType::of(\mime_content_type($path->toString()));

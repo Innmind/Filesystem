@@ -11,6 +11,7 @@ use Innmind\Filesystem\{
     Event\FileWasAdded,
     Event\FileWasRemoved,
     Exception\FileNotFound,
+    Exception\LogicException,
 };
 use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
@@ -155,6 +156,28 @@ class DirectoryTest extends TestCase
         $this->assertSame(
             'updated',
             $d2->get(new Name('foo'))->get(new Name('bar'))->get(new Name('baz'))->get(new Name('baz.md'))->content()->toString()
+        );
+    }
+
+    public function testThrowWhenReplacingAtAPathThatDoesntReferenceADirectory()
+    {
+        $d = (new Directory(new Name('foobar')))
+            ->add(
+                (new Directory(new Name('foo')))
+                    ->add(
+                        (new Directory(new Name('bar')))
+                            ->add(
+                                new File\File(new Name('baz'), Stream::ofContent('baz'))
+                            )
+                    )
+            );
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Path doesn\'t reference a directory');
+
+        $d->replaceAt(
+            Path::of('/foo/bar/baz'),
+            new File\File(new Name('baz.md'), Stream::ofContent('updated'))
         );
     }
 
