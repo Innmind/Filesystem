@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
+use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
     Set,
@@ -18,7 +19,7 @@ interface Directory extends File
     public function get(Name $name): File;
     public function contains(Name $name): bool;
     public function remove(Name $name): self;
-    public function replaceAt(string $path, File $file): self;
+    public function replaceAt(Path $path, File $file): self;
 
     /**
      * @param callable(File): void $function

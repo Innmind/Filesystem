@@ -12,6 +12,7 @@ use Innmind\Filesystem\{
     Event\FileWasRemoved,
     Exception\FileNotFound,
 };
+use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use function Innmind\Immutable\unwrap;
@@ -142,7 +143,7 @@ class DirectoryTest extends TestCase
             );
 
         $d2 = $d->replaceAt(
-            'foo/bar/baz',
+            Path::of('foo/bar/baz'),
             new File\File(new Name('baz.md'), Stream::ofContent('updated'))
         );
         $this->assertInstanceOf(DirectoryInterface::class, $d2);

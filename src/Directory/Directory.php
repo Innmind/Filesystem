@@ -11,6 +11,7 @@ use Innmind\Filesystem\{
     Event\FileWasAdded,
     Event\FileWasRemoved,
 };
+use Innmind\Url\Path;
 use Innmind\Stream\Readable;
 use Innmind\MediaType\MediaType;
 use Innmind\Immutable\{
@@ -153,9 +154,9 @@ final class Directory implements DirectoryInterface
     /**
      * {@inheritdoc}
      */
-    public function replaceAt(string $path, File $file): DirectoryInterface
+    public function replaceAt(Path $path, File $file): DirectoryInterface
     {
-        $pieces = Str::of($path)->split('/');
+        $pieces = Str::of($path->toString())->split('/');
         $directory = $this;
 
         while ($pieces->count() > 0) {
