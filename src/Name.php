@@ -13,7 +13,7 @@ final class Name
     public function __construct(string $value)
     {
         if (Str::of($value)->matches('|/|')) {
-            throw new DomainException('A file name can\'t contain a slash');
+            throw new DomainException("A file name can't contain a slash, $value given");
         }
 
         $this->value = $value;

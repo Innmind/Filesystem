@@ -34,7 +34,7 @@ final class HashedNameAdapter implements Adapter
     public function add(File $file): void
     {
         if ($file instanceof Directory) {
-            throw new LogicException;
+            throw new LogicException('A directory can\'t be hashed');
         }
 
         $hashes = $this->hash($file->name());

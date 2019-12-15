@@ -21,7 +21,7 @@ class NameTest extends TestCase
     public function testThrowWhenABuildingNameWithASlash()
     {
         $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('A file name can\'t contain a slash');
+        $this->expectExceptionMessage('A file name can\'t contain a slash, foo/bar given');
 
         new Name('foo/bar');
     }

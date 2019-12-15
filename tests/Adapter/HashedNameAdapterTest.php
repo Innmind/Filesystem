@@ -40,6 +40,7 @@ class HashedNameAdapterTest extends TestCase
         $filesystem = new HashedNameAdapter($this->createMock(Adapter::class));
 
         $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('A directory can\'t be hashed');
 
         $filesystem->add($this->createMock(Directory::class));
     }
