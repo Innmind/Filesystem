@@ -24,7 +24,7 @@ class HashedNameAdapterTest extends TestCase
 {
     public function setUp(): void
     {
-        (new Filesystem)->remove('/tmp/hashed');
+        (new Filesystem)->remove('/tmp/hashed/');
     }
 
     public function testInterface()
@@ -47,7 +47,7 @@ class HashedNameAdapterTest extends TestCase
     public function testFileLifecycle()
     {
         $filesystem = new HashedNameAdapter(
-            $inner = new FilesystemAdapter(Path::of('/tmp/hashed'))
+            $inner = new FilesystemAdapter(Path::of('/tmp/hashed/'))
         );
 
         $file = new File\File(new Name('foo'), Stream::ofContent('content'));
@@ -85,7 +85,7 @@ class HashedNameAdapterTest extends TestCase
     public function testThrowWhenGettingUnknownFile()
     {
         $filesystem = new HashedNameAdapter(
-            new FilesystemAdapter(Path::of('/tmp/hashed'))
+            new FilesystemAdapter(Path::of('/tmp/hashed/'))
         );
 
         $this->expectException(FileNotFound::class);
@@ -97,7 +97,7 @@ class HashedNameAdapterTest extends TestCase
     public function testAll()
     {
         $filesystem = new HashedNameAdapter(
-            new FilesystemAdapter(Path::of('/tmp/hashed'))
+            new FilesystemAdapter(Path::of('/tmp/hashed/'))
         );
 
         $filesystem->add(new File\File(new Name('foo'), Stream::ofContent('content')));
@@ -117,7 +117,7 @@ class HashedNameAdapterTest extends TestCase
     public function testRemovingUnknownFileDoesntThrow()
     {
         $filesystem = new HashedNameAdapter(
-            new FilesystemAdapter(Path::of('/tmp/hashed'))
+            new FilesystemAdapter(Path::of('/tmp/hashed/'))
         );
 
         $this->assertNull($filesystem->remove(new Name('foo')));

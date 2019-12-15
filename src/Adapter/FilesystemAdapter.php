@@ -10,7 +10,7 @@ use Innmind\Filesystem\{
     Directory,
     Stream\LazyStream,
     Exception\FileNotFound,
-    Exception\InvalidMediaTypeString,
+    Exception\PathDoesntRepresentADirectory,
     Event\FileWasAdded,
     Event\FileWasRemoved,
 };
@@ -35,6 +35,10 @@ final class FilesystemAdapter implements Adapter
 
     public function __construct(Path $path)
     {
+        if (!$path->directory()) {
+            throw new PathDoesntRepresentADirectory($path->toString());
+        }
+
         $this->path = $path;
         $this->filesystem = new Filesystem;
         $this->files = Map::of('string', File::class);
