@@ -143,7 +143,7 @@ class DirectoryTest extends TestCase
             );
 
         $d2 = $d->replaceAt(
-            Path::of('foo/bar/baz'),
+            Path::of('/foo/bar/baz'),
             new File\File(new Name('baz.md'), Stream::ofContent('updated'))
         );
         $this->assertInstanceOf(DirectoryInterface::class, $d2);
