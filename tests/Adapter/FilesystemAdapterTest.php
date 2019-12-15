@@ -17,10 +17,18 @@ use Innmind\Filesystem\{
 use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
+use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 
 class FilesystemAdapterTest extends TestCase
 {
+    public function setUp(): void
+    {
+        $fs = new Filesystem;
+        $fs->remove('/tmp/test');
+        $fs->remove('/tmp/foo');
+    }
+
     public function testInterface()
     {
         $adapter = new FilesystemAdapter(Path::of('/tmp/'));
