@@ -13,6 +13,7 @@ use Innmind\Filesystem\{
     Exception\LogicException,
     Exception\FileNotFound
 };
+use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use function Innmind\Immutable\unwrap;
@@ -46,7 +47,7 @@ class HashedNameAdapterTest extends TestCase
     public function testFileLifecycle()
     {
         $filesystem = new HashedNameAdapter(
-            $inner = new FilesystemAdapter('/tmp/hashed')
+            $inner = new FilesystemAdapter(Path::of('/tmp/hashed'))
         );
 
         $file = new File\File(new Name('foo'), Stream::ofContent('content'));
@@ -84,7 +85,7 @@ class HashedNameAdapterTest extends TestCase
     public function testThrowWhenGettingUnknownFile()
     {
         $filesystem = new HashedNameAdapter(
-            new FilesystemAdapter('/tmp/hashed')
+            new FilesystemAdapter(Path::of('/tmp/hashed'))
         );
 
         $this->expectException(FileNotFound::class);
@@ -96,7 +97,7 @@ class HashedNameAdapterTest extends TestCase
     public function testAll()
     {
         $filesystem = new HashedNameAdapter(
-            new FilesystemAdapter('/tmp/hashed')
+            new FilesystemAdapter(Path::of('/tmp/hashed'))
         );
 
         $filesystem->add(new File\File(new Name('foo'), Stream::ofContent('content')));
@@ -116,7 +117,7 @@ class HashedNameAdapterTest extends TestCase
     public function testRemovingUnknownFileDoesntThrow()
     {
         $filesystem = new HashedNameAdapter(
-            new FilesystemAdapter('/tmp/hashed')
+            new FilesystemAdapter(Path::of('/tmp/hashed'))
         );
 
         $this->assertNull($filesystem->remove(new Name('foo')));

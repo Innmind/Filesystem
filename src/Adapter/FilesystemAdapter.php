@@ -15,6 +15,7 @@ use Innmind\Filesystem\{
     Event\FileWasRemoved,
 };
 use Innmind\MediaType\MediaType;
+use Innmind\Url\Path;
 use Innmind\Immutable\{
     Map,
     Set,
@@ -27,20 +28,20 @@ use Symfony\Component\{
 final class FilesystemAdapter implements Adapter
 {
     private const INVALID_FILES = ['.', '..'];
-    private string $path;
+    private Path $path;
     private Filesystem $filesystem;
     private Map $files;
     private Set $handledEvents;
 
-    public function __construct(string $path)
+    public function __construct(Path $path)
     {
         $this->path = $path;
         $this->filesystem = new Filesystem;
         $this->files = Map::of('string', File::class);
         $this->handledEvents = Set::objects();
 
-        if (!$this->filesystem->exists($this->path)) {
-            $this->filesystem->mkdir($this->path);
+        if (!$this->filesystem->exists($this->path->toString())) {
+            $this->filesystem->mkdir($this->path->toString());
         }
     }
 
@@ -49,7 +50,7 @@ final class FilesystemAdapter implements Adapter
      */
     public function add(File $file): void
     {
-        $this->createFileAt($this->path, $file);
+        $this->createFileAt($this->path->toString(), $file);
     }
 
     /**
@@ -61,7 +62,7 @@ final class FilesystemAdapter implements Adapter
             throw new FileNotFound($file->toString());
         }
 
-        return $this->open($this->path, $file->toString());
+        return $this->open($this->path->toString(), $file->toString());
     }
 
     /**
@@ -73,7 +74,7 @@ final class FilesystemAdapter implements Adapter
             return false;
         }
 
-        return $this->filesystem->exists($this->path.'/'.$file->toString());
+        return $this->filesystem->exists($this->path->toString().'/'.$file->toString());
     }
 
     /**
@@ -81,7 +82,7 @@ final class FilesystemAdapter implements Adapter
      */
     public function remove(Name $file): void
     {
-        $this->filesystem->remove($this->path.'/'.$file->toString());
+        $this->filesystem->remove($this->path->toString().'/'.$file->toString());
     }
 
     /**
@@ -97,7 +98,7 @@ final class FilesystemAdapter implements Adapter
                 foreach ($files as $file) {
                     yield $adapter->get(new Name($file->getRelativePathname()));
                 }
-            })($this, $this->path),
+            })($this, $this->path->toString()),
         );
     }
 
