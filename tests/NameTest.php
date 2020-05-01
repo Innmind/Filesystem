@@ -38,11 +38,21 @@ class NameTest extends TestCase
         $this->assertFalse((new Name('foo'))->equals(new Name('bar')));
     }
 
+    public function testEmptyNameIsNotAllowed()
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('A file name can\'t be empty');
+
+        new Name('');
+    }
+
     public function testAcceptsAnyValueNotContainingASlash()
     {
         $this
             ->forAll(
-                Set\Strings::any()->filter(fn($s) => \strpos($s, '/') === false),
+                Set\Strings::any()
+                    ->filter(fn($s) => \strpos($s, '/') === false)
+                    ->filter(fn($s) => $s !== ''),
             )
             ->then(function($value) {
                 $name = new Name($value);
@@ -68,7 +78,11 @@ class NameTest extends TestCase
     public function testNameEqualsItself()
     {
         $this
-            ->forAll(Set\Strings::any()->filter(fn($s) => \strpos($s, '/') === false))
+            ->forAll(
+                Set\Strings::any()
+                    ->filter(fn($s) => \strpos($s, '/') === false)
+                    ->filter(fn($s) => $s !== ''),
+            )
             ->then(function($value) {
                 $name1 = new Name($value);
                 $name2 = new Name($value);
@@ -82,8 +96,12 @@ class NameTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Strings::any()->filter(fn($s) => \strpos($s, '/') === false),
-                Set\Strings::any()->filter(fn($s) => \strpos($s, '/') === false),
+                Set\Strings::any()
+                    ->filter(fn($s) => \strpos($s, '/') === false)
+                    ->filter(fn($s) => $s !== ''),
+                Set\Strings::any()
+                    ->filter(fn($s) => \strpos($s, '/') === false)
+                    ->filter(fn($s) => $s !== ''),
             )
             ->then(function($a, $b) {
                 $name1 = new Name($a);

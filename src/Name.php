@@ -16,6 +16,10 @@ final class Name
             throw new DomainException("A file name can't contain a slash, $value given");
         }
 
+        if (Str::of($value)->empty()) {
+            throw new DomainException('A file name can\'t be empty');
+        }
+
         $this->value = $value;
     }
 

@@ -15,7 +15,9 @@ final class Name
     {
         return Set\Decorate::immutable(
             static fn(string $name): Model => new Model($name),
-            Set\Strings::any()->filter(fn($s) => \strpos($s, '/') === false),
+            Set\Strings::any()
+                ->filter(static fn($s) => \strpos($s, '/') === false)
+                ->filter(static fn($s) => $s !== ''),
         );
     }
 }
