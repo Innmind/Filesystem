@@ -46,6 +46,19 @@ final class Directory implements DirectoryInterface
 
         assertSet(File::class, $files, 2);
 
+        $files->reduce(
+            Set::strings(),
+            static function(Set $names, File $file): Set {
+                $name = $file->name()->toString();
+
+                if ($names->contains($name)) {
+                    throw new LogicException("Same file '$name' found multiple times");
+                }
+
+                return ($names)($name);
+            },
+        );
+
         $this->name = $name;
         $this->files = $files;
         $this->mediaType = new MediaType(

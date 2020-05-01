@@ -18,9 +18,21 @@ use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set as DataSet,
+};
+use Fixtures\Innmind\Filesystem\{
+    Name as FName,
+    File as FFile,
+};
+use Fixtures\Innmind\Immutable\Set as FSet;
+use Properties\Innmind\Filesystem\Directory as PDirectory;
 
 class DirectoryTest extends TestCase
 {
+    use BlackBox;
+
     public function testInterface()
     {
         $d = new Directory(new Name('foo'));
@@ -278,5 +290,73 @@ class DirectoryTest extends TestCase
         $this->assertSame(File::class, $set->type());
         $this->assertSame('foo', unwrap($set)[0]->name()->toString());
         $this->assertSame('foobar', unwrap($set)[1]->name()->toString());
+    }
+
+    public function testEmptyDirectoryHoldProperties()
+    {
+        $this
+            ->forAll(
+                PDirectory::properties(),
+                FName::any(),
+            )
+            ->then(function($properties, $name) {
+                $directory = new Directory($name);
+
+                $properties->ensureHeldBy($directory);
+            });
+    }
+
+    public function testDirectoryWithSomeFilesHoldProperties()
+    {
+        $this
+            ->forAll(
+                PDirectory::properties(),
+                FName::any(),
+                FSet::of(
+                    File::class,
+                    new DataSet\Randomize(
+                        FFile::any(),
+                    ),
+                ),
+            )
+            ->filter(function($properties, $name, $files) {
+                if ($files->empty()) {
+                    return true;
+                }
+
+                // do not accept duplicated files
+                return $files
+                    ->groupBy(fn($file) => $file->name()->toString())
+                    ->size() === $files->size();
+            })
+            ->then(function($properties, $name, $files) {
+                $directory = new Directory($name, $files);
+
+                $properties->ensureHeldBy($directory);
+            });
+    }
+
+    public function testDirectoryLoadedWithDifferentFilesWithTheSameNameThrows()
+    {
+        $this
+            ->forAll(
+                FName::any(),
+                FName::any(),
+                DataSet\Strings::any(),
+                DataSet\Strings::any(),
+            )
+            ->then(function($directory, $file, $content1, $content2) {
+                $this->expectException(LogicException::class);
+                $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
+
+                new Directory(
+                    $directory,
+                    Set::of(
+                        File::class,
+                        File\File::named($file->toString(), Stream::ofContent($content1)),
+                        File\File::named($file->toString(), Stream::ofContent($content2)),
+                    ),
+                );
+            });
     }
 }
