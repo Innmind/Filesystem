@@ -61,4 +61,4 @@ jobs:
       - name: Install Dependencies
         run: composer install --no-progress
       - name: Psalm
-        run: vendor/bin/psalm
+        run: vendor/bin/psalm --shepherd
