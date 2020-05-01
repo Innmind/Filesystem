@@ -25,7 +25,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Innmind\\Filesystem\\": "src/"
+            "Innmind\\Filesystem\\": "src/",
+            "Fixtures\\Innmind\\Filesystem\\": "fixtures/"
         }
     },
     "autoload-dev": {
