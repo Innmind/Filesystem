@@ -11,6 +11,7 @@ use Innmind\BlackBox\{
 use Fixtures\Innmind\Filesystem\{
     File,
     Name,
+    Directory,
 };
 
 final class Adapter
@@ -50,6 +51,9 @@ final class Adapter
             new Adapter\AllRootFilesAreAccessible,
             new Adapter\AccessingUnknownFileThrowsAnException(
                 $seed(Name::any()),
+            ),
+            new Adapter\AddDirectory(
+                $seed(Directory::any()),
             ),
         );
     }
