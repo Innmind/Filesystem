@@ -13,22 +13,27 @@ use PHPUnit\Framework\Assert;
 
 final class AddDirectory implements Property
 {
-    private const NAME = 'Some new directory';
+    private Name $name;
+
+    public function __construct(Name $name)
+    {
+        $this->name = $name;
+    }
 
     public function name(): string
     {
-        return 'Add directory';
+        return "Add directory '{$this->name->toString()}'";
     }
 
     public function applicableTo(object $directory): bool
     {
-        return !$directory->contains(new Name(self::NAME));
+        return !$directory->contains($this->name);
     }
 
     public function ensureHeldBy(object $directory): object
     {
         $file = new Directory(
-            new Name(self::NAME),
+            $this->name,
         );
 
         Assert::assertFalse($directory->contains($file->name()));

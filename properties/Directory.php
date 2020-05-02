@@ -6,6 +6,11 @@ namespace Properties\Innmind\Filesystem;
 use Innmind\BlackBox\{
     Set,
     Property,
+    PHPUnit\Seeder,
+};
+use Fixtures\Innmind\Filesystem\{
+    Name,
+    File,
 };
 
 final class Directory
@@ -13,19 +18,27 @@ final class Directory
     /**
      * @return Set<Property>
      */
-    public static function properties(): Set
+    public static function properties(Seeder $seed): Set
     {
         return Set\Properties::of(
             new Directory\MediaTypeIsAlwaysTheSame,
             new Directory\ContainsMethodAlwaysReturnTrueForFilesInTheDirectory,
             new Directory\AllFilesInTheDirectoryAreAccessible,
-            new Directory\AccessingUnknownFileThrowsAnException,
-            new Directory\RemovingAnUnknownFileHasNoEffect,
+            new Directory\AccessingUnknownFileThrowsAnException(
+                $seed(Name::any()),
+            ),
+            new Directory\RemovingAnUnknownFileHasNoEffect(
+                $seed(Name::any()),
+            ),
             new Directory\RemoveFile,
             new Directory\RemoveDirectory,
             new Directory\ContentHoldsTheNamesOfTheFiles,
-            new Directory\AddFile,
-            new Directory\AddDirectory,
+            new Directory\AddFile(
+                $seed(File::any()),
+            ),
+            new Directory\AddDirectory(
+                $seed(Name::any()),
+            ),
         );
     }
 }

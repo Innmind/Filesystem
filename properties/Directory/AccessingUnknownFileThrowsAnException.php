@@ -12,22 +12,27 @@ use PHPUnit\Framework\Assert;
 
 final class AccessingUnknownFileThrowsAnException implements Property
 {
-    private const UNKNOWN = 'some unknown file name';
+    private Name $name;
+
+    public function __construct(Name $name)
+    {
+        $this->name = $name;
+    }
 
     public function name(): string
     {
-        return 'Accessing an unknown file throw an exception';
+        return "Accessing unknown file '{$this->name->toString()}' must throw an exception";
     }
 
     public function applicableTo(object $directory): bool
     {
-        return !$directory->contains(new Name(self::UNKNOWN));
+        return !$directory->contains($this->name);
     }
 
     public function ensureHeldBy(object $directory): object
     {
         try {
-            $directory->get(new Name(self::UNKNOWN));
+            $directory->get($this->name);
 
             Assert::fail('It should throw an exception');
         } catch (FileNotFound $e) {

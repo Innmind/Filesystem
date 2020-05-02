@@ -4,9 +4,7 @@ declare(strict_types = 1);
 namespace Properties\Innmind\Filesystem\Directory;
 
 use Innmind\Filesystem\{
-    File\File,
-    Name,
-    Stream\NullStream,
+    File,
     Event\FileWasAdded,
 };
 use Innmind\BlackBox\Property;
@@ -14,30 +12,30 @@ use PHPUnit\Framework\Assert;
 
 final class AddFile implements Property
 {
-    private const NAME = 'Some new file';
+    private File $file;
+
+    public function __construct(File $file)
+    {
+        $this->file = $file;
+    }
 
     public function name(): string
     {
-        return 'Add file';
+        return "Add file '{$this->file->name()->toString()}'";
     }
 
     public function applicableTo(object $directory): bool
     {
-        return !$directory->contains(new Name(self::NAME));
+        return !$directory->contains($this->file->name());
     }
 
     public function ensureHeldBy(object $directory): object
     {
-        $file = new File(
-            new Name(self::NAME),
-            new NullStream,
-        );
-
-        Assert::assertFalse($directory->contains($file->name()));
-        $newDirectory = $directory->add($file);
+        Assert::assertFalse($directory->contains($this->file->name()));
+        $newDirectory = $directory->add($this->file);
         Assert::assertNotSame($directory, $newDirectory);
-        Assert::assertFalse($directory->contains($file->name()));
-        Assert::assertTrue($newDirectory->contains($file->name()));
+        Assert::assertFalse($directory->contains($this->file->name()));
+        Assert::assertTrue($newDirectory->contains($this->file->name()));
         Assert::assertGreaterThan(
             $directory->modifications()->size(),
             $newDirectory->modifications()->size(),
@@ -47,7 +45,7 @@ final class AddFile implements Property
             $newDirectory->modifications()->last(),
         );
         Assert::assertSame(
-            $file,
+            $this->file,
             $newDirectory->modifications()->last()->file(),
         );
 
