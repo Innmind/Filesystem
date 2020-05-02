@@ -15,16 +15,25 @@ use PHPUnit\Framework\Assert;
 
 final class AddDirectoryFromAnotherAdapterWithFileRemoved implements Property
 {
-    private const NAME = 'Some directory from another adapter with file removed';
+    private Name $name;
+    private File $file;
+    private File $removed;
+
+    public function __construct(Name $name, File $file, File $removed)
+    {
+        $this->name = $name;
+        $this->file = $file;
+        $this->removed = $removed;
+    }
 
     public function name(): string
     {
-        return 'Add directory loaded from another adapter with file removed';
+        return "Add directory '{$this->name->toString()}' loaded from another adapter with file '{$this->removed->name()->toString()}' removed";
     }
 
     public function applicableTo(object $adapter): bool
     {
-        return !$adapter->contains(new Name(self::NAME));
+        return !$adapter->contains($this->name);
     }
 
     public function ensureHeldBy(object $adapter): object
@@ -32,20 +41,14 @@ final class AddDirectoryFromAnotherAdapterWithFileRemoved implements Property
         // directories loaded from other adapters have files injecting at
         // construct time (so there is no modifications())
         $directory = new Directory(
-            new Name(self::NAME),
+            $this->name,
             Set::of(
                 File::class,
-                new File\File(
-                    new Name('file removed afterward'),
-                    Stream::ofContent('baz'),
-                ),
-                new File\File(
-                    new Name('file from other adapter'),
-                    Stream::ofContent('foobar'),
-                ),
+                $this->removed,
+                $this->file,
             ),
         );
-        $directory = $directory->remove(new Name('file removed afterward'));
+        $directory = $directory->remove($this->removed->name());
 
         Assert::assertFalse($adapter->contains($directory->name()));
         Assert::assertNull($adapter->add($directory));
@@ -53,18 +56,18 @@ final class AddDirectoryFromAnotherAdapterWithFileRemoved implements Property
         Assert::assertTrue(
             $adapter
                 ->get($directory->name())
-                ->contains(new Name('file from other adapter')),
+                ->contains($this->file->name()),
         );
         Assert::assertFalse(
             $adapter
                 ->get($directory->name())
-                ->contains(new Name('file removed afterward')),
+                ->contains($this->removed->name()),
         );
         Assert::assertSame(
-            'foobar',
+            $this->file->content()->toString(),
             $adapter
                 ->get($directory->name())
-                ->get(new Name('file from other adapter'))
+                ->get($this->file->name())
                 ->content()
                 ->toString(),
         );

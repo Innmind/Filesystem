@@ -3,42 +3,38 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Adapter;
 
-use Innmind\Filesystem\{
-    File\File,
-    Name,
-};
-use Innmind\Stream\Readable\Stream;
+use Innmind\Filesystem\File;
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;
 
 final class AddFile implements Property
 {
-    private const NAME = 'Some new file';
+    private File $file;
+
+    public function __construct(File $file)
+    {
+        $this->file = $file;
+    }
 
     public function name(): string
     {
-        return 'Add file';
+        return "Add file '{$this->file->name()->toString()}'";
     }
 
     public function applicableTo(object $adapter): bool
     {
-        return !$adapter->contains(new Name(self::NAME));
+        return !$adapter->contains($this->file->name());
     }
 
     public function ensureHeldBy(object $adapter): object
     {
-        $file = new File(
-            new Name(self::NAME),
-            Stream::ofContent('foo'),
-        );
-
-        Assert::assertFalse($adapter->contains($file->name()));
-        Assert::assertNull($adapter->add($file));
-        Assert::assertTrue($adapter->contains($file->name()));
+        Assert::assertFalse($adapter->contains($this->file->name()));
+        Assert::assertNull($adapter->add($this->file));
+        Assert::assertTrue($adapter->contains($this->file->name()));
         Assert::assertSame(
-            'foo',
+            $this->file->content()->toString(),
             $adapter
-                ->get($file->name())
+                ->get($this->file->name())
                 ->content()
                 ->toString(),
         );

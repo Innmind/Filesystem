@@ -15,16 +15,25 @@ use PHPUnit\Framework\Assert;
 
 final class AddDirectoryFromAnotherAdapterWithFileAdded implements Property
 {
-    private const NAME = 'Some directory from another adapter with file added';
+    private Name $name;
+    private File $file;
+    private File $added;
+
+    public function __construct(Name $name, File $file, File $added)
+    {
+        $this->name = $name;
+        $this->file = $file;
+        $this->added = $added;
+    }
 
     public function name(): string
     {
-        return 'Add directory loaded from another adapter with file added';
+        return "Add directory '{$this->name->toString()}' loaded from another adapter with file '{$this->added->name()->toString()}' added";
     }
 
     public function applicableTo(object $adapter): bool
     {
-        return !$adapter->contains(new Name(self::NAME));
+        return !$adapter->contains($this->name);
     }
 
     public function ensureHeldBy(object $adapter): object
@@ -32,19 +41,13 @@ final class AddDirectoryFromAnotherAdapterWithFileAdded implements Property
         // directories loaded from other adapters have files injecting at
         // construct time (so there is no modifications())
         $directory = new Directory(
-            new Name(self::NAME),
+            $this->name,
             Set::of(
                 File::class,
-                new File\File(
-                    new Name('file from other adapter'),
-                    Stream::ofContent('foobar'),
-                ),
+                $this->file,
             ),
         );
-        $directory = $directory->add(new File\File(
-            new Name('file added afterward'),
-            Stream::ofContent('baz'),
-        ));
+        $directory = $directory->add($this->added);
 
         Assert::assertFalse($adapter->contains($directory->name()));
         Assert::assertNull($adapter->add($directory));
@@ -52,26 +55,26 @@ final class AddDirectoryFromAnotherAdapterWithFileAdded implements Property
         Assert::assertTrue(
             $adapter
                 ->get($directory->name())
-                ->contains(new Name('file from other adapter')),
+                ->contains($this->file->name()),
         );
         Assert::assertTrue(
             $adapter
                 ->get($directory->name())
-                ->contains(new Name('file added afterward')),
+                ->contains($this->added->name()),
         );
         Assert::assertSame(
-            'foobar',
+            $this->file->content()->toString(),
             $adapter
                 ->get($directory->name())
-                ->get(new Name('file from other adapter'))
+                ->get($this->file->name())
                 ->content()
                 ->toString(),
         );
         Assert::assertSame(
-            'baz',
+            $this->added->content()->toString(),
             $adapter
                 ->get($directory->name())
-                ->get(new Name('file added afterward'))
+                ->get($this->added->name())
                 ->content()
                 ->toString(),
         );

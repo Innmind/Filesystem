@@ -9,11 +9,16 @@ use PHPUnit\Framework\Assert;
 
 final class RemoveUnknownFile implements Property
 {
-    private const NAME = 'Unknown file';
+    private Name $name;
+
+    public function __construct(Name $name)
+    {
+        $this->name = $name;
+    }
 
     public function name(): string
     {
-        return 'Remove unknown file';
+        return "Remove unknown file '{$this->name->toString()}'";
     }
 
     public function applicableTo(object $adapter): bool
@@ -23,8 +28,8 @@ final class RemoveUnknownFile implements Property
 
     public function ensureHeldBy(object $adapter): object
     {
-        Assert::assertNull($adapter->remove(new Name(self::NAME)));
-        Assert::assertFalse($adapter->contains(new Name(self::NAME)));
+        Assert::assertNull($adapter->remove($this->name));
+        Assert::assertFalse($adapter->contains($this->name));
 
         return $adapter;
     }

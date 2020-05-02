@@ -15,16 +15,23 @@ use PHPUnit\Framework\Assert;
 
 final class AddDirectoryFromAnotherAdapter implements Property
 {
-    private const NAME = 'Some directory from another adapter';
+    private Name $name;
+    private File $file;
+
+    public function __construct(Name $name, File $file)
+    {
+        $this->name = $name;
+        $this->file = $file;
+    }
 
     public function name(): string
     {
-        return 'Add directory loaded from another adapter';
+        return "Add directory '{$this->name->toString()}' loaded from another adapter";
     }
 
     public function applicableTo(object $adapter): bool
     {
-        return !$adapter->contains(new Name(self::NAME));
+        return !$adapter->contains($this->name);
     }
 
     public function ensureHeldBy(object $adapter): object
@@ -32,13 +39,10 @@ final class AddDirectoryFromAnotherAdapter implements Property
         // directories loaded from other adapters have files injecting at
         // construct time (so there is no modifications())
         $directory = new Directory(
-            new Name(self::NAME),
+            $this->name,
             Set::of(
                 File::class,
-                new File\File(
-                    new Name('file from other adapter'),
-                    Stream::ofContent('foobar'),
-                ),
+                $this->file,
             ),
         );
 
@@ -48,13 +52,13 @@ final class AddDirectoryFromAnotherAdapter implements Property
         Assert::assertTrue(
             $adapter
                 ->get($directory->name())
-                ->contains(new Name('file from other adapter')),
+                ->contains($this->file->name()),
         );
         Assert::assertSame(
-            'foobar',
+            $this->file->content()->toString(),
             $adapter
                 ->get($directory->name())
-                ->get(new Name('file from other adapter'))
+                ->get($this->file->name())
                 ->content()
                 ->toString(),
         );

@@ -12,22 +12,27 @@ use PHPUnit\Framework\Assert;
 
 final class AddEmptyDirectory implements Property
 {
-    private const NAME = 'Some empty directory';
+    private Name $name;
+
+    public function __construct(Name $name)
+    {
+        $this->name = $name;
+    }
 
     public function name(): string
     {
-        return 'Add empty directory';
+        return "Add empty directory '{$this->name->toString()}'";
     }
 
     public function applicableTo(object $adapter): bool
     {
-        return !$adapter->contains(new Name(self::NAME));
+        return !$adapter->contains($this->name);
     }
 
     public function ensureHeldBy(object $adapter): object
     {
         $directory = new Directory(
-            new Name(self::NAME),
+            $this->name,
         );
 
         Assert::assertFalse($adapter->contains($directory->name()));
