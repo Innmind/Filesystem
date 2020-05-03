@@ -34,10 +34,10 @@ final class Source implements Directory, SourceInterface
         $this->path = $path;
     }
 
-    public function shouldPersistAt(Adapter $target, Path $path): bool
+    public function sourcedAt(Adapter $adapter, Path $path): bool
     {
-        return $this->openedBy !== $target ||
-            !$this->path->equals($path);
+        return $this->openedBy === $adapter &&
+            $this->path->equals($path);
     }
 
     public function name(): Name

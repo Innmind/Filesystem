@@ -46,7 +46,7 @@ class SourceTest extends TestCase
                     $path,
                 );
 
-                $this->assertTrue($source->shouldPersistAt(
+                $this->assertFalse($source->sourcedAt(
                     $this->createMock(Adapter::class),
                     $path,
                 ));
@@ -70,7 +70,7 @@ class SourceTest extends TestCase
                     $openedAt,
                 );
 
-                $this->assertTrue($source->shouldPersistAt(
+                $this->assertFalse($source->sourcedAt(
                     $adapter,
                     $writeAt,
                 ));
@@ -88,7 +88,7 @@ class SourceTest extends TestCase
                     $path,
                 );
 
-                $this->assertFalse($source->shouldPersistAt(
+                $this->assertTrue($source->sourcedAt(
                     $adapter,
                     $path,
                 ));

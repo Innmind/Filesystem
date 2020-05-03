@@ -120,7 +120,8 @@ final class Filesystem implements Adapter
 
         $path = $path->resolve(Path::of($name));
 
-        if ($file instanceof Source && !$file->shouldPersistAt($this, $path)) {
+        if ($file instanceof Source && $file->sourcedAt($this, $path)) {
+            // no need to persist untouched file where it was loaded from
             return;
         }
 

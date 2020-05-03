@@ -13,5 +13,5 @@ use Innmind\Url\Path;
  */
 interface Source extends File
 {
-    public function shouldPersistAt(Adapter $target, Path $path): bool;
+    public function sourcedAt(Adapter $adapter, Path $path): bool;
 }
