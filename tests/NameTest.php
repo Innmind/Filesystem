@@ -52,7 +52,7 @@ class NameTest extends TestCase
             ->forAll(
                 Set\Strings::any()
                     ->filter(fn($s) => \strpos($s, '/') === false)
-                    ->filter(fn($s) => $s !== ''),
+                    ->filter(fn($s) => $s !== '' && $s !== '.' && $s !== '..'),
             )
             ->then(function($value) {
                 $name = new Name($value);
@@ -81,7 +81,7 @@ class NameTest extends TestCase
             ->forAll(
                 Set\Strings::any()
                     ->filter(fn($s) => \strpos($s, '/') === false)
-                    ->filter(fn($s) => $s !== ''),
+                    ->filter(fn($s) => $s !== '' && $s !== '.' && $s !== '..'),
             )
             ->then(function($value) {
                 $name1 = new Name($value);
@@ -98,10 +98,10 @@ class NameTest extends TestCase
             ->forAll(
                 Set\Strings::any()
                     ->filter(fn($s) => \strpos($s, '/') === false)
-                    ->filter(fn($s) => $s !== ''),
+                    ->filter(fn($s) => $s !== '' && $s !== '.' && $s !== '..'),
                 Set\Strings::any()
                     ->filter(fn($s) => \strpos($s, '/') === false)
-                    ->filter(fn($s) => $s !== ''),
+                    ->filter(fn($s) => $s !== '' && $s !== '.' && $s !== '..'),
             )
             ->then(function($a, $b) {
                 $name1 = new Name($a);
@@ -109,6 +109,18 @@ class NameTest extends TestCase
 
                 $this->assertFalse($name1->equals($name2));
                 $this->assertFalse($name2->equals($name1));
+            });
+    }
+
+    public function testDotFoldersAreNotAccepted()
+    {
+        $this
+            ->forAll(Set\Elements::of('.', '..'))
+            ->then(function($name) {
+                $this->expectException(DomainException::class);
+                $this->expectExceptionMessage("'.' and '..' can't be used");
+
+                new Name($name);
             });
     }
 }

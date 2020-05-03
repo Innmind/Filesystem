@@ -20,6 +20,11 @@ final class Name
             throw new DomainException('A file name can\'t be empty');
         }
 
+        if ($value === '.' || $value === '..') {
+            // as they are special links on unix filesystems
+            throw new DomainException("'.' and '..' can't be used");
+        }
+
         $this->value = $value;
     }
 
