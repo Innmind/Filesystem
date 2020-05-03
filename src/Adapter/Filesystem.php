@@ -167,29 +167,27 @@ final class Filesystem implements Adapter
                 \closedir($handle);
             })($folder->resolve(Path::of($file->toString().'/'))));
 
-            $object = new Directory\Source(
+            return new Directory\Source(
                 new Directory\Directory($file, $files),
-                $this,
-                $path,
-            );
-        } else {
-            try {
-                $mediaType = MediaType::of(\mime_content_type($path->toString()));
-            } catch (InvalidMediaTypeString $e) {
-                $mediaType = MediaType::null();
-            }
-
-            $object = new File\Source(
-                new File\File(
-                    $file,
-                    new LazyStream($path),
-                    $mediaType,
-                ),
                 $this,
                 $path,
             );
         }
 
-        return $object;
+        try {
+            $mediaType = MediaType::of(\mime_content_type($path->toString()));
+        } catch (InvalidMediaTypeString $e) {
+            $mediaType = MediaType::null();
+        }
+
+        return new File\Source(
+            new File\File(
+                $file,
+                new LazyStream($path),
+                $mediaType,
+            ),
+            $this,
+            $path,
+        );
     }
 }
