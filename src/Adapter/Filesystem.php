@@ -9,7 +9,7 @@ use Innmind\Filesystem\{
     Name,
     Directory,
     Stream\LazyStream,
-    Stream\Source,
+    Source,
     Exception\FileNotFound,
     Exception\PathDoesntRepresentADirectory,
     Event\FileWasRemoved,
