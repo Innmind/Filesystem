@@ -6,7 +6,6 @@ namespace Properties\Innmind\Filesystem;
 use Innmind\BlackBox\{
     Set,
     Property,
-    PHPUnit\Seeder,
 };
 use Fixtures\Innmind\Filesystem\{
     Name,
@@ -18,30 +17,49 @@ final class Directory
     /**
      * @return Set<Property>
      */
-    public static function properties(Seeder $seed): Set
+    public static function properties(): Set
     {
-        return Set\Properties::of(
-            new Directory\MediaTypeIsAlwaysTheSame,
-            new Directory\ContainsMethodAlwaysReturnTrueForFilesInTheDirectory,
-            new Directory\AllFilesInTheDirectoryAreAccessible,
-            new Directory\AccessingUnknownFileThrowsAnException(
-                $seed(Name::any()),
+        return Set\Properties::any(
+            Set\Property::of(
+                Directory\MediaTypeIsAlwaysTheSame::class,
             ),
-            new Directory\RemovingAnUnknownFileHasNoEffect(
-                $seed(Name::any()),
+            Set\Property::of(
+                Directory\ContainsMethodAlwaysReturnTrueForFilesInTheDirectory::class,
             ),
-            new Directory\RemoveFile,
-            new Directory\RemoveFileMustUnwrapSourceDecorator,
-            new Directory\RemoveDirectory,
-            new Directory\ContentHoldsTheNamesOfTheFiles,
-            new Directory\AddFile(
-                $seed(File::any()),
+            Set\Property::of(
+                Directory\AllFilesInTheDirectoryAreAccessible::class,
             ),
-            new Directory\AddFileMustUnwrapSourceDecorator(
-                $seed(File::any()),
+            Set\Property::of(
+                Directory\AccessingUnknownFileThrowsAnException::class,
+                Name::any(),
             ),
-            new Directory\AddDirectory(
-                $seed(Name::any()),
+            Set\Property::of(
+                Directory\RemovingAnUnknownFileHasNoEffect::class,
+                Name::any(),
+            ),
+            Set\Property::of(
+                Directory\RemoveFile::class,
+            ),
+            Set\Property::of(
+                Directory\RemoveFileMustUnwrapSourceDecorator::class,
+            ),
+            Set\Property::of(
+                Directory\RemoveDirectory::class,
+            ),
+            Set\Property::of(
+                Directory\ContentHoldsTheNamesOfTheFiles::class,
+            ),
+            Set\Property::of(
+                Directory\AddFile::class,
+                File::any(),
+            ),
+            Set\Property::of(
+                Directory\AddFileMustUnwrapSourceDecorator::class,
+                File::any(),
+            ),
+            Set\Property::of(
+                Directory\AddDirectory::class,
+                Name::any(),
             ),
         );
     }

@@ -219,7 +219,7 @@ class FilesystemTest extends TestCase
     public function testHoldProperties()
     {
         $this
-            ->forAll(PAdapter::properties($this->seeder()))
+            ->forAll(PAdapter::properties())
             ->then(function($properties) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);

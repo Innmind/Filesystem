@@ -107,7 +107,7 @@ class SourceTest extends TestCase
     {
         $this
             ->forAll(
-                PDirectory::properties($this->seeder()),
+                PDirectory::properties(),
                 Directory::maxDepth(1),
                 Path::any(),
             )

@@ -296,7 +296,7 @@ class DirectoryTest extends TestCase
     {
         $this
             ->forAll(
-                PDirectory::properties($this->seeder()),
+                PDirectory::properties(),
                 FName::any(),
             )
             ->then(function($properties, $name) {
@@ -310,7 +310,7 @@ class DirectoryTest extends TestCase
     {
         $this
             ->forAll(
-                PDirectory::properties($this->seeder()),
+                PDirectory::properties(),
                 FName::any(),
                 FSet::of(
                     File::class,

@@ -6,7 +6,6 @@ namespace Properties\Innmind\Filesystem;
 use Innmind\BlackBox\{
     Set,
     Property,
-    PHPUnit\Seeder,
 };
 use Fixtures\Innmind\Filesystem\{
     File,
@@ -19,51 +18,66 @@ final class Adapter
     /**
      * @return Set<Property>
      */
-    public static function properties(Seeder $seed): Set
+    public static function properties(): Set
     {
-        return Set\Properties::of(
-            new Adapter\AddFile(
-                $seed(File::any()),
+        return Set\Properties::any(
+            Set\Property::of(
+                Adapter\AddFile::class,
+                File::any(),
             ),
-            new Adapter\AddEmptyDirectory(
-                $seed(Name::any()),
+            Set\Property::of(
+                Adapter\AddEmptyDirectory::class,
+                Name::any(),
             ),
-            new Adapter\AddDirectoryFromAnotherAdapter(
-                $seed(Name::any()),
-                $seed(File::any()),
+            Set\Property::of(
+                Adapter\AddDirectoryFromAnotherAdapter::class,
+                Name::any(),
+                File::any(),
             ),
-            new Adapter\AddDirectoryFromAnotherAdapterWithFileAdded(
-                $seed(Name::any()),
-                $seed(File::any()),
-                $seed(File::any()),
+            Set\Property::of(
+                Adapter\AddDirectoryFromAnotherAdapterWithFileAdded::class,
+                Name::any(),
+                File::any(),
+                File::any(),
             ),
-            new Adapter\AddDirectoryFromAnotherAdapterWithFileRemoved(
-                $seed(Name::any()),
-                $seed(File::any()),
-                $seed(File::any()),
+            Set\Property::of(
+                Adapter\AddDirectoryFromAnotherAdapterWithFileRemoved::class,
+                Name::any(),
+                File::any(),
+                File::any(),
             ),
-            new Adapter\RemoveUnknownFile(
-                $seed(Name::any()),
+            Set\Property::of(
+                Adapter\RemoveUnknownFile::class,
+                Name::any(),
             ),
-            new Adapter\RemoveFile(
-                $seed(File::any()),
+            Set\Property::of(
+                Adapter\RemoveFile::class,
+                File::any(),
             ),
-            new Adapter\AllRootFilesAreAccessible,
-            new Adapter\AccessingUnknownFileThrowsAnException(
-                $seed(Name::any()),
+            Set\Property::of(
+                Adapter\AllRootFilesAreAccessible::class,
             ),
-            new Adapter\AddDirectory(
-                $seed(Directory::any()),
+            Set\Property::of(
+                Adapter\AccessingUnknownFileThrowsAnException::class,
+                Name::any(),
             ),
-            new Adapter\AddRemoveAddModificationsStillAddTheFile(
-                $seed(Directory::any()),
-                $seed(File::any()),
+            Set\Property::of(
+                Adapter\AddDirectory::class,
+                Directory::any(),
             ),
-            new Adapter\RemoveAddRemoveModificationsDoesntAddTheFile(
-                $seed(Directory::any()),
-                $seed(File::any()),
+            Set\Property::of(
+                Adapter\AddRemoveAddModificationsStillAddTheFile::class,
+                Directory::any(),
+                File::any(),
             ),
-            new Adapter\ReAddingFilesHasNoSideEffect,
+            Set\Property::of(
+                Adapter\RemoveAddRemoveModificationsDoesntAddTheFile::class,
+                Directory::any(),
+                File::any(),
+            ),
+            Set\Property::of(
+                Adapter\ReAddingFilesHasNoSideEffect::class,
+            ),
         );
     }
 }

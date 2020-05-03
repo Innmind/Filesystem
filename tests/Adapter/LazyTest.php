@@ -118,7 +118,7 @@ class LazyTest extends TestCase
     public function testHoldProperties()
     {
         $this
-            ->forAll(Adapter::properties($this->seeder()))
+            ->forAll(Adapter::properties())
             ->then(function($properties) {
                 $properties->ensureHeldBy(new Lazy(new InMemory));
             });

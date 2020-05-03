@@ -77,7 +77,7 @@ class InMemoryTest extends TestCase
     public function testHoldProperties()
     {
         $this
-            ->forAll(PAdapter::properties($this->seeder()))
+            ->forAll(PAdapter::properties())
             ->then(function($properties) {
                 $properties->ensureHeldBy(new InMemory);
             });
