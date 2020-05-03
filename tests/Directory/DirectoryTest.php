@@ -144,7 +144,7 @@ class DirectoryTest extends TestCase
         );
 
         $this->assertSame(
-            'foo' . "\n" . 'bar' . "\n" . 'foobar' . "\n" . 'sub',
+            'bar' . "\n" . 'foo' . "\n" . 'foobar' . "\n" . 'sub',
             $d->content()->toString()
         );
     }
