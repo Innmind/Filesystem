@@ -15,6 +15,7 @@ use Innmind\Filesystem\{
     Event\FileWasRemoved,
     Event\FileWasAdded,
 };
+use Innmind\Stream\Writable\Stream;
 use Innmind\MediaType\{
     MediaType,
     Exception\InvalidMediaTypeString,
@@ -159,10 +160,12 @@ final class Filesystem implements Adapter
 
         $stream = $file->content();
         $stream->rewind();
-        $handle = \fopen($path->toString(), 'w');
+        $handle = new Stream(\fopen($path->toString(), 'w'));
 
         while (!$stream->end()) {
-            \fwrite($handle, $stream->read(8192)->toString());
+            $handle->write(
+                $stream->read(8192)->toEncoding('ASCII'),
+            );
         }
     }
 
