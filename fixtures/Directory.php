@@ -20,12 +20,20 @@ final class Directory
      */
     public static function any(): DataSet
     {
-        return self::atDepth(0);
+        return self::atDepth(0, 3);
     }
 
-    private static function atDepth(int $depth): DataSet
+    /**
+     * @return DataSet<Model>
+     */
+    public static function maxDepth(int $depth): DataSet
     {
-        if ($depth === 3) {
+        return self::atDepth(0, $depth);
+    }
+
+    private static function atDepth(int $depth, int $maxDepth): DataSet
+    {
+        if ($depth === $maxDepth) {
             $files = Set::of(
                 FileInterface::class,
                 new DataSet\Randomize(
@@ -46,7 +54,7 @@ final class Directory
                     new DataSet\Randomize(
                         File::any(),
                     ),
-                    self::atDepth($depth + 1),
+                    self::atDepth($depth + 1, $maxDepth),
                 ),
                 DataSet\Integers::between(0, 10),
             )->filter(static function($files): bool {
@@ -64,7 +72,7 @@ final class Directory
                     new DataSet\Randomize(
                         File::any(),
                     ),
-                    self::atDepth($depth + 1),
+                    self::atDepth($depth + 1, $maxDepth),
                 ),
                 DataSet\Integers::between(0, 10),
             );

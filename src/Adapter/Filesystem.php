@@ -9,9 +9,9 @@ use Innmind\Filesystem\{
     Name,
     Directory,
     Stream\LazyStream,
+    Stream\Source,
     Exception\FileNotFound,
     Exception\PathDoesntRepresentADirectory,
-    Event\FileWasAdded,
     Event\FileWasRemoved,
 };
 use Innmind\MediaType\{
@@ -19,10 +19,7 @@ use Innmind\MediaType\{
     Exception\InvalidMediaTypeString,
 };
 use Innmind\Url\Path;
-use Innmind\Immutable\{
-    Map,
-    Set,
-};
+use Innmind\Immutable\Set;
 use Symfony\Component\{
     Filesystem\Filesystem as FS,
     Finder\Finder,
@@ -34,8 +31,6 @@ final class Filesystem implements Adapter
     private const INVALID_FILES = ['.', '..'];
     private Path $path;
     private FS $filesystem;
-    private Map $files;
-    private Set $handledEvents;
 
     public function __construct(Path $path)
     {
@@ -45,8 +40,6 @@ final class Filesystem implements Adapter
 
         $this->path = $path;
         $this->filesystem = new FS;
-        $this->files = Map::of('string', File::class);
-        $this->handledEvents = Set::objects();
 
         if (!$this->filesystem->exists($this->path->toString())) {
             $this->filesystem->mkdir($this->path->toString());
@@ -117,48 +110,28 @@ final class Filesystem implements Adapter
      */
     private function createFileAt(Path $path, File $file): void
     {
+        $name = $file->name()->toString();
+
         if ($file instanceof Directory) {
-            $folder = $path->resolve(Path::of($file->name()->toString().'/'));
+            $name .= '/';
+        }
 
-            if (
-                $this->files->contains($folder->toString()) &&
-                $this->files->get($folder->toString()) === $file
-            ) {
-                return;
-            }
+        $path = $path->resolve(Path::of($name));
 
-            $this->filesystem->mkdir($folder->toString());
-            $file
-                ->modifications()
-                ->foreach(function(object $event) use ($folder) {
-                    if ($this->handledEvents->contains($event)) {
-                        return;
-                    }
-
-                    switch (true) {
-                        case $event instanceof FileWasRemoved:
-                            $this
-                                ->filesystem
-                                ->remove($folder->toString().$event->file()->toString());
-                            break;
-                        case $event instanceof FileWasAdded:
-                            $this->createFileAt($folder, $event->file());
-                            break;
-                    }
-
-                    $this->handledEvents = ($this->handledEvents)($event);
-                });
-            $this->files = ($this->files)($folder->toString(), $file);
-
+        if ($file instanceof Source && !$file->shouldPersistAt($this, $path)) {
             return;
         }
 
-        $path = $path->resolve(Path::of($file->name()->toString()));
+        if ($file instanceof Directory) {
+            $this->filesystem->mkdir($path->toString());
+            $file->foreach(fn(File $file) => $this->createFileAt($path, $file));
+            $file
+                ->modifications()
+                ->filter(static fn(object $event): bool => $event instanceof FileWasRemoved)
+                ->foreach(fn(FileWasRemoved $event) => $this->filesystem->remove(
+                    $path->toString().$event->file()->toString(),
+                ));
 
-        if (
-            $this->files->contains($path->toString()) &&
-            $this->files->get($path->toString()) === $file
-        ) {
             return;
         }
 
@@ -169,8 +142,6 @@ final class Filesystem implements Adapter
         while (!$stream->end()) {
             \fwrite($handle, $stream->read(8192)->toString());
         }
-
-        $this->files = ($this->files)($path->toString(), $file);
     }
 
     /**
@@ -196,7 +167,11 @@ final class Filesystem implements Adapter
                 \closedir($handle);
             })($folder->resolve(Path::of($file->toString().'/'))));
 
-            $object = new Directory\Directory($file, $files);
+            $object = new Directory\Source(
+                new Directory\Directory($file, $files),
+                $this,
+                $path,
+            );
         } else {
             try {
                 $mediaType = MediaType::of(\mime_content_type($path->toString()));
@@ -204,14 +179,16 @@ final class Filesystem implements Adapter
                 $mediaType = MediaType::null();
             }
 
-            $object = new File\File(
-                $file,
-                new LazyStream($path),
-                $mediaType,
+            $object = new File\Source(
+                new File\File(
+                    $file,
+                    new LazyStream($path),
+                    $mediaType,
+                ),
+                $this,
+                $path,
             );
         }
-
-        $this->files = ($this->files)($path->toString(), $object);
 
         return $object;
     }

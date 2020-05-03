@@ -31,9 +31,13 @@ final class Directory
                 $seed(Name::any()),
             ),
             new Directory\RemoveFile,
+            new Directory\RemoveFileMustUnwrapSourceDecorator,
             new Directory\RemoveDirectory,
             new Directory\ContentHoldsTheNamesOfTheFiles,
             new Directory\AddFile(
+                $seed(File::any()),
+            ),
+            new Directory\AddFileMustUnwrapSourceDecorator(
                 $seed(File::any()),
             ),
             new Directory\AddDirectory(

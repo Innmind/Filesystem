@@ -93,7 +93,8 @@ final class Directory implements DirectoryInterface
         /** @var Set<string> $names */
         $names = $this
             ->files
-            ->toSetOf('string', fn($file): \Generator => yield $file->name()->toString());
+            ->toSetOf('string', fn($file): \Generator => yield $file->name()->toString())
+            ->sort(static fn(string $a, string $b): int => $a <=> $b);
         $this->content = Readable\Stream::ofContent(
             join("\n", $names)->toString(),
         );

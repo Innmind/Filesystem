@@ -9,6 +9,7 @@ use Innmind\Filesystem\{
     File\File,
     Name,
     File as FileInterface,
+    Directory as DirectoryInterface,
     Directory\Directory,
     MediaType\NullMediaType,
     Exception\FileNotFound,
@@ -19,9 +20,13 @@ use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use Symfony\Component\Filesystem\Filesystem as FS;
 use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\BlackBox;
+use Properties\Innmind\Filesystem\Adapter as PAdapter;
 
 class FilesystemTest extends TestCase
 {
+    use BlackBox;
+
     public function setUp(): void
     {
         $fs = new FS;
@@ -169,7 +174,7 @@ class FilesystemTest extends TestCase
         $this->assertTrue($all->contains('baz'));
         $this->assertSame('foo', $adapter->get(new Name('foo'))->content()->toString());
         $this->assertSame('bar', $adapter->get(new Name('bar'))->content()->toString());
-        $this->assertInstanceOf(Directory::class, $adapter->get(new Name('baz')));
+        $this->assertInstanceOf(DirectoryInterface::class, $adapter->get(new Name('baz')));
         $adapter->remove(new Name('foo'));
         $adapter->remove(new Name('bar'));
         $adapter->remove(new Name('baz'));
@@ -209,5 +214,19 @@ class FilesystemTest extends TestCase
 
         $this->assertNull($adapter->add($file));
         $this->assertNull($adapter->add($file));
+    }
+
+    public function testHoldProperties()
+    {
+        $this
+            ->forAll(PAdapter::properties($this->seeder()))
+            ->then(function($properties) {
+                $path = \sys_get_temp_dir().'/innmind/filesystem/';
+                (new FS)->remove($path);
+
+                $properties->ensureHeldBy(new Filesystem(Path::of($path)));
+
+                (new FS)->remove($path);
+            });
     }
 }
