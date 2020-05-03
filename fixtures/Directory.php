@@ -20,7 +20,7 @@ final class Directory
      */
     public static function any(): DataSet
     {
-        return self::atDepth(0, 3);
+        return self::atDepth(0, 2);
     }
 
     /**
@@ -39,13 +39,13 @@ final class Directory
                 new DataSet\Randomize(
                     File::any(),
                 ),
-                DataSet\Integers::between(0, 10),
+                DataSet\Integers::between(0, 5),
             );
             $toAdd = DataSet\Sequence::of(
                 new DataSet\Randomize(
                     File::any(),
                 ),
-                DataSet\Integers::between(0, 10),
+                DataSet\Integers::between(0, 5),
             );
         } else {
             $files = Set::of(
@@ -56,7 +56,7 @@ final class Directory
                     ),
                     self::atDepth($depth + 1, $maxDepth),
                 ),
-                DataSet\Integers::between(0, 10),
+                DataSet\Integers::between(0, 5),
             )->filter(static function($files): bool {
                 if ($files->empty()) {
                     return true;
@@ -74,7 +74,7 @@ final class Directory
                     ),
                     self::atDepth($depth + 1, $maxDepth),
                 ),
-                DataSet\Integers::between(0, 10),
+                DataSet\Integers::between(0, 5),
             );
         }
 
@@ -104,7 +104,7 @@ final class Directory
             Name::any(),
             $files,
             $toAdd,
-            DataSet\Integers::between(0, 20),
+            DataSet\Integers::between(0, 10),
         );
     }
 }
