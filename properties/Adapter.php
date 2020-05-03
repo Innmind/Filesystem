@@ -55,6 +55,14 @@ final class Adapter
             new Adapter\AddDirectory(
                 $seed(Directory::any()),
             ),
+            new Adapter\AddRemoveAddModificationsStillAddTheFile(
+                $seed(Directory::any()),
+                $seed(File::any()),
+            ),
+            new Adapter\RemoveAddRemoveModificationsDoesntAddTheFile(
+                $seed(Directory::any()),
+                $seed(File::any()),
+            ),
         );
     }
 }

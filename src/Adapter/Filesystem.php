@@ -13,6 +13,7 @@ use Innmind\Filesystem\{
     Exception\FileNotFound,
     Exception\PathDoesntRepresentADirectory,
     Event\FileWasRemoved,
+    Event\FileWasAdded,
 };
 use Innmind\MediaType\{
     MediaType,
@@ -124,13 +125,34 @@ final class Filesystem implements Adapter
 
         if ($file instanceof Directory) {
             $this->filesystem->mkdir($path->toString());
-            $file->foreach(fn(File $file) => $this->createFileAt($path, $file));
-            $file
+            $alreadyAdded = $file
                 ->modifications()
-                ->filter(static fn(object $event): bool => $event instanceof FileWasRemoved)
-                ->foreach(fn(FileWasRemoved $event) => $this->filesystem->remove(
-                    $path->toString().$event->file()->toString(),
-                ));
+                ->reduce(
+                    [],
+                    function(array $added, object $event) use ($path): array {
+                        switch (\get_class($event)) {
+                            case FileWasRemoved::class:
+                                $this->filesystem->remove(
+                                    $path->toString().$event->file()->toString(),
+                                );
+                                break;
+
+                            case FileWasAdded::class:
+                                $this->createFileAt($path, $event->file());
+                                $added[] = $event->file()->name()->toString();
+                                break;
+                        }
+
+                        return $added;
+                    },
+                );
+            $file->foreach(function(File $file) use ($path, $alreadyAdded): void {
+                if (\in_array($file->name()->toString(), $alreadyAdded, true)) {
+                    return;
+                }
+
+                $this->createFileAt($path, $file);
+            });
 
             return;
         }
