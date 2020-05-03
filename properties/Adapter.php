@@ -63,6 +63,7 @@ final class Adapter
                 $seed(Directory::any()),
                 $seed(File::any()),
             ),
+            new Adapter\ReAddingFilesHasNoSideEffect,
         );
     }
 }
