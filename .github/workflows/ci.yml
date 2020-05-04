@@ -31,6 +31,8 @@ jobs:
         run: composer install --no-progress
       - name: PHPUnit
         run: vendor/bin/phpunit
+        env:
+          BLACKBOX_SET_SIZE: 1
   coverage:
     runs-on: ${{ matrix.os }}
     strategy:
