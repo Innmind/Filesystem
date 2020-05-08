@@ -12,13 +12,20 @@ final class Name
 
     public function __construct(string $value)
     {
-        if (Str::of($value)->matches('|/|')) {
-            throw new DomainException("A file name can't contain a slash, $value given");
-        }
-
         if (Str::of($value)->empty()) {
             throw new DomainException('A file name can\'t be empty');
         }
+
+        if (Str::of($value, 'ASCII')->length() > 255) {
+            throw new DomainException($value);
+        }
+
+        if (Str::of($value)->contains('/')) {
+            throw new DomainException("A file name can't contain a slash, $value given");
+        }
+
+        $this->assertContainsOnlyValidCharacters($value);
+        $this->assertFirstCharacterValid($value);
 
         if ($value === '.' || $value === '..') {
             // as they are special links on unix filesystems
@@ -36,5 +43,26 @@ final class Name
     public function toString(): string
     {
         return $this->value;
+    }
+
+    private function assertContainsOnlyValidCharacters(string $value): void
+    {
+        $value = Str::of($value);
+        $invalid = [0, ...range(128, 255)];
+
+        foreach ($invalid as $ord) {
+            if ($value->contains(\chr($ord))) {
+                throw new DomainException($value->toString());
+            }
+        }
+    }
+
+    private function assertFirstCharacterValid(string $value): void
+    {
+        $index = \ord(Str::of($value, 'ASCII')->take(1)->toString());
+
+        if (\in_array($index, [32, ...range(9, 13)], true)) {
+            throw new DomainException($value);
+        }
     }
 }
