@@ -180,30 +180,6 @@ class FilesystemTest extends TestCase
         $adapter->remove(new Name('baz'));
     }
 
-    public function testDotPseudoFilesAreNotListedInDirectory()
-    {
-        @mkdir('/tmp/sub');
-        @mkdir('/tmp/sub/test');
-        $adapter = new Filesystem(Path::of('/tmp/sub/'));
-
-        $this->assertFalse($adapter->get(new Name('test'))->contains(new Name('.')));
-        $this->assertFalse($adapter->get(new Name('test'))->contains(new Name('..')));
-        $this->assertFalse($adapter->contains(new Name('.')));
-        $this->assertFalse($adapter->contains(new Name('..')));
-        $this->assertFalse(
-            $adapter
-                ->all()
-                ->reduce(
-                    false,
-                    fn($found, $file) => $found || $file->name()->equals(new Name('.')) || $file->name()->equals(new Name('..')),
-                ),
-        );
-
-        $this->expectException(FileNotFound::class);
-
-        $adapter->get(new Name('..'));
-    }
-
     public function testAddingTheSameFileTwiceDoesNothing()
     {
         $adapter = new Filesystem(Path::of('/tmp/'));
