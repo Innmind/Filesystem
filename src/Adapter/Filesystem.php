@@ -13,7 +13,6 @@ use Innmind\Filesystem\{
     Exception\FileNotFound,
     Exception\PathDoesntRepresentADirectory,
     Event\FileWasRemoved,
-    Event\FileWasAdded,
 };
 use Innmind\Stream\Writable\Stream;
 use Innmind\MediaType\{
@@ -127,34 +126,21 @@ final class Filesystem implements Adapter
 
         if ($file instanceof Directory) {
             $this->filesystem->mkdir($path->toString());
-            $alreadyAdded = $file
+            $persisted = $file->reduce(
+                Set::strings(),
+                function(Set $persisted, File $file) use ($path): Set {
+                    $this->createFileAt($path, $file);
+
+                    return ($persisted)($file->name()->toString());
+                },
+            );
+            $file
                 ->modifications()
-                ->reduce(
-                    [],
-                    function(array $added, object $event) use ($path): array {
-                        switch (\get_class($event)) {
-                            case FileWasRemoved::class:
-                                $this->filesystem->remove(
-                                    $path->toString().$event->file()->toString(),
-                                );
-                                break;
-
-                            case FileWasAdded::class:
-                                $this->createFileAt($path, $event->file());
-                                $added[] = $event->file()->name()->toString();
-                                break;
-                        }
-
-                        return $added;
-                    },
-                );
-            $file->foreach(function(File $file) use ($path, $alreadyAdded): void {
-                if (\in_array($file->name()->toString(), $alreadyAdded, true)) {
-                    return;
-                }
-
-                $this->createFileAt($path, $file);
-            });
+                ->filter(static fn(object $event): bool => $event instanceof FileWasRemoved)
+                ->filter(static fn(FileWasRemoved $event): bool => !$persisted->contains($event->file()->toString()))
+                ->foreach(fn(FileWasRemoved $event) => $this->filesystem->remove(
+                    $path->toString().$event->file()->toString(),
+                ));
 
             return;
         }
