@@ -33,6 +33,7 @@ jobs:
         run: vendor/bin/phpunit
         env:
           BLACKBOX_SET_SIZE: 10
+          BLACKBOX_DETAILED_PROPERTIES: 1
   coverage:
     runs-on: ${{ matrix.os }}
     strategy:
