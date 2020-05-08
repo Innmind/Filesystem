@@ -39,5 +39,14 @@
         "phpunit/phpunit": "~8.0",
         "vimeo/psalm": "^3.7",
         "innmind/black-box": "^4.7"
+    },
+    "conflict": {
+        "innmind/black-box": "<4.7|~5.0"
+    },
+    "suggest": {
+        "innmind/black-box": "For property based testing"
+    },
+    "provide": {
+        "innmind/black-box": "4.7.0"
     }
 }
