@@ -134,6 +134,10 @@ final class Filesystem implements Adapter
                     return ($persisted)($file->name()->toString());
                 },
             );
+            /**
+             * @psalm-suppress ArgumentTypeCoercion
+             * @psalm-suppress MissingClosureReturnType
+             */
             $file
                 ->modifications()
                 ->filter(static fn(object $event): bool => $event instanceof FileWasRemoved)
