@@ -12,6 +12,8 @@ use Innmind\Filesystem\{
     Source,
     Exception\FileNotFound,
     Exception\PathDoesntRepresentADirectory,
+    Exception\PathTooLong,
+    Exception\RuntimeException,
     Event\FileWasRemoved,
 };
 use Innmind\Stream\Writable\Stream;
@@ -20,9 +22,13 @@ use Innmind\MediaType\{
     Exception\InvalidMediaTypeString,
 };
 use Innmind\Url\Path;
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Str,
+};
 use Symfony\Component\{
     Filesystem\Filesystem as FS,
+    Filesystem\Exception\IOException,
     Finder\Finder,
     Finder\SplFileInfo,
 };
@@ -151,6 +157,21 @@ final class Filesystem implements Adapter
 
         $stream = $file->content();
         $stream->rewind();
+
+        try {
+            $this->filesystem->touch($path->toString());
+        } catch (IOException $e) {
+            if (Str::of($path->toString(), 'ASCII')->length() > 1014) {
+                throw new PathTooLong($path->toString(), 0, $e);
+            }
+
+            throw new RuntimeException(
+                $e->getMessage(),
+                (int) $e->getCode(),
+                $e,
+            );
+        }
+
         $handle = new Stream(\fopen($path->toString(), 'w'));
 
         while (!$stream->end()) {

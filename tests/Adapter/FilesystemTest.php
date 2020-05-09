@@ -14,6 +14,7 @@ use Innmind\Filesystem\{
     MediaType\NullMediaType,
     Exception\FileNotFound,
     Exception\PathDoesntRepresentADirectory,
+    Exception\PathTooLong,
 };
 use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
@@ -229,6 +230,39 @@ class FilesystemTest extends TestCase
 
                 (new FS)->remove($path);
             });
+    }
+
+    public function testPathTooLongThrowAnException()
+    {
+        $path = \sys_get_temp_dir().'/innmind/filesystem/';
+        (new FS)->remove($path);
+
+        $filesystem = new Filesystem(Path::of($path));
+
+        $this->expectException(PathTooLong::class);
+
+        $filesystem->add(new Directory(
+            new Name(str_repeat('a', 255)),
+            Set::of(
+                FileInterface::class,
+                new Directory(
+                    new Name(str_repeat('a', 255)),
+                    Set::of(
+                        FileInterface::class,
+                        new Directory(
+                            new Name(str_repeat('a', 255)),
+                            Set::of(
+                                FileInterface::class,
+                                new File(
+                                    new Name(str_repeat('a', 255)),
+                                    Stream::ofContent('foo')
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        ));
     }
 
     public function properties(): iterable
