@@ -67,7 +67,7 @@ jobs:
       - name: Install Dependencies
         run: composer install --no-progress
       - name: PHPUnit
-        run: vendor/bin/phpunit --coverage-clover=coverage.clover
+        run: php -dmemory_limit=-1 vendor/bin/phpunit --coverage-clover=coverage.clover
         env:
           BLACKBOX_SET_SIZE: 1
       - uses: codecov/codecov-action@v1
