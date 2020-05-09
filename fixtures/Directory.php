@@ -7,7 +7,11 @@ use Innmind\Filesystem\{
     Directory\Directory as Model,
     File as FileInterface,
 };
-use Innmind\BlackBox\Set as DataSet;
+use Properties\Innmind\Filesystem\Directory as Properties;
+use Innmind\BlackBox\{
+    Set as DataSet,
+    Properties as Ensure,
+};
 use Fixtures\Innmind\Immutable\Set;
 use function Innmind\Immutable\unwrap;
 
@@ -41,12 +45,6 @@ final class Directory
                 ),
                 DataSet\Integers::between(0, 5),
             );
-            $toAdd = DataSet\Sequence::of(
-                new DataSet\Randomize(
-                    File::any(),
-                ),
-                DataSet\Integers::between(0, 5),
-            );
         } else {
             $files = Set::of(
                 FileInterface::class,
@@ -67,44 +65,40 @@ final class Directory
                     ->groupBy(static fn($file) => $file->name()->toString())
                     ->size() === $files->size();
             });
-            $toAdd = DataSet\Sequence::of(
-                new DataSet\Either(
-                    new DataSet\Randomize(
-                        File::any(),
-                    ),
-                    self::atDepth($depth + 1, $maxDepth),
-                ),
-                DataSet\Integers::between(0, 5),
-            );
         }
 
-        return DataSet\Composite::immutable(
-            static function($name, $files, $toAdd, $numberToRemove): Model {
-                $directory = new Model(
-                    $name,
-                    $files,
-                );
-
-                foreach ($toAdd as $file) {
-                    $directory = $directory->add($file);
-                }
-
-                $files = \array_merge(
-                    unwrap($files),
-                    $toAdd,
-                );
-                $toRemove = \array_slice($files, 0, $numberToRemove);
-
-                foreach ($toRemove as $file) {
-                    $directory = $directory->remove($file->name());
-                }
-
-                return $directory;
-            },
+        $directory = DataSet\Composite::immutable(
+            static fn($name, $files): Model => new Model(
+                $name,
+                $files,
+            ),
             Name::any(),
             $files,
-            $toAdd,
-            DataSet\Integers::between(0, 10),
+        );
+
+        $modified = DataSet\Composite::immutable(
+            static fn($directory, $properties): Model => $properties->ensureHeldBy($directory),
+            $directory,
+            DataSet\Decorate::immutable(
+                static fn(array $properties): Ensure => new Ensure(...$properties),
+                DataSet\Sequence::of(
+                    new DataSet\Either(
+                        DataSet\Property::of(
+                            Properties\RemoveFile::class,
+                        ),
+                        DataSet\Property::of(
+                            Properties\AddFile::class,
+                            File::any(),
+                        ),
+                    ),
+                    DataSet\Integers::between(1, 10),
+                ),
+            ),
+        );
+
+        return new DataSet\Either(
+            $directory,
+            $modified
         );
     }
 }
