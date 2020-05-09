@@ -19,7 +19,15 @@ final class Directory
      */
     public static function properties(): Set
     {
-        return Set\Properties::any(
+        return Set\Properties::any(...self::list());
+    }
+
+    /**
+     * @return list<Set<Property>>
+     */
+    public static function list(): array
+    {
+        return [
             Set\Property::of(
                 Directory\MediaTypeIsAlwaysTheSame::class,
             ),
@@ -61,6 +69,6 @@ final class Directory
                 Directory\AddDirectory::class,
                 Name::any(),
             ),
-        );
+        ];
     }
 }

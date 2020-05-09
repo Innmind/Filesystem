@@ -20,7 +20,15 @@ final class Adapter
      */
     public static function properties(): Set
     {
-        return Set\Properties::any(
+        return Set\Properties::any(...self::list());
+    }
+
+    /**
+     * @return list<Property>
+     */
+    public static function list(): array
+    {
+        return [
             Set\Property::of(
                 Adapter\AddFile::class,
                 File::any(),
@@ -78,6 +86,6 @@ final class Adapter
             Set\Property::of(
                 Adapter\ReAddingFilesHasNoSideEffect::class,
             ),
-        );
+        ];
     }
 }

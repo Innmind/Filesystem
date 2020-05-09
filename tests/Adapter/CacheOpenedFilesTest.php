@@ -145,6 +145,24 @@ class CacheOpenedFilesTest extends TestCase
         $this->assertSame($file, $filesystem->get(new Name('foo')));
     }
 
+    /**
+     * @dataProvider properties
+     */
+    public function testHoldProperty($property)
+    {
+        $this
+            ->forAll($property)
+            ->then(function($property) {
+                $adapter = new CacheOpenedFiles(new InMemory);
+
+                if (!$property->applicableTo($adapter)) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy($adapter);
+            });
+    }
+
     public function testHoldProperties()
     {
         $this
@@ -152,5 +170,12 @@ class CacheOpenedFilesTest extends TestCase
             ->then(function($properties) {
                 $properties->ensureHeldBy(new CacheOpenedFiles(new InMemory));
             });
+    }
+
+    public function properties(): iterable
+    {
+        foreach (PAdapter::list() as $property) {
+            yield [$property];
+        }
     }
 }

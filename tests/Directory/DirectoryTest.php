@@ -292,6 +292,61 @@ class DirectoryTest extends TestCase
         $this->assertSame('foobar', unwrap($set)[1]->name()->toString());
     }
 
+    /**
+     * @dataProvider properties
+     */
+    public function testEmptyDirectoryHoldProperty($property)
+    {
+        $this
+            ->forAll(
+                $property,
+                FName::any(),
+            )
+            ->then(function($property, $name) {
+                $directory = new Directory($name);
+
+                if (!$property->applicableTo($directory)) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy($directory);
+            });
+    }
+
+    /**
+     * @dataProvider properties
+     */
+    public function testDirectoryWithSomeFilesHoldProperty($property)
+    {
+        $this
+            ->forAll(
+                $property,
+                FName::any(),
+                FSet::of(
+                    File::class,
+                    new DataSet\Randomize(
+                        FFile::any(),
+                    ),
+                    DataSet\Integers::between(1, 5), // only to speed up tests
+                ),
+            )
+            ->filter(function($property, $name, $files) {
+                // do not accept duplicated files
+                return $files
+                    ->groupBy(fn($file) => $file->name()->toString())
+                    ->size() === $files->size();
+            })
+            ->then(function($property, $name, $files) {
+                $directory = new Directory($name, $files);
+
+                if (!$property->applicableTo($directory)) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy($directory);
+            });
+    }
+
     public function testEmptyDirectoryHoldProperties()
     {
         $this
@@ -355,5 +410,12 @@ class DirectoryTest extends TestCase
                     ),
                 );
             });
+    }
+
+    public function properties(): iterable
+    {
+        foreach (PDirectory::list() as $property) {
+            yield [$property];
+        }
     }
 }

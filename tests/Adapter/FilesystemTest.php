@@ -192,6 +192,28 @@ class FilesystemTest extends TestCase
         $this->assertNull($adapter->add($file));
     }
 
+    /**
+     * @dataProvider properties
+     */
+    public function testHoldProperty($property)
+    {
+        $this
+            ->forAll($property)
+            ->then(function($property) {
+                $path = \sys_get_temp_dir().'/innmind/filesystem/';
+                (new FS)->remove($path);
+                $adapter = new Filesystem(Path::of($path));
+
+                if (!$property->applicableTo($adapter)) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy($adapter);
+
+                (new FS)->remove($path);
+            });
+    }
+
     public function testHoldProperties()
     {
         $this
@@ -204,5 +226,12 @@ class FilesystemTest extends TestCase
 
                 (new FS)->remove($path);
             });
+    }
+
+    public function properties(): iterable
+    {
+        foreach (PAdapter::list() as $property) {
+            yield [$property];
+        }
     }
 }

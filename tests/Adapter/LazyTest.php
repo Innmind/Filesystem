@@ -115,6 +115,24 @@ class LazyTest extends TestCase
         $this->assertSame($file, $filesystem->get($file->name()));
     }
 
+    /**
+     * @dataProvider properties
+     */
+    public function testHoldProperty($property)
+    {
+        $this
+            ->forAll($property)
+            ->then(function($property) {
+                $adapter = new Lazy(new InMemory);
+
+                if (!$property->applicableTo($adapter)) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy($adapter);
+            });
+    }
+
     public function testHoldProperties()
     {
         $this
@@ -122,5 +140,12 @@ class LazyTest extends TestCase
             ->then(function($properties) {
                 $properties->ensureHeldBy(new Lazy(new InMemory));
             });
+    }
+
+    public function properties(): iterable
+    {
+        foreach (Adapter::list() as $property) {
+            yield [$property];
+        }
     }
 }

@@ -74,6 +74,22 @@ class InMemoryTest extends TestCase
         );
     }
 
+    /**
+     * @dataProvider properties
+     */
+    public function testHoldProperty($property)
+    {
+        $this
+            ->forAll($property)
+            ->then(function($property) {
+                if (!$property->applicableTo(new InMemory)) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy(new InMemory);
+            });
+    }
+
     public function testHoldProperties()
     {
         $this
@@ -81,5 +97,12 @@ class InMemoryTest extends TestCase
             ->then(function($properties) {
                 $properties->ensureHeldBy(new InMemory);
             });
+    }
+
+    public function properties(): iterable
+    {
+        foreach (PAdapter::list() as $property) {
+            yield [$property];
+        }
     }
 }
