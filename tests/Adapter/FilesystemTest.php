@@ -340,7 +340,9 @@ class FilesystemTest extends TestCase
         $this
             ->forAll(
                 new DataSet\Either(
-                    DataSet\Integers::between(1, 45),
+                    DataSet\Integers::between(1, 8),
+                    DataSet\Integers::between(14, 31),
+                    DataSet\Integers::between(33, 45),
                     DataSet\Integers::between(48, 127),
                 ),
                 DataSet\Strings::any(),
