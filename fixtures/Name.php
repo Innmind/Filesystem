@@ -20,17 +20,22 @@ final class Name
                 Set\Decorate::immutable(
                     static fn(int $chr): string => \chr($chr),
                     Set\Elements::of(
+                        33,
                         ...range(1, 8),
                         ...range(14, 31),
-                        ...range(33, 46),
-                        ...range(48, 127),
+                        ...range(35, 38),
+                        ...range(40, 46),
+                        ...range(48, 122),
+                        ...range(126, 127),
                     ),
                 ),
                 Set\Sequence::of(
                     Set\Decorate::immutable(
                         static fn(int $chr): string => \chr($chr),
                         Set\Elements::of(
-                            ...range(1, 46),
+                            ...range(1, 33),
+                            ...range(35, 38),
+                            ...range(40, 46),
                             ...range(48, 127),
                         ),
                     ),
