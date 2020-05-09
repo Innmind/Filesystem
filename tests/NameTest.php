@@ -162,6 +162,24 @@ class NameTest extends TestCase
             });
     }
 
+    public function testNameWithOnlyWhiteSpacesIsNotAccepted()
+    {
+        $this
+            ->forAll(Set\Elements::of(
+                32,
+                ...range(9, 13),
+            ))
+            ->then(function($ord) {
+                try {
+                    new Name(chr($ord));
+
+                    $this->fail('it should throw');
+                } catch (DomainException $e) {
+                    $this->assertTrue(true);
+                }
+            });
+    }
+
     private function valid(): Set
     {
         return Set\Decorate::immutable(
@@ -176,6 +194,9 @@ class NameTest extends TestCase
                 ),
                 Set\Integers::between(1, 255),
             ),
-        )->filter(static fn(string $name): bool => $name !== '.' && $name !== '..');
+        )->filter(static fn(string $name): bool => $name !== '.' &&
+            $name !== '..' &&
+            !\preg_match('~^\s+$~', $name)
+        );
     }
 }

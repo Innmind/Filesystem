@@ -27,7 +27,11 @@ final class Name
                     ),
                     Set\Integers::between(1, 255),
                 ),
-            )->filter(static fn(string $name): bool => $name !== '.' && $name !== '..'),
+            )->filter(
+                static fn(string $name): bool => $name !== '.' &&
+                    $name !== '..' &&
+                    !\preg_match('~\s+~', $name)
+            ),
         );
     }
 }

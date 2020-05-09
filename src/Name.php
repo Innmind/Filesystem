@@ -24,6 +24,11 @@ final class Name
             throw new DomainException("A file name can't contain a slash, $value given");
         }
 
+        // name with only _spaces_ are not accepted as it is not as valid path
+        if (Str::of($value)->matches('~^\s+$~')) {
+            throw new DomainException($value);
+        }
+
         $this->assertContainsOnlyValidCharacters($value);
 
         if ($value === '.' || $value === '..') {
