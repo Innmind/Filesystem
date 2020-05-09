@@ -161,7 +161,7 @@ final class Filesystem implements Adapter
         try {
             $this->filesystem->touch($path->toString());
         } catch (IOException $e) {
-            if (Str::of($path->toString(), 'ASCII')->length() > 1014) {
+            if (\PHP_OS === 'Darwin' && Str::of($path->toString(), 'ASCII')->length() > 1014) {
                 throw new PathTooLong($path->toString(), 0, $e);
             }
 
