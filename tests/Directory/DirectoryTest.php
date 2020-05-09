@@ -317,13 +317,10 @@ class DirectoryTest extends TestCase
                     new DataSet\Randomize(
                         FFile::any(),
                     ),
+                    DataSet\Integers::between(1, 5), // only to speed up tests
                 ),
             )
             ->filter(function($properties, $name, $files) {
-                if ($files->empty()) {
-                    return true;
-                }
-
                 // do not accept duplicated files
                 return $files
                     ->groupBy(fn($file) => $file->name()->toString())
