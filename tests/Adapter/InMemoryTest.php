@@ -90,6 +90,9 @@ class InMemoryTest extends TestCase
             });
     }
 
+    /**
+     * @group properties
+     */
     public function testHoldProperties()
     {
         $this

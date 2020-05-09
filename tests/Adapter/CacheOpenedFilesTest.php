@@ -163,6 +163,9 @@ class CacheOpenedFilesTest extends TestCase
             });
     }
 
+    /**
+     * @group properties
+     */
     public function testHoldProperties()
     {
         $this

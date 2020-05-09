@@ -347,6 +347,9 @@ class DirectoryTest extends TestCase
             });
     }
 
+    /**
+     * @group properties
+     */
     public function testEmptyDirectoryHoldProperties()
     {
         $this
@@ -361,6 +364,9 @@ class DirectoryTest extends TestCase
             });
     }
 
+    /**
+     * @group properties
+     */
     public function testDirectoryWithSomeFilesHoldProperties()
     {
         $this
