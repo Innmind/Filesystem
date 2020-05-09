@@ -116,24 +116,6 @@ class NameTest extends TestCase
             });
     }
 
-    public function testNamesContainingOnlyOneCharacterOutsideOfAllowedRangeAreNotAccepted()
-    {
-        $this
-            ->forAll(Set\Elements::of(
-                0,
-                32,
-                47,
-                ...range(9, 13),
-                ...range(123, 125),
-                ...range(128, 255),
-            ))
-            ->then(function($invalid) {
-                $this->expectException(DomainException::class);
-
-                new Name(\chr($invalid));
-            });
-    }
-
     public function testNamesContainingCharOrdAbove127IsNotAccepted()
     {
         $this
@@ -154,45 +136,17 @@ class NameTest extends TestCase
         new Name('a'.\chr(0).'a');
     }
 
-    public function testSingleQuoteIsNotAccepted()
-    {
-        $this->expectException(DomainException::class);
-
-        new Name("a'a");
-    }
-
-    public function testDoubleQuoteIsNotAccepted()
-    {
-        $this->expectException(DomainException::class);
-
-        new Name('a"a');
-    }
-
     public function testNamesLongerThan255AreNotAccepted()
     {
         $this
             ->forAll(
-                Set\Composite::immutable(
-                    static fn(string $first, array $chrs): string => $first.\implode('', $chrs),
-                    Set\Decorate::immutable(
-                        static fn(int $chr): string => \chr($chr),
-                        Set\Elements::of(
-                            33,
-                            ...range(1, 8),
-                            ...range(14, 31),
-                            ...range(35, 38),
-                            ...range(40, 46),
-                            ...range(48, 122),
-                            ...range(126, 127),
-                        ),
-                    ),
+                Set\Decorate::immutable(
+                    static fn(array $chrs): string => \implode('', $chrs),
                     Set\Sequence::of(
                         Set\Decorate::immutable(
                             static fn(int $chr): string => \chr($chr),
                             Set\Elements::of(
-                                ...range(1, 33),
-                                ...range(35, 38),
-                                ...range(40, 46),
+                                ...range(1, 46),
                                 // chr(47) alias '/' not accepted
                                 ...range(48, 127),
                             ),
@@ -210,31 +164,17 @@ class NameTest extends TestCase
 
     private function valid(): Set
     {
-        return Set\Composite::immutable(
-            static fn(string $first, array $chrs): string => $first.\implode('', $chrs),
-            Set\Decorate::immutable(
-                static fn(int $chr): string => \chr($chr),
-                Set\Elements::of(
-                    33,
-                    ...range(1, 8),
-                    ...range(14, 31),
-                    ...range(35, 38),
-                    ...range(40, 46),
-                    ...range(48, 122),
-                    ...range(126, 127),
-                ),
-            ),
+        return Set\Decorate::immutable(
+            static fn(array $chrs): string => \implode('', $chrs),
             Set\Sequence::of(
                 Set\Decorate::immutable(
                     static fn(int $chr): string => \chr($chr),
                     Set\Elements::of(
-                        ...range(1, 33),
-                        ...range(35, 38),
-                        ...range(40, 46),
+                        ...range(1, 46),
                         ...range(48, 127),
                     ),
                 ),
-                Set\Integers::between(0, 254),
+                Set\Integers::between(1, 255),
             ),
         )->filter(static fn(string $name): bool => $name !== '.' && $name !== '..');
     }

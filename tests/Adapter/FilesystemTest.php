@@ -21,7 +21,11 @@ use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use Symfony\Component\Filesystem\Filesystem as FS;
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set as DataSet,
+};
+use Fixtures\Innmind\Filesystem\Name as FName;
 use Properties\Innmind\Filesystem\Adapter as PAdapter;
 
 class FilesystemTest extends TestCase
@@ -263,6 +267,99 @@ class FilesystemTest extends TestCase
                 )
             )
         ));
+    }
+
+    public function testPersistedNameCanStartWithAnyAsciiCharacter()
+    {
+        $this
+            ->forAll(
+                new DataSet\Either(
+                    DataSet\Integers::between(1, 46),
+                    DataSet\Integers::between(48, 127),
+                ),
+                DataSet\Strings::any(),
+            )
+            ->then(function($ord, $content) {
+                $path = \sys_get_temp_dir().'/innmind/filesystem/';
+                (new FS)->remove($path);
+
+                $filesystem = new Filesystem(Path::of($path));
+
+                $this->assertNull($filesystem->add(new Directory(
+                    new Name(chr($ord).'a'),
+                    Set::of(
+                        FileInterface::class,
+                        new File(
+                            new Name('a'),
+                            Stream::ofContent($content),
+                        ),
+                    ),
+                )));
+
+                (new FS)->remove($path);
+            });
+    }
+
+    public function testPersistedNameCanContainWithAnyAsciiCharacter()
+    {
+        $this
+            ->forAll(
+                new DataSet\Either(
+                    DataSet\Integers::between(1, 46),
+                    DataSet\Integers::between(48, 127),
+                ),
+                DataSet\Strings::any(),
+            )
+            ->then(function($ord, $content) {
+                $path = \sys_get_temp_dir().'/innmind/filesystem/';
+                (new FS)->remove($path);
+
+                $filesystem = new Filesystem(Path::of($path));
+
+                $this->assertNull($filesystem->add(new Directory(
+                    new Name('a'.chr($ord).'a'),
+                    Set::of(
+                        FileInterface::class,
+                        new File(
+                            new Name('a'),
+                            Stream::ofContent($content),
+                        ),
+                    ),
+                )));
+
+                (new FS)->remove($path);
+            });
+    }
+
+    public function testPersistedNameCanContainOnlyOneAsciiCharacter()
+    {
+        $this
+            ->forAll(
+                new DataSet\Either(
+                    DataSet\Integers::between(1, 45),
+                    DataSet\Integers::between(48, 127),
+                ),
+                DataSet\Strings::any(),
+            )
+            ->then(function($ord, $content) {
+                $path = \sys_get_temp_dir().'/innmind/filesystem/';
+                (new FS)->remove($path);
+
+                $filesystem = new Filesystem(Path::of($path));
+
+                $this->assertNull($filesystem->add(new Directory(
+                    new Name(chr($ord)),
+                    Set::of(
+                        FileInterface::class,
+                        new File(
+                            new Name('a'),
+                            Stream::ofContent($content),
+                        ),
+                    ),
+                )));
+
+                (new FS)->remove($path);
+            });
     }
 
     public function properties(): iterable
