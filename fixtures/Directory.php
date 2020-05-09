@@ -20,7 +20,7 @@ final class Directory
      */
     public static function any(): DataSet
     {
-        return self::atDepth(0, 2);
+        return self::atDepth(0, 1);
     }
 
     /**
