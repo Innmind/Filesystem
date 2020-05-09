@@ -52,7 +52,7 @@ final class Name
     private function assertContainsOnlyValidCharacters(string $value): void
     {
         $value = Str::of($value);
-        $invalid = [0, ...range(128, 255)];
+        $invalid = [0, ...\range(128, 255)];
 
         foreach ($invalid as $ord) {
             if ($value->contains(\chr($ord))) {
