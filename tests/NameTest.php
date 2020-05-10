@@ -7,12 +7,13 @@ use Innmind\Filesystem\{
     Name,
     Exception\DomainException,
 };
-use Fixtures\Innmind\Filesystem\Name as Fixture;
+use Innmind\Url\Path;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set,
 };
+use Fixtures\Innmind\Filesystem\Name as Fixture;
 
 class NameTest extends TestCase
 {
@@ -178,6 +179,27 @@ class NameTest extends TestCase
                 } catch (DomainException $e) {
                     $this->assertTrue(true);
                 }
+            });
+    }
+
+    public function testAnySequenceOfNamesConstitutesAValidPath()
+    {
+        $this
+            ->forAll(Set\Sequence::of(
+                Fixture::any(),
+                Set\Integers::between(1, 10), // enough to prove the behaviour
+            ))
+            ->then(function($names) {
+                $strings = \array_map(
+                    fn($name) => $name->toString(),
+                    $names,
+                );
+                $path = '/'.\implode('/', $strings);
+
+                $this->assertInstanceOf(
+                    Path::class,
+                    Path::of($path),
+                );
             });
     }
 }
