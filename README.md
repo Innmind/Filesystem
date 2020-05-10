@@ -33,11 +33,11 @@ $directory = Directory::named('uploads')->add(
         Stream::open($_FILES['my_upload']['tmp_name'])
     )
 );
-$adapter = new Filesystem(Path::of('/var/www/web'));
+$adapter = new Filesystem(Path::of('/var/www/web/'));
 $adapter->add($directory);
 ```
 
-This example show you how you can create a new directory `uploads` in the folder `/var/www/web` of your filesystem and create the uploaded file into it.
+This example show you how you can create a new directory `uploads` in the folder `/var/www/web/` of your filesystem and create the uploaded file into it.
 
 **Note**: For performance reasons the filesystem adapter only persist to disk the files that have changed (achievable via the immutable nature of file objects).
 
