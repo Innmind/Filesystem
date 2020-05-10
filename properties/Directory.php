@@ -76,6 +76,26 @@ final class Directory
                 Directory\FilteringRetunsTheExpectedElements::class,
                 File::any(),
             ),
+            Set\Property::of(
+                Directory\ReplacingFileAtEmptyPathIsSameAsAddingTheFile::class,
+                File::any(),
+            ),
+            Set\Property::of(
+                Directory\ReplacingFileAtUnknownPathMustThrowAnException::class,
+                Name::any(),
+                File::any(),
+            ),
+            Set\Property::of(
+                Directory\ReplacingFileAtPathTargetingAFileMustThrowAnException::class,
+                File::any(),
+                File::any(),
+            ),
+            Set\Property::of(
+                Directory\ReplaceFileInSubDirectory::class,
+                Name::any(),
+                Name::any(),
+                File::any(),
+            ),
         ];
     }
 }

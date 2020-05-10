@@ -182,7 +182,7 @@ final class Directory implements DirectoryInterface
      */
     public function replaceAt(Path $path, File $file): DirectoryInterface
     {
-        $normalizedPath = Str::of($path->toString())->leftTrim('/');
+        $normalizedPath = Str::of($path->toString())->trim('/');
         $pieces = $normalizedPath->split('/');
 
         if ($normalizedPath->empty()) {
