@@ -16,9 +16,15 @@ use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+};
+use Properties\Innmind\Filesystem\Adapter as PAdapter;
 
 class InMemoryTest extends TestCase
 {
+    use BlackBox;
+
     public function testInterface()
     {
         $a = new InMemory;
@@ -66,5 +72,40 @@ class InMemoryTest extends TestCase
             [$foo, $bar],
             unwrap($all),
         );
+    }
+
+    /**
+     * @dataProvider properties
+     */
+    public function testHoldProperty($property)
+    {
+        $this
+            ->forAll($property)
+            ->then(function($property) {
+                if (!$property->applicableTo(new InMemory)) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy(new InMemory);
+            });
+    }
+
+    /**
+     * @group properties
+     */
+    public function testHoldProperties()
+    {
+        $this
+            ->forAll(PAdapter::properties())
+            ->then(function($properties) {
+                $properties->ensureHeldBy(new InMemory);
+            });
+    }
+
+    public function properties(): iterable
+    {
+        foreach (PAdapter::list() as $property) {
+            yield [$property];
+        }
     }
 }

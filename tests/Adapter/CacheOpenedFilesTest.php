@@ -5,6 +5,7 @@ namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter\CacheOpenedFiles,
+    Adapter\InMemory,
     Adapter,
     File,
     Name,
@@ -12,9 +13,13 @@ use Innmind\Filesystem\{
 use Innmind\Stream\Readable;
 use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\BlackBox;
+use Properties\Innmind\Filesystem\Adapter as PAdapter;
 
 class CacheOpenedFilesTest extends TestCase
 {
+    use BlackBox;
+
     public function testInterface()
     {
         $this->assertInstanceOf(
@@ -138,5 +143,42 @@ class CacheOpenedFilesTest extends TestCase
 
         $this->assertSame($expected, $filesystem->all());
         $this->assertSame($file, $filesystem->get(new Name('foo')));
+    }
+
+    /**
+     * @dataProvider properties
+     */
+    public function testHoldProperty($property)
+    {
+        $this
+            ->forAll($property)
+            ->then(function($property) {
+                $adapter = new CacheOpenedFiles(new InMemory);
+
+                if (!$property->applicableTo($adapter)) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy($adapter);
+            });
+    }
+
+    /**
+     * @group properties
+     */
+    public function testHoldProperties()
+    {
+        $this
+            ->forAll(PAdapter::properties())
+            ->then(function($properties) {
+                $properties->ensureHeldBy(new CacheOpenedFiles(new InMemory));
+            });
+    }
+
+    public function properties(): iterable
+    {
+        foreach (PAdapter::list() as $property) {
+            yield [$property];
+        }
     }
 }

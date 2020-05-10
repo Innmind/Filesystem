@@ -18,6 +18,42 @@ jobs:
         with:
           php-version: ${{ matrix.php-version }}
           extensions: mbstring, intl
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+      - name: Cache dependencies
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ runner.os }}-composer-
+      - name: Install Dependencies
+        run: composer install --no-progress
+      - name: PHPUnit
+        run: php -dmemory_limit=-1 vendor/bin/phpunit --exclude-group properties
+        env:
+          BLACKBOX_SET_SIZE: 20
+          BLACKBOX_DETAILED_PROPERTIES: 1
+      - name: Properties
+        run: php -dmemory_limit=-1 vendor/bin/phpunit --group properties
+        env:
+          BLACKBOX_SET_SIZE: 10
+          BLACKBOX_DETAILED_PROPERTIES: 1
+  coverage:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        php-version: ['7.4']
+    name: 'Coverage - PHP/${{ matrix.php-version }} - OS/${{ matrix.os }}'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v1
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, intl
           coverage: xdebug
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -29,9 +65,11 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ runner.os }}-composer-
       - name: Install Dependencies
-        run: composer install
+        run: composer install --no-progress
       - name: PHPUnit
-        run: vendor/bin/phpunit --coverage-clover=coverage.clover
+        run: php -dmemory_limit=-1 vendor/bin/phpunit --coverage-clover=coverage.clover
+        env:
+          BLACKBOX_SET_SIZE: 1
       - uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -59,6 +97,6 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ runner.os }}-composer-
       - name: Install Dependencies
-        run: composer install
+        run: composer install --no-progress
       - name: Psalm
-        run: vendor/bin/psalm
+        run: vendor/bin/psalm --shepherd

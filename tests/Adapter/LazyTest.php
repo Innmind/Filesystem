@@ -17,9 +17,13 @@ use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\BlackBox;
+use Properties\Innmind\Filesystem\Adapter;
 
 class LazyTest extends TestCase
 {
+    use BlackBox;
+
     public function testInterface()
     {
         $l = new Lazy($a = new InMemory);
@@ -109,5 +113,42 @@ class LazyTest extends TestCase
 
         $this->assertNull($filesystem->add($file));
         $this->assertSame($file, $filesystem->get($file->name()));
+    }
+
+    /**
+     * @dataProvider properties
+     */
+    public function testHoldProperty($property)
+    {
+        $this
+            ->forAll($property)
+            ->then(function($property) {
+                $adapter = new Lazy(new InMemory);
+
+                if (!$property->applicableTo($adapter)) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy($adapter);
+            });
+    }
+
+    /**
+     * @group properties
+     */
+    public function testHoldProperties()
+    {
+        $this
+            ->forAll(Adapter::properties())
+            ->then(function($properties) {
+                $properties->ensureHeldBy(new Lazy(new InMemory));
+            });
+    }
+
+    public function properties(): iterable
+    {
+        foreach (Adapter::list() as $property) {
+            yield [$property];
+        }
     }
 }

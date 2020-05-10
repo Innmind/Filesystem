@@ -25,7 +25,9 @@
     },
     "autoload": {
         "psr-4": {
-            "Innmind\\Filesystem\\": "src/"
+            "Innmind\\Filesystem\\": "src/",
+            "Fixtures\\Innmind\\Filesystem\\": "fixtures/",
+            "Properties\\Innmind\\Filesystem\\": "properties/"
         }
     },
     "autoload-dev": {
@@ -35,6 +37,16 @@
     },
     "require-dev": {
         "phpunit/phpunit": "~8.0",
-        "vimeo/psalm": "^3.7"
+        "vimeo/psalm": "^3.7",
+        "innmind/black-box": "^4.7"
+    },
+    "conflict": {
+        "innmind/black-box": "<4.7|~5.0"
+    },
+    "suggest": {
+        "innmind/black-box": "For property based testing"
+    },
+    "provide": {
+        "innmind/black-box": "4.7.0"
     }
 }

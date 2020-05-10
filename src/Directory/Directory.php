@@ -46,6 +46,19 @@ final class Directory implements DirectoryInterface
 
         assertSet(File::class, $files, 2);
 
+        $files->reduce(
+            Set::strings(),
+            static function(Set $names, File $file): Set {
+                $name = $file->name()->toString();
+
+                if ($names->contains($name)) {
+                    throw new LogicException("Same file '$name' found multiple times");
+                }
+
+                return ($names)($name);
+            },
+        );
+
         $this->name = $name;
         $this->files = $files;
         $this->mediaType = new MediaType(
@@ -80,7 +93,8 @@ final class Directory implements DirectoryInterface
         /** @var Set<string> $names */
         $names = $this
             ->files
-            ->toSetOf('string', fn($file): \Generator => yield $file->name()->toString());
+            ->toSetOf('string', fn($file): \Generator => yield $file->name()->toString())
+            ->sort(static fn(string $a, string $b): int => $a <=> $b);
         $this->content = Readable\Stream::ofContent(
             join("\n", $names)->toString(),
         );
@@ -168,7 +182,7 @@ final class Directory implements DirectoryInterface
      */
     public function replaceAt(Path $path, File $file): DirectoryInterface
     {
-        $normalizedPath = Str::of($path->toString())->leftTrim('/');
+        $normalizedPath = Str::of($path->toString())->trim('/');
         $pieces = $normalizedPath->split('/');
 
         if ($normalizedPath->empty()) {

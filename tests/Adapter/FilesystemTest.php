@@ -9,19 +9,29 @@ use Innmind\Filesystem\{
     File\File,
     Name,
     File as FileInterface,
+    Directory as DirectoryInterface,
     Directory\Directory,
     MediaType\NullMediaType,
     Exception\FileNotFound,
     Exception\PathDoesntRepresentADirectory,
+    Exception\PathTooLong,
 };
 use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use Symfony\Component\Filesystem\Filesystem as FS;
 use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set as DataSet,
+};
+use Fixtures\Innmind\Filesystem\Name as FName;
+use Properties\Innmind\Filesystem\Adapter as PAdapter;
 
 class FilesystemTest extends TestCase
 {
+    use BlackBox;
+
     public function setUp(): void
     {
         $fs = new FS;
@@ -169,34 +179,10 @@ class FilesystemTest extends TestCase
         $this->assertTrue($all->contains('baz'));
         $this->assertSame('foo', $adapter->get(new Name('foo'))->content()->toString());
         $this->assertSame('bar', $adapter->get(new Name('bar'))->content()->toString());
-        $this->assertInstanceOf(Directory::class, $adapter->get(new Name('baz')));
+        $this->assertInstanceOf(DirectoryInterface::class, $adapter->get(new Name('baz')));
         $adapter->remove(new Name('foo'));
         $adapter->remove(new Name('bar'));
         $adapter->remove(new Name('baz'));
-    }
-
-    public function testDotPseudoFilesAreNotListedInDirectory()
-    {
-        @mkdir('/tmp/sub');
-        @mkdir('/tmp/sub/test');
-        $adapter = new Filesystem(Path::of('/tmp/sub/'));
-
-        $this->assertFalse($adapter->get(new Name('test'))->contains(new Name('.')));
-        $this->assertFalse($adapter->get(new Name('test'))->contains(new Name('..')));
-        $this->assertFalse($adapter->contains(new Name('.')));
-        $this->assertFalse($adapter->contains(new Name('..')));
-        $this->assertFalse(
-            $adapter
-                ->all()
-                ->reduce(
-                    false,
-                    fn($found, $file) => $found || $file->name()->equals(new Name('.')) || $file->name()->equals(new Name('..')),
-                ),
-        );
-
-        $this->expectException(FileNotFound::class);
-
-        $adapter->get(new Name('..'));
     }
 
     public function testAddingTheSameFileTwiceDoesNothing()
@@ -209,5 +195,183 @@ class FilesystemTest extends TestCase
 
         $this->assertNull($adapter->add($file));
         $this->assertNull($adapter->add($file));
+    }
+
+    /**
+     * @dataProvider properties
+     */
+    public function testHoldProperty($property)
+    {
+        $this
+            ->forAll($property)
+            ->then(function($property) {
+                $path = \sys_get_temp_dir().'/innmind/filesystem/';
+                (new FS)->remove($path);
+                $adapter = new Filesystem(Path::of($path));
+
+                if (!$property->applicableTo($adapter)) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy($adapter);
+
+                (new FS)->remove($path);
+            });
+    }
+
+    /**
+     * @group properties
+     */
+    public function testHoldProperties()
+    {
+        $this
+            ->forAll(PAdapter::properties())
+            ->then(function($properties) {
+                $path = \sys_get_temp_dir().'/innmind/filesystem/';
+                (new FS)->remove($path);
+
+                $properties->ensureHeldBy(new Filesystem(Path::of($path)));
+
+                (new FS)->remove($path);
+            });
+    }
+
+    public function testPathTooLongThrowAnException()
+    {
+        if (\PHP_OS !== 'Darwin') {
+            $this->markTestSkipped();
+        }
+
+        $path = \sys_get_temp_dir().'/innmind/filesystem/';
+        (new FS)->remove($path);
+
+        $filesystem = new Filesystem(Path::of($path));
+
+        $this->expectException(PathTooLong::class);
+
+        $filesystem->add(new Directory(
+            new Name(str_repeat('a', 255)),
+            Set::of(
+                FileInterface::class,
+                new Directory(
+                    new Name(str_repeat('a', 255)),
+                    Set::of(
+                        FileInterface::class,
+                        new Directory(
+                            new Name(str_repeat('a', 255)),
+                            Set::of(
+                                FileInterface::class,
+                                new File(
+                                    new Name(str_repeat('a', 255)),
+                                    Stream::ofContent('foo')
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        ));
+    }
+
+    public function testPersistedNameCanStartWithAnyAsciiCharacter()
+    {
+        $this
+            ->forAll(
+                new DataSet\Either(
+                    DataSet\Integers::between(1, 46),
+                    DataSet\Integers::between(48, 127),
+                ),
+                DataSet\Strings::any(),
+            )
+            ->then(function($ord, $content) {
+                $path = \sys_get_temp_dir().'/innmind/filesystem/';
+                (new FS)->remove($path);
+
+                $filesystem = new Filesystem(Path::of($path));
+
+                $this->assertNull($filesystem->add(new Directory(
+                    new Name(chr($ord).'a'),
+                    Set::of(
+                        FileInterface::class,
+                        new File(
+                            new Name('a'),
+                            Stream::ofContent($content),
+                        ),
+                    ),
+                )));
+
+                (new FS)->remove($path);
+            });
+    }
+
+    public function testPersistedNameCanContainWithAnyAsciiCharacter()
+    {
+        $this
+            ->forAll(
+                new DataSet\Either(
+                    DataSet\Integers::between(1, 46),
+                    DataSet\Integers::between(48, 127),
+                ),
+                DataSet\Strings::any(),
+            )
+            ->then(function($ord, $content) {
+                $path = \sys_get_temp_dir().'/innmind/filesystem/';
+                (new FS)->remove($path);
+
+                $filesystem = new Filesystem(Path::of($path));
+
+                $this->assertNull($filesystem->add(new Directory(
+                    new Name('a'.chr($ord).'a'),
+                    Set::of(
+                        FileInterface::class,
+                        new File(
+                            new Name('a'),
+                            Stream::ofContent($content),
+                        ),
+                    ),
+                )));
+
+                (new FS)->remove($path);
+            });
+    }
+
+    public function testPersistedNameCanContainOnlyOneAsciiCharacter()
+    {
+        $this
+            ->forAll(
+                new DataSet\Either(
+                    DataSet\Integers::between(1, 8),
+                    DataSet\Integers::between(14, 31),
+                    DataSet\Integers::between(33, 45),
+                    DataSet\Integers::between(48, 127),
+                ),
+                DataSet\Strings::any(),
+            )
+            ->then(function($ord, $content) {
+                $path = \sys_get_temp_dir().'/innmind/filesystem/';
+                (new FS)->remove($path);
+
+                $filesystem = new Filesystem(Path::of($path));
+
+                $this->assertNull($filesystem->add(new Directory(
+                    new Name(chr($ord)),
+                    Set::of(
+                        FileInterface::class,
+                        new File(
+                            new Name('a'),
+                            Stream::ofContent($content),
+                        ),
+                    ),
+                )));
+
+                (new FS)->remove($path);
+            });
+    }
+
+    public function properties(): iterable
+    {
+        foreach (PAdapter::list() as $property) {
+            yield [$property];
+        }
     }
 }

@@ -18,9 +18,21 @@ use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set as DataSet,
+};
+use Fixtures\Innmind\Filesystem\{
+    Name as FName,
+    File as FFile,
+};
+use Fixtures\Innmind\Immutable\Set as FSet;
+use Properties\Innmind\Filesystem\Directory as PDirectory;
 
 class DirectoryTest extends TestCase
 {
+    use BlackBox;
+
     public function testInterface()
     {
         $d = new Directory(new Name('foo'));
@@ -132,7 +144,7 @@ class DirectoryTest extends TestCase
         );
 
         $this->assertSame(
-            'foo' . "\n" . 'bar' . "\n" . 'foobar' . "\n" . 'sub',
+            'bar' . "\n" . 'foo' . "\n" . 'foobar' . "\n" . 'sub',
             $d->content()->toString()
         );
     }
@@ -278,5 +290,138 @@ class DirectoryTest extends TestCase
         $this->assertSame(File::class, $set->type());
         $this->assertSame('foo', unwrap($set)[0]->name()->toString());
         $this->assertSame('foobar', unwrap($set)[1]->name()->toString());
+    }
+
+    /**
+     * @dataProvider properties
+     */
+    public function testEmptyDirectoryHoldProperty($property)
+    {
+        $this
+            ->forAll(
+                $property,
+                FName::any(),
+            )
+            ->then(function($property, $name) {
+                $directory = new Directory($name);
+
+                if (!$property->applicableTo($directory)) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy($directory);
+            });
+    }
+
+    /**
+     * @dataProvider properties
+     */
+    public function testDirectoryWithSomeFilesHoldProperty($property)
+    {
+        $this
+            ->forAll(
+                $property,
+                FName::any(),
+                FSet::of(
+                    File::class,
+                    new DataSet\Randomize(
+                        FFile::any(),
+                    ),
+                    DataSet\Integers::between(1, 5), // only to speed up tests
+                ),
+            )
+            ->filter(function($property, $name, $files) {
+                // do not accept duplicated files
+                return $files
+                    ->groupBy(fn($file) => $file->name()->toString())
+                    ->size() === $files->size();
+            })
+            ->then(function($property, $name, $files) {
+                $directory = new Directory($name, $files);
+
+                if (!$property->applicableTo($directory)) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy($directory);
+            });
+    }
+
+    /**
+     * @group properties
+     */
+    public function testEmptyDirectoryHoldProperties()
+    {
+        $this
+            ->forAll(
+                PDirectory::properties(),
+                FName::any(),
+            )
+            ->then(function($properties, $name) {
+                $directory = new Directory($name);
+
+                $properties->ensureHeldBy($directory);
+            });
+    }
+
+    /**
+     * @group properties
+     */
+    public function testDirectoryWithSomeFilesHoldProperties()
+    {
+        $this
+            ->forAll(
+                PDirectory::properties(),
+                FName::any(),
+                FSet::of(
+                    File::class,
+                    new DataSet\Randomize(
+                        FFile::any(),
+                    ),
+                    DataSet\Integers::between(1, 5), // only to speed up tests
+                ),
+            )
+            ->filter(function($properties, $name, $files) {
+                // do not accept duplicated files
+                return $files
+                    ->groupBy(fn($file) => $file->name()->toString())
+                    ->size() === $files->size();
+            })
+            ->then(function($properties, $name, $files) {
+                $directory = new Directory($name, $files);
+
+                $properties->ensureHeldBy($directory);
+            });
+    }
+
+    public function testDirectoryLoadedWithDifferentFilesWithTheSameNameThrows()
+    {
+        $this
+            ->forAll(
+                FName::any(),
+                FName::any(),
+                DataSet\Strings::any(),
+                DataSet\Strings::any(),
+            )
+            ->then(function($directory, $file, $content1, $content2) {
+                $this->expectException(LogicException::class);
+                $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
+
+                new Directory(
+                    $directory,
+                    Set::of(
+                        File::class,
+                        File\File::named($file->toString(), Stream::ofContent($content1)),
+                        File\File::named($file->toString(), Stream::ofContent($content2)),
+                    ),
+                );
+            });
+    }
+
+    public function properties(): iterable
+    {
+        foreach (PDirectory::list() as $property) {
+            yield [$property];
+        }
     }
 }

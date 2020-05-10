@@ -9,22 +9,26 @@ use Innmind\Filesystem\{
     Name,
     Directory,
     Stream\LazyStream,
+    Source,
     Exception\FileNotFound,
     Exception\PathDoesntRepresentADirectory,
-    Event\FileWasAdded,
+    Exception\PathTooLong,
+    Exception\RuntimeException,
     Event\FileWasRemoved,
 };
+use Innmind\Stream\Writable\Stream;
 use Innmind\MediaType\{
     MediaType,
     Exception\InvalidMediaTypeString,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Map,
     Set,
+    Str,
 };
 use Symfony\Component\{
     Filesystem\Filesystem as FS,
+    Filesystem\Exception\IOException,
     Finder\Finder,
     Finder\SplFileInfo,
 };
@@ -34,8 +38,6 @@ final class Filesystem implements Adapter
     private const INVALID_FILES = ['.', '..'];
     private Path $path;
     private FS $filesystem;
-    private Map $files;
-    private Set $handledEvents;
 
     public function __construct(Path $path)
     {
@@ -45,8 +47,6 @@ final class Filesystem implements Adapter
 
         $this->path = $path;
         $this->filesystem = new FS;
-        $this->files = Map::of('string', File::class);
-        $this->handledEvents = Set::objects();
 
         if (!$this->filesystem->exists($this->path->toString())) {
             $this->filesystem->mkdir($this->path->toString());
@@ -78,10 +78,6 @@ final class Filesystem implements Adapter
      */
     public function contains(Name $file): bool
     {
-        if (\in_array($file->toString(), self::INVALID_FILES, true)) {
-            return false;
-        }
-
         return $this->filesystem->exists($this->path->toString().'/'.$file->toString());
     }
 
@@ -117,60 +113,68 @@ final class Filesystem implements Adapter
      */
     private function createFileAt(Path $path, File $file): void
     {
+        $name = $file->name()->toString();
+
         if ($file instanceof Directory) {
-            $folder = $path->resolve(Path::of($file->name()->toString().'/'));
+            $name .= '/';
+        }
 
-            if (
-                $this->files->contains($folder->toString()) &&
-                $this->files->get($folder->toString()) === $file
-            ) {
-                return;
-            }
+        $path = $path->resolve(Path::of($name));
 
-            $this->filesystem->mkdir($folder->toString());
-            $file
-                ->modifications()
-                ->foreach(function(object $event) use ($folder) {
-                    if ($this->handledEvents->contains($event)) {
-                        return;
-                    }
-
-                    switch (true) {
-                        case $event instanceof FileWasRemoved:
-                            $this
-                                ->filesystem
-                                ->remove($folder->toString().$event->file()->toString());
-                            break;
-                        case $event instanceof FileWasAdded:
-                            $this->createFileAt($folder, $event->file());
-                            break;
-                    }
-
-                    $this->handledEvents = ($this->handledEvents)($event);
-                });
-            $this->files = ($this->files)($folder->toString(), $file);
-
+        if ($file instanceof Source && $file->sourcedAt($this, $path)) {
+            // no need to persist untouched file where it was loaded from
             return;
         }
 
-        $path = $path->resolve(Path::of($file->name()->toString()));
+        if ($file instanceof Directory) {
+            $this->filesystem->mkdir($path->toString());
+            $persisted = $file->reduce(
+                Set::strings(),
+                function(Set $persisted, File $file) use ($path): Set {
+                    $this->createFileAt($path, $file);
 
-        if (
-            $this->files->contains($path->toString()) &&
-            $this->files->get($path->toString()) === $file
-        ) {
+                    return ($persisted)($file->name()->toString());
+                },
+            );
+            /**
+             * @psalm-suppress ArgumentTypeCoercion
+             * @psalm-suppress MissingClosureReturnType
+             */
+            $file
+                ->modifications()
+                ->filter(static fn(object $event): bool => $event instanceof FileWasRemoved)
+                ->filter(static fn(FileWasRemoved $event): bool => !$persisted->contains($event->file()->toString()))
+                ->foreach(fn(FileWasRemoved $event) => $this->filesystem->remove(
+                    $path->toString().$event->file()->toString(),
+                ));
+
             return;
         }
 
         $stream = $file->content();
         $stream->rewind();
-        $handle = \fopen($path->toString(), 'w');
 
-        while (!$stream->end()) {
-            \fwrite($handle, $stream->read(8192)->toString());
+        try {
+            $this->filesystem->touch($path->toString());
+        } catch (IOException $e) {
+            if (\PHP_OS === 'Darwin' && Str::of($path->toString(), 'ASCII')->length() > 1014) {
+                throw new PathTooLong($path->toString(), 0, $e);
+            }
+
+            throw new RuntimeException(
+                $e->getMessage(),
+                (int) $e->getCode(),
+                $e,
+            );
         }
 
-        $this->files = ($this->files)($path->toString(), $file);
+        $handle = new Stream(\fopen($path->toString(), 'w'));
+
+        while (!$stream->end()) {
+            $handle->write(
+                $stream->read(8192)->toEncoding('ASCII'),
+            );
+        }
     }
 
     /**
@@ -196,23 +200,27 @@ final class Filesystem implements Adapter
                 \closedir($handle);
             })($folder->resolve(Path::of($file->toString().'/'))));
 
-            $object = new Directory\Directory($file, $files);
-        } else {
-            try {
-                $mediaType = MediaType::of(\mime_content_type($path->toString()));
-            } catch (InvalidMediaTypeString $e) {
-                $mediaType = MediaType::null();
-            }
-
-            $object = new File\File(
-                $file,
-                new LazyStream($path),
-                $mediaType,
+            return new Directory\Source(
+                new Directory\Directory($file, $files),
+                $this,
+                $path,
             );
         }
 
-        $this->files = ($this->files)($path->toString(), $object);
+        try {
+            $mediaType = MediaType::of(\mime_content_type($path->toString()));
+        } catch (InvalidMediaTypeString $e) {
+            $mediaType = MediaType::null();
+        }
 
-        return $object;
+        return new File\Source(
+            new File\File(
+                $file,
+                new LazyStream($path),
+                $mediaType,
+            ),
+            $this,
+            $path,
+        );
     }
 }
