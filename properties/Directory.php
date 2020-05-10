@@ -69,6 +69,13 @@ final class Directory
                 Directory\AddDirectory::class,
                 Name::any(),
             ),
+            Set\Property::of(
+                Directory\FilteringDoesntAffectTheDirectory::class,
+            ),
+            Set\Property::of(
+                Directory\FilteringRetunsTheExpectedElements::class,
+                File::any(),
+            ),
         ];
     }
 }
