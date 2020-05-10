@@ -78,10 +78,6 @@ final class Filesystem implements Adapter
      */
     public function contains(Name $file): bool
     {
-        if (\in_array($file->toString(), self::INVALID_FILES, true)) {
-            return false;
-        }
-
         return $this->filesystem->exists($this->path->toString().'/'.$file->toString());
     }
 
