@@ -7,6 +7,7 @@ use Innmind\Filesystem\{
     Name,
     Exception\DomainException,
 };
+use Fixtures\Innmind\Filesystem\Name as Fixture;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -50,7 +51,7 @@ class NameTest extends TestCase
     {
         $this
             ->forAll(
-                $this->valid(),
+                Fixture::strings(),
             )
             ->then(function($value) {
                 $name = new Name($value);
@@ -63,8 +64,8 @@ class NameTest extends TestCase
     {
         $this
             ->forAll(
-                $this->valid(),
-                $this->valid(),
+                Fixture::strings(),
+                Fixture::strings(),
             )
             ->then(function($a, $b) {
                 $this->expectException(DomainException::class);
@@ -77,7 +78,7 @@ class NameTest extends TestCase
     {
         $this
             ->forAll(
-                $this->valid(),
+                Fixture::strings(),
             )
             ->then(function($value) {
                 $name1 = new Name($value);
@@ -92,8 +93,8 @@ class NameTest extends TestCase
     {
         $this
             ->forAll(
-                $this->valid(),
-                $this->valid(),
+                Fixture::strings(),
+                Fixture::strings(),
             )
             ->then(function($a, $b) {
                 $name1 = new Name($a);
@@ -178,25 +179,5 @@ class NameTest extends TestCase
                     $this->assertTrue(true);
                 }
             });
-    }
-
-    private function valid(): Set
-    {
-        return Set\Decorate::immutable(
-            static fn(array $chrs): string => \implode('', $chrs),
-            Set\Sequence::of(
-                Set\Decorate::immutable(
-                    static fn(int $chr): string => \chr($chr),
-                    Set\Elements::of(
-                        ...range(1, 46),
-                        ...range(48, 127),
-                    ),
-                ),
-                Set\Integers::between(1, 255),
-            ),
-        )->filter(static fn(string $name): bool => $name !== '.' &&
-            $name !== '..' &&
-            !\preg_match('~^\s+$~', $name)
-        );
     }
 }
