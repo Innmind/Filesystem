@@ -55,16 +55,7 @@ final class Directory
                     self::atDepth($depth + 1, $maxDepth),
                 ),
                 DataSet\Integers::between(0, 5),
-            )->filter(static function($files): bool {
-                if ($files->empty()) {
-                    return true;
-                }
-
-                // do not accept duplicated files
-                return $files
-                    ->groupBy(static fn($file) => $file->name()->toString())
-                    ->size() === $files->size();
-            });
+            );
         }
 
         $directory = DataSet\Composite::immutable(
@@ -73,7 +64,16 @@ final class Directory
                 $files,
             ),
             Name::any(),
-            $files,
+            $files->filter(static function($files): bool {
+                if ($files->empty()) {
+                    return true;
+                }
+
+                // do not accept duplicated files
+                return $files
+                    ->groupBy(static fn($file) => $file->name()->toString())
+                    ->size() === $files->size();
+            }),
         );
 
         $modified = DataSet\Composite::immutable(
