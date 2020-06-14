@@ -31,7 +31,7 @@ final class FilteringRetunsTheExpectedElements implements Property
         $shouldBeEmpty = $directory->filter(fn($file): bool => $file === $this->file);
         $shouldContainsOurFile = $directory
             ->add($this->file)
-            ->filter(fn($file): bool => $file === $this->file);
+            ->filter(fn($file): bool => $file->name() === $this->file->name());
 
         Assert::assertCount(0, $shouldBeEmpty);
         Assert::assertCount(1, $shouldContainsOurFile);
