@@ -14,6 +14,7 @@ use Innmind\Filesystem\{
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\RuntimeException,
+    Exception\CannotPersistClosedStream,
     Event\FileWasRemoved,
 };
 use Innmind\Stream\Writable\Stream;
@@ -152,6 +153,11 @@ final class Filesystem implements Adapter
         }
 
         $stream = $file->content();
+
+        if ($stream->closed()) {
+            throw new CannotPersistClosedStream($path->toString());
+        }
+
         $stream->rewind();
 
         try {
