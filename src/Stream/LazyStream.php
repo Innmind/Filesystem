@@ -45,8 +45,15 @@ final class LazyStream implements Readable
 
     public function rewind(): void
     {
-        if ($this->stream) {
-            $this->stream()->rewind();
+        if ($this->stream && !$this->stream->closed()) {
+            // this trick allows to automatically close the opened files on the
+            // system in order to avoid a fatal error when too many files are
+            // opened. This is possible because of the rewind done in
+            // Adapter\Filesystem::createFileAt() after persisting a file.
+            // This does not break be behaviour of the streams as once the stream
+            // is manually closed we won't reopen it here
+            $this->stream->close();
+            $this->stream = null;
         }
     }
 

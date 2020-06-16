@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <phpunit colors="true" bootstrap="vendor/autoload.php" printerClass="Innmind\BlackBox\PHPUnit\ResultPrinterV8">
+    <php>
+        <env name="BLACKBOX_SET_SIZE" value="1" />
+    </php>
     <testsuites>
         <testsuite name="Filesystem test suite">
             <directory>./tests</directory>

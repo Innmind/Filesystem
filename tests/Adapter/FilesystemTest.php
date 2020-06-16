@@ -15,6 +15,7 @@ use Innmind\Filesystem\{
     Exception\FileNotFound,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
+    Exception\CannotPersistClosedStream,
 };
 use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
@@ -25,7 +26,10 @@ use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set as DataSet,
 };
-use Fixtures\Innmind\Filesystem\Name as FName;
+use Fixtures\Innmind\Filesystem\{
+    Name as FName,
+    File as FFile,
+};
 use Properties\Innmind\Filesystem\Adapter as PAdapter;
 
 class FilesystemTest extends TestCase
@@ -365,6 +369,23 @@ class FilesystemTest extends TestCase
                 )));
 
                 (new FS)->remove($path);
+            });
+    }
+
+    public function testThrowsWhenTryingToPersistClosedFileStream()
+    {
+        $this
+            ->forAll(FFile::any())
+            ->then(function($file) {
+                $path = \sys_get_temp_dir().'/innmind/filesystem/';
+                (new FS)->remove($path);
+
+                $filesystem = new Filesystem(Path::of($path));
+
+                $file->content()->close();
+                $this->expectException(CannotPersistClosedStream::class);
+
+                $filesystem->add($file);
             });
     }
 

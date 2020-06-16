@@ -10,9 +10,17 @@ use Innmind\Stream\{
 };
 use Innmind\Url\Path;
 use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set,
+};
+use Fixtures\Innmind\Stream\Readable as FReadable;
+use Properties\Innmind\Stream\Readable as PReadable;
 
 class LazyStreamTest extends TestCase
 {
+    use BlackBox;
+
     private $stream;
 
     public function setUp(): void
@@ -110,5 +118,21 @@ class LazyStreamTest extends TestCase
         file_put_contents($path, 'lorem ipsum dolor');
 
         $this->assertSame('lorem', $stream->read(5)->toString());
+    }
+
+    public function testHoldProperties()
+    {
+        $this
+            ->forAll(
+                PReadable::properties(),
+                FReadable::any(),
+            )
+            ->then(function($properties, $content) {
+                $path = \tempnam(\sys_get_temp_dir(), 'lazy_stream');
+                $stream = new LazyStream(Path::of($path));
+                \file_put_contents($path, $content->toString());
+
+                $properties->ensureHeldBy($stream);
+            });
     }
 }

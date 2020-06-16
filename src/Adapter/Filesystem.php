@@ -14,6 +14,7 @@ use Innmind\Filesystem\{
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\RuntimeException,
+    Exception\CannotPersistClosedStream,
     Event\FileWasRemoved,
 };
 use Innmind\Stream\Writable\Stream;
@@ -152,6 +153,11 @@ final class Filesystem implements Adapter
         }
 
         $stream = $file->content();
+
+        if ($stream->closed()) {
+            throw new CannotPersistClosedStream($path->toString());
+        }
+
         $stream->rewind();
 
         try {
@@ -175,6 +181,11 @@ final class Filesystem implements Adapter
                 $stream->read(8192)->toEncoding('ASCII'),
             );
         }
+
+        // Calling the rewind here helps always leave the streams in a readable
+        // state. It also helps avoid a fatal error when handling too many files
+        // (see LazyStream::rewind() for more explanations)
+        $stream->rewind();
     }
 
     /**
