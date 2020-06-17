@@ -16,10 +16,12 @@ use Innmind\Filesystem\{
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\CannotPersistClosedStream,
+    Exception\LinksAreNotSupported,
 };
 use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
+use function Innmind\Immutable\unwrap;
 use Symfony\Component\Filesystem\Filesystem as FS;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -387,6 +389,36 @@ class FilesystemTest extends TestCase
 
                 $filesystem->add($file);
             });
+    }
+
+    public function testThrowsWhenTryingToGetLink()
+    {
+        $path = \sys_get_temp_dir().'/innmind/filesystem/';
+        (new FS)->remove($path);
+        (new FS)->dumpFile($path.'foo', 'bar');
+        \symlink($path.'foo', $path.'bar');
+
+        $filesystem = new Filesystem(Path::of($path));
+
+        $this->expectException(LinksAreNotSupported::class);
+        $this->expectExceptionMessage($path.'bar');
+
+        $filesystem->get(new Name('bar'));
+    }
+
+    public function testThrowsWhenListContainsALink()
+    {
+        $path = \sys_get_temp_dir().'/innmind/filesystem/';
+        (new FS)->remove($path);
+        (new FS)->dumpFile($path.'foo', 'bar');
+        \symlink($path.'foo', $path.'bar');
+
+        $filesystem = new Filesystem(Path::of($path));
+
+        $this->expectException(LinksAreNotSupported::class);
+        $this->expectExceptionMessage($path.'bar');
+
+        unwrap($filesystem->all());
     }
 
     public function properties(): iterable

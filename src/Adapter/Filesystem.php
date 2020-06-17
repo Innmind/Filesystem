@@ -15,6 +15,7 @@ use Innmind\Filesystem\{
     Exception\PathTooLong,
     Exception\RuntimeException,
     Exception\CannotPersistClosedStream,
+    Exception\LinksAreNotSupported,
     Event\FileWasRemoved,
 };
 use Innmind\Stream\Writable\Stream;
@@ -103,6 +104,10 @@ final class Filesystem implements Adapter
 
                 /** @var SplFileInfo $file */
                 foreach ($files as $file) {
+                    if (\is_link($file->getPathname())) {
+                        throw new LinksAreNotSupported($file->getPathname());
+                    }
+
                     yield $adapter->get(new Name($file->getRelativePathname()));
                 }
             })($this, $this->path->toString()),
@@ -216,6 +221,10 @@ final class Filesystem implements Adapter
                 $this,
                 $path,
             );
+        }
+
+        if (\is_link($path->toString())) {
+            throw new LinksAreNotSupported($path->toString());
         }
 
         try {
