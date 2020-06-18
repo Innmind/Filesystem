@@ -118,19 +118,6 @@ class NameTest extends TestCase
             });
     }
 
-    public function testNamesContainingCharOrdAbove127IsNotAccepted()
-    {
-        $this
-            ->forAll(Set\Elements::of(
-                ...range(128, 255),
-            ))
-            ->then(function($invalid) {
-                $this->expectException(DomainException::class);
-
-                new Name('a'.\chr($invalid).'a');
-            });
-    }
-
     public function testChr0IsNotAccepted()
     {
         $this->expectException(DomainException::class);
@@ -200,6 +187,15 @@ class NameTest extends TestCase
                     Path::class,
                     Path::of($path),
                 );
+            });
+    }
+
+    public function testUnicodeCharactersAreAccepted()
+    {
+        $this
+            ->forAll(Set\Unicode::latinExtendedA())
+            ->then(function(string $name) {
+                $this->assertInstanceOf(Name::class, new Name($name));
             });
     }
 }
