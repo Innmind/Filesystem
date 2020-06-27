@@ -423,15 +423,20 @@ class FilesystemTest extends TestCase
 
     public function testDotFilesAreListed()
     {
-        $path = \sys_get_temp_dir().'/innmind/filesystem/';
-        (new FS)->remove($path);
-        (new FS)->dumpFile($path.'.foo', 'bar');
+        $this
+            ->forAll(FName::strings())
+            ->then(function($name) {
+                $name = ".$name";
+                $path = \sys_get_temp_dir().'/innmind/filesystem/';
+                (new FS)->remove($path);
+                (new FS)->dumpFile($path.$name, 'bar');
 
-        $filesystem = new Filesystem(Path::of($path));
+                $filesystem = new Filesystem(Path::of($path));
 
-        $all = unwrap($filesystem->all());
-        $this->assertCount(1, $all);
-        $this->assertSame('.foo', $all[0]->name()->toString());
+                $all = unwrap($filesystem->all());
+                $this->assertCount(1, $all);
+                $this->assertSame($name, $all[0]->name()->toString());
+            });
     }
 
     public function properties(): iterable
