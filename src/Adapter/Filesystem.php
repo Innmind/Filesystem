@@ -225,7 +225,10 @@ final class Filesystem implements Adapter
         return Set::defer(
             File::class,
             (function(Path $folder): \Generator {
-                $files = Finder::create()->depth('== 0')->in($folder->toString());
+                $files = Finder::create()
+                    ->depth('== 0')
+                    ->in($folder->toString())
+                    ->ignoreDotFiles(false);
 
                 /** @var SplFileInfo $file */
                 foreach ($files as $file) {
