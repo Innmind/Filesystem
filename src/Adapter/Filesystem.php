@@ -96,22 +96,7 @@ final class Filesystem implements Adapter
      */
     public function all(): Set
     {
-        /** @var Set<File> */
-        return Set::defer(
-            File::class,
-            (function(Adapter $adapter, string $path): \Generator {
-                $files = Finder::create()->depth('== 0')->in($path);
-
-                /** @var SplFileInfo $file */
-                foreach ($files as $file) {
-                    if (\is_link($file->getPathname())) {
-                        throw new LinksAreNotSupported($file->getPathname());
-                    }
-
-                    yield $adapter->get(new Name($file->getRelativePathname()));
-                }
-            })($this, $this->path->toString()),
-        );
+        return $this->list($this->path);
     }
 
     /**
@@ -201,20 +186,7 @@ final class Filesystem implements Adapter
         $path = $folder->resolve(Path::of($file->toString()));
 
         if (\is_dir($path->toString())) {
-            /** @var Set<File> $files */
-            $files = Set::defer(File::class, (function(Path $folder): \Generator {
-                $handle = \opendir($folder->toString());
-
-                while (($name = \readdir($handle)) !== false) {
-                    if (\in_array($name, self::INVALID_FILES, true)) {
-                        continue;
-                    }
-
-                    yield $this->open($folder, new Name($name));
-                }
-
-                \closedir($handle);
-            })($folder->resolve(Path::of($file->toString().'/'))));
+            $files = $this->list($folder->resolve(Path::of($file->toString().'/')));
 
             return new Directory\Source(
                 new Directory\Directory($file, $files),
@@ -241,6 +213,29 @@ final class Filesystem implements Adapter
             ),
             $this,
             $path,
+        );
+    }
+
+    /**
+     * @return Set<File>
+     */
+    private function list(Path $path): Set
+    {
+        /** @var Set<File> */
+        return Set::defer(
+            File::class,
+            (function(Path $folder): \Generator {
+                $files = Finder::create()->depth('== 0')->in($folder->toString());
+
+                /** @var SplFileInfo $file */
+                foreach ($files as $file) {
+                    if (\is_link($file->getPathname())) {
+                        throw new LinksAreNotSupported($file->getPathname());
+                    }
+
+                    yield $this->open($folder, new Name($file->getRelativePathname()));
+                }
+            })($path),
         );
     }
 }
