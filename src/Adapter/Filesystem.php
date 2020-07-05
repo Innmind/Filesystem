@@ -142,6 +142,10 @@ final class Filesystem implements Adapter
             return;
         }
 
+        if (\is_dir($path->toString())) {
+            $this->filesystem->remove($path->toString());
+        }
+
         $stream = $file->content();
 
         if ($stream->closed()) {
