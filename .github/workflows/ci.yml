@@ -42,6 +42,7 @@ jobs:
       - name: PHPUnit
         run: php -dmemory_limit=-1 vendor/bin/phpunit
         env:
+          BLACKBOX_SET_SIZE: 100
           BLACKBOX_DETAILED_PROPERTIES: 1
   coverage:
     runs-on: ${{ matrix.os }}
