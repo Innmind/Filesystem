@@ -40,14 +40,8 @@ jobs:
       - name: Install Dependencies
         run: composer install --no-progress
       - name: PHPUnit
-        run: php -dmemory_limit=-1 vendor/bin/phpunit --exclude-group properties
+        run: php -dmemory_limit=-1 vendor/bin/phpunit
         env:
-          BLACKBOX_SET_SIZE: 20
-          BLACKBOX_DETAILED_PROPERTIES: 1
-      - name: Properties
-        run: php -dmemory_limit=-1 vendor/bin/phpunit --group properties
-        env:
-          BLACKBOX_SET_SIZE: 10
           BLACKBOX_DETAILED_PROPERTIES: 1
   coverage:
     runs-on: ${{ matrix.os }}
