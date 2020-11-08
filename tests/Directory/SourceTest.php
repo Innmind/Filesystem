@@ -9,7 +9,6 @@ use Innmind\Filesystem\{
     Directory as DirectoryInterface,
     Adapter,
 };
-use Innmind\Stream\Readable\Stream;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -68,7 +67,7 @@ class SourceTest extends TestCase
                 Path::any(),
                 Path::any(),
             )
-            ->filter(function($openedAt, $writeAt) {
+            ->filter(static function($openedAt, $writeAt) {
                 return !$openedAt->equals($writeAt);
             })
             ->then(function($openedAt, $writeAt) {

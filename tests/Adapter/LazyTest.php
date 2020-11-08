@@ -140,7 +140,7 @@ class LazyTest extends TestCase
     {
         $this
             ->forAll(Adapter::properties())
-            ->then(function($properties) {
+            ->then(static function($properties) {
                 $properties->ensureHeldBy(new Lazy(new InMemory));
             });
     }

@@ -60,7 +60,7 @@ class SourceTest extends TestCase
                 Path::any(),
                 Path::any(),
             )
-            ->filter(function($openedAt, $writeAt) {
+            ->filter(static function($openedAt, $writeAt) {
                 return !$openedAt->equals($writeAt);
             })
             ->then(function($openedAt, $writeAt) {

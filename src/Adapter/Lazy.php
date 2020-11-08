@@ -31,9 +31,6 @@ final class Lazy implements LazyAdapterInterface
         $this->toRemove = Set::strings();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function add(File $file): void
     {
         $this->toAdd = ($this->toAdd)(
@@ -43,9 +40,6 @@ final class Lazy implements LazyAdapterInterface
         $this->toRemove = $this->toRemove->remove($file->name()->toString());
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function get(Name $file): File
     {
         if (!$this->contains($file)) {
@@ -59,9 +53,6 @@ final class Lazy implements LazyAdapterInterface
         return $this->adapter->get($file);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function contains(Name $file): bool
     {
         if ($this->toRemove->contains($file->toString())) {
@@ -75,18 +66,12 @@ final class Lazy implements LazyAdapterInterface
         return $this->adapter->contains($file);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function remove(Name $file): void
     {
         $this->toRemove = ($this->toRemove)($file->toString());
         $this->toAdd = $this->toAdd->remove($file->toString());
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function all(): Set
     {
         return $this
@@ -100,9 +85,6 @@ final class Lazy implements LazyAdapterInterface
             );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function persist(): void
     {
         $this

@@ -22,7 +22,7 @@ final class RemoveDirectory implements Property
         // at least one directory must exist
         return $directory->reduce(
             false,
-            fn($found, $file) => $found || $file instanceof Directory,
+            static fn($found, $file) => $found || $file instanceof Directory,
         );
     }
 
@@ -30,7 +30,7 @@ final class RemoveDirectory implements Property
     {
         $file = $directory->reduce(
             null,
-            function($found, $file) {
+            static function($found, $file) {
                 if ($found) {
                     return $found;
                 }
@@ -38,8 +38,6 @@ final class RemoveDirectory implements Property
                 if ($file instanceof Directory) {
                     return $file;
                 }
-
-                return null;
             },
         );
 

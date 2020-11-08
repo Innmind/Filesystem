@@ -92,7 +92,7 @@ final class Adapter
                 Name::any(),
                 Readable::any(),
                 File::any(),
-            )
+            ),
         ];
     }
 }

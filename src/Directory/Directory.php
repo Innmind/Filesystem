@@ -73,17 +73,11 @@ final class Directory implements DirectoryInterface
         return new self(new Name($name));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function name(): Name
     {
         return $this->name;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function content(): Readable
     {
         if ($this->content instanceof Readable) {
@@ -93,7 +87,7 @@ final class Directory implements DirectoryInterface
         /** @var Set<string> $names */
         $names = $this
             ->files
-            ->toSetOf('string', fn($file): \Generator => yield $file->name()->toString())
+            ->toSetOf('string', static fn($file): \Generator => yield $file->name()->toString())
             ->sort(static fn(string $a, string $b): int => $a <=> $b);
         $this->content = Readable\Stream::ofContent(
             join("\n", $names)->toString(),
@@ -107,9 +101,6 @@ final class Directory implements DirectoryInterface
         return $this->mediaType;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function add(File $file): DirectoryInterface
     {
         $files = $this->files->filter(static fn(File $known): bool => !$known->name()->equals($file->name()));
@@ -122,9 +113,6 @@ final class Directory implements DirectoryInterface
         return $directory;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function get(Name $name): File
     {
         $file = $this->files->reduce(
@@ -149,9 +137,6 @@ final class Directory implements DirectoryInterface
         return $file;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function contains(Name $name): bool
     {
         return $this->files->reduce(
@@ -160,9 +145,6 @@ final class Directory implements DirectoryInterface
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function remove(Name $name): DirectoryInterface
     {
         if (!$this->contains($name)) {
@@ -177,9 +159,6 @@ final class Directory implements DirectoryInterface
         return $directory;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function replaceAt(Path $path, File $file): DirectoryInterface
     {
         $normalizedPath = Str::of($path->toString())->trim('/');
@@ -215,33 +194,21 @@ final class Directory implements DirectoryInterface
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function foreach(callable $function): void
     {
         $this->files->foreach($function);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function filter(callable $predicate): Set
     {
         return $this->files->filter($predicate);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function reduce($carry, callable $reducer)
     {
         return $this->files->reduce($carry, $reducer);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function modifications(): Sequence
     {
         return $this->modifications;

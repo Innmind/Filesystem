@@ -135,7 +135,7 @@ class DirectoryTest extends TestCase
     {
         $d = new Directory(
             new Name('foo'),
-            Set::defer(File::class, (function () {
+            Set::defer(File::class, (static function() {
                 yield new File\File(new Name('foo'), Stream::ofContent('foo'));
                 yield new File\File(new Name('bar'), Stream::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
@@ -235,7 +235,7 @@ class DirectoryTest extends TestCase
     {
         $directory = new Directory(
             new Name('foo'),
-            Set::defer(File::class, (function () {
+            Set::defer(File::class, (static function() {
                 yield new File\File(new Name('foo'), Stream::ofContent('foo'));
                 yield new File\File(new Name('bar'), Stream::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
@@ -244,7 +244,7 @@ class DirectoryTest extends TestCase
         );
 
         $called = 0;
-        $this->assertNull($directory->foreach(function() use (&$called) {
+        $this->assertNull($directory->foreach(static function() use (&$called) {
             ++$called;
         }));
         $this->assertSame(4, $called);
@@ -254,7 +254,7 @@ class DirectoryTest extends TestCase
     {
         $directory = new Directory(
             new Name('foo'),
-            Set::defer(File::class, (function () {
+            Set::defer(File::class, (static function() {
                 yield new File\File(new Name('foo'), Stream::ofContent('foo'));
                 yield new File\File(new Name('bar'), Stream::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
@@ -264,7 +264,7 @@ class DirectoryTest extends TestCase
 
         $reduced = $directory->reduce(
             '',
-            fn($carry, $file) => $carry.$file->name()->toString(),
+            static fn($carry, $file) => $carry.$file->name()->toString(),
         );
 
         $this->assertSame('foobarfoobarsub', $reduced);
@@ -274,7 +274,7 @@ class DirectoryTest extends TestCase
     {
         $directory = new Directory(
             new Name('foo'),
-            Set::defer(File::class, (function () {
+            Set::defer(File::class, (static function() {
                 yield new File\File(new Name('foo'), Stream::ofContent('foo'));
                 yield new File\File(new Name('bar'), Stream::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
@@ -283,7 +283,7 @@ class DirectoryTest extends TestCase
         );
 
         $set = $directory->filter(
-            fn($file) => strpos($file->name()->toString(), 'foo') === 0,
+            static fn($file) => \strpos($file->name()->toString(), 'foo') === 0,
         );
 
         $this->assertInstanceOf(Set::class, $set);
@@ -330,10 +330,10 @@ class DirectoryTest extends TestCase
                     DataSet\Integers::between(1, 5), // only to speed up tests
                 ),
             )
-            ->filter(function($property, $name, $files) {
+            ->filter(static function($property, $name, $files) {
                 // do not accept duplicated files
                 return $files
-                    ->groupBy(fn($file) => $file->name()->toString())
+                    ->groupBy(static fn($file) => $file->name()->toString())
                     ->size() === $files->size();
             })
             ->then(function($property, $name, $files) {
@@ -357,7 +357,7 @@ class DirectoryTest extends TestCase
                 PDirectory::properties(),
                 FName::any(),
             )
-            ->then(function($properties, $name) {
+            ->then(static function($properties, $name) {
                 $directory = new Directory($name);
 
                 $properties->ensureHeldBy($directory);
@@ -381,13 +381,13 @@ class DirectoryTest extends TestCase
                     DataSet\Integers::between(1, 5), // only to speed up tests
                 ),
             )
-            ->filter(function($properties, $name, $files) {
+            ->filter(static function($properties, $name, $files) {
                 // do not accept duplicated files
                 return $files
-                    ->groupBy(fn($file) => $file->name()->toString())
+                    ->groupBy(static fn($file) => $file->name()->toString())
                     ->size() === $files->size();
             })
-            ->then(function($properties, $name, $files) {
+            ->then(static function($properties, $name, $files) {
                 $directory = new Directory($name, $files);
 
                 $properties->ensureHeldBy($directory);

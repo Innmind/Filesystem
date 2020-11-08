@@ -19,7 +19,7 @@ final class RemoveFile implements Property
         // at least one file must exist
         return $directory->reduce(
             false,
-            fn() => true,
+            static fn() => true,
         );
     }
 
@@ -27,7 +27,7 @@ final class RemoveFile implements Property
     {
         $file = $directory->reduce(
             null,
-            fn($found, $file) => $found ?? $file,
+            static fn($found, $file) => $found ?? $file,
         );
 
         $newDirectory = $directory->remove($file->name());

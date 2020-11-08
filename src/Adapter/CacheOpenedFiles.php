@@ -26,9 +26,6 @@ final class CacheOpenedFiles implements Adapter
         $this->files = Map::of('string', File::class);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function add(File $file): void
     {
         $this->filesystem->add($file);
@@ -38,9 +35,6 @@ final class CacheOpenedFiles implements Adapter
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function get(Name $file): File
     {
         if ($this->files->contains($file->toString())) {
@@ -56,9 +50,6 @@ final class CacheOpenedFiles implements Adapter
         return $file;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function contains(Name $file): bool
     {
         if ($this->files->contains($file->toString())) {
@@ -68,18 +59,12 @@ final class CacheOpenedFiles implements Adapter
         return $this->filesystem->contains($file);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function remove(Name $file): void
     {
         $this->files = $this->files->remove($file->toString());
         $this->filesystem->remove($file);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function all(): Set
     {
         $all = $this->filesystem->all();

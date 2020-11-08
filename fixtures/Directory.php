@@ -13,7 +13,6 @@ use Innmind\BlackBox\{
     Properties as Ensure,
 };
 use Fixtures\Innmind\Immutable\Set;
-use function Innmind\Immutable\unwrap;
 
 final class Directory
 {

@@ -135,9 +135,9 @@ class NameTest extends TestCase
                         Set\Decorate::immutable(
                             static fn(int $chr): string => \chr($chr),
                             Set\Elements::of(
-                                ...range(1, 46),
+                                ...\range(1, 46),
                                 // chr(47) alias '/' not accepted
-                                ...range(48, 127),
+                                ...\range(48, 127),
                             ),
                         ),
                         Set\Integers::between(255, 1024), // upper limit at 1024 to avoid out of memory
@@ -156,11 +156,11 @@ class NameTest extends TestCase
         $this
             ->forAll(Set\Elements::of(
                 32,
-                ...range(9, 13),
+                ...\range(9, 13),
             ))
             ->then(function($ord) {
                 try {
-                    new Name(chr($ord));
+                    new Name(\chr($ord));
 
                     $this->fail('it should throw');
                 } catch (DomainException $e) {
@@ -178,7 +178,7 @@ class NameTest extends TestCase
             ))
             ->then(function($names) {
                 $strings = \array_map(
-                    fn($name) => $name->toString(),
+                    static fn($name) => $name->toString(),
                     $names,
                 );
                 $path = '/'.\implode('/', $strings);

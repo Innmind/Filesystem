@@ -25,9 +25,6 @@ final class InMemory implements Adapter
         $this->files = Map::of('string', File::class);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function add(File $file): void
     {
         $this->files = ($this->files)(
@@ -36,9 +33,6 @@ final class InMemory implements Adapter
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function get(Name $file): File
     {
         if (!$this->contains($file)) {
@@ -48,25 +42,16 @@ final class InMemory implements Adapter
         return $this->files->get($file->toString());
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function contains(Name $file): bool
     {
         return $this->files->contains($file->toString());
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function remove(Name $file): void
     {
         $this->files = $this->files->remove($file->toString());
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function all(): Set
     {
         return $this->files->values()->toSetOf(File::class);
