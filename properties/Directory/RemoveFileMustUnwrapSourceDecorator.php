@@ -14,7 +14,7 @@ final class RemoveFileMustUnwrapSourceDecorator implements Property
 {
     public function name(): string
     {
-        return "Remove file must unwrap source decorator";
+        return 'Remove file must unwrap source decorator';
     }
 
     public function applicableTo(object $directory): bool
@@ -22,7 +22,7 @@ final class RemoveFileMustUnwrapSourceDecorator implements Property
         // at least one file must exist
         return $directory instanceof Source && $directory->reduce(
             false,
-            fn() => true,
+            static fn() => true,
         );
     }
 
@@ -30,7 +30,7 @@ final class RemoveFileMustUnwrapSourceDecorator implements Property
     {
         $file = $directory->reduce(
             null,
-            fn($found, $file) => $found ?? $file,
+            static fn($found, $file) => $found ?? $file,
         );
 
         $newDirectory = $directory->remove($file->name());

@@ -21,7 +21,7 @@ final class ContentHoldsTheNamesOfTheFiles implements Property
     public function ensureHeldBy(object $directory): object
     {
         $content = $directory->content()->toString();
-        $directory->foreach(function($file) use ($content) {
+        $directory->foreach(static function($file) use ($content) {
             Assert::assertStringContainsString(
                 $file->name()->toString(),
                 $content,

@@ -38,8 +38,8 @@ final class ReplacingFileAtEmptyPathIsSameAsAddingTheFile implements Property
         Assert::assertNotSame($directory, $newDirectory);
         Assert::assertFalse($directory->contains($this->file->name()));
         Assert::assertTrue($newDirectory->contains($this->file->name()));
-        $files->foreach(fn($file) => Assert::assertTrue($directory->contains($file->name())));
-        $files->foreach(fn($file) => Assert::assertTrue($newDirectory->contains($file->name())));
+        $files->foreach(static fn($file) => Assert::assertTrue($directory->contains($file->name())));
+        $files->foreach(static fn($file) => Assert::assertTrue($newDirectory->contains($file->name())));
         Assert::assertGreaterThan(
             $directory->modifications()->size(),
             $newDirectory->modifications()->size(),

@@ -34,17 +34,11 @@ final class File implements FileInterface
         return new self(new Name($name), $content, $mediaType);
     }
 
-    /**
-     * {@inheritdo}
-     */
     public function name(): Name
     {
         return $this->name;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function content(): Readable
     {
         return $this->content;
@@ -57,8 +51,6 @@ final class File implements FileInterface
 
     /**
      * New file reference with a different content
-     *
-     * @return self
      */
     public function withContent(Readable $content): self
     {

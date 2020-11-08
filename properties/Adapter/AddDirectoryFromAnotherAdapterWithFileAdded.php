@@ -8,7 +8,6 @@ use Innmind\Filesystem\{
     File,
     Name,
 };
-use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;

@@ -148,7 +148,7 @@ class FilesystemTest extends TestCase
     public function testLoadWithMediaType()
     {
         $a = new Filesystem(Path::of('/tmp/'));
-        file_put_contents(
+        \file_put_contents(
             '/tmp/some_content.html',
             '<!DOCTYPE html><html><body><answer value="42"/></body></html>'
         );
@@ -167,9 +167,9 @@ class FilesystemTest extends TestCase
             new Name('foo'),
             Stream::ofContent('foo')
         ));
-        file_put_contents('/tmp/test/bar', 'bar');
-        mkdir('/tmp/test/baz');
-        file_put_contents('/tmp/test/baz/foobar', 'baz');
+        \file_put_contents('/tmp/test/bar', 'bar');
+        \mkdir('/tmp/test/baz');
+        \file_put_contents('/tmp/test/baz/foobar', 'baz');
 
         $all = $adapter->all();
         $this->assertInstanceOf(Set::class, $all);
@@ -178,7 +178,7 @@ class FilesystemTest extends TestCase
         $all = $all->toMapOf(
             'string',
             FileInterface::class,
-            fn($file) => yield $file->name()->toString() => $file,
+            static fn($file) => yield $file->name()->toString() => $file,
         );
         $this->assertTrue($all->contains('foo'));
         $this->assertTrue($all->contains('bar'));
@@ -232,7 +232,7 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(PAdapter::properties())
-            ->then(function($properties) {
+            ->then(static function($properties) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
 
@@ -256,19 +256,19 @@ class FilesystemTest extends TestCase
         $this->expectException(PathTooLong::class);
 
         $filesystem->add(new Directory(
-            new Name(str_repeat('a', 255)),
+            new Name(\str_repeat('a', 255)),
             Set::of(
                 FileInterface::class,
                 new Directory(
-                    new Name(str_repeat('a', 255)),
+                    new Name(\str_repeat('a', 255)),
                     Set::of(
                         FileInterface::class,
                         new Directory(
-                            new Name(str_repeat('a', 255)),
+                            new Name(\str_repeat('a', 255)),
                             Set::of(
                                 FileInterface::class,
                                 new File(
-                                    new Name(str_repeat('a', 255)),
+                                    new Name(\str_repeat('a', 255)),
                                     Stream::ofContent('foo')
                                 )
                             )
@@ -296,7 +296,7 @@ class FilesystemTest extends TestCase
                 $filesystem = new Filesystem(Path::of($path));
 
                 $this->assertNull($filesystem->add(new Directory(
-                    new Name(chr($ord).'a'),
+                    new Name(\chr($ord).'a'),
                     Set::of(
                         FileInterface::class,
                         new File(
@@ -327,7 +327,7 @@ class FilesystemTest extends TestCase
                 $filesystem = new Filesystem(Path::of($path));
 
                 $this->assertNull($filesystem->add(new Directory(
-                    new Name('a'.chr($ord).'a'),
+                    new Name('a'.\chr($ord).'a'),
                     Set::of(
                         FileInterface::class,
                         new File(
@@ -360,7 +360,7 @@ class FilesystemTest extends TestCase
                 $filesystem = new Filesystem(Path::of($path));
 
                 $this->assertNull($filesystem->add(new Directory(
-                    new Name(chr($ord)),
+                    new Name(\chr($ord)),
                     Set::of(
                         FileInterface::class,
                         new File(

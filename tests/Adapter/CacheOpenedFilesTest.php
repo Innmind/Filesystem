@@ -170,7 +170,7 @@ class CacheOpenedFilesTest extends TestCase
     {
         $this
             ->forAll(PAdapter::properties())
-            ->then(function($properties) {
+            ->then(static function($properties) {
                 $properties->ensureHeldBy(new CacheOpenedFiles(new InMemory));
             });
     }

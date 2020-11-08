@@ -65,9 +65,6 @@ final class HashedName implements Adapter
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function get(Name $file): File
     {
         if (!$this->contains($file)) {
@@ -112,9 +109,6 @@ final class HashedName implements Adapter
         return $directory->contains($hashes[2]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function remove(Name $file): void
     {
         if (!$this->contains($file)) {
@@ -132,9 +126,6 @@ final class HashedName implements Adapter
         $this->filesystem->add($first);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function all(): Set
     {
         //this is not ideal but the names can't be determined from the hashes
@@ -146,8 +137,8 @@ final class HashedName implements Adapter
      */
     private function hash(Name $name): array
     {
-        $extension = \pathinfo($name->toString(), PATHINFO_EXTENSION);
-        $hash = Str::of(\sha1(\pathinfo($name->toString(), PATHINFO_BASENAME)));
+        $extension = \pathinfo($name->toString(), \PATHINFO_EXTENSION);
+        $hash = Str::of(\sha1(\pathinfo($name->toString(), \PATHINFO_BASENAME)));
 
         $first = new Name($hash->substring(0, 2)->toString());
         $second = new Name($hash->substring(2, 2)->toString());
