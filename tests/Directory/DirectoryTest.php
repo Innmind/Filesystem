@@ -429,7 +429,7 @@ class DirectoryTest extends TestCase
                         $name,
                         Set::defer(
                             File::class,
-                            (function() {
+                            (static function() {
                                 throw new \Exception;
 
                                 yield false;
