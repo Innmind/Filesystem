@@ -418,6 +418,28 @@ class DirectoryTest extends TestCase
             });
     }
 
+    public function testDeferringTheLoadingOfADirectoryDoesntLoadFiles()
+    {
+        $this
+            ->forAll(FName::any())
+            ->then(function($name) {
+                $this->assertInstanceOf(
+                    Directory::class,
+                    Directory::defer(
+                        $name,
+                        Set::defer(
+                            File::class,
+                            (function() {
+                                throw new \Exception;
+
+                                yield false;
+                            })(),
+                        ),
+                    ),
+                );
+            });
+    }
+
     public function properties(): iterable
     {
         foreach (PDirectory::list() as $property) {

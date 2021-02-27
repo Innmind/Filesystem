@@ -73,6 +73,26 @@ final class Directory implements DirectoryInterface
         return new self(new Name($name));
     }
 
+    /**
+     * @internal
+     *
+     * @param Set<File> $files
+     */
+    public static function defer(Name $name, Set $files): self
+    {
+        assertSet(File::class, $files, 2);
+
+        $self = new self($name);
+        // we hijack the constructors to prevent checking for duplicates when
+        // using a deferred set of files as it will trigger to load the whole
+        // directory tree, it's kinda safe to do this as this method should
+        // only be used within the filesystem adapter and there should be no
+        // duplicates on a concrete filesystem
+        $self->files = $files;
+
+        return $self;
+    }
+
     public function name(): Name
     {
         return $this->name;
