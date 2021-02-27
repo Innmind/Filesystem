@@ -178,7 +178,7 @@ final class Filesystem implements Adapter
             $files = $this->list($folder->resolve(Path::of($file->toString().'/')));
 
             return new Directory\Source(
-                new Directory\Directory($file, $files),
+                Directory\Directory::defer($file, $files),
                 $this,
                 $path,
             );
