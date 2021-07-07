@@ -79,11 +79,6 @@ final class Source implements Directory, SourceInterface
         return $this->directory->remove($name);
     }
 
-    public function replaceAt(Path $path, File $file): Directory
-    {
-        return $this->directory->replaceAt($path, $file);
-    }
-
     public function foreach(callable $function): void
     {
         $this->directory->foreach($function);

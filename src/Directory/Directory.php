@@ -179,41 +179,6 @@ final class Directory implements DirectoryInterface
         return $directory;
     }
 
-    public function replaceAt(Path $path, File $file): DirectoryInterface
-    {
-        $normalizedPath = Str::of($path->toString())->trim('/');
-        $pieces = $normalizedPath->split('/');
-
-        if ($normalizedPath->empty()) {
-            return $this->add($file);
-        }
-
-        $child = $this->get(new Name($pieces->first()->toString()));
-
-        if (!$child instanceof DirectoryInterface) {
-            throw new LogicException('Path doesn\'t reference a directory');
-        }
-
-        if ($pieces->count() === 1) {
-            return $this->add(
-                $child->add($file),
-            );
-        }
-
-        /** @var Set<string> $names */
-        $names = $pieces->drop(1)->toSequenceOf(
-            'string',
-            static fn($name): \Generator => yield $name->toString(),
-        );
-
-        return $this->add(
-            $child->replaceAt(
-                Path::of(join('/', $names)->toString()),
-                $file,
-            ),
-        );
-    }
-
     public function foreach(callable $function): void
     {
         $this->files->foreach($function);
