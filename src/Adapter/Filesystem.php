@@ -9,7 +9,6 @@ use Innmind\Filesystem\{
     Name,
     Directory,
     Stream\LazyStream,
-    Source,
     Exception\FileNotFound,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
@@ -40,6 +39,8 @@ final class Filesystem implements Adapter
     private const INVALID_FILES = ['.', '..'];
     private Path $path;
     private FS $filesystem;
+    /** @var \WeakMap<File, Path> */
+    private \WeakMap $loaded;
 
     public function __construct(Path $path)
     {
@@ -49,6 +50,8 @@ final class Filesystem implements Adapter
 
         $this->path = $path;
         $this->filesystem = new FS;
+        /** @var \WeakMap<File, Path> */
+        $this->loaded = new \WeakMap;
 
         if (!$this->filesystem->exists($this->path->toString())) {
             $this->filesystem->mkdir($this->path->toString());
@@ -97,10 +100,12 @@ final class Filesystem implements Adapter
 
         $path = $path->resolve(Path::of($name));
 
-        if ($file instanceof Source && $file->sourcedAt($this, $path)) {
+        if ($this->loaded->offsetExists($file) && $this->loaded[$file]->equals($path)) {
             // no need to persist untouched file where it was loaded from
             return;
         }
+
+        $this->loaded[$file] = $path;
 
         if ($file instanceof Directory) {
             $this->filesystem->mkdir($path->toString());
@@ -177,11 +182,7 @@ final class Filesystem implements Adapter
         if (\is_dir($path->toString())) {
             $files = $this->list($folder->resolve(Path::of($file->toString().'/')));
 
-            return new Directory\Source(
-                Directory\Directory::defer($file, $files),
-                $this,
-                $path,
-            );
+            return Directory\Directory::defer($file, $files);
         }
 
         if (\is_link($path->toString())) {
@@ -194,15 +195,14 @@ final class Filesystem implements Adapter
             $mediaType = MediaType::null();
         }
 
-        return new File\Source(
-            new File\File(
-                $file,
-                new LazyStream($path),
-                $mediaType,
-            ),
-            $this,
-            $path,
+        $file = new File\File(
+            $file,
+            new LazyStream($path),
+            $mediaType,
         );
+        $this->loaded[$file] = $path;
+
+        return $file;
     }
 
     /**
