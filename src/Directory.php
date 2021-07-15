@@ -40,6 +40,9 @@ interface Directory extends File
     public function reduce($carry, callable $reducer);
 
     /**
+     * This method should only be used for implementations of the Adapter
+     * interface, normal users should never have to use this method
+     *
      * @return Set<Name>
      */
     public function removed(): Set;
