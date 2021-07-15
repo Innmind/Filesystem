@@ -24,10 +24,8 @@ interface Directory extends File
 
     /**
      * @param callable(File): bool $predicate
-     *
-     * @return Set<File>
      */
-    public function filter(callable $predicate): Set;
+    public function filter(callable $predicate): self;
 
     /**
      * @template R

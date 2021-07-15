@@ -179,9 +179,14 @@ final class Directory implements DirectoryInterface
         $this->files->foreach($function);
     }
 
-    public function filter(callable $predicate): Set
+    public function filter(callable $predicate): self
     {
-        return $this->files->filter($predicate);
+        // it is safe to not check for duplicates here as either the current
+        // directory comes from the filesystem thus can't have duplicates or
+        // comes from a user and must have used the standard constructor that
+        // validates for duplicates, so they're can't be any duplicates after
+        // a filter
+        return self::defer($this->name, $this->files->filter($predicate));
     }
 
     public function reduce($carry, callable $reducer)

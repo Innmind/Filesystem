@@ -190,14 +190,17 @@ class DirectoryTest extends TestCase
             })()),
         );
 
-        $set = $directory->filter(
+        $filtered = $directory->filter(
             static fn($file) => \strpos($file->name()->toString(), 'foo') === 0,
         );
 
-        $this->assertInstanceOf(Set::class, $set);
-        $this->assertSame(File::class, $set->type());
-        $this->assertSame('foo', unwrap($set)[0]->name()->toString());
-        $this->assertSame('foobar', unwrap($set)[1]->name()->toString());
+        $this->assertInstanceOf(DirectoryInterface::class, $filtered);
+        $files = $filtered->reduce(
+            Set::objects(),
+            static fn($files, $file) => ($files)($file),
+        );
+        $this->assertSame('foo', unwrap($files)[0]->name()->toString());
+        $this->assertSame('foobar', unwrap($files)[1]->name()->toString());
     }
 
     /**
