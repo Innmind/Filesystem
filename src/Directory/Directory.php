@@ -9,8 +9,6 @@ use Innmind\Filesystem\{
     File,
     Exception\FileNotFound,
     Exception\LogicException,
-    Event\FileWasAdded,
-    Event\FileWasRemoved,
 };
 use Innmind\Stream\Readable;
 use Innmind\MediaType\MediaType;
