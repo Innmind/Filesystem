@@ -13,7 +13,6 @@ use Innmind\Filesystem\{
 };
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
-use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -72,10 +71,9 @@ class InMemoryTest extends TestCase
 
         $all = $adapter->all();
         $this->assertInstanceOf(Set::class, $all);
-        $this->assertSame(FileInterface::class, $all->type());
         $this->assertSame(
             [$foo, $bar],
-            unwrap($all),
+            $all->toList(),
         );
     }
 

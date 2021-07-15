@@ -11,7 +11,10 @@ use Innmind\Stream\{
     Stream\Size,
     Exception\PositionNotSeekable,
 };
-use Innmind\Immutable\Str;
+use Innmind\Immutable\{
+    Str,
+    Maybe,
+};
 
 final class NullStream implements Readable
 {
@@ -46,14 +49,9 @@ final class NullStream implements Readable
         return true;
     }
 
-    public function size(): Size
+    public function size(): Maybe
     {
-        return new Size(0);
-    }
-
-    public function knowsSize(): bool
-    {
-        return true;
+        return Maybe::just(new Size(0));
     }
 
     public function read(int $length = null): Str

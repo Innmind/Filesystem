@@ -42,7 +42,6 @@ final class AddDirectoryFromAnotherAdapterWithFileRemoved implements Property
         $directory = Directory::of(
             $this->name,
             Set::of(
-                File::class,
                 $this->removed,
                 $this->file,
             ),

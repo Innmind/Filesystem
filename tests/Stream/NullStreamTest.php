@@ -20,8 +20,10 @@ class NullStreamTest extends TestCase
         $this->assertInstanceOf(Readable::class, $stream);
         $this->assertSame('', $stream->toString());
         $this->assertNull($stream->close());
-        $this->assertTrue($stream->knowsSize());
-        $this->assertSame(0, $stream->size()->toInt());
+        $this->assertSame(0, $stream->size()->match(
+            static fn($size) => $size->toInt(),
+            static fn() => null,
+        ));
         $this->assertSame(0, $stream->position()->toInt());
         $this->assertTrue($stream->end());
         $this->assertNull($stream->rewind());

@@ -14,7 +14,6 @@ use Innmind\Filesystem\{
 };
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
-use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -120,7 +119,16 @@ class DirectoryTest extends TestCase
         $this->assertSame('', $d2->content()->toString());
         $this->assertSame(0, $d->removed()->count());
         $this->assertSame(1, $d2->removed()->count());
-        $this->assertSame('bar', $d2->removed()->find(static fn() => true)->toString());
+        $this->assertSame(
+            'bar',
+            $d2
+                ->removed()
+                ->find(static fn() => true)
+                ->match(
+                    static fn($name) => $name->toString(),
+                    static fn() => null,
+                ),
+        );
     }
 
     public function testRemovingUnknownFileDoesntThrow()
@@ -134,7 +142,7 @@ class DirectoryTest extends TestCase
     {
         $d = Directory::of(
             new Name('foo'),
-            Set::defer(File::class, (static function() {
+            Set::defer((static function() {
                 yield new File\File(new Name('foo'), Stream::ofContent('foo'));
                 yield new File\File(new Name('bar'), Stream::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
@@ -152,7 +160,7 @@ class DirectoryTest extends TestCase
     {
         $directory = Directory::of(
             new Name('foo'),
-            Set::defer(File::class, (static function() {
+            Set::defer((static function() {
                 yield new File\File(new Name('foo'), Stream::ofContent('foo'));
                 yield new File\File(new Name('bar'), Stream::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
@@ -171,7 +179,7 @@ class DirectoryTest extends TestCase
     {
         $directory = Directory::of(
             new Name('foo'),
-            Set::defer(File::class, (static function() {
+            Set::defer((static function() {
                 yield new File\File(new Name('foo'), Stream::ofContent('foo'));
                 yield new File\File(new Name('bar'), Stream::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
@@ -191,7 +199,7 @@ class DirectoryTest extends TestCase
     {
         $directory = Directory::of(
             new Name('foo'),
-            Set::defer(File::class, (static function() {
+            Set::defer((static function() {
                 yield new File\File(new Name('foo'), Stream::ofContent('foo'));
                 yield new File\File(new Name('bar'), Stream::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
@@ -208,8 +216,8 @@ class DirectoryTest extends TestCase
             Set::objects(),
             static fn($files, $file) => ($files)($file),
         );
-        $this->assertSame('foo', unwrap($files)[0]->name()->toString());
-        $this->assertSame('foobar', unwrap($files)[1]->name()->toString());
+        $this->assertSame('foo', $files->toList()[0]->name()->toString());
+        $this->assertSame('foobar', $files->toList()[1]->name()->toString());
     }
 
     /**
@@ -243,7 +251,6 @@ class DirectoryTest extends TestCase
                 $property,
                 FName::any(),
                 FSet::of(
-                    File::class,
                     new DataSet\Randomize(
                         FFile::any(),
                     ),
@@ -294,7 +301,6 @@ class DirectoryTest extends TestCase
                 PDirectory::properties(),
                 FName::any(),
                 FSet::of(
-                    File::class,
                     new DataSet\Randomize(
                         FFile::any(),
                     ),
@@ -330,7 +336,6 @@ class DirectoryTest extends TestCase
                 Directory::of(
                     $directory,
                     Set::of(
-                        File::class,
                         File\File::named($file->toString(), Stream::ofContent($content1)),
                         File\File::named($file->toString(), Stream::ofContent($content2)),
                     ),
@@ -347,14 +352,11 @@ class DirectoryTest extends TestCase
                     Directory::class,
                     Directory::defer(
                         $name,
-                        Set::defer(
-                            File::class,
-                            (static function() {
-                                throw new \Exception;
+                        Set::defer((static function() {
+                            throw new \Exception;
 
-                                yield false;
-                            })(),
-                        ),
+                            yield false;
+                        })()),
                     ),
                 );
             });

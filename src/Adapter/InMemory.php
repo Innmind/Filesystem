@@ -22,7 +22,7 @@ final class InMemory implements Adapter
     public function __construct()
     {
         /** @var Map<string, File> */
-        $this->files = Map::of('string', File::class);
+        $this->files = Map::of();
     }
 
     public function add(File $file): void
@@ -35,12 +35,7 @@ final class InMemory implements Adapter
 
     public function get(Name $file): Maybe
     {
-        if (!$this->contains($file)) {
-            /** @var Maybe<File> */
-            return Maybe::nothing();
-        }
-
-        return Maybe::just($this->files->get($file->toString()));
+        return $this->files->get($file->toString());
     }
 
     public function contains(Name $file): bool
@@ -55,6 +50,6 @@ final class InMemory implements Adapter
 
     public function all(): Set
     {
-        return $this->files->values()->toSetOf(File::class);
+        return Set::of(...$this->files->values()->toList());
     }
 }

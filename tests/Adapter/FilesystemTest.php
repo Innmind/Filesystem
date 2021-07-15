@@ -19,8 +19,10 @@ use Innmind\Filesystem\{
 };
 use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\unwrap;
+use Innmind\Immutable\{
+    Set,
+    Map,
+};
 use Symfony\Component\Filesystem\Filesystem as FS;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -85,10 +87,10 @@ class FilesystemTest extends TestCase
     {
         $adapter = new Filesystem(Path::of('/tmp/'));
 
-        $directory = (Directory::of(new Name('foo')))
+        $directory = Directory::of(new Name('foo'))
             ->add(new File(new Name('foo.md'), Stream::ofContent('# Foo')))
             ->add(
-                (Directory::of(new Name('bar')))
+                Directory::of(new Name('bar'))
                     ->add(new File(new Name('bar.md'), Stream::ofContent('# Bar')))
             );
         $adapter->add($directory);
@@ -226,12 +228,11 @@ class FilesystemTest extends TestCase
 
         $all = $adapter->all();
         $this->assertInstanceOf(Set::class, $all);
-        $this->assertSame(FileInterface::class, $all->type());
         $this->assertCount(3, $all);
-        $all = $all->toMapOf(
-            'string',
-            FileInterface::class,
-            static fn($file) => yield $file->name()->toString() => $file,
+        $all = Map::of(
+            ...$all
+                ->map(static fn($file) => [$file->name()->toString(), $file])
+                ->toList(),
         );
         $this->assertTrue($all->contains('foo'));
         $this->assertTrue($all->contains('bar'));
@@ -335,15 +336,12 @@ class FilesystemTest extends TestCase
         $filesystem->add(Directory::of(
             new Name(\str_repeat('a', 255)),
             Set::of(
-                FileInterface::class,
                 Directory::of(
                     new Name(\str_repeat('a', 255)),
                     Set::of(
-                        FileInterface::class,
                         Directory::of(
                             new Name(\str_repeat('a', 255)),
                             Set::of(
-                                FileInterface::class,
                                 new File(
                                     new Name(\str_repeat('a', 255)),
                                     Stream::ofContent('foo')
@@ -375,7 +373,6 @@ class FilesystemTest extends TestCase
                 $this->assertNull($filesystem->add(Directory::of(
                     new Name(\chr($ord).'a'),
                     Set::of(
-                        FileInterface::class,
                         new File(
                             new Name('a'),
                             Stream::ofContent($content),
@@ -406,7 +403,6 @@ class FilesystemTest extends TestCase
                 $this->assertNull($filesystem->add(Directory::of(
                     new Name('a'.\chr($ord).'a'),
                     Set::of(
-                        FileInterface::class,
                         new File(
                             new Name('a'),
                             Stream::ofContent($content),
@@ -439,7 +435,6 @@ class FilesystemTest extends TestCase
                 $this->assertNull($filesystem->add(Directory::of(
                     new Name(\chr($ord)),
                     Set::of(
-                        FileInterface::class,
                         new File(
                             new Name('a'),
                             Stream::ofContent($content),
@@ -495,7 +490,7 @@ class FilesystemTest extends TestCase
         $this->expectException(LinksAreNotSupported::class);
         $this->expectExceptionMessage($path.'bar');
 
-        unwrap($filesystem->all());
+        $filesystem->all()->toList();
     }
 
     public function testDotFilesAreListed()
@@ -510,7 +505,7 @@ class FilesystemTest extends TestCase
 
                 $filesystem = new Filesystem(Path::of($path));
 
-                $all = unwrap($filesystem->all());
+                $all = $filesystem->all()->toList();
                 $this->assertCount(1, $all);
                 $this->assertSame($name, $all[0]->name()->toString());
             });

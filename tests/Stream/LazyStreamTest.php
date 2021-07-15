@@ -72,16 +72,10 @@ class LazyStreamTest extends TestCase
         $stream = new LazyStream(Path::of($path));
         \file_put_contents($path, 'lorem ipsum dolor');
 
-        $this->assertSame(17, $stream->size()->toInt());
-    }
-
-    public function testKnowsSize()
-    {
-        $path = \tempnam(\sys_get_temp_dir(), 'lazy_stream');
-        $stream = new LazyStream(Path::of($path));
-        \file_put_contents($path, 'lorem ipsum dolor');
-
-        $this->assertTrue($stream->knowsSize());
+        $this->assertSame(17, $stream->size()->match(
+            static fn($size) => $size->toInt(),
+            static fn() => null,
+        ));
     }
 
     public function testPosition()

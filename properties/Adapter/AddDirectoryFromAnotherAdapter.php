@@ -39,10 +39,7 @@ final class AddDirectoryFromAnotherAdapter implements Property
         // construct time (so there is no modifications())
         $directory = Directory::of(
             $this->name,
-            Set::of(
-                File::class,
-                $this->file,
-            ),
+            Set::of($this->file),
         );
 
         Assert::assertFalse($adapter->contains($directory->name()));

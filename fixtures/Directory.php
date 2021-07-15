@@ -38,7 +38,6 @@ final class Directory
     {
         if ($depth === $maxDepth) {
             $files = Set::of(
-                FileInterface::class,
                 new DataSet\Randomize(
                     File::any(),
                 ),
@@ -46,7 +45,6 @@ final class Directory
             );
         } else {
             $files = Set::of(
-                FileInterface::class,
                 new DataSet\Either(
                     new DataSet\Randomize(
                         File::any(),

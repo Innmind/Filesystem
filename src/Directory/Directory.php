@@ -16,10 +16,7 @@ use Innmind\Immutable\{
     Set,
     Maybe,
 };
-use function Innmind\Immutable\{
-    assertSet,
-    join,
-};
+use function Innmind\Immutable\join;
 
 final class Directory implements DirectoryInterface
 {
@@ -37,13 +34,11 @@ final class Directory implements DirectoryInterface
     private function __construct(Name $name, Set $files = null, bool $validate = true)
     {
         /** @var Set<File> $default */
-        $default = Set::of(File::class);
+        $default = Set::of();
         $files ??= $default;
 
-        assertSet(File::class, $files, 2);
-
         if ($validate) {
-            $files->reduce(
+            $_ = $files->reduce(
                 Set::strings(),
                 static function(Set $names, File $file): Set {
                     $name = $file->name()->toString();
@@ -63,7 +58,8 @@ final class Directory implements DirectoryInterface
             'text',
             'directory',
         );
-        $this->removed = Set::of(Name::class);
+        /** @var Set<Name> */
+        $this->removed = Set::of();
     }
 
     /**
@@ -108,7 +104,7 @@ final class Directory implements DirectoryInterface
         /** @var Set<string> $names */
         $names = $this
             ->files
-            ->toSetOf('string', static fn($file): \Generator => yield $file->name()->toString())
+            ->map(static fn($file) => $file->name()->toString())
             ->sort(static fn(string $a, string $b): int => $a <=> $b);
         $this->content = Readable\Stream::ofContent(
             join("\n", $names)->toString(),
@@ -177,7 +173,7 @@ final class Directory implements DirectoryInterface
 
     public function foreach(callable $function): void
     {
-        $this->files->foreach($function);
+        $_ = $this->files->foreach($function);
     }
 
     public function filter(callable $predicate): self

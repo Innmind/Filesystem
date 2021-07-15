@@ -17,10 +17,7 @@ use Innmind\Filesystem\{
     Event\FileWasRemoved,
 };
 use Innmind\Stream\Writable\Stream;
-use Innmind\MediaType\{
-    MediaType,
-    Exception\InvalidMediaTypeString,
-};
+use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Set,
@@ -119,10 +116,9 @@ final class Filesystem implements Adapter
                 },
             );
             /**
-             * @psalm-suppress ArgumentTypeCoercion
              * @psalm-suppress MissingClosureReturnType
              */
-            $file
+            $_ = $file
                 ->removed()
                 ->filter(static fn($file): bool => !$persisted->contains($file->toString()))
                 ->foreach(fn($file) => $this->filesystem->remove(
@@ -189,16 +185,13 @@ final class Filesystem implements Adapter
             throw new LinksAreNotSupported($path->toString());
         }
 
-        try {
-            $mediaType = MediaType::of(\mime_content_type($path->toString()));
-        } catch (InvalidMediaTypeString $e) {
-            $mediaType = MediaType::null();
-        }
-
         $file = new File\File(
             $file,
             new LazyStream($path),
-            $mediaType,
+            MediaType::of(\mime_content_type($path->toString()))->match(
+                static fn($mediaType) => $mediaType,
+                static fn() => MediaType::null(),
+            ),
         );
         $this->loaded[$file] = $path;
 
@@ -211,23 +204,20 @@ final class Filesystem implements Adapter
     private function list(Path $path): Set
     {
         /** @var Set<File> */
-        return Set::defer(
-            File::class,
-            (function(Path $folder): \Generator {
-                $files = Finder::create()
-                    ->depth('== 0')
-                    ->in($folder->toString())
-                    ->ignoreDotFiles(false);
+        return Set::defer((function(Path $folder): \Generator {
+            $files = Finder::create()
+                ->depth('== 0')
+                ->in($folder->toString())
+                ->ignoreDotFiles(false);
 
-                /** @var SplFileInfo $file */
-                foreach ($files as $file) {
-                    if (\is_link($file->getPathname())) {
-                        throw new LinksAreNotSupported($file->getPathname());
-                    }
-
-                    yield $this->open($folder, new Name($file->getRelativePathname()));
+            /** @var SplFileInfo $file */
+            foreach ($files as $file) {
+                if (\is_link($file->getPathname())) {
+                    throw new LinksAreNotSupported($file->getPathname());
                 }
-            })($path),
-        );
+
+                yield $this->open($folder, new Name($file->getRelativePathname()));
+            }
+        })($path));
     }
 }

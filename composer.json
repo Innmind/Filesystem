@@ -16,12 +16,12 @@
     },
     "require": {
         "php": "~8.0",
-        "innmind/immutable": "~3.0",
+        "innmind/immutable": "dev-next",
         "symfony/filesystem": "~5.0",
         "symfony/finder": "~5.0",
-        "innmind/stream": "~2.0",
-        "innmind/media-type": "^1.1",
-        "innmind/url": "^3.1",
+        "innmind/stream": "dev-next",
+        "innmind/media-type": "dev-next",
+        "innmind/url": "dev-next",
         "psr/log": "^1.1"
     },
     "autoload": {

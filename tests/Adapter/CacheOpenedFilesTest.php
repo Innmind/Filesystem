@@ -165,7 +165,7 @@ class CacheOpenedFilesTest extends TestCase
             ->expects($this->once())
             ->method('all')
             ->willReturn(
-                $expected = Set::of(File::class, $file)
+                $expected = Set::of($file)
             );
 
         $this->assertSame($expected, $filesystem->all());

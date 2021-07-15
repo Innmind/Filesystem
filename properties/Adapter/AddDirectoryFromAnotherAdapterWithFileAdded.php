@@ -41,10 +41,7 @@ final class AddDirectoryFromAnotherAdapterWithFileAdded implements Property
         // construct time (so there is no modifications())
         $directory = Directory::of(
             $this->name,
-            Set::of(
-                File::class,
-                $this->file,
-            ),
+            Set::of($this->file),
         );
         $directory = $directory->add($this->added);
 

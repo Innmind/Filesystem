@@ -24,7 +24,7 @@ final class CacheOpenedFiles implements Adapter
     {
         $this->filesystem = $filesystem;
         /** @var Map<string, File> */
-        $this->files = Map::of('string', File::class);
+        $this->files = Map::of();
     }
 
     public function add(File $file): void
@@ -38,11 +38,7 @@ final class CacheOpenedFiles implements Adapter
 
     public function get(Name $file): Maybe
     {
-        if ($this->files->contains($file->toString())) {
-            return Maybe::just($this->files->get($file->toString()));
-        }
-
-        return $this
+        $load = fn(): Maybe => $this
             ->filesystem
             ->get($file)
             ->map(function($file) {
@@ -53,6 +49,11 @@ final class CacheOpenedFiles implements Adapter
 
                 return $file;
             });
+
+        return $this
+            ->files
+            ->get($file->toString())
+            ->otherwise($load);
     }
 
     public function contains(Name $file): bool
@@ -73,10 +74,10 @@ final class CacheOpenedFiles implements Adapter
     public function all(): Set
     {
         $all = $this->filesystem->all();
-        $this->files = $all->toMapOf(
-            'string',
-            File::class,
-            static fn(File $file): \Generator => yield $file->name()->toString() => $file,
+        $this->files = Map::of(
+            ...$all
+                ->map(static fn($file) => [$file->name()->toString(), $file])
+                ->toList()
         );
 
         return $all;

@@ -59,9 +59,13 @@ class FileTest extends TestCase
         $f = new File(
             new Name('foo'),
             Stream::ofContent('bar'),
-            $mt = MediaType::of('application/json')
+            $mt = MediaType::of('application/json')->match(
+                static fn($mediaType) => $mediaType,
+                static fn() => null,
+            ),
         );
 
+        $this->assertNotNull($mt);
         $this->assertSame($mt, $f->mediaType());
     }
 

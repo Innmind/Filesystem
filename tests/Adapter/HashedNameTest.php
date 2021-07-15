@@ -15,7 +15,6 @@ use Innmind\Filesystem\{
 use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
-use function Innmind\Immutable\unwrap;
 use Symfony\Component\Filesystem\Filesystem as FS;
 use PHPUnit\Framework\TestCase;
 
@@ -122,10 +121,9 @@ class HashedNameTest extends TestCase
         $all = $filesystem->all();
 
         $this->assertInstanceOf(Set::class, $all);
-        $this->assertSame(File::class, $all->type());
         $this->assertCount(2, $all);
         //as described in the method comment we return the inner structure instead of the files
-        $files = unwrap($all);
+        $files = $all->toList();
         $this->assertInstanceOf(Directory::class, $files[0]);
         $this->assertInstanceOf(Directory::class, $files[1]);
     }
