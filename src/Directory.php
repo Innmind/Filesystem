@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem;
 
 use Innmind\Filesystem\Exception\FileNotFound;
-use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
     Set,

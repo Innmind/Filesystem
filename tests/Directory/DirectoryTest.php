@@ -13,7 +13,6 @@ use Innmind\Filesystem\{
     Exception\FileNotFound,
     Exception\LogicException,
 };
-use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use function Innmind\Immutable\unwrap;

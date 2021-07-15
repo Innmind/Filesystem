@@ -12,7 +12,6 @@ use Innmind\Filesystem\{
     Event\FileWasAdded,
     Event\FileWasRemoved,
 };
-use Innmind\Url\Path;
 use Innmind\Stream\Readable;
 use Innmind\MediaType\MediaType;
 use Innmind\Immutable\{
