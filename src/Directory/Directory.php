@@ -34,7 +34,7 @@ final class Directory implements DirectoryInterface
     /**
      * @param Set<File>|null $files
      */
-    private function __construct(Name $name, Set $files = null)
+    private function __construct(Name $name, Set $files = null, bool $validate = true)
     {
         /** @var Set<File> $default */
         $default = Set::of(File::class);
@@ -42,18 +42,20 @@ final class Directory implements DirectoryInterface
 
         assertSet(File::class, $files, 2);
 
-        $files->reduce(
-            Set::strings(),
-            static function(Set $names, File $file): Set {
-                $name = $file->name()->toString();
+        if ($validate) {
+            $files->reduce(
+                Set::strings(),
+                static function(Set $names, File $file): Set {
+                    $name = $file->name()->toString();
 
-                if ($names->contains($name)) {
-                    throw new LogicException("Same file '$name' found multiple times");
-                }
+                    if ($names->contains($name)) {
+                        throw new LogicException("Same file '$name' found multiple times");
+                    }
 
-                return ($names)($name);
-            },
-        );
+                    return ($names)($name);
+                },
+            );
+        }
 
         $this->name = $name;
         $this->files = $files;
@@ -84,17 +86,12 @@ final class Directory implements DirectoryInterface
      */
     public static function defer(Name $name, Set $files): self
     {
-        assertSet(File::class, $files, 2);
-
-        $self = new self($name);
-        // we hijack the constructors to prevent checking for duplicates when
+        // we prevent the contrusctor from checking for duplicates when
         // using a deferred set of files as it will trigger to load the whole
         // directory tree, it's kinda safe to do this as this method should
         // only be used within the filesystem adapter and there should be no
         // duplicates on a concrete filesystem
-        $self->files = $files;
-
-        return $self;
+        return new self($name, $files, false);
     }
 
     public function name(): Name
