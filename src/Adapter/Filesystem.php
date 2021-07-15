@@ -122,11 +122,10 @@ final class Filesystem implements Adapter
              * @psalm-suppress MissingClosureReturnType
              */
             $file
-                ->modifications()
-                ->filter(static fn(object $event): bool => $event instanceof FileWasRemoved)
-                ->filter(static fn(FileWasRemoved $event): bool => !$persisted->contains($event->file()->toString()))
-                ->foreach(fn(FileWasRemoved $event) => $this->filesystem->remove(
-                    $path->toString().$event->file()->toString(),
+                ->removed()
+                ->filter(static fn($file): bool => !$persisted->contains($file->toString()))
+                ->foreach(fn($file) => $this->filesystem->remove(
+                    $path->toString().$file->toString(),
                 ));
 
             return;

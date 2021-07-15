@@ -66,13 +66,8 @@ class DirectoryTest extends TestCase
         $this->assertNotSame($d->content(), $d2->content());
         $this->assertSame('', $d->content()->toString());
         $this->assertSame('foo', $d2->content()->toString());
-        $this->assertSame(0, $d->modifications()->count());
-        $this->assertSame(1, $d2->modifications()->count());
-        $this->assertInstanceOf(
-            FileWasAdded::class,
-            $d2->modifications()->first()
-        );
-        $this->assertSame($file, $d2->modifications()->first()->file());
+        $this->assertSame(0, $d->removed()->count());
+        $this->assertSame(0, $d2->removed()->count());
     }
 
     public function testGet()
@@ -114,13 +109,9 @@ class DirectoryTest extends TestCase
         $this->assertNotSame($d->content(), $d2->content());
         $this->assertSame('bar', $d->content()->toString());
         $this->assertSame('', $d2->content()->toString());
-        $this->assertSame(1, $d->modifications()->count());
-        $this->assertSame(2, $d2->modifications()->count());
-        $this->assertInstanceOf(
-            FileWasRemoved::class,
-            $d2->modifications()->get(1)
-        );
-        $this->assertSame('bar', $d2->modifications()->get(1)->file()->toString());
+        $this->assertSame(0, $d->removed()->count());
+        $this->assertSame(1, $d2->removed()->count());
+        $this->assertSame('bar', $d2->removed()->first()->toString());
     }
 
     public function testRemovingUnknownFileDoesntThrow()

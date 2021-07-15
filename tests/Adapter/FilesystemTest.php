@@ -123,7 +123,7 @@ class FilesystemTest extends TestCase
         $a->add($d);
         $d = $d->remove(new Name('bar'));
         $a->add($d);
-        $this->assertSame(2, $d->modifications()->count());
+        $this->assertSame(1, $d->removed()->count());
         $a = new Filesystem(Path::of('/tmp/'));
         $this->assertFalse($a->get(new Name('foo'))->contains(new Name('bar')));
         $a->remove(new Name('foo'));
@@ -139,7 +139,7 @@ class FilesystemTest extends TestCase
         $d = $d->remove(new Name('bar'));
         $a->add($d);
         $a->add($d);
-        $this->assertSame(2, $d->modifications()->count());
+        $this->assertSame(1, $d->removed()->count());
         $a = new Filesystem(Path::of('/tmp/'));
         $this->assertFalse($a->get(new Name('foo'))->contains(new Name('bar')));
         $a->remove(new Name('foo'));

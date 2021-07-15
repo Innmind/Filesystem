@@ -31,8 +31,8 @@ final class Directory implements DirectoryInterface
     /** @var Set<File> */
     private Set $files;
     private MediaType $mediaType;
-    /** @var Sequence<object> */
-    private Sequence $modifications;
+    /** @var Sequence<Name> */
+    private Sequence $removed;
 
     /**
      * @param Set<File>|null $files
@@ -64,7 +64,7 @@ final class Directory implements DirectoryInterface
             'text',
             'directory',
         );
-        $this->modifications = Sequence::objects();
+        $this->removed = Sequence::of(Name::class);
     }
 
     public static function named(string $name): self
@@ -127,7 +127,6 @@ final class Directory implements DirectoryInterface
         $directory = clone $this;
         $directory->content = null;
         $directory->files = ($files)($file);
-        $directory->record(new FileWasAdded($file));
 
         return $directory;
     }
@@ -173,7 +172,7 @@ final class Directory implements DirectoryInterface
         $directory = clone $this;
         $directory->content = null;
         $directory->files = $this->files->filter(static fn(File $file) => !$file->name()->equals($name));
-        $directory->record(new FileWasRemoved($name));
+        $directory->removed = ($directory->removed)($name);
 
         return $directory;
     }
@@ -193,13 +192,8 @@ final class Directory implements DirectoryInterface
         return $this->files->reduce($carry, $reducer);
     }
 
-    public function modifications(): Sequence
+    public function removed(): Sequence
     {
-        return $this->modifications;
-    }
-
-    private function record(object $event): void
-    {
-        $this->modifications = ($this->modifications)($event);
+        return $this->removed;
     }
 }

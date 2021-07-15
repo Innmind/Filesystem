@@ -43,7 +43,7 @@ interface Directory extends File
     public function reduce($carry, callable $reducer);
 
     /**
-     * @return Sequence<object>
+     * @return Sequence<Name>
      */
-    public function modifications(): Sequence;
+    public function removed(): Sequence;
 }
