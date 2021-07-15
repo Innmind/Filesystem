@@ -36,9 +36,8 @@ final class RemoveFile implements Property
             $directory->removed()->size(),
             $newDirectory->removed()->size(),
         );
-        Assert::assertSame(
-            $file->name(),
-            $newDirectory->removed()->last(),
+        Assert::assertTrue(
+            $newDirectory->removed()->contains($file->name()),
         );
 
         return $newDirectory;

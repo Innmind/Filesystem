@@ -16,7 +16,6 @@ use Innmind\Stream\Readable;
 use Innmind\MediaType\MediaType;
 use Innmind\Immutable\{
     Str,
-    Sequence,
     Set,
 };
 use function Innmind\Immutable\{
@@ -31,8 +30,8 @@ final class Directory implements DirectoryInterface
     /** @var Set<File> */
     private Set $files;
     private MediaType $mediaType;
-    /** @var Sequence<Name> */
-    private Sequence $removed;
+    /** @var Set<Name> */
+    private Set $removed;
 
     /**
      * @param Set<File>|null $files
@@ -64,7 +63,7 @@ final class Directory implements DirectoryInterface
             'text',
             'directory',
         );
-        $this->removed = Sequence::of(Name::class);
+        $this->removed = Set::of(Name::class);
     }
 
     public static function named(string $name): self
@@ -192,7 +191,7 @@ final class Directory implements DirectoryInterface
         return $this->files->reduce($carry, $reducer);
     }
 
-    public function removed(): Sequence
+    public function removed(): Set
     {
         return $this->removed;
     }

@@ -4,10 +4,7 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem;
 
 use Innmind\Filesystem\Exception\FileNotFound;
-use Innmind\Immutable\{
-    Sequence,
-    Set,
-};
+use Innmind\Immutable\Set;
 
 interface Directory extends File
 {
@@ -43,7 +40,7 @@ interface Directory extends File
     public function reduce($carry, callable $reducer);
 
     /**
-     * @return Sequence<Name>
+     * @return Set<Name>
      */
-    public function removed(): Sequence;
+    public function removed(): Set;
 }

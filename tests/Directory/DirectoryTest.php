@@ -111,7 +111,7 @@ class DirectoryTest extends TestCase
         $this->assertSame('', $d2->content()->toString());
         $this->assertSame(0, $d->removed()->count());
         $this->assertSame(1, $d2->removed()->count());
-        $this->assertSame('bar', $d2->removed()->first()->toString());
+        $this->assertSame('bar', $d2->removed()->find(static fn() => true)->toString());
     }
 
     public function testRemovingUnknownFileDoesntThrow()
