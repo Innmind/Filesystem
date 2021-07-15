@@ -3,17 +3,19 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Filesystem\Exception\FileNotFound;
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 
 interface Directory extends File
 {
     public function add(File $file): self;
 
     /**
-     * @throws FileNotFound
+     * @return Maybe<File>
      */
-    public function get(Name $name): File;
+    public function get(Name $name): Maybe;
     public function contains(Name $name): bool;
     public function remove(Name $name): self;
 

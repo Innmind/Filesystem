@@ -8,7 +8,10 @@ use Innmind\Filesystem\{
     File,
     Name,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 use Psr\Log\LoggerInterface;
 
 final class Logger implements Adapter
@@ -28,12 +31,19 @@ final class Logger implements Adapter
         $this->filesystem->add($file);
     }
 
-    public function get(Name $file): File
+    public function get(Name $file): Maybe
     {
-        $file = $this->filesystem->get($file);
-        $this->logger->debug('Accessing file {name}', ['name' => $file->name()->toString()]);
+        return $this
+            ->filesystem
+            ->get($file)
+            ->map(function($file) {
+                $this->logger->debug(
+                    'Accessing file {name}',
+                    ['name' => $file->name()->toString()],
+                );
 
-        return $file;
+                return $file;
+            });
     }
 
     public function contains(Name $file): bool

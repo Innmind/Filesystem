@@ -38,7 +38,7 @@ final class Directory
                 Directory\AllFilesInTheDirectoryAreAccessible::class,
             ),
             Set\Property::of(
-                Directory\AccessingUnknownFileThrowsAnException::class,
+                Directory\AccessingUnknownFileReturnsNothing::class,
                 Name::any(),
             ),
             Set\Property::of(

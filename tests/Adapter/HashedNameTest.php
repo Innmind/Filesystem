@@ -11,7 +11,6 @@ use Innmind\Filesystem\{
     File,
     Name,
     Exception\LogicException,
-    Exception\FileNotFound
 };
 use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
@@ -60,17 +59,23 @@ class HashedNameTest extends TestCase
             'content',
             (string) $inner
                 ->get(new Name('0b'))
-                ->get(new Name('ee'))
-                ->get(new Name('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33'))
-                ->content()
-                ->toString()
+                ->flatMap(static fn($directory) => $directory->get(new Name('ee')))
+                ->flatMap(static fn($directory) => $directory->get(new Name('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33')))
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
         );
         $this->assertSame(
             'content',
             $filesystem
                 ->get(new Name('foo'))
-                ->content()
-                ->toString(),
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
         );
 
         $file = new File\File(new Name('foo'), Stream::ofContent('content bis'));
@@ -80,26 +85,29 @@ class HashedNameTest extends TestCase
             'content bis',
             (string) $inner
                 ->get(new Name('0b'))
-                ->get(new Name('ee'))
-                ->get(new Name('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33'))
-                ->content()
-                ->toString()
+                ->flatMap(static fn($directory) => $directory->get(new Name('ee')))
+                ->flatMap(static fn($directory) => $directory->get(new Name('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33')))
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
         );
 
         $this->assertNull($filesystem->remove(new Name('foo')));
         $this->assertFalse($filesystem->contains(new Name('foo')));
     }
 
-    public function testThrowWhenGettingUnknownFile()
+    public function testReturnNothingWhenGettingUnknownFile()
     {
         $filesystem = new HashedName(
             new Filesystem(Path::of('/tmp/hashed/'))
         );
 
-        $this->expectException(FileNotFound::class);
-        $this->expectExceptionMessage('foo');
-
-        $filesystem->get(new Name('foo'));
+        $this->assertNull($filesystem->get(new Name('foo'))->match(
+            static fn($file) => $file,
+            static fn() => null,
+        ));
     }
 
     public function testAll()

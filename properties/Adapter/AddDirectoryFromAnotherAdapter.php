@@ -49,17 +49,21 @@ final class AddDirectoryFromAnotherAdapter implements Property
         Assert::assertNull($adapter->add($directory));
         Assert::assertTrue($adapter->contains($directory->name()));
         Assert::assertTrue(
-            $adapter
-                ->get($directory->name())
-                ->contains($this->file->name()),
+            $adapter->get($directory->name())->match(
+                fn($dir) => $dir->contains($this->file->name()),
+                static fn() => false,
+            ),
         );
         Assert::assertSame(
             $this->file->content()->toString(),
             $adapter
                 ->get($directory->name())
-                ->get($this->file->name())
-                ->content()
-                ->toString(),
+                ->flatMap(fn($dir) => $dir->get($this->file->name()))
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
         );
 
         return $adapter;

@@ -11,7 +11,10 @@ use Innmind\Filesystem\{
     Name,
 };
 use Innmind\Stream\Readable;
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\PHPUnit\BlackBox;
 use Properties\Innmind\Filesystem\Adapter as PAdapter;
@@ -45,7 +48,13 @@ class CacheOpenedFilesTest extends TestCase
             ->with($file);
 
         $this->assertNull($filesystem->add($file));
-        $this->assertSame($file, $filesystem->get(new Name('foo')));
+        $this->assertSame(
+            $file,
+            $filesystem->get(new Name('foo'))->match(
+                static fn($file) => $file,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testGet()
@@ -61,10 +70,22 @@ class CacheOpenedFilesTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(new Name('foo'))
-            ->willReturn($file);
+            ->willReturn(Maybe::just($file));
 
-        $this->assertSame($file, $filesystem->get(new Name('foo')));
-        $this->assertSame($file, $filesystem->get(new Name('foo')));
+        $this->assertSame(
+            $file,
+            $filesystem->get(new Name('foo'))->match(
+                static fn($file) => $file,
+                static fn() => null,
+            ),
+        );
+        $this->assertSame(
+            $file,
+            $filesystem->get(new Name('foo'))->match(
+                static fn($file) => $file,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testContainsFromInnerAdapter()
@@ -115,14 +136,20 @@ class CacheOpenedFilesTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(new Name('foo'))
-            ->willReturn($expected = new File\File(
+            ->willReturn(Maybe::just($expected = new File\File(
                 new Name('foo'),
                 $this->createMock(Readable::class),
-            ));
+            )));
         $filesystem->add($file);
 
         $this->assertNull($filesystem->remove(new Name('foo')));
-        $this->assertSame($expected, $filesystem->get(new Name('foo')));
+        $this->assertSame(
+            $expected,
+            $filesystem->get(new Name('foo'))->match(
+                static fn($file) => $file,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testAll()
@@ -142,7 +169,13 @@ class CacheOpenedFilesTest extends TestCase
             );
 
         $this->assertSame($expected, $filesystem->all());
-        $this->assertSame($file, $filesystem->get(new Name('foo')));
+        $this->assertSame(
+            $file,
+            $filesystem->get(new Name('foo'))->match(
+                static fn($file) => $file,
+                static fn() => null,
+            ),
+        );
     }
 
     /**

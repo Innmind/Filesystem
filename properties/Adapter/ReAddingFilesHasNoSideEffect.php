@@ -30,8 +30,11 @@ final class ReAddingFilesHasNoSideEffect implements Property
                     $file->content()->toString(),
                     $adapter
                         ->get($file->name())
-                        ->content()
-                        ->toString(),
+                        ->map(static fn($file) => $file->content())
+                        ->match(
+                            static fn($content) => $content->toString(),
+                            static fn() => null,
+                        ),
                 );
             });
 

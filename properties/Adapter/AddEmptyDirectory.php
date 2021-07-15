@@ -40,9 +40,8 @@ final class AddEmptyDirectory implements Property
         Assert::assertTrue($adapter->contains($directory->name()));
         Assert::assertSame(
             [],
-            $adapter
-                ->get($directory->name())
-                ->reduce(
+            $adapter->get($directory->name())->match(
+                static fn($dir) => $dir->reduce(
                     [],
                     static function(array $files, $file): array {
                         $files[] = $file;
@@ -50,6 +49,8 @@ final class AddEmptyDirectory implements Property
                         return $files;
                     },
                 ),
+                static fn() => null,
+            ),
         );
 
         return $adapter;

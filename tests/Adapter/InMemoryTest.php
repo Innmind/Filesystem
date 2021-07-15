@@ -10,7 +10,6 @@ use Innmind\Filesystem\{
     File as FileInterface,
     File\File,
     Name,
-    Exception\FileNotFound,
 };
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
@@ -35,17 +34,23 @@ class InMemoryTest extends TestCase
             $a->add($d = new Directory(new Name('foo')))
         );
         $this->assertTrue($a->contains(new Name('foo')));
-        $this->assertSame($d, $a->get(new Name('foo')));
+        $this->assertSame(
+            $d,
+            $a->get(new Name('foo'))->match(
+                static fn($file) => $file,
+                static fn() => null,
+            ),
+        );
         $this->assertNull($a->remove(new Name('foo')));
         $this->assertFalse($a->contains(new Name('foo')));
     }
 
-    public function testThrowWhenGettingUnknownFile()
+    public function testReturnNothingWhenGettingUnknownFile()
     {
-        $this->expectException(FileNotFound::class);
-        $this->expectExceptionMessage('foo');
-
-        (new InMemory)->get(new Name('foo'));
+        $this->assertNull((new InMemory)->get(new Name('foo'))->match(
+            static fn($file) => $file,
+            static fn() => null,
+        ));
     }
 
     public function testRemovingUnknownFileDoesntThrow()

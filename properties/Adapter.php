@@ -67,7 +67,7 @@ final class Adapter
                 Adapter\AllRootFilesAreAccessible::class,
             ),
             Set\Property::of(
-                Adapter\AccessingUnknownFileThrowsAnException::class,
+                Adapter\AccessingUnknownFileReturnsNothing::class,
                 Name::any(),
             ),
             Set\Property::of(

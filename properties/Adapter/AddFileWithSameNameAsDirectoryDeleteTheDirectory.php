@@ -50,8 +50,11 @@ final class AddFileWithSameNameAsDirectoryDeleteTheDirectory implements Property
             $this->file->content()->toString(),
             $adapter
                 ->get($this->file->name())
-                ->content()
-                ->toString(),
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
         );
 
         return $adapter;

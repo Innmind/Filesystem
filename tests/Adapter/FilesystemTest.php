@@ -12,7 +12,6 @@ use Innmind\Filesystem\{
     Directory as DirectoryInterface,
     Directory\Directory,
     MediaType\NullMediaType,
-    Exception\FileNotFound,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\CannotPersistClosedStream,
@@ -65,12 +64,16 @@ class FilesystemTest extends TestCase
         new Filesystem(Path::of('path/to/somewhere'));
     }
 
-    public function testThrowWhenGettingUnknownFile()
+    public function testReturnNothingWhenGettingUnknownFile()
     {
-        $this->expectException(FileNotFound::class);
-        $this->expectExceptionMessage('foo');
-
-        (new Filesystem(Path::of('/tmp/')))->get(new Name('foo'));
+        $this->assertNull(
+            (new Filesystem(Path::of('/tmp/')))
+                ->get(new Name('foo'))
+                ->match(
+                    static fn($file) => $file,
+                    static fn() => null,
+                ),
+        );
     }
 
     public function testRemovingUnknownFileDoesntThrow()
@@ -91,24 +94,58 @@ class FilesystemTest extends TestCase
         $adapter->add($directory);
         $this->assertSame(
             '# Foo',
-            $adapter->get(new Name('foo'))->get(new Name('foo.md'))->content()->toString()
+            $adapter
+                ->get(new Name('foo'))
+                ->flatMap(static fn($dir) => $dir->get(new Name('foo.md')))
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
         );
         $this->assertSame(
             '# Bar',
-            $adapter->get(new Name('foo'))->get(new Name('bar'))->get(new Name('bar.md'))->content()->toString()
+            $adapter
+                ->get(new Name('foo'))
+                ->flatMap(static fn($dir) => $dir->get(new Name('bar')))
+                ->flatMap(static fn($dir) => $dir->get(new Name('bar.md')))
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
         );
 
         $adapter = new Filesystem(Path::of('/tmp/'));
-        //check it's really persisted (otherwise it will throw)
-        $adapter->get(new Name('foo'));
+        $this->assertTrue($adapter->contains(new Name('foo')));
         $this->assertSame(
             '# Foo',
-            $adapter->get(new Name('foo'))->get(new Name('foo.md'))->content()->toString()
+            $adapter
+                ->get(new Name('foo'))
+                ->flatMap(static fn($dir) => $dir->get(new Name('foo.md')))
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
         );
-        $adapter->get(new Name('foo'))->get(new Name('bar'));
+        $this->assertTrue(
+            $adapter->get(new Name('foo'))->match(
+                static fn($dir) => $dir->contains(new Name('bar')),
+                static fn() => false,
+            ),
+        );
         $this->assertSame(
             '# Bar',
-            $adapter->get(new Name('foo'))->get(new Name('bar'))->get(new Name('bar.md'))->content()->toString()
+            $adapter
+                ->get(new Name('foo'))
+                ->flatMap(static fn($dir) => $dir->get(new Name('bar')))
+                ->flatMap(static fn($dir) => $dir->get(new Name('bar.md')))
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
         );
 
         $adapter->remove(new Name('foo'));
@@ -125,7 +162,12 @@ class FilesystemTest extends TestCase
         $a->add($d);
         $this->assertSame(1, $d->removed()->count());
         $a = new Filesystem(Path::of('/tmp/'));
-        $this->assertFalse($a->get(new Name('foo'))->contains(new Name('bar')));
+        $this->assertFalse(
+            $a->get(new Name('foo'))->match(
+                static fn($dir) => $dir->contains(new Name('bar')),
+                static fn() => true,
+            ),
+        );
         $a->remove(new Name('foo'));
     }
 
@@ -141,7 +183,12 @@ class FilesystemTest extends TestCase
         $a->add($d);
         $this->assertSame(1, $d->removed()->count());
         $a = new Filesystem(Path::of('/tmp/'));
-        $this->assertFalse($a->get(new Name('foo'))->contains(new Name('bar')));
+        $this->assertFalse(
+            $a->get(new Name('foo'))->match(
+                static fn($dir) => $dir->contains(new Name('bar')),
+                static fn() => true,
+            ),
+        );
         $a->remove(new Name('foo'));
     }
 
@@ -155,7 +202,13 @@ class FilesystemTest extends TestCase
 
         $this->assertSame(
             'text/html',
-            $a->get(new Name('some_content.html'))->mediaType()->toString()
+            $a
+                ->get(new Name('some_content.html'))
+                ->map(static fn($file) => $file->mediaType())
+                ->match(
+                    static fn($mediaType) => $mediaType->toString(),
+                    static fn() => null,
+                ),
         );
         $a->remove(new Name('some_content.html'));
     }
@@ -183,9 +236,33 @@ class FilesystemTest extends TestCase
         $this->assertTrue($all->contains('foo'));
         $this->assertTrue($all->contains('bar'));
         $this->assertTrue($all->contains('baz'));
-        $this->assertSame('foo', $adapter->get(new Name('foo'))->content()->toString());
-        $this->assertSame('bar', $adapter->get(new Name('bar'))->content()->toString());
-        $this->assertInstanceOf(DirectoryInterface::class, $adapter->get(new Name('baz')));
+        $this->assertSame(
+            'foo',
+            $adapter
+                ->get(new Name('foo'))
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
+        );
+        $this->assertSame(
+            'bar',
+            $adapter
+                ->get(new Name('bar'))
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
+        );
+        $this->assertInstanceOf(
+            DirectoryInterface::class,
+            $adapter->get(new Name('baz'))->match(
+                static fn($dir) => $dir,
+                static fn() => null,
+            ),
+        );
         $adapter->remove(new Name('foo'));
         $adapter->remove(new Name('bar'));
         $adapter->remove(new Name('baz'));

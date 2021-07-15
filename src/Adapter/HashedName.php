@@ -9,11 +9,11 @@ use Innmind\Filesystem\{
     Directory,
     Name,
     Exception\LogicException,
-    Exception\FileNotFound,
 };
 use Innmind\Immutable\{
     Set,
     Str,
+    Maybe,
 };
 
 /**
@@ -38,92 +38,62 @@ final class HashedName implements Adapter
         }
 
         $hashes = $this->hash($file->name());
+        [$first, $second] = $this->fetch($hashes[0], $hashes[1], $hashes[2]);
 
-        if ($this->filesystem->contains($hashes[0])) {
-            /** @var Directory $first */
-            $first = $this->filesystem->get($hashes[0]);
-        } else {
-            $first = new Directory\Directory($hashes[0]);
-        }
-
-        if ($first->contains($hashes[1])) {
-            /** @var Directory $second */
-            $second = $first->get($hashes[1]);
-        } else {
-            $second = new Directory\Directory($hashes[1]);
-        }
-
-        $this->filesystem->add(
-            $first->add(
-                $second->add(
-                    new File\File(
-                        $hashes[2],
-                        $file->content(),
-                    ),
-                ),
-            ),
-        );
+        $first = $first->otherwise(static fn() => Maybe::just(new Directory\Directory($hashes[0])));
+        $second = $second
+            ->otherwise(static fn() => Maybe::just(new Directory\Directory($hashes[1])))
+            ->map(static fn($second) => $second->add(new File\File(
+                $hashes[2],
+                $file->content(),
+            )));
+        $persist = $second
+            ->flatMap(static fn($second) => $first->map(
+                static fn($first) => $first->add($second),
+            ))
+            ->match(
+                fn($first) => fn() => $this->filesystem->add($first),
+                static fn() => static fn() => null,
+            );
+        $persist();
     }
 
-    public function get(Name $file): File
+    public function get(Name $file): Maybe
     {
-        if (!$this->contains($file)) {
-            throw new FileNotFound($file->toString());
-        }
-
         $originalName = $file;
         $hashes = $this->hash($file);
-        /** @var Directory $first */
-        $first = $this->filesystem->get($hashes[0]);
-        /** @var Directory $second */
-        $second = $first->get($hashes[1]);
-        $file = $second->get($hashes[2]);
+        [, , $concreteFile] = $this->fetch($hashes[0], $hashes[1], $hashes[2]);
 
-        return new File\File(
+        /** @var Maybe<File> */
+        return $concreteFile->map(static fn($file) => new File\File(
             $originalName,
             $file->content(),
             $file->mediaType(),
-        );
+        ));
     }
 
     public function contains(Name $file): bool
     {
-        $hashes = $this->hash($file);
-
-        if (!$this->filesystem->contains($hashes[0])) {
-            return false;
-        }
-
-        $directory = $this->filesystem->get($hashes[0]);
-
-        if (!$directory instanceof Directory) {
-            return false;
-        }
-
-        $directory = $directory->get($hashes[1]);
-
-        if (!$directory instanceof Directory) {
-            return false;
-        }
-
-        return $directory->contains($hashes[2]);
+        return $this->get($file)->match(
+            static fn() => true,
+            static fn() => false,
+        );
     }
 
     public function remove(Name $file): void
     {
-        if (!$this->contains($file)) {
-            return;
-        }
-
         $hashes = $this->hash($file);
-        /** @var Directory $first */
-        $first = $this->filesystem->get($hashes[0]);
-        /** @var Directory $second */
-        $second = $first->get($hashes[1]);
-        $first = $first->add(
-            $second->remove($hashes[2]),
+        [$first, $second] = $this->fetch($hashes[0], $hashes[1], $hashes[2]);
+
+        $second = $second->map(static fn($second) => $second->remove($hashes[2]));
+        $first = $second->flatMap(static fn($second) => $first->map(
+            static fn($first) => $first->add($second),
+        ));
+        $persist = $first->match(
+            fn($first) => fn() => $this->filesystem->add($first),
+            static fn() => static fn() => null,
         );
-        $this->filesystem->add($first);
+        $persist();
     }
 
     public function all(): Set
@@ -145,5 +115,26 @@ final class HashedName implements Adapter
         $remaining = new Name($hash->substring(4)->toString().($extension ? '.'.$extension : ''));
 
         return [$first, $second, $remaining];
+    }
+
+    /**
+     * @return array{0: Maybe<Directory>, 1: Maybe<Directory>, 2: Maybe<File>}
+     */
+    private function fetch(Name $first, Name $second, Name $file): array
+    {
+        /** @var Maybe<Directory> */
+        $firstDirectory = $this
+            ->filesystem
+            ->get($first)
+            ->filter(static fn($first) => $first instanceof Directory);
+        /** @var Maybe<Directory> */
+        $secondDirectory = $firstDirectory
+            ->flatMap(static fn($first) => $first->get($second))
+            ->filter(static fn($second) => $second instanceof Directory);
+        $concreteFile = $secondDirectory->flatMap(
+            static fn($second) => $second->get($file),
+        );
+
+        return [$firstDirectory, $secondDirectory, $concreteFile];
     }
 }

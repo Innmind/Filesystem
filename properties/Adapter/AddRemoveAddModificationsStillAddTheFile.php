@@ -41,9 +41,10 @@ final class AddRemoveAddModificationsStillAddTheFile implements Property
                 ->add($this->file),
         );
         Assert::assertTrue(
-            $adapter
-                ->get($this->directory->name())
-                ->contains($this->file->name()),
+            $adapter->get($this->directory->name())->match(
+                fn($dir) => $dir->contains($this->file->name()),
+                static fn() => false,
+            ),
         );
 
         return $adapter;

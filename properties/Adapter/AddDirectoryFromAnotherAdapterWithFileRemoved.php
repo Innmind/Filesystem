@@ -55,20 +55,29 @@ final class AddDirectoryFromAnotherAdapterWithFileRemoved implements Property
         Assert::assertTrue(
             $adapter
                 ->get($directory->name())
-                ->contains($this->file->name()),
+                ->match(
+                    fn($dir) => $dir->contains($this->file->name()),
+                    static fn() => false,
+                ),
         );
         Assert::assertFalse(
             $adapter
                 ->get($directory->name())
-                ->contains($this->removed->name()),
+                ->match(
+                    fn($dir) => $dir->contains($this->removed->name()),
+                    static fn() => true,
+                ),
         );
         Assert::assertSame(
             $this->file->content()->toString(),
             $adapter
                 ->get($directory->name())
-                ->get($this->file->name())
-                ->content()
-                ->toString(),
+                ->flatMap(fn($dir) => $dir->get($this->file->name()))
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
         );
 
         return $adapter;

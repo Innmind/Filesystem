@@ -9,7 +9,10 @@ use Innmind\Filesystem\{
     File,
     Name,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -65,9 +68,15 @@ class LoggerTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with($name)
-            ->willReturn($file);
+            ->willReturn(Maybe::just($file));
 
-        $this->assertSame($file, $adapter->get($name));
+        $this->assertSame(
+            $file,
+            $adapter->get($name)->match(
+                static fn($file) => $file,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testContains()

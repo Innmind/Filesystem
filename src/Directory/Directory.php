@@ -7,7 +7,6 @@ use Innmind\Filesystem\{
     Directory as DirectoryInterface,
     Name,
     File,
-    Exception\FileNotFound,
     Exception\LogicException,
 };
 use Innmind\Stream\Readable;
@@ -15,6 +14,7 @@ use Innmind\MediaType\MediaType;
 use Innmind\Immutable\{
     Str,
     Set,
+    Maybe,
 };
 use function Innmind\Immutable\{
     assertSet,
@@ -128,7 +128,7 @@ final class Directory implements DirectoryInterface
         return $directory;
     }
 
-    public function get(Name $name): File
+    public function get(Name $name): Maybe
     {
         $file = $this->files->reduce(
             null,
@@ -145,11 +145,7 @@ final class Directory implements DirectoryInterface
             }
         );
 
-        if (\is_null($file)) {
-            throw new FileNotFound($name->toString());
-        }
-
-        return $file;
+        return Maybe::of($file);
     }
 
     public function contains(Name $name): bool

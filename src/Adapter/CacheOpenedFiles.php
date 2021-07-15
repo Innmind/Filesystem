@@ -11,6 +11,7 @@ use Innmind\Filesystem\{
 use Innmind\Immutable\{
     Map,
     Set,
+    Maybe,
 };
 
 final class CacheOpenedFiles implements Adapter
@@ -35,19 +36,23 @@ final class CacheOpenedFiles implements Adapter
         );
     }
 
-    public function get(Name $file): File
+    public function get(Name $file): Maybe
     {
         if ($this->files->contains($file->toString())) {
-            return $this->files->get($file->toString());
+            return Maybe::just($this->files->get($file->toString()));
         }
 
-        $file = $this->filesystem->get($file);
-        $this->files = ($this->files)(
-            $file->name()->toString(),
-            $file,
-        );
+        return $this
+            ->filesystem
+            ->get($file)
+            ->map(function($file) {
+                $this->files = ($this->files)(
+                    $file->name()->toString(),
+                    $file,
+                );
 
-        return $file;
+                return $file;
+            });
     }
 
     public function contains(Name $file): bool

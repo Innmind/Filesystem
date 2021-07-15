@@ -10,7 +10,6 @@ use Innmind\Filesystem\{
     Name,
     Event\FileWasAdded,
     Event\FileWasRemoved,
-    Exception\FileNotFound,
     Exception\LogicException,
 };
 use Innmind\Stream\Readable\Stream;
@@ -75,15 +74,25 @@ class DirectoryTest extends TestCase
         $d = (new Directory(new Name('foo')))
             ->add($f = new File\File(new Name('bar'), Stream::ofContent('baz')));
 
-        $this->assertSame($f, $d->get(new Name('bar')));
+        $this->assertSame(
+            $f,
+            $d->get(new Name('bar'))->match(
+                static fn($file) => $file,
+                static fn() => null,
+            ),
+        );
     }
 
-    public function testThrowWhenGettingUnknownFile()
+    public function testReturnNothingWhenGettingUnknownFile()
     {
-        $this->expectException(FileNotFound::class);
-        $this->expectExceptionMessage('bar');
-
-        (new Directory(new Name('foo')))->get(new Name('bar'));
+        $this->assertNull(
+            (new Directory(new Name('foo')))
+                ->get(new Name('bar'))
+                ->match(
+                    static fn($file) => $file,
+                    static fn() => null,
+                ),
+        );
     }
 
     public function testContains()

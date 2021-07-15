@@ -9,7 +9,6 @@ use Innmind\Filesystem\{
     Name,
     Directory,
     Stream\LazyStream,
-    Exception\FileNotFound,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\RuntimeException,
@@ -26,6 +25,7 @@ use Innmind\Url\Path;
 use Innmind\Immutable\{
     Set,
     Str,
+    Maybe,
 };
 use Symfony\Component\{
     Filesystem\Filesystem as FS,
@@ -63,13 +63,14 @@ final class Filesystem implements Adapter
         $this->createFileAt($this->path, $file);
     }
 
-    public function get(Name $file): File
+    public function get(Name $file): Maybe
     {
         if (!$this->contains($file)) {
-            throw new FileNotFound($file->toString());
+            /** @var Maybe<File> */
+            return Maybe::nothing();
         }
 
-        return $this->open($this->path, $file);
+        return Maybe::just($this->open($this->path, $file));
     }
 
     public function contains(Name $file): bool
