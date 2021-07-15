@@ -31,7 +31,7 @@ class InMemoryTest extends TestCase
         $this->assertInstanceOf(Adapter::class, $a);
         $this->assertFalse($a->contains(new Name('foo')));
         $this->assertNull(
-            $a->add($d = new Directory(new Name('foo')))
+            $a->add($d = Directory::of(new Name('foo')))
         );
         $this->assertTrue($a->contains(new Name('foo')));
         $this->assertSame(

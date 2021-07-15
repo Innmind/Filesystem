@@ -34,7 +34,7 @@ final class Directory implements DirectoryInterface
     /**
      * @param Set<File>|null $files
      */
-    public function __construct(Name $name, Set $files = null)
+    private function __construct(Name $name, Set $files = null)
     {
         /** @var Set<File> $default */
         $default = Set::of(File::class);
@@ -62,6 +62,14 @@ final class Directory implements DirectoryInterface
             'directory',
         );
         $this->removed = Set::of(Name::class);
+    }
+
+    /**
+     * @param Set<File>|null $files
+     */
+    public static function of(Name $name, Set $files = null): self
+    {
+        return new self($name, $files);
     }
 
     public static function named(string $name): self

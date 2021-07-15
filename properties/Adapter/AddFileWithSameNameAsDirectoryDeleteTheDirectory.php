@@ -26,7 +26,7 @@ final class AddFileWithSameNameAsDirectoryDeleteTheDirectory implements Property
     {
         $this->file = new File\File($name, $file);
         // the extra file is here to make sure we can delete non empty directories
-        $this->directory = (new Directory\Directory($name))->add($fileInDirectory);
+        $this->directory = Directory\Directory::of($name)->add($fileInDirectory);
     }
 
     public function name(): string

@@ -40,9 +40,9 @@ final class HashedName implements Adapter
         $hashes = $this->hash($file->name());
         [$first, $second] = $this->fetch($hashes[0], $hashes[1], $hashes[2]);
 
-        $first = $first->otherwise(static fn() => Maybe::just(new Directory\Directory($hashes[0])));
+        $first = $first->otherwise(static fn() => Maybe::just(Directory\Directory::of($hashes[0])));
         $second = $second
-            ->otherwise(static fn() => Maybe::just(new Directory\Directory($hashes[1])))
+            ->otherwise(static fn() => Maybe::just(Directory\Directory::of($hashes[1])))
             ->map(static fn($second) => $second->add(new File\File(
                 $hashes[2],
                 $file->content(),

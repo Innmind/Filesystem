@@ -37,9 +37,9 @@ final class AddDirectoryFromAnotherAdapterWithFileAdded implements Property
 
     public function ensureHeldBy(object $adapter): object
     {
-        // directories loaded from other adapters have files injecting at
+        // directories loaded from other adapters have files injected at
         // construct time (so there is no modifications())
-        $directory = new Directory(
+        $directory = Directory::of(
             $this->name,
             Set::of(
                 File::class,

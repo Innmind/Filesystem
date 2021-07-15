@@ -50,7 +50,7 @@ class FilesystemTest extends TestCase
 
         $this->assertInstanceOf(Adapter::class, $adapter);
         $this->assertFalse($adapter->contains(new Name('foo')));
-        $this->assertNull($adapter->add(new Directory(new Name('foo'))));
+        $this->assertNull($adapter->add(Directory::of(new Name('foo'))));
         $this->assertTrue($adapter->contains(new Name('foo')));
         $this->assertNull($adapter->remove(new Name('foo')));
         $this->assertFalse($adapter->contains(new Name('foo')));
@@ -85,10 +85,10 @@ class FilesystemTest extends TestCase
     {
         $adapter = new Filesystem(Path::of('/tmp/'));
 
-        $directory = (new Directory(new Name('foo')))
+        $directory = (Directory::of(new Name('foo')))
             ->add(new File(new Name('foo.md'), Stream::ofContent('# Foo')))
             ->add(
-                (new Directory(new Name('bar')))
+                (Directory::of(new Name('bar')))
                     ->add(new File(new Name('bar.md'), Stream::ofContent('# Bar')))
             );
         $adapter->add($directory);
@@ -155,7 +155,7 @@ class FilesystemTest extends TestCase
     {
         $a = new Filesystem(Path::of('/tmp/'));
 
-        $d = new Directory(new Name('foo'));
+        $d = Directory::of(new Name('foo'));
         $d = $d->add(new File(new Name('bar'), Stream::ofContent('some content')));
         $a->add($d);
         $d = $d->remove(new Name('bar'));
@@ -175,7 +175,7 @@ class FilesystemTest extends TestCase
     {
         $a = new Filesystem(Path::of('/tmp/'));
 
-        $d = new Directory(new Name('foo'));
+        $d = Directory::of(new Name('foo'));
         $d = $d->add(new File(new Name('bar'), Stream::ofContent('some content')));
         $a->add($d);
         $d = $d->remove(new Name('bar'));
@@ -332,15 +332,15 @@ class FilesystemTest extends TestCase
 
         $this->expectException(PathTooLong::class);
 
-        $filesystem->add(new Directory(
+        $filesystem->add(Directory::of(
             new Name(\str_repeat('a', 255)),
             Set::of(
                 FileInterface::class,
-                new Directory(
+                Directory::of(
                     new Name(\str_repeat('a', 255)),
                     Set::of(
                         FileInterface::class,
-                        new Directory(
+                        Directory::of(
                             new Name(\str_repeat('a', 255)),
                             Set::of(
                                 FileInterface::class,
@@ -372,7 +372,7 @@ class FilesystemTest extends TestCase
 
                 $filesystem = new Filesystem(Path::of($path));
 
-                $this->assertNull($filesystem->add(new Directory(
+                $this->assertNull($filesystem->add(Directory::of(
                     new Name(\chr($ord).'a'),
                     Set::of(
                         FileInterface::class,
@@ -403,7 +403,7 @@ class FilesystemTest extends TestCase
 
                 $filesystem = new Filesystem(Path::of($path));
 
-                $this->assertNull($filesystem->add(new Directory(
+                $this->assertNull($filesystem->add(Directory::of(
                     new Name('a'.\chr($ord).'a'),
                     Set::of(
                         FileInterface::class,
@@ -436,7 +436,7 @@ class FilesystemTest extends TestCase
 
                 $filesystem = new Filesystem(Path::of($path));
 
-                $this->assertNull($filesystem->add(new Directory(
+                $this->assertNull($filesystem->add(Directory::of(
                     new Name(\chr($ord)),
                     Set::of(
                         FileInterface::class,

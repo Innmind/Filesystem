@@ -33,7 +33,7 @@ class DirectoryTest extends TestCase
 
     public function testInterface()
     {
-        $d = new Directory(new Name('foo'));
+        $d = Directory::of(new Name('foo'));
 
         $this->assertInstanceOf(DirectoryInterface::class, $d);
         $this->assertSame('foo', $d->name()->toString());
@@ -52,7 +52,7 @@ class DirectoryTest extends TestCase
 
     public function testAdd()
     {
-        $d = new Directory(new Name('foo'));
+        $d = Directory::of(new Name('foo'));
         $d->content(); //force generation of files list, to be sure it's not cloned
 
         $d2 = $d->add(
@@ -71,7 +71,7 @@ class DirectoryTest extends TestCase
 
     public function testGet()
     {
-        $d = (new Directory(new Name('foo')))
+        $d = Directory::of(new Name('foo'))
             ->add($f = new File\File(new Name('bar'), Stream::ofContent('baz')));
 
         $this->assertSame(
@@ -86,7 +86,7 @@ class DirectoryTest extends TestCase
     public function testReturnNothingWhenGettingUnknownFile()
     {
         $this->assertNull(
-            (new Directory(new Name('foo')))
+            Directory::of(new Name('foo'))
                 ->get(new Name('bar'))
                 ->match(
                     static fn($file) => $file,
@@ -97,7 +97,7 @@ class DirectoryTest extends TestCase
 
     public function testContains()
     {
-        $d = (new Directory(new Name('foo')))
+        $d = Directory::of(new Name('foo'))
             ->add(new File\File(new Name('bar'), Stream::ofContent('baz')));
 
         $this->assertFalse($d->contains(new Name('baz')));
@@ -106,7 +106,7 @@ class DirectoryTest extends TestCase
 
     public function testRemove()
     {
-        $d = (new Directory(new Name('foo')))
+        $d = Directory::of(new Name('foo'))
             ->add(new File\File(new Name('bar'), Stream::ofContent('baz')));
         $d->content(); //force generation of files list, to be sure it's not cloned
 
@@ -125,20 +125,20 @@ class DirectoryTest extends TestCase
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $dir = new Directory(new Name('foo'));
+        $dir = Directory::of(new Name('foo'));
 
         $this->assertSame($dir, $dir->remove(new Name('bar')));
     }
 
     public function testGenerator()
     {
-        $d = new Directory(
+        $d = Directory::of(
             new Name('foo'),
             Set::defer(File::class, (static function() {
                 yield new File\File(new Name('foo'), Stream::ofContent('foo'));
                 yield new File\File(new Name('bar'), Stream::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
-                yield new Directory(new Name('sub'));
+                yield Directory::of(new Name('sub'));
             })()),
         );
 
@@ -150,13 +150,13 @@ class DirectoryTest extends TestCase
 
     public function testForeach()
     {
-        $directory = new Directory(
+        $directory = Directory::of(
             new Name('foo'),
             Set::defer(File::class, (static function() {
                 yield new File\File(new Name('foo'), Stream::ofContent('foo'));
                 yield new File\File(new Name('bar'), Stream::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
-                yield new Directory(new Name('sub'));
+                yield Directory::of(new Name('sub'));
             })()),
         );
 
@@ -169,13 +169,13 @@ class DirectoryTest extends TestCase
 
     public function testReduce()
     {
-        $directory = new Directory(
+        $directory = Directory::of(
             new Name('foo'),
             Set::defer(File::class, (static function() {
                 yield new File\File(new Name('foo'), Stream::ofContent('foo'));
                 yield new File\File(new Name('bar'), Stream::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
-                yield new Directory(new Name('sub'));
+                yield Directory::of(new Name('sub'));
             })()),
         );
 
@@ -189,13 +189,13 @@ class DirectoryTest extends TestCase
 
     public function testFilter()
     {
-        $directory = new Directory(
+        $directory = Directory::of(
             new Name('foo'),
             Set::defer(File::class, (static function() {
                 yield new File\File(new Name('foo'), Stream::ofContent('foo'));
                 yield new File\File(new Name('bar'), Stream::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
-                yield new Directory(new Name('sub'));
+                yield Directory::of(new Name('sub'));
             })()),
         );
 
@@ -223,7 +223,7 @@ class DirectoryTest extends TestCase
                 FName::any(),
             )
             ->then(function($property, $name) {
-                $directory = new Directory($name);
+                $directory = Directory::of($name);
 
                 if (!$property->applicableTo($directory)) {
                     $this->markTestSkipped();
@@ -257,7 +257,7 @@ class DirectoryTest extends TestCase
                     ->size() === $files->size();
             })
             ->then(function($property, $name, $files) {
-                $directory = new Directory($name, $files);
+                $directory = Directory::of($name, $files);
 
                 if (!$property->applicableTo($directory)) {
                     $this->markTestSkipped();
@@ -278,7 +278,7 @@ class DirectoryTest extends TestCase
                 FName::any(),
             )
             ->then(static function($properties, $name) {
-                $directory = new Directory($name);
+                $directory = Directory::of($name);
 
                 $properties->ensureHeldBy($directory);
             });
@@ -308,7 +308,7 @@ class DirectoryTest extends TestCase
                     ->size() === $files->size();
             })
             ->then(static function($properties, $name, $files) {
-                $directory = new Directory($name, $files);
+                $directory = Directory::of($name, $files);
 
                 $properties->ensureHeldBy($directory);
             });
@@ -327,7 +327,7 @@ class DirectoryTest extends TestCase
                 $this->expectException(LogicException::class);
                 $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
 
-                new Directory(
+                Directory::of(
                     $directory,
                     Set::of(
                         File::class,

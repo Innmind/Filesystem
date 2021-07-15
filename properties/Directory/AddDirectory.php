@@ -32,9 +32,7 @@ final class AddDirectory implements Property
 
     public function ensureHeldBy(object $directory): object
     {
-        $file = new Directory(
-            $this->name,
-        );
+        $file = Directory::of($this->name);
 
         Assert::assertFalse($directory->contains($file->name()));
         $newDirectory = $directory->add($file);

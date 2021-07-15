@@ -39,7 +39,7 @@ final class AddDirectoryFromAnotherAdapterWithFileRemoved implements Property
     {
         // directories loaded from other adapters have files injecting at
         // construct time (so there is no modifications())
-        $directory = new Directory(
+        $directory = Directory::of(
             $this->name,
             Set::of(
                 File::class,
