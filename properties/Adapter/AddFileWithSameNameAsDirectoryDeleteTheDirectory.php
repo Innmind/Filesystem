@@ -6,9 +6,7 @@ namespace Properties\Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     File,
     Directory,
-    Name,
 };
-use Innmind\Stream\Readable;
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;
 
@@ -22,11 +20,11 @@ final class AddFileWithSameNameAsDirectoryDeleteTheDirectory implements Property
     private File $file;
     private Directory $directory;
 
-    public function __construct(Name $name, Readable $file, File $fileInDirectory)
+    public function __construct(File $file, File $fileInDirectory)
     {
-        $this->file = new File\File($name, $file);
+        $this->file = $file;
         // the extra file is here to make sure we can delete non empty directories
-        $this->directory = Directory\Directory::of($name)->add($fileInDirectory);
+        $this->directory = Directory\Directory::of($file->name())->add($fileInDirectory);
     }
 
     public function name(): string

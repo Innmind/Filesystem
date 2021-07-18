@@ -8,9 +8,9 @@ use Innmind\Filesystem\{
     Adapter\InMemory,
     Adapter,
     File,
+    File\Content,
     Name,
 };
-use Innmind\Stream\Readable;
 use Innmind\Immutable\{
     Set,
     Maybe,
@@ -138,7 +138,7 @@ class CacheOpenedFilesTest extends TestCase
             ->with(new Name('foo'))
             ->willReturn(Maybe::just($expected = new File\File(
                 new Name('foo'),
-                $this->createMock(Readable::class),
+                $this->createMock(Content::class),
             )));
         $filesystem->add($file);
 

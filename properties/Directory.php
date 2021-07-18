@@ -55,7 +55,7 @@ final class Directory
                 Directory\RemoveDirectory::class,
             ),
             Set\Property::of(
-                Directory\ContentHoldsTheNamesOfTheFiles::class,
+                Directory\ContentHoldsNothing::class,
             ),
             Set\Property::of(
                 Directory\AddFile::class,

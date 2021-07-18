@@ -7,21 +7,19 @@ use Innmind\Filesystem\{
     Directory as DirectoryInterface,
     Name,
     File,
+    File\Content,
     Exception\LogicException,
 };
-use Innmind\Stream\Readable;
 use Innmind\MediaType\MediaType;
 use Innmind\Immutable\{
     Str,
     Set,
     Maybe,
 };
-use function Innmind\Immutable\join;
 
 final class Directory implements DirectoryInterface
 {
     private Name $name;
-    private ?Readable $content = null;
     /** @var Set<File> */
     private Set $files;
     private MediaType $mediaType;
@@ -95,22 +93,9 @@ final class Directory implements DirectoryInterface
         return $this->name;
     }
 
-    public function content(): Readable
+    public function content(): Content
     {
-        if ($this->content instanceof Readable) {
-            return $this->content;
-        }
-
-        /** @var Set<string> $names */
-        $names = $this
-            ->files
-            ->map(static fn($file) => $file->name()->toString())
-            ->sort(static fn(string $a, string $b): int => $a <=> $b);
-        $this->content = Readable\Stream::ofContent(
-            join("\n", $names)->toString(),
-        );
-
-        return $this->content;
+        return Content\None::of();
     }
 
     public function mediaType(): MediaType
@@ -123,7 +108,6 @@ final class Directory implements DirectoryInterface
         $files = $this->files->filter(static fn(File $known): bool => !$known->name()->equals($file->name()));
 
         $directory = clone $this;
-        $directory->content = null;
         $directory->files = ($files)($file);
 
         return $directory;
@@ -164,7 +148,6 @@ final class Directory implements DirectoryInterface
         }
 
         $directory = clone $this;
-        $directory->content = null;
         $directory->files = $this->files->filter(static fn(File $file) => !$file->name()->equals($name));
         $directory->removed = ($directory->removed)($name);
 

@@ -132,7 +132,7 @@ final class Filesystem implements Adapter
             $this->filesystem->remove($path->toString());
         }
 
-        $stream = $file->content();
+        $stream = $file->content()->stream();
 
         if ($stream->closed()) {
             throw new CannotPersistClosedStream($path->toString());
@@ -162,10 +162,10 @@ final class Filesystem implements Adapter
             );
         }
 
-        // Calling the rewind here helps always leave the streams in a readable
-        // state. It also helps avoid a fatal error when handling too many files
-        // (see LazyStream::rewind() for more explanations)
-        $stream->rewind();
+        $handle->close();
+        // Closing the stream is safe as the Content should return a new stream
+        // each time so there should ne no side effect
+        $stream->close();
     }
 
     /**
@@ -187,7 +187,7 @@ final class Filesystem implements Adapter
 
         $file = new File\File(
             $file,
-            new LazyStream($path),
+            File\Content\AtPath::of($path),
             MediaType::of(\mime_content_type($path->toString()))->match(
                 static fn($mediaType) => $mediaType,
                 static fn() => MediaType::null(),

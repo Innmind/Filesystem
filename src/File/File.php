@@ -7,18 +7,17 @@ use Innmind\Filesystem\{
     File as FileInterface,
     Name,
 };
-use Innmind\Stream\Readable;
 use Innmind\MediaType\MediaType;
 
 final class File implements FileInterface
 {
     private Name $name;
-    private Readable $content;
+    private Content $content;
     private MediaType $mediaType;
 
     public function __construct(
         Name $name,
-        Readable $content,
+        Content $content,
         MediaType $mediaType = null
     ) {
         $this->name = $name;
@@ -28,7 +27,7 @@ final class File implements FileInterface
 
     public static function named(
         string $name,
-        Readable $content,
+        Content $content,
         MediaType $mediaType = null
     ): self {
         return new self(new Name($name), $content, $mediaType);
@@ -39,7 +38,7 @@ final class File implements FileInterface
         return $this->name;
     }
 
-    public function content(): Readable
+    public function content(): Content
     {
         return $this->content;
     }
@@ -52,7 +51,7 @@ final class File implements FileInterface
     /**
      * New file reference with a different content
      */
-    public function withContent(Readable $content): self
+    public function withContent(Content $content): self
     {
         $file = clone $this;
         $file->content = $content;

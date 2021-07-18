@@ -10,10 +10,10 @@ use Innmind\Filesystem\{
     Directory,
     File,
     Name,
+    File\Content\Lines,
     Exception\LogicException,
 };
 use Innmind\Url\Path;
-use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use Symfony\Component\Filesystem\Filesystem as FS;
 use PHPUnit\Framework\TestCase;
@@ -49,7 +49,7 @@ class HashedNameTest extends TestCase
             $inner = new Filesystem(Path::of('/tmp/hashed/'))
         );
 
-        $file = new File\File(new Name('foo'), Stream::ofContent('content'));
+        $file = new File\File(new Name('foo'), Lines::ofContent('content'));
 
         $this->assertFalse($filesystem->contains(new Name('foo')));
         $this->assertNull($filesystem->add($file));
@@ -77,7 +77,7 @@ class HashedNameTest extends TestCase
                 ),
         );
 
-        $file = new File\File(new Name('foo'), Stream::ofContent('content bis'));
+        $file = new File\File(new Name('foo'), Lines::ofContent('content bis'));
 
         $this->assertNull($filesystem->add($file));
         $this->assertSame(
@@ -115,8 +115,8 @@ class HashedNameTest extends TestCase
             new Filesystem(Path::of('/tmp/hashed/'))
         );
 
-        $filesystem->add(new File\File(new Name('foo'), Stream::ofContent('content')));
-        $filesystem->add(new File\File(new Name('bar'), Stream::ofContent('content')));
+        $filesystem->add(new File\File(new Name('foo'), Lines::ofContent('content')));
+        $filesystem->add(new File\File(new Name('bar'), Lines::ofContent('content')));
 
         $all = $filesystem->all();
 

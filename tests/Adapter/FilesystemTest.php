@@ -7,18 +7,18 @@ use Innmind\Filesystem\{
     Adapter\Filesystem,
     Adapter,
     File\File,
+    File\Content\None,
+    File\Content\Lines,
     Name,
     File as FileInterface,
     Directory as DirectoryInterface,
     Directory\Directory,
-    MediaType\NullMediaType,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\CannotPersistClosedStream,
     Exception\LinksAreNotSupported,
 };
 use Innmind\Url\Path;
-use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\{
     Set,
     Map,
@@ -88,10 +88,10 @@ class FilesystemTest extends TestCase
         $adapter = new Filesystem(Path::of('/tmp/'));
 
         $directory = Directory::of(new Name('foo'))
-            ->add(new File(new Name('foo.md'), Stream::ofContent('# Foo')))
+            ->add(new File(new Name('foo.md'), Lines::ofContent('# Foo')))
             ->add(
                 Directory::of(new Name('bar'))
-                    ->add(new File(new Name('bar.md'), Stream::ofContent('# Bar')))
+                    ->add(new File(new Name('bar.md'), Lines::ofContent('# Bar')))
             );
         $adapter->add($directory);
         $this->assertSame(
@@ -158,7 +158,7 @@ class FilesystemTest extends TestCase
         $a = new Filesystem(Path::of('/tmp/'));
 
         $d = Directory::of(new Name('foo'));
-        $d = $d->add(new File(new Name('bar'), Stream::ofContent('some content')));
+        $d = $d->add(new File(new Name('bar'), Lines::ofContent('some content')));
         $a->add($d);
         $d = $d->remove(new Name('bar'));
         $a->add($d);
@@ -178,7 +178,7 @@ class FilesystemTest extends TestCase
         $a = new Filesystem(Path::of('/tmp/'));
 
         $d = Directory::of(new Name('foo'));
-        $d = $d->add(new File(new Name('bar'), Stream::ofContent('some content')));
+        $d = $d->add(new File(new Name('bar'), Lines::ofContent('some content')));
         $a->add($d);
         $d = $d->remove(new Name('bar'));
         $a->add($d);
@@ -220,7 +220,7 @@ class FilesystemTest extends TestCase
         $adapter = new Filesystem(Path::of('/tmp/test/'));
         $adapter->add(new File(
             new Name('foo'),
-            Stream::ofContent('foo')
+            Lines::ofContent('foo')
         ));
         \file_put_contents('/tmp/test/bar', 'bar');
         \mkdir('/tmp/test/baz');
@@ -274,7 +274,7 @@ class FilesystemTest extends TestCase
         $adapter = new Filesystem(Path::of('/tmp/'));
         $file = new File(
             new Name('foo'),
-            Stream::ofContent('foo'),
+            Lines::ofContent('foo'),
         );
 
         $this->assertNull($adapter->add($file));
@@ -344,13 +344,13 @@ class FilesystemTest extends TestCase
                             Set::of(
                                 new File(
                                     new Name(\str_repeat('a', 255)),
-                                    Stream::ofContent('foo')
-                                )
-                            )
-                        )
-                    )
-                )
-            )
+                                    None::of(),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
         ));
     }
 
@@ -375,7 +375,7 @@ class FilesystemTest extends TestCase
                     Set::of(
                         new File(
                             new Name('a'),
-                            Stream::ofContent($content),
+                            Lines::ofContent($content),
                         ),
                     ),
                 )));
@@ -405,7 +405,7 @@ class FilesystemTest extends TestCase
                     Set::of(
                         new File(
                             new Name('a'),
-                            Stream::ofContent($content),
+                            Lines::ofContent($content),
                         ),
                     ),
                 )));
@@ -437,29 +437,12 @@ class FilesystemTest extends TestCase
                     Set::of(
                         new File(
                             new Name('a'),
-                            Stream::ofContent($content),
+                            Lines::ofContent($content),
                         ),
                     ),
                 )));
 
                 (new FS)->remove($path);
-            });
-    }
-
-    public function testThrowsWhenTryingToPersistClosedFileStream()
-    {
-        $this
-            ->forAll(FFile::any())
-            ->then(function($file) {
-                $path = \sys_get_temp_dir().'/innmind/filesystem/';
-                (new FS)->remove($path);
-
-                $filesystem = new Filesystem(Path::of($path));
-
-                $file->content()->close();
-                $this->expectException(CannotPersistClosedStream::class);
-
-                $filesystem->add($file);
             });
     }
 

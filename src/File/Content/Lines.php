@@ -8,11 +8,13 @@ use Innmind\Filesystem\{
     Stream\NullStream,
 };
 use Innmind\Stream\Readable;
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    Str,
+};
 use function Innmind\Immutable\join;
 
 /**
- * @internal
  * @psalm-immutable
  */
 final class Lines implements Content
@@ -34,6 +36,15 @@ final class Lines implements Content
     public static function of(Sequence $lines): self
     {
         return new self($lines);
+    }
+
+    public static function ofContent(string $content): self
+    {
+        return new self(
+            Str::of($content)
+                ->split("\n")
+                ->map(static fn($line) => Line::fromStream($line)),
+        );
     }
 
     public function foreach(callable $function): void

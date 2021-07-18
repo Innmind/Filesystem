@@ -12,7 +12,6 @@ use Fixtures\Innmind\Filesystem\{
     Name,
     Directory,
 };
-use Fixtures\Innmind\Stream\Readable;
 
 final class Adapter
 {
@@ -89,8 +88,7 @@ final class Adapter
             ),
             Set\Property::of(
                 Adapter\AddFileWithSameNameAsDirectoryDeleteTheDirectory::class,
-                Name::any(),
-                Readable::any(),
+                File::any(),
                 File::any(),
             ),
         ];

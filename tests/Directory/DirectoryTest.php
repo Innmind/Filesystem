@@ -8,11 +8,10 @@ use Innmind\Filesystem\{
     Directory as DirectoryInterface,
     File,
     Name,
-    Event\FileWasAdded,
-    Event\FileWasRemoved,
+    File\Content\None,
+    File\Content\Lines,
     Exception\LogicException,
 };
-use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -55,15 +54,13 @@ class DirectoryTest extends TestCase
         $d->content(); //force generation of files list, to be sure it's not cloned
 
         $d2 = $d->add(
-            $file = new File\File(new Name('foo'), Stream::ofContent('bar'))
+            $file = new File\File(new Name('foo'), Lines::ofContent('bar'))
         );
 
         $this->assertInstanceOf(DirectoryInterface::class, $d2);
         $this->assertNotSame($d, $d2);
         $this->assertSame($d->name(), $d2->name());
         $this->assertNotSame($d->content(), $d2->content());
-        $this->assertSame('', $d->content()->toString());
-        $this->assertSame('foo', $d2->content()->toString());
         $this->assertSame(0, $d->removed()->count());
         $this->assertSame(0, $d2->removed()->count());
     }
@@ -71,7 +68,7 @@ class DirectoryTest extends TestCase
     public function testGet()
     {
         $d = Directory::of(new Name('foo'))
-            ->add($f = new File\File(new Name('bar'), Stream::ofContent('baz')));
+            ->add($f = new File\File(new Name('bar'), Lines::ofContent('baz')));
 
         $this->assertSame(
             $f,
@@ -97,7 +94,7 @@ class DirectoryTest extends TestCase
     public function testContains()
     {
         $d = Directory::of(new Name('foo'))
-            ->add(new File\File(new Name('bar'), Stream::ofContent('baz')));
+            ->add(new File\File(new Name('bar'), Lines::ofContent('baz')));
 
         $this->assertFalse($d->contains(new Name('baz')));
         $this->assertTrue($d->contains(new Name('bar')));
@@ -106,7 +103,7 @@ class DirectoryTest extends TestCase
     public function testRemove()
     {
         $d = Directory::of(new Name('foo'))
-            ->add(new File\File(new Name('bar'), Stream::ofContent('baz')));
+            ->add(new File\File(new Name('bar'), Lines::ofContent('baz')));
         $d->content(); //force generation of files list, to be sure it's not cloned
 
         $d2 = $d->remove(new Name('bar'));
@@ -115,8 +112,6 @@ class DirectoryTest extends TestCase
         $this->assertNotSame($d, $d2);
         $this->assertSame($d->name(), $d2->name());
         $this->assertNotSame($d->content(), $d2->content());
-        $this->assertSame('bar', $d->content()->toString());
-        $this->assertSame('', $d2->content()->toString());
         $this->assertSame(0, $d->removed()->count());
         $this->assertSame(1, $d2->removed()->count());
         $this->assertSame(
@@ -138,32 +133,14 @@ class DirectoryTest extends TestCase
         $this->assertSame($dir, $dir->remove(new Name('bar')));
     }
 
-    public function testGenerator()
-    {
-        $d = Directory::of(
-            new Name('foo'),
-            Set::defer((static function() {
-                yield new File\File(new Name('foo'), Stream::ofContent('foo'));
-                yield new File\File(new Name('bar'), Stream::ofContent('bar'));
-                yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
-                yield Directory::of(new Name('sub'));
-            })()),
-        );
-
-        $this->assertSame(
-            'bar' . "\n" . 'foo' . "\n" . 'foobar' . "\n" . 'sub',
-            $d->content()->toString()
-        );
-    }
-
     public function testForeach()
     {
         $directory = Directory::of(
             new Name('foo'),
             Set::defer((static function() {
-                yield new File\File(new Name('foo'), Stream::ofContent('foo'));
-                yield new File\File(new Name('bar'), Stream::ofContent('bar'));
-                yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
+                yield new File\File(new Name('foo'), Lines::ofContent('foo'));
+                yield new File\File(new Name('bar'), Lines::ofContent('bar'));
+                yield new File\File(new Name('foobar'), Lines::ofContent('foobar'));
                 yield Directory::of(new Name('sub'));
             })()),
         );
@@ -180,9 +157,9 @@ class DirectoryTest extends TestCase
         $directory = Directory::of(
             new Name('foo'),
             Set::defer((static function() {
-                yield new File\File(new Name('foo'), Stream::ofContent('foo'));
-                yield new File\File(new Name('bar'), Stream::ofContent('bar'));
-                yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
+                yield new File\File(new Name('foo'), Lines::ofContent('foo'));
+                yield new File\File(new Name('bar'), Lines::ofContent('bar'));
+                yield new File\File(new Name('foobar'), Lines::ofContent('foobar'));
                 yield Directory::of(new Name('sub'));
             })()),
         );
@@ -200,9 +177,9 @@ class DirectoryTest extends TestCase
         $directory = Directory::of(
             new Name('foo'),
             Set::defer((static function() {
-                yield new File\File(new Name('foo'), Stream::ofContent('foo'));
-                yield new File\File(new Name('bar'), Stream::ofContent('bar'));
-                yield new File\File(new Name('foobar'), Stream::ofContent('foobar'));
+                yield new File\File(new Name('foo'), Lines::ofContent('foo'));
+                yield new File\File(new Name('bar'), Lines::ofContent('bar'));
+                yield new File\File(new Name('foobar'), Lines::ofContent('foobar'));
                 yield Directory::of(new Name('sub'));
             })()),
         );
@@ -326,18 +303,16 @@ class DirectoryTest extends TestCase
             ->forAll(
                 FName::any(),
                 FName::any(),
-                DataSet\Strings::any(),
-                DataSet\Strings::any(),
             )
-            ->then(function($directory, $file, $content1, $content2) {
+            ->then(function($directory, $file) {
                 $this->expectException(LogicException::class);
                 $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
 
                 Directory::of(
                     $directory,
                     Set::of(
-                        File\File::named($file->toString(), Stream::ofContent($content1)),
-                        File\File::named($file->toString(), Stream::ofContent($content2)),
+                        File\File::named($file->toString(), None::of()),
+                        File\File::named($file->toString(), None::of()),
                     ),
                 );
             });

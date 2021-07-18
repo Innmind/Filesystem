@@ -6,11 +6,11 @@ namespace Properties\Innmind\Filesystem\Directory;
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;
 
-final class ContentHoldsTheNamesOfTheFiles implements Property
+final class ContentHoldsNothing implements Property
 {
     public function name(): string
     {
-        return 'Content stream holds the names of the files';
+        return 'Content stream holds nothing';
     }
 
     public function applicableTo(object $directory): bool
@@ -20,13 +20,7 @@ final class ContentHoldsTheNamesOfTheFiles implements Property
 
     public function ensureHeldBy(object $directory): object
     {
-        $content = $directory->content()->toString();
-        $directory->foreach(static function($file) use ($content) {
-            Assert::assertStringContainsString(
-                $file->name()->toString(),
-                $content,
-            );
-        });
+        Assert::assertSame('', $directory->content()->toString());
 
         return $directory;
     }

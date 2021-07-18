@@ -9,9 +9,9 @@ use Innmind\Filesystem\{
     Directory\Directory,
     File as FileInterface,
     File\File,
+    File\Content\Lines,
     Name,
 };
-use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -62,11 +62,11 @@ class InMemoryTest extends TestCase
         $adapter = new InMemory;
         $adapter->add($foo = new File(
             new Name('foo'),
-            Stream::ofContent('foo')
+            Lines::ofContent('foo')
         ));
         $adapter->add($bar = new File(
             new Name('bar'),
-            Stream::ofContent('bar')
+            Lines::ofContent('bar')
         ));
 
         $all = $adapter->all();
