@@ -89,7 +89,7 @@ final class Lazy implements LazyAdapterInterface
     {
         $this
             ->toAdd
-            ->foreach(function(string $name, File $file) {
+            ->foreach(function(string $_, File $file) {
                 $this->adapter->add($file);
             });
         $this->toAdd = $this->toAdd->clear();

@@ -68,7 +68,6 @@ final class CacheOpenedFiles implements Adapter
     public function all(): Set
     {
         $all = $this->filesystem->all();
-        /** @var Map<string, File> */
         $this->files = $all->toMapOf(
             'string',
             File::class,
