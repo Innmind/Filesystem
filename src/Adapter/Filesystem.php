@@ -161,6 +161,7 @@ final class Filesystem implements Adapter
             );
         }
 
+        $handle->close();
         // Calling the rewind here helps always leave the streams in a readable
         // state. It also helps avoid a fatal error when handling too many files
         // (see LazyStream::rewind() for more explanations)
