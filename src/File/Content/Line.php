@@ -1,0 +1,50 @@
+<?php
+declare(strict_types = 1);
+
+namespace Innmind\Filesystem\File\Content;
+
+use Innmind\Filesystem\Exception\DomainException;
+use Innmind\Immutable\Str;
+
+/**
+ * @psalm-immutable
+ */
+final class Line
+{
+    private Str $content;
+
+    private function __construct(Str $content)
+    {
+        $this->content = $content->rightTrim("\n");
+    }
+
+    public static function of(Str $content): self
+    {
+        if ($content->contains("\n")) {
+            throw new DomainException('New line delimiter should not appear in the line content');
+        }
+
+        return new self($content);
+    }
+
+    /**
+     * @internal
+     */
+    public static function fromStream(Str $content): self
+    {
+        return new self($content);
+    }
+
+    /**
+     * @param callable(Str): Str $map
+     */
+    public function map(callable $map): self
+    {
+        return self::of($map($this->content));
+    }
+
+    public function toString(): string
+    {
+        return $this->content->toString();
+    }
+}
