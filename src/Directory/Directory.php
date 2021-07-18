@@ -124,29 +124,14 @@ final class Directory implements DirectoryInterface
 
     public function get(Name $name): Maybe
     {
-        $file = $this->files->reduce(
-            null,
-            static function(?File $found, File $file) use ($name): ?File {
-                if ($found) {
-                    return $found;
-                }
-
-                if ($file->name()->equals($name)) {
-                    return $file;
-                }
-
-                return null;
-            }
-        );
-
-        return Maybe::of($file);
+        return $this->files->find(static fn($file) => $file->name()->equals($name));
     }
 
     public function contains(Name $name): bool
     {
-        return $this->files->reduce(
-            false,
-            static fn(bool $found, File $file): bool => $found || $file->name()->equals($name),
+        return $this->get($name)->match(
+            static fn() => true,
+            static fn() => false,
         );
     }
 
