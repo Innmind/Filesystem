@@ -43,17 +43,6 @@ class FileTest extends TestCase
         $this->assertSame('foo', $file->name()->toString());
     }
 
-    public function testWithContent()
-    {
-        $f = new File(new Name('foo'), $c = $this->createMock(Content::class));
-        $f2 = $f->withContent($c2 = $this->createMock(Content::class));
-
-        $this->assertNotSame($f, $f2);
-        $this->assertSame($f->name(), $f2->name());
-        $this->assertSame($c, $f->content());
-        $this->assertSame($c2, $f2->content());
-    }
-
     public function testMediaType()
     {
         $f = new File(
@@ -123,30 +112,6 @@ class FileTest extends TestCase
                 $this->assertTrue($file->name()->equals($name));
                 $this->assertSame($content, $file->content());
                 $this->assertSame($mediaType, $file->mediaType());
-            });
-    }
-
-    public function testWithContentIsPure()
-    {
-        $this
-            ->forAll(
-                FName::any(),
-                FMediaType::any(),
-            )
-            ->then(function($name, $mediaType) {
-                $file1 = new File(
-                    $name,
-                    $content = $this->createMock(Content::class),
-                    $mediaType,
-                );
-                $file2 = $file1->withContent($content2 = $this->createMock(Content::class));
-
-                $this->assertSame($name, $file1->name());
-                $this->assertSame($content, $file1->content());
-                $this->assertSame($mediaType, $file1->mediaType());
-                $this->assertSame($name, $file2->name());
-                $this->assertSame($content2, $file2->content());
-                $this->assertSame($mediaType, $file2->mediaType());
             });
     }
 }

@@ -50,15 +50,4 @@ final class File implements FileInterface
     {
         return $this->mediaType;
     }
-
-    /**
-     * New file reference with a different content
-     */
-    public function withContent(Content $content): self
-    {
-        $file = clone $this;
-        $file->content = $content;
-
-        return $file;
-    }
 }
