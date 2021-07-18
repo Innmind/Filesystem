@@ -100,6 +100,6 @@ class LineTest extends TestCase
         return Set\Decorate::immutable(
             static fn($content) => \rtrim($content, "\n"),
             Set\Unicode::strings(),
-        );
+        )->filter(static fn($content) => !\str_contains($content, "\n"));
     }
 }
