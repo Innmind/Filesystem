@@ -11,6 +11,7 @@ use Innmind\Filesystem\File\{
 use Innmind\Immutable\{
     Str,
     Sequence,
+    SideEffect,
 };
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -38,10 +39,13 @@ class LinesTest extends TestCase
                 $content = Lines::of(Sequence::of(...$lines));
                 $called = 0;
 
-                $this->assertNull($content->foreach(function($line) use ($lines, &$called) {
-                    $this->assertSame($lines[$called], $line);
-                    $called++;
-                }));
+                $this->assertInstanceOf(
+                    SideEffect::class,
+                    $content->foreach(function($line) use ($lines, &$called) {
+                        $this->assertSame($lines[$called], $line);
+                        $called++;
+                    }),
+                );
                 $this->assertSame(\count($lines), $called);
             });
     }
@@ -51,10 +55,13 @@ class LinesTest extends TestCase
         $content = Lines::of(Sequence::of(Line::of(Str::of(''))));
         $called = 0;
 
-        $this->assertNull($content->foreach(function($line) use (&$called) {
-            $this->assertSame('', $line->toString());
-            $called++;
-        }));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $content->foreach(function($line) use (&$called) {
+                $this->assertSame('', $line->toString());
+                $called++;
+            }),
+        );
         $this->assertSame(1, $called);
     }
 
@@ -74,10 +81,13 @@ class LinesTest extends TestCase
                 $called = 0;
 
                 $this->assertNotSame($content, $mapped);
-                $this->assertNull($mapped->foreach(function($line) use ($replacement, &$called) {
-                    $this->assertSame($replacement, $line);
-                    $called++;
-                }));
+                $this->assertInstanceOf(
+                    SideEffect::class,
+                    $mapped->foreach(function($line) use ($replacement, &$called) {
+                        $this->assertSame($replacement, $line);
+                        $called++;
+                    }),
+                );
                 $this->assertSame(\count($lines), $called);
             });
     }

@@ -12,6 +12,7 @@ use Innmind\Url\Path;
 use Innmind\Immutable\{
     Str,
     Sequence,
+    SideEffect,
 };
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -40,10 +41,13 @@ class AtPathTest extends TestCase
                 $content = AtPath::of(Path::of('/tmp/test_content'));
                 $called = 0;
 
-                $this->assertNull($content->foreach(function($line) use ($lines, &$called) {
-                    $this->assertSame($lines[$called], $line->toString());
-                    $called++;
-                }));
+                $this->assertInstanceOf(
+                    SideEffect::class,
+                    $content->foreach(function($line) use ($lines, &$called) {
+                        $this->assertSame($lines[$called], $line->toString());
+                        $called++;
+                    }),
+                );
                 $this->assertSame(\count($lines), $called);
             });
     }
@@ -54,10 +58,13 @@ class AtPathTest extends TestCase
         $content = AtPath::of(Path::of('/tmp/test_content'));
         $called = 0;
 
-        $this->assertNull($content->foreach(function($line) use (&$called) {
-            $this->assertSame('', $line->toString());
-            $called++;
-        }));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $content->foreach(function($line) use (&$called) {
+                $this->assertSame('', $line->toString());
+                $called++;
+            }),
+        );
         $this->assertSame(1, $called);
     }
 
@@ -79,10 +86,13 @@ class AtPathTest extends TestCase
                 $called = 0;
 
                 $this->assertNotSame($content, $mapped);
-                $this->assertNull($mapped->foreach(function($line) use ($replacement, &$called) {
-                    $this->assertSame($replacement, $line);
-                    $called++;
-                }));
+                $this->assertInstanceOf(
+                    SideEffect::class,
+                    $mapped->foreach(function($line) use ($replacement, &$called) {
+                        $this->assertSame($replacement, $line);
+                        $called++;
+                    }),
+                );
                 $this->assertSame(\count($lines), $called);
             });
     }

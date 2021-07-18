@@ -6,6 +6,7 @@ namespace Innmind\Filesystem;
 use Innmind\Immutable\{
     Set,
     Maybe,
+    SideEffect,
 };
 
 interface Directory extends File
@@ -22,7 +23,7 @@ interface Directory extends File
     /**
      * @param callable(File): void $function
      */
-    public function foreach(callable $function): void;
+    public function foreach(callable $function): SideEffect;
 
     /**
      * @param callable(File): bool $predicate

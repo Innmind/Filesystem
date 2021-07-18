@@ -9,7 +9,10 @@ use Innmind\Filesystem\{
 };
 use Innmind\Url\Path;
 use Innmind\Stream\Readable;
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    SideEffect,
+};
 
 /**
  * @psalm-immutable
@@ -28,9 +31,9 @@ final class AtPath implements Content
         return new self($path);
     }
 
-    public function foreach(callable $function): void
+    public function foreach(callable $function): SideEffect
     {
-        $_ = $this->sequence()->foreach($function);
+        return $this->sequence()->foreach($function);
     }
 
     public function map(callable $map): Content

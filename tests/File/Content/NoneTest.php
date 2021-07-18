@@ -11,6 +11,7 @@ use Innmind\Filesystem\File\{
 use Innmind\Immutable\{
     Str,
     Sequence,
+    SideEffect,
 };
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -32,10 +33,13 @@ class NoneTest extends TestCase
         $content = None::of();
         $called = 0;
 
-        $this->assertNull($content->foreach(function($line) use (&$called) {
-            $this->assertSame('', $line->toString());
-            $called++;
-        }));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $content->foreach(function($line) use (&$called) {
+                $this->assertSame('', $line->toString());
+                $called++;
+            }),
+        );
         $this->assertSame(1, $called);
     }
 
@@ -50,10 +54,13 @@ class NoneTest extends TestCase
                 $called = 0;
 
                 $this->assertNotSame($content, $mapped);
-                $this->assertNull($mapped->foreach(function($line) use ($replacement, &$called) {
-                    $this->assertSame($replacement, $line);
-                    $called++;
-                }));
+                $this->assertInstanceOf(
+                    SideEffect::class,
+                    $mapped->foreach(function($line) use ($replacement, &$called) {
+                        $this->assertSame($replacement, $line);
+                        $called++;
+                    }),
+                );
                 $this->assertSame(1, $called);
             });
     }

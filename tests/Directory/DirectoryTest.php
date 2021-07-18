@@ -12,7 +12,10 @@ use Innmind\Filesystem\{
     File\Content\Lines,
     Exception\LogicException,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    SideEffect,
+};
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -146,9 +149,12 @@ class DirectoryTest extends TestCase
         );
 
         $called = 0;
-        $this->assertNull($directory->foreach(static function() use (&$called) {
-            ++$called;
-        }));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $directory->foreach(static function() use (&$called) {
+                ++$called;
+            }),
+        );
         $this->assertSame(4, $called);
     }
 

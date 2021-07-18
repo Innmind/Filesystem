@@ -5,7 +5,10 @@ namespace Innmind\Filesystem\File;
 
 use Innmind\Filesystem\File\Content\Line;
 use Innmind\Stream\Readable;
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    SideEffect,
+};
 
 /**
  * @psalm-immutable
@@ -15,7 +18,7 @@ interface Content
     /**
      * @param callable(Line): void $function
      */
-    public function foreach(callable $function): void;
+    public function foreach(callable $function): SideEffect;
 
     /**
      * @param callable(Line): Line $map

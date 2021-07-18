@@ -15,6 +15,7 @@ use Innmind\Immutable\{
     Str,
     Set,
     Maybe,
+    SideEffect,
 };
 
 /**
@@ -148,9 +149,9 @@ final class Directory implements DirectoryInterface
         return $directory;
     }
 
-    public function foreach(callable $function): void
+    public function foreach(callable $function): SideEffect
     {
-        $_ = $this->files->foreach($function);
+        return $this->files->foreach($function);
     }
 
     public function filter(callable $predicate): self

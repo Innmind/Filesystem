@@ -11,6 +11,7 @@ use Innmind\Stream\Readable;
 use Innmind\Immutable\{
     Sequence,
     Str,
+    SideEffect,
 };
 use function Innmind\Immutable\join;
 
@@ -52,9 +53,9 @@ final class Lines implements Content
         );
     }
 
-    public function foreach(callable $function): void
+    public function foreach(callable $function): SideEffect
     {
-        $_ = $this->lines->foreach($function);
+        return $this->lines->foreach($function);
     }
 
     public function map(callable $map): Content
