@@ -9,6 +9,9 @@ use Innmind\Filesystem\{
 };
 use Innmind\MediaType\MediaType;
 
+/**
+ * @psalm-immutable
+ */
 final class File implements FileInterface
 {
     private Name $name;

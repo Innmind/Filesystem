@@ -16,6 +16,9 @@ final class None
         // cannot be instanciated
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function of(): Content
     {
         return Lines::of(Sequence::of(Line::of(Str::of(''))));

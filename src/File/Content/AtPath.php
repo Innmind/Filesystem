@@ -56,7 +56,9 @@ final class AtPath implements Content
     public function toString(): string
     {
         $stream = $this->stream();
+        /** @psalm-suppress ImpureMethodCall */
         $content = $stream->toString();
+        /** @psalm-suppress ImpureMethodCall */
         $stream->close();
 
         return $content;

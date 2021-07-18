@@ -31,6 +31,8 @@ final class Lines implements Content
     }
 
     /**
+     * @psalm-pure
+     *
      * @param Sequence<Line> $lines
      */
     public static function of(Sequence $lines): self
@@ -38,6 +40,9 @@ final class Lines implements Content
         return new self($lines);
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function ofContent(string $content): self
     {
         return new self(
@@ -88,6 +93,7 @@ final class Lines implements Content
      */
     public function stream(): Readable
     {
+        /** @psalm-suppress ImpureMethodCall */
         return Readable\Stream::ofContent($this->toString());
     }
 }

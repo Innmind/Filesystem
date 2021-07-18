@@ -17,6 +17,9 @@ use Innmind\Immutable\{
     Maybe,
 };
 
+/**
+ * @psalm-immutable
+ */
 final class Directory implements DirectoryInterface
 {
     private Name $name;
@@ -61,6 +64,8 @@ final class Directory implements DirectoryInterface
     }
 
     /**
+     * @psalm-pure
+     *
      * @param Set<File>|null $files
      */
     public static function of(Name $name, Set $files = null): self
@@ -68,6 +73,9 @@ final class Directory implements DirectoryInterface
         return new self($name, $files);
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function named(string $name): self
     {
         return new self(new Name($name));
@@ -75,6 +83,7 @@ final class Directory implements DirectoryInterface
 
     /**
      * @internal
+     * @psalm-pure
      *
      * @param Set<File> $files
      */

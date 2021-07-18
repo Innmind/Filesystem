@@ -6,6 +6,9 @@ namespace Innmind\Filesystem;
 use Innmind\Filesystem\File\Content;
 use Innmind\MediaType\MediaType;
 
+/**
+ * @psalm-immutable
+ */
 interface File
 {
     public function name(): Name;

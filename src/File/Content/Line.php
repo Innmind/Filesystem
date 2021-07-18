@@ -18,6 +18,9 @@ final class Line
         $this->content = $content->rightTrim("\n");
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function of(Str $content): self
     {
         if ($content->contains("\n")) {
@@ -29,6 +32,7 @@ final class Line
 
     /**
      * @internal
+     * @psalm-pure
      */
     public static function fromStream(Str $content): self
     {
