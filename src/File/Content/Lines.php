@@ -63,6 +63,15 @@ final class Lines implements Content
         return new self($this->lines->map($map));
     }
 
+    public function flatMap(callable $map): Content
+    {
+        return new self($this->lines->flatMap(
+            static fn($line) => $map($line)->transform(
+                static fn(Line $line) => $line,
+            ),
+        ));
+    }
+
     public function filter(callable $filter): Content
     {
         return new self($this->lines->filter($filter));

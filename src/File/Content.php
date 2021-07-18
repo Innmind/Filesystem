@@ -26,6 +26,11 @@ interface Content
     public function map(callable $map): self;
 
     /**
+     * @param callable(Line): self $map
+     */
+    public function flatMap(callable $map): self;
+
+    /**
      * @param callable(Line): bool $filter
      */
     public function filter(callable $filter): self;

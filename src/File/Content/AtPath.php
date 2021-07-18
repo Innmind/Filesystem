@@ -41,6 +41,11 @@ final class AtPath implements Content
         return Lines::of($this->transform($map));
     }
 
+    public function flatMap(callable $map): Content
+    {
+        return Lines::of($this->sequence())->flatMap($map);
+    }
+
     public function filter(callable $filter): Content
     {
         return Lines::of($this->sequence()->filter($filter));

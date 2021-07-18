@@ -5,6 +5,8 @@ namespace Tests\Innmind\Filesystem\File\Content;
 
 use Innmind\Filesystem\File\{
     Content\AtPath,
+    Content\Lines,
+    Content\None,
     Content\Line,
     Content,
 };
@@ -94,6 +96,47 @@ class AtPathTest extends TestCase
                     }),
                 );
                 $this->assertSame(\count($lines), $called);
+            });
+    }
+
+    public function testFlatMap()
+    {
+        $this
+            ->forAll(
+                Set\Sequence::of(
+                    $this->strings(),
+                    Set\Integers::between(1, 10),
+                ),
+                $this->strings(),
+            )
+            ->then(function($lines, $newLine) {
+                $newLine = Line::of(Str::of($newLine));
+                \file_put_contents('/tmp/test_content', \implode("\n", $lines));
+                $content = AtPath::of(Path::of('/tmp/test_content'));
+                $empty = $content->flatMap(static fn() => Lines::of(Sequence::of()));
+                $extra = $content->flatMap(static fn($line) => Lines::of(Sequence::of(
+                    $line,
+                    $newLine,
+                )));
+
+                $called = 0;
+                $empty->foreach(static function() use (&$called) {
+                    ++$called;
+                });
+                $this->assertSame(0, $called);
+
+                $called = 0;
+                $extra->foreach(static function() use (&$called) {
+                    ++$called;
+                });
+                $this->assertSame(\count($lines) * 2, $called);
+                $newContent = '';
+
+                foreach ($lines as $line) {
+                    $newContent .= $line."\n".$newLine->toString()."\n";
+                }
+
+                $this->assertSame(\rtrim($newContent, "\n"), $extra->toString());
             });
     }
 
