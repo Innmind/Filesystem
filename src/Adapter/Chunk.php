@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\Adapter;
 
-use Innmind\Filesystem\{
-    File\Content,
-    Exception\CannotPersistClosedStream,
-};
+use Innmind\Filesystem\File\Content;
 use Innmind\Immutable\{
     Sequence,
     Str,
@@ -17,27 +14,29 @@ use Innmind\Immutable\{
  */
 final class Chunk
 {
+    private Chunk\Fixed $fixed;
+    private Chunk\PerLine $perLine;
+
+    public function __construct()
+    {
+        $this->fixed = new Chunk\Fixed;
+        $this->perLine = new Chunk\PerLine;
+    }
+
     /**
      * @return Sequence<Str>
      */
     public function __invoke(Content $content): Sequence
     {
-        $stream = $content->stream();
-
-        if ($stream->closed()) {
-            throw new CannotPersistClosedStream;
+        // For files content coming directly from the filesystem we can use the
+        // stream to make sure we never read too many data at once as it could
+        // cause out of memory errors
+        if ($content instanceof Content\AtPath) {
+            return ($this->fixed)($content);
         }
 
-        $stream->rewind();
-
-        return Sequence::lazy(static function() use ($stream) {
-            while (!$stream->end()) {
-                yield $stream->read(8192);
-            }
-
-            // Closing the stream is safe as the Content should return a new
-            // stream each time so there should ne no side effect
-            $stream->close();
-        });
+        // Reading line per line allows to deal with huge files without loading
+        // them completely in memory
+        return ($this->perLine)($content);
     }
 }
