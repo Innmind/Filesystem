@@ -34,6 +34,7 @@ final class Filesystem implements Adapter
     private const INVALID_FILES = ['.', '..'];
     private Path $path;
     private FS $filesystem;
+    private Chunk $chunk;
     /** @var \WeakMap<File, Path> */
     private \WeakMap $loaded;
 
@@ -45,6 +46,7 @@ final class Filesystem implements Adapter
 
         $this->path = $path;
         $this->filesystem = new FS;
+        $this->chunk = new Chunk;
         /** @var \WeakMap<File, Path> */
         $this->loaded = new \WeakMap;
 
@@ -130,13 +132,7 @@ final class Filesystem implements Adapter
             $this->filesystem->remove($path->toString());
         }
 
-        $stream = $file->content()->stream();
-
-        if ($stream->closed()) {
-            throw new CannotPersistClosedStream($path->toString());
-        }
-
-        $stream->rewind();
+        $chunks = ($this->chunk)($file->content());
 
         try {
             $this->filesystem->touch($path->toString());
@@ -154,16 +150,11 @@ final class Filesystem implements Adapter
 
         $handle = new Stream(\fopen($path->toString(), 'w'));
 
-        while (!$stream->end()) {
-            $handle->write(
-                $stream->read(8192)->toEncoding('ASCII'),
-            );
-        }
+        $_ = $chunks->foreach(static fn($chunk) => $handle->write(
+            $chunk->toEncoding('ASCII'),
+        ));
 
         $handle->close();
-        // Closing the stream is safe as the Content should return a new stream
-        // each time so there should ne no side effect
-        $stream->close();
     }
 
     /**
