@@ -11,10 +11,7 @@ use Innmind\Filesystem\{
 };
 use Innmind\MediaType\MediaType;
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\{
-    PHPUnit\BlackBox,
-    Set,
-};
+use Innmind\BlackBox\PHPUnit\BlackBox;
 use Fixtures\Innmind\Filesystem\Name as FName;
 use Fixtures\Innmind\MediaType\MediaType as FMediaType;
 

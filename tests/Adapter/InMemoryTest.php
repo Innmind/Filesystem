@@ -7,16 +7,13 @@ use Innmind\Filesystem\{
     Adapter\InMemory,
     Adapter,
     Directory\Directory,
-    File as FileInterface,
     File\File,
     File\Content\Lines,
     Name,
 };
 use Innmind\Immutable\Set;
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\{
-    PHPUnit\BlackBox,
-};
+use Innmind\BlackBox\PHPUnit\BlackBox;
 use Properties\Innmind\Filesystem\Adapter as PAdapter;
 
 class InMemoryTest extends TestCase

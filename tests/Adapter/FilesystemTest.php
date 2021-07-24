@@ -10,12 +10,10 @@ use Innmind\Filesystem\{
     File\Content\None,
     File\Content\Lines,
     Name,
-    File as FileInterface,
     Directory as DirectoryInterface,
     Directory\Directory,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
-    Exception\CannotPersistClosedStream,
     Exception\LinksAreNotSupported,
 };
 use Innmind\Url\Path;
@@ -29,10 +27,7 @@ use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set as DataSet,
 };
-use Fixtures\Innmind\Filesystem\{
-    Name as FName,
-    File as FFile,
-};
+use Fixtures\Innmind\Filesystem\Name as FName;
 use Properties\Innmind\Filesystem\Adapter as PAdapter;
 
 class FilesystemTest extends TestCase

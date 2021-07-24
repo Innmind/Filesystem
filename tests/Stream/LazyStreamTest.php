@@ -10,10 +10,7 @@ use Innmind\Stream\{
 };
 use Innmind\Url\Path;
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\{
-    PHPUnit\BlackBox,
-    Set,
-};
+use Innmind\BlackBox\PHPUnit\BlackBox;
 use Fixtures\Innmind\Stream\Readable as FReadable;
 use Properties\Innmind\Stream\Readable as PReadable;
 

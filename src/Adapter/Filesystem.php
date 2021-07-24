@@ -8,13 +8,11 @@ use Innmind\Filesystem\{
     File,
     Name,
     Directory,
-    Stream\LazyStream,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\RuntimeException,
     Exception\CannotPersistClosedStream,
     Exception\LinksAreNotSupported,
-    Event\FileWasRemoved,
 };
 use Innmind\Stream\Writable\Stream;
 use Innmind\MediaType\MediaType;
