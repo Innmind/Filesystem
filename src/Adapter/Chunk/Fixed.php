@@ -35,9 +35,10 @@ final class Fixed
                 yield $stream->read(8192);
             }
 
-            // Closing the stream is safe as the Content should return a new
-            // stream each time so there should ne no side effect
-            $stream->close();
+            // Calling the rewind here helps always leave the streams in a
+            // readable state. It also helps avoid a fatal error when handling
+            // too many files (see LazyStream::rewind() for more explanations)
+            $stream->rewind();
         });
     }
 }
