@@ -28,6 +28,9 @@ final class File implements FileInterface
         $this->mediaType = $mediaType ?? MediaType::null();
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function named(
         string $name,
         Content $content,

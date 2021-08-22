@@ -26,6 +26,9 @@ final class AtPath implements Content
         $this->path = $path;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function of(Path $path): self
     {
         return new self($path);
