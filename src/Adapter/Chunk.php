@@ -35,6 +35,12 @@ final class Chunk
             return ($this->fixed)($content);
         }
 
+        // For files read from a stream we use the same strategy as the files
+        // coming from the filesystem for memory reasons
+        if ($content instanceof Content\OfStream) {
+            return ($this->fixed)($content);
+        }
+
         // Reading line per line allows to deal with huge files without loading
         // them completely in memory
         return ($this->perLine)($content);

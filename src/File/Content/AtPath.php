@@ -19,11 +19,11 @@ use Innmind\Immutable\{
  */
 final class AtPath implements Content
 {
-    private Path $path;
+    private Content $content;
 
-    private function __construct(Path $path)
+    private function __construct(Content $content)
     {
-        $this->path = $path;
+        $this->content = $content;
     }
 
     /**
@@ -31,77 +31,46 @@ final class AtPath implements Content
      */
     public static function of(Path $path): self
     {
-        return new self($path);
+        return new self(OfStream::lazy(static fn() => new LazyStream($path)));
     }
 
     public function foreach(callable $function): SideEffect
     {
-        return $this->sequence()->foreach($function);
+        return $this->content->foreach($function);
     }
 
     public function map(callable $map): Content
     {
-        return Lines::of($this->transform($map));
+        return $this->content->map($map);
     }
 
     public function flatMap(callable $map): Content
     {
-        return Lines::of($this->sequence())->flatMap($map);
+        return $this->content->flatMap($map);
     }
 
     public function filter(callable $filter): Content
     {
-        return Lines::of($this->sequence()->filter($filter));
+        return $this->content->filter($filter);
     }
 
     public function transform(callable $map): Sequence
     {
-        return $this->sequence()->map($map);
+        return $this->content->transform($map);
     }
 
     public function reduce($carry, callable $reducer)
     {
-        return $this->sequence()->reduce($carry, $reducer);
+        return $this->content->reduce($carry, $reducer);
     }
 
     public function toString(): string
     {
-        $stream = $this->stream();
-        /** @psalm-suppress ImpureMethodCall */
-        $content = $stream->toString();
-        /** @psalm-suppress ImpureMethodCall */
-        $stream->close();
-
-        return $content;
+        return $this->content->toString();
     }
 
-    /**
-     * This method should be use with extreme care as manipulating a stream
-     * manually can lead to unexpected behaviour in your code.
-     *
-     * Implementations of this interface should always return a different
-     * instance of the stream object to avoid side effects in the implementation
-     */
     public function stream(): Readable
     {
-        return new LazyStream($this->path);
-    }
-
-    /**
-     * @return Sequence<Line>
-     */
-    private function sequence(): Sequence
-    {
-        return Sequence::lazy(function() {
-            $stream = $this->stream();
-
-            while (!$stream->end()) {
-                $line = $stream->readLine();
-
-                yield Line::fromStream($line);
-            }
-
-            $stream->close();
-        });
+        return $this->content->stream();
     }
 }
