@@ -205,18 +205,15 @@ final class Filesystem implements Adapter
     {
         /** @var Set<File> */
         return Set::defer((function(Path $folder): \Generator {
-            $files = Finder::create()
-                ->depth('== 0')
-                ->in($folder->toString())
-                ->ignoreDotFiles(false);
+            $files = new \FilesystemIterator($folder->toString());
 
-            /** @var SplFileInfo $file */
+            /** @var \SplFileInfo $file */
             foreach ($files as $file) {
                 if (\is_link($file->getPathname())) {
                     throw new LinksAreNotSupported($file->getPathname());
                 }
 
-                yield $this->open($folder, new Name($file->getRelativePathname()));
+                yield $this->open($folder, new Name($file->getBasename()));
             }
         })($path));
     }
