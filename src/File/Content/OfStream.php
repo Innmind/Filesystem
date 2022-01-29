@@ -55,7 +55,7 @@ final class OfStream implements Content
 
     public function foreach(callable $function): SideEffect
     {
-        return $this->sequence()->foreach($function);
+        return $this->lines()->foreach($function);
     }
 
     public function map(callable $map): Content
@@ -65,39 +65,31 @@ final class OfStream implements Content
 
     public function flatMap(callable $map): Content
     {
-        return Lines::of($this->sequence())->flatMap($map);
+        return Lines::of($this->lines())->flatMap($map);
     }
 
     public function filter(callable $filter): Content
     {
-        return Lines::of($this->sequence()->filter($filter));
+        return Lines::of($this->lines()->filter($filter));
     }
 
     public function transform(callable $map): Sequence
     {
-        return $this->sequence()->map($map);
+        return $this->lines()->map($map);
     }
 
     public function reduce($carry, callable $reducer)
     {
-        return $this->sequence()->reduce($carry, $reducer);
+        return $this->lines()->reduce($carry, $reducer);
     }
 
     public function toString(): string
     {
-        /**
-         * @psalm-suppress ImpureFunctionCall
-         * @psalm-suppress ImpureMethodCall
-         * @var Either<PositionNotSeekable, Readable>
-         */
-        $either = ($this->load)()->rewind();
+        $lines = $this
+            ->sequence()
+            ->map(static fn($line) => $line->toString());
 
-        return $either
-            ->flatMap(fn(Readable $stream) => $this->read($stream))
-            ->match(
-                static fn($content) => $content,
-                static fn() => throw new FailedToLoadFile,
-            );
+        return Str::of('')->join($lines)->toString();
     }
 
     public function stream(): Readable
@@ -108,6 +100,16 @@ final class OfStream implements Content
 
     /**
      * @return Sequence<Line>
+     */
+    private function lines(): Sequence
+    {
+        return $this
+            ->sequence()
+            ->map(static fn($line) => Line::fromStream($line));
+    }
+
+    /**
+     * @return Sequence<Str>
      */
     private function sequence(): Sequence
     {
@@ -132,29 +134,13 @@ final class OfStream implements Content
                 // ending with the "end of line" character
                 yield $stream
                     ->readLine()
-                    ->map(static fn($line) => Line::fromStream($line))
                     ->match(
                         static fn($line) => $line,
-                        static fn() => Line::of(Str::of('')),
+                        static fn() => Str::of(''),
                     );
             }
 
             $rewind();
         });
-    }
-
-    /**
-     * @return Either<null, string>
-     */
-    private function read(Readable $stream): Either
-    {
-        /** @psalm-suppress ImpureMethodCall */
-        return $stream->toString()->match(
-            static fn($content) => $stream
-                ->rewind()
-                ->map(static fn() => $content)
-                ->leftMap(static fn() => null),
-            static fn() => Either::left(null),
-        );
     }
 }
