@@ -27,7 +27,7 @@ class InMemoryTest extends TestCase
         $this->assertInstanceOf(Adapter::class, $a);
         $this->assertFalse($a->contains(new Name('foo')));
         $this->assertNull(
-            $a->add($d = Directory::of(new Name('foo')))
+            $a->add($d = Directory::of(new Name('foo'))),
         );
         $this->assertTrue($a->contains(new Name('foo')));
         $this->assertSame(
@@ -59,11 +59,11 @@ class InMemoryTest extends TestCase
         $adapter = new InMemory;
         $adapter->add($foo = new File(
             new Name('foo'),
-            Lines::ofContent('foo')
+            Lines::ofContent('foo'),
         ));
         $adapter->add($bar = new File(
             new Name('bar'),
-            Lines::ofContent('bar')
+            Lines::ofContent('bar'),
         ));
 
         $all = $adapter->all();

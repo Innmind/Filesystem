@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Adapter;
 
-use Innmind\Filesystem\Name;
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;
 

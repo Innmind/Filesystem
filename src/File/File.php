@@ -21,7 +21,7 @@ final class File implements FileInterface
     public function __construct(
         Name $name,
         Content $content,
-        MediaType $mediaType = null
+        MediaType $mediaType = null,
     ) {
         $this->name = $name;
         $this->content = $content;
@@ -34,7 +34,7 @@ final class File implements FileInterface
     public static function named(
         string $name,
         Content $content,
-        MediaType $mediaType = null
+        MediaType $mediaType = null,
     ): self {
         return new self(new Name($name), $content, $mediaType);
     }

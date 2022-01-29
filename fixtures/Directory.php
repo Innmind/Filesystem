@@ -95,7 +95,7 @@ final class Directory
 
         return new DataSet\Either(
             $directory,
-            $modified
+            $modified,
         );
     }
 }

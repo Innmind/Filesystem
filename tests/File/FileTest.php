@@ -28,7 +28,7 @@ class FileTest extends TestCase
         $this->assertSame($c, $f->content());
         $this->assertSame(
             'application/octet-stream',
-            $f->mediaType()->toString()
+            $f->mediaType()->toString(),
         );
     }
 

@@ -25,7 +25,7 @@ class LazyStreamTest extends TestCase
     {
         \file_put_contents(
             $path = \tempnam(\sys_get_temp_dir(), 'lazy_stream'),
-            'lorem ipsum dolor'
+            'lorem ipsum dolor',
         );
         $stream = new LazyStream(Path::of($path));
     }

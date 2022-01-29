@@ -57,7 +57,7 @@ class DirectoryTest extends TestCase
         $d->content(); //force generation of files list, to be sure it's not cloned
 
         $d2 = $d->add(
-            $file = new File\File(new Name('foo'), Lines::ofContent('bar'))
+            $file = new File\File(new Name('foo'), Lines::ofContent('bar')),
         );
 
         $this->assertInstanceOf(DirectoryInterface::class, $d2);

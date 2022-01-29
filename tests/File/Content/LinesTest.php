@@ -136,7 +136,7 @@ class LinesTest extends TestCase
         $this
             ->forAll(Set\Sequence::of(
                 $this->strings(),
-                Set\Integers::between(1, 10)
+                Set\Integers::between(1, 10),
             ))
             ->then(function($lines) {
                 $content = Lines::of(Sequence::of(...$lines));
@@ -191,7 +191,7 @@ class LinesTest extends TestCase
         $this
             ->forAll(Set\Sequence::of(
                 $this->strings(),
-                Set\Integers::between(1, 10)
+                Set\Integers::between(1, 10),
             ))
             ->then(function($lines) {
                 $content = Lines::of(Sequence::of(...$lines));
@@ -211,7 +211,7 @@ class LinesTest extends TestCase
         $this
             ->forAll(Set\Sequence::of(
                 $this->strings(),
-                Set\Integers::between(1, 10)
+                Set\Integers::between(1, 10),
             ))
             ->then(function($lines) {
                 $content = Lines::of(Sequence::of(...$lines));

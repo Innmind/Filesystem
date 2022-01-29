@@ -39,7 +39,7 @@ final class Name
         )->filter(
             static fn(string $name): bool => $name !== '.' &&
                 $name !== '..' &&
-                !\preg_match('~\s+~', $name)
+                !\preg_match('~\s+~', $name),
         );
     }
 }

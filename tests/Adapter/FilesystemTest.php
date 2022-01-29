@@ -86,7 +86,7 @@ class FilesystemTest extends TestCase
             ->add(new File(new Name('foo.md'), Lines::ofContent('# Foo')))
             ->add(
                 Directory::of(new Name('bar'))
-                    ->add(new File(new Name('bar.md'), Lines::ofContent('# Bar')))
+                    ->add(new File(new Name('bar.md'), Lines::ofContent('# Bar'))),
             );
         $adapter->add($directory);
         $this->assertSame(
@@ -194,7 +194,7 @@ class FilesystemTest extends TestCase
         $a = new Filesystem(Path::of('/tmp/'));
         \file_put_contents(
             '/tmp/some_content.html',
-            '<!DOCTYPE html><html><body><answer value="42"/></body></html>'
+            '<!DOCTYPE html><html><body><answer value="42"/></body></html>',
         );
 
         $this->assertSame(
@@ -215,7 +215,7 @@ class FilesystemTest extends TestCase
         $adapter = new Filesystem(Path::of('/tmp/test/'));
         $adapter->add(new File(
             new Name('foo'),
-            Lines::ofContent('foo')
+            Lines::ofContent('foo'),
         ));
         \file_put_contents('/tmp/test/bar', 'bar');
         \mkdir('/tmp/test/baz');
