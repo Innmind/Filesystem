@@ -15,7 +15,7 @@ final class Line
 
     private function __construct(Str $content)
     {
-        $this->content = $content->rightTrim("\n");
+        $this->content = $content;
     }
 
     /**
@@ -36,7 +36,7 @@ final class Line
      */
     public static function fromStream(Str $content): self
     {
-        return new self($content);
+        return new self($content->rightTrim("\n"));
     }
 
     /**
