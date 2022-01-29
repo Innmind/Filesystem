@@ -22,7 +22,7 @@ class InMemoryTest extends TestCase
 
     public function testInterface()
     {
-        $a = new InMemory;
+        $a = InMemory::new();
 
         $this->assertInstanceOf(Adapter::class, $a);
         $this->assertFalse($a->contains(new Name('foo')));
@@ -43,7 +43,7 @@ class InMemoryTest extends TestCase
 
     public function testReturnNothingWhenGettingUnknownFile()
     {
-        $this->assertNull((new InMemory)->get(new Name('foo'))->match(
+        $this->assertNull(InMemory::new()->get(new Name('foo'))->match(
             static fn($file) => $file,
             static fn() => null,
         ));
@@ -51,12 +51,12 @@ class InMemoryTest extends TestCase
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $this->assertNull((new InMemory)->remove(new Name('foo')));
+        $this->assertNull(InMemory::new()->remove(new Name('foo')));
     }
 
     public function testAll()
     {
-        $adapter = new InMemory;
+        $adapter = InMemory::new();
         $adapter->add($foo = new File(
             new Name('foo'),
             Lines::ofContent('foo'),
@@ -82,11 +82,11 @@ class InMemoryTest extends TestCase
         $this
             ->forAll($property)
             ->then(function($property) {
-                if (!$property->applicableTo(new InMemory)) {
+                if (!$property->applicableTo(InMemory::new())) {
                     $this->markTestSkipped();
                 }
 
-                $property->ensureHeldBy(new InMemory);
+                $property->ensureHeldBy(InMemory::new());
             });
     }
 
@@ -98,7 +98,7 @@ class InMemoryTest extends TestCase
         $this
             ->forAll(PAdapter::properties())
             ->then(static function($properties) {
-                $properties->ensureHeldBy(new InMemory);
+                $properties->ensureHeldBy(InMemory::new());
             });
     }
 

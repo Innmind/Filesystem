@@ -19,10 +19,15 @@ final class Logger implements Adapter
     private Adapter $filesystem;
     private LoggerInterface $logger;
 
-    public function __construct(Adapter $filesystem, LoggerInterface $logger)
+    private function __construct(Adapter $filesystem, LoggerInterface $logger)
     {
         $this->filesystem = $filesystem;
         $this->logger = $logger;
+    }
+
+    public static function psr(Adapter $filesystem, LoggerInterface $logger): self
+    {
+        return new self($filesystem, $logger);
     }
 
     public function add(File $file): void

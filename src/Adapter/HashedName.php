@@ -26,9 +26,14 @@ final class HashedName implements Adapter
 {
     private Adapter $filesystem;
 
-    public function __construct(Adapter $filesystem)
+    private function __construct(Adapter $filesystem)
     {
         $this->filesystem = $filesystem;
+    }
+
+    public static function of(Adapter $filesystem): self
+    {
+        return new self($filesystem);
     }
 
     public function add(File $file): void

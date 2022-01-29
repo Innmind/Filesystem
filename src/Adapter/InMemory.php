@@ -19,10 +19,15 @@ final class InMemory implements Adapter
     /** @var Map<string, File> */
     private Map $files;
 
-    public function __construct()
+    private function __construct()
     {
         /** @var Map<string, File> */
         $this->files = Map::of();
+    }
+
+    public static function new(): self
+    {
+        return new self;
     }
 
     public function add(File $file): void

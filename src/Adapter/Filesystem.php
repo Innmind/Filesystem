@@ -42,7 +42,7 @@ final class Filesystem implements Adapter
     /** @var \WeakMap<File, Path> */
     private \WeakMap $loaded;
 
-    public function __construct(Path $path)
+    private function __construct(Path $path)
     {
         if (!$path->directory()) {
             throw new PathDoesntRepresentADirectory($path->toString());
@@ -57,6 +57,11 @@ final class Filesystem implements Adapter
         if (!$this->filesystem->exists($this->path->toString())) {
             $this->filesystem->mkdir($this->path->toString());
         }
+    }
+
+    public static function mount(Path $path): self
+    {
+        return new self($path);
     }
 
     public function add(File $file): void

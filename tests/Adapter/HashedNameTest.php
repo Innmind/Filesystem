@@ -29,13 +29,13 @@ class HashedNameTest extends TestCase
     {
         $this->assertInstanceOf(
             Adapter::class,
-            new HashedName($this->createMock(Adapter::class)),
+            HashedName::of($this->createMock(Adapter::class)),
         );
     }
 
     public function testThrowWhenAddingADirectory()
     {
-        $filesystem = new HashedName($this->createMock(Adapter::class));
+        $filesystem = HashedName::of($this->createMock(Adapter::class));
 
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('A directory can\'t be hashed');
@@ -45,8 +45,8 @@ class HashedNameTest extends TestCase
 
     public function testFileLifecycle()
     {
-        $filesystem = new HashedName(
-            $inner = new Filesystem(Path::of('/tmp/hashed/')),
+        $filesystem = HashedName::of(
+            $inner = Filesystem::mount(Path::of('/tmp/hashed/')),
         );
 
         $file = new File\File(new Name('foo'), Lines::ofContent('content'));
@@ -99,8 +99,8 @@ class HashedNameTest extends TestCase
 
     public function testReturnNothingWhenGettingUnknownFile()
     {
-        $filesystem = new HashedName(
-            new Filesystem(Path::of('/tmp/hashed/')),
+        $filesystem = HashedName::of(
+            Filesystem::mount(Path::of('/tmp/hashed/')),
         );
 
         $this->assertNull($filesystem->get(new Name('foo'))->match(
@@ -111,8 +111,8 @@ class HashedNameTest extends TestCase
 
     public function testAll()
     {
-        $filesystem = new HashedName(
-            new Filesystem(Path::of('/tmp/hashed/')),
+        $filesystem = HashedName::of(
+            Filesystem::mount(Path::of('/tmp/hashed/')),
         );
 
         $filesystem->add(new File\File(new Name('foo'), Lines::ofContent('content')));
@@ -130,8 +130,8 @@ class HashedNameTest extends TestCase
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $filesystem = new HashedName(
-            new Filesystem(Path::of('/tmp/hashed/')),
+        $filesystem = HashedName::of(
+            Filesystem::mount(Path::of('/tmp/hashed/')),
         );
 
         $this->assertNull($filesystem->remove(new Name('foo')));
