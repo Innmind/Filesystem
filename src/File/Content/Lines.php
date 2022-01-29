@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\Filesystem\{
-    File\Content,
-    Stream\NullStream,
-};
+use Innmind\Filesystem\File\Content;
 use Innmind\Stream\Readable;
 use Innmind\Immutable\{
     Sequence,
