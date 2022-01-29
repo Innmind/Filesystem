@@ -88,10 +88,10 @@ final class Directory implements DirectoryInterface
      *
      * @param Set<File> $files
      */
-    public static function defer(Name $name, Set $files): self
+    public static function lazy(Name $name, Set $files): self
     {
         // we prevent the contrusctor from checking for duplicates when
-        // using a deferred set of files as it will trigger to load the whole
+        // using a lazy set of files as it will trigger to load the whole
         // directory tree, it's kinda safe to do this as this method should
         // only be used within the filesystem adapter and there should be no
         // duplicates on a concrete filesystem
@@ -161,7 +161,7 @@ final class Directory implements DirectoryInterface
         // comes from a user and must have used the standard constructor that
         // validates for duplicates, so they're can't be any duplicates after
         // a filter
-        return self::defer($this->name, $this->files->filter($predicate));
+        return self::lazy($this->name, $this->files->filter($predicate));
     }
 
     public function reduce($carry, callable $reducer)

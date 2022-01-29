@@ -183,7 +183,7 @@ final class Filesystem implements Adapter
         if (\is_dir($path->toString())) {
             $files = $this->list($folder->resolve(Path::of($file->toString().'/')));
 
-            return Directory\Directory::defer($file, $files);
+            return Directory\Directory::lazy($file, $files);
         }
 
         if (\is_link($path->toString())) {
@@ -209,8 +209,8 @@ final class Filesystem implements Adapter
     private function list(Path $path): Set
     {
         /** @var Set<File> */
-        return Set::defer((function(Path $folder): \Generator {
-            $files = new \FilesystemIterator($folder->toString());
+        return Set::lazy(function() use ($path): \Generator {
+            $files = new \FilesystemIterator($path->toString());
 
             /** @var \SplFileInfo $file */
             foreach ($files as $file) {
@@ -218,8 +218,8 @@ final class Filesystem implements Adapter
                     throw new LinksAreNotSupported($file->getPathname());
                 }
 
-                yield $this->open($folder, new Name($file->getBasename()));
+                yield $this->open($path, new Name($file->getBasename()));
             }
-        })($path));
+        });
     }
 }

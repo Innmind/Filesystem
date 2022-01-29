@@ -140,12 +140,12 @@ class DirectoryTest extends TestCase
     {
         $directory = Directory::of(
             new Name('foo'),
-            Set::defer((static function() {
+            Set::lazy(static function() {
                 yield new File\File(new Name('foo'), Lines::ofContent('foo'));
                 yield new File\File(new Name('bar'), Lines::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Lines::ofContent('foobar'));
                 yield Directory::of(new Name('sub'));
-            })()),
+            }),
         );
 
         $called = 0;
@@ -162,12 +162,12 @@ class DirectoryTest extends TestCase
     {
         $directory = Directory::of(
             new Name('foo'),
-            Set::defer((static function() {
+            Set::lazy(static function() {
                 yield new File\File(new Name('foo'), Lines::ofContent('foo'));
                 yield new File\File(new Name('bar'), Lines::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Lines::ofContent('foobar'));
                 yield Directory::of(new Name('sub'));
-            })()),
+            }),
         );
 
         $reduced = $directory->reduce(
@@ -182,12 +182,12 @@ class DirectoryTest extends TestCase
     {
         $directory = Directory::of(
             new Name('foo'),
-            Set::defer((static function() {
+            Set::lazy(static function() {
                 yield new File\File(new Name('foo'), Lines::ofContent('foo'));
                 yield new File\File(new Name('bar'), Lines::ofContent('bar'));
                 yield new File\File(new Name('foobar'), Lines::ofContent('foobar'));
                 yield Directory::of(new Name('sub'));
-            })()),
+            }),
         );
 
         $filtered = $directory->filter(
@@ -324,20 +324,20 @@ class DirectoryTest extends TestCase
             });
     }
 
-    public function testDeferringTheLoadingOfADirectoryDoesntLoadFiles()
+    public function testLazyLoadingADirectoryDoesntLoadFiles()
     {
         $this
             ->forAll(FName::any())
             ->then(function($name) {
                 $this->assertInstanceOf(
                     Directory::class,
-                    Directory::defer(
+                    Directory::lazy(
                         $name,
-                        Set::defer((static function() {
+                        Set::lazy(static function() {
                             throw new \Exception;
 
                             yield false;
-                        })()),
+                        }),
                     ),
                 );
             });
