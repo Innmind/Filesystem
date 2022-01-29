@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\File;
 
 use Innmind\Filesystem\File\Content\Line;
-use Innmind\Stream\Readable;
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
@@ -54,13 +53,4 @@ interface Content
      */
     public function reduce($carry, callable $reducer);
     public function toString(): string;
-
-    /**
-     * This method should be used with extreme care as manipulating a stream
-     * manually can lead to unexpected behaviour in your code.
-     *
-     * Implementations of this interface should always return a different
-     * instance of the stream object to avoid side effects in the implementation
-     */
-    public function stream(): Readable;
 }

@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\File\Content;
 
 use Innmind\Filesystem\File\Content;
-use Innmind\Stream\Readable;
 use Innmind\Immutable\{
     Sequence,
     Str,
@@ -88,18 +87,5 @@ final class Lines implements Content
         $lines = $this->lines->map(static fn($line) => $line->toString());
 
         return Str::of("\n")->join($lines)->toString();
-    }
-
-    /**
-     * This method should be use with extreme care as manipulating a stream
-     * manually can lead to unexpected behaviour in your code.
-     *
-     * Implementations of this interface should always return a different
-     * instance of the stream object to avoid side effects in the implementation
-     */
-    public function stream(): Readable
-    {
-        /** @psalm-suppress ImpureMethodCall */
-        return Readable\Stream::ofContent($this->toString());
     }
 }

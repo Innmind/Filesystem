@@ -124,10 +124,6 @@ class NoneTest extends TestCase
     public function testToString()
     {
         $this->assertSame('', None::of()->toString());
-        $this->assertSame('', None::of()->stream()->toString()->match(
-            static fn($value) => $value,
-            static fn() => null,
-        ));
     }
 
     private function strings(): Set

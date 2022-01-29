@@ -19,9 +19,9 @@ use Innmind\Immutable\{
  */
 final class AtPath implements Content
 {
-    private Content $content;
+    private OfStream $content;
 
-    private function __construct(Content $content)
+    private function __construct(OfStream $content)
     {
         $this->content = $content;
     }
@@ -69,6 +69,12 @@ final class AtPath implements Content
         return $this->content->toString();
     }
 
+    /**
+     * This should be used only for reading chunk by chunk to persist the file
+     * to the filesystem
+     *
+     * @internal
+     */
     public function stream(): Readable
     {
         return $this->content->stream();

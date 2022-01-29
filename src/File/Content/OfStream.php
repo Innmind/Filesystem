@@ -92,6 +92,14 @@ final class OfStream implements Content
         return Str::of('')->join($lines)->toString();
     }
 
+    /**
+     * This should be used only for reading chunk by chunk to persist the file
+     * to the filesystem
+     *
+     * The stream returned MUST never be closed
+     *
+     * @internal
+     */
     public function stream(): Readable
     {
         /** @psalm-suppress ImpureFunctionCall */

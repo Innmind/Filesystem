@@ -22,7 +22,7 @@ final class Fixed
     /**
      * @return Sequence<Str>
      */
-    public function __invoke(Content $content): Sequence
+    public function __invoke(Content\AtPath|Content\OfStream $content): Sequence
     {
         $stream = $content->stream();
 
