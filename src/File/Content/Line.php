@@ -44,6 +44,7 @@ final class Line
      */
     public function map(callable $map): self
     {
+        /** @psalm-suppress ImpureFunctionCall */
         return self::of($map($this->content));
     }
 

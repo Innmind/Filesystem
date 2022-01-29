@@ -99,6 +99,31 @@ class AtPathTest extends TestCase
             });
     }
 
+    public function testDoesntThrowWhenLastLineIsEmpty()
+    {
+        $lines = [
+            'foo',
+            'foo',
+            'foo',
+            '',
+        ];
+        $replacement = Line::of(Str::of(''));
+        \file_put_contents('/tmp/test_content', \implode("\n", $lines));
+        $content = AtPath::of(Path::of('/tmp/test_content'));
+        $mapped = $content->map(static fn() => $replacement);
+        $called = 0;
+
+        $this->assertNotSame($content, $mapped);
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $mapped->foreach(function($line) use ($replacement, &$called) {
+                $this->assertSame($replacement, $line);
+                $called++;
+            }),
+        );
+        $this->assertSame(\count($lines), $called);
+    }
+
     public function testFlatMap()
     {
         $this

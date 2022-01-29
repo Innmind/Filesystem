@@ -9,6 +9,7 @@ use Innmind\Stream\{
     Stream\Position,
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\PHPUnit\BlackBox;
 use Fixtures\Innmind\Stream\Readable as FReadable;
@@ -42,7 +43,13 @@ class LazyStreamTest extends TestCase
             \tempnam(\sys_get_temp_dir(), 'lazy_stream'),
         ));
 
-        $this->assertNull($stream->rewind()); // it would fail if initialized here as the file doesn't exist
+        $this->assertSame(
+            $stream,
+            $stream->rewind()->match( // it would fail if initialized here as the file doesn't exist
+                static fn($value) => $value,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testCast()
@@ -51,7 +58,10 @@ class LazyStreamTest extends TestCase
         $stream = new LazyStream(Path::of($path));
         \file_put_contents($path, 'lorem ipsum dolor');
 
-        $this->assertSame('lorem ipsum dolor', $stream->toString());
+        $this->assertSame('lorem ipsum dolor', $stream->toString()->match(
+            static fn($value) => $value,
+            static fn() => null,
+        ));
     }
 
     public function testClose()
@@ -60,7 +70,13 @@ class LazyStreamTest extends TestCase
         $stream = new LazyStream(Path::of($path));
         \file_put_contents($path, 'lorem ipsum dolor');
 
-        $this->assertNull($stream->close());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $stream->close()->match(
+                static fn($value) => $value,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testSize()
@@ -99,7 +115,13 @@ class LazyStreamTest extends TestCase
         $stream = new LazyStream(Path::of($path));
         \file_put_contents($path, 'lorem ipsum dolor');
 
-        $this->assertNull($stream->seek(new Position(3)));
+        $this->assertSame(
+            $stream,
+            $stream->seek(new Position(3))->match(
+                static fn($value) => $value,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testRead()
@@ -108,7 +130,10 @@ class LazyStreamTest extends TestCase
         $stream = new LazyStream(Path::of($path));
         \file_put_contents($path, 'lorem ipsum dolor');
 
-        $this->assertSame('lorem', $stream->read(5)->toString());
+        $this->assertSame('lorem', $stream->read(5)->match(
+            static fn($value) => $value->toString(),
+            static fn() => null,
+        ));
     }
 
     public function testHoldProperties()

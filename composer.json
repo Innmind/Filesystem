@@ -14,17 +14,15 @@
     "support": {
         "issues": "http://github.com/Innmind/filesystem/issues"
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "require": {
-        "php": "~8.0",
-        "innmind/immutable": "dev-next",
+        "php": "~8.1",
+        "innmind/immutable": "~4.0",
         "symfony/filesystem": "~5.0",
         "symfony/finder": "~5.0",
-        "innmind/stream": "dev-next",
-        "innmind/media-type": "dev-next",
-        "innmind/url": "dev-next",
-        "psr/log": "^1.1"
+        "innmind/stream": "~3.0",
+        "innmind/media-type": "~2.0",
+        "innmind/url": "~4.0",
+        "psr/log": "~3.0"
     },
     "autoload": {
         "psr-4": {

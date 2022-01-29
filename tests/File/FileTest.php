@@ -45,10 +45,7 @@ class FileTest extends TestCase
         $f = new File(
             new Name('foo'),
             $this->createMock(Content::class),
-            $mt = MediaType::of('application/json')->match(
-                static fn($mediaType) => $mediaType,
-                static fn() => null,
-            ),
+            $mt = MediaType::of('application/json'),
         );
 
         $this->assertNotNull($mt);

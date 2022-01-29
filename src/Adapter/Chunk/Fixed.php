@@ -6,7 +6,9 @@ namespace Innmind\Filesystem\Adapter\Chunk;
 use Innmind\Filesystem\{
     File\Content,
     Exception\CannotPersistClosedStream,
+    Exception\FailedToLoadFile,
 };
+use Innmind\Stream\Readable;
 use Innmind\Immutable\{
     Sequence,
     Str,
@@ -28,17 +30,27 @@ final class Fixed
             throw new CannotPersistClosedStream;
         }
 
-        $stream->rewind();
+        /** @var Readable */
+        $stream = $stream->rewind()->match(
+            static fn($stream) => $stream,
+            static fn() => throw new FailedToLoadFile,
+        );
 
         return Sequence::lazy(static function() use ($stream) {
             while (!$stream->end()) {
-                yield $stream->read(8192);
+                yield $stream->read(8192)->match(
+                    static fn($chunk) => $chunk,
+                    static fn() => throw new FailedToLoadFile,
+                );
             }
 
             // Calling the rewind here helps always leave the streams in a
             // readable state. It also helps avoid a fatal error when handling
             // too many files (see LazyStream::rewind() for more explanations)
-            $stream->rewind();
+            $_ = $stream->rewind()->match(
+                static fn($stream) => $stream,
+                static fn() => throw new FailedToLoadFile,
+            );
         });
     }
 }

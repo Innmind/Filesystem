@@ -13,20 +13,24 @@ use Innmind\Filesystem\{
     Exception\RuntimeException,
     Exception\CannotPersistClosedStream,
     Exception\LinksAreNotSupported,
+    Exception\FailedToWriteFile,
 };
-use Innmind\Stream\Writable\Stream;
+use Innmind\Stream\{
+    Writable,
+    Writable\Stream,
+};
 use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Set,
     Str,
     Maybe,
+    Either,
 };
 use Symfony\Component\{
     Filesystem\Filesystem as FS,
     Filesystem\Exception\IOException,
     Finder\Finder,
-    Finder\SplFileInfo,
 };
 
 final class Filesystem implements Adapter
@@ -148,13 +152,20 @@ final class Filesystem implements Adapter
             );
         }
 
-        $handle = new Stream(\fopen($path->toString(), 'w'));
+        $handle = Stream::of(\fopen($path->toString(), 'w'));
 
-        $_ = $chunks->foreach(static fn($chunk) => $handle->write(
-            $chunk->toEncoding('ASCII'),
-        ));
-
-        $handle->close();
+        $_ = $chunks
+            ->reduce(
+                $handle,
+                static fn(Writable $handle, Str $chunk): Writable => $handle
+                    ->write($chunk->toEncoding('ASCII'))
+                    ->match(
+                        static fn($handle) => $handle,
+                        static fn() => throw new FailedToWriteFile,
+                    ),
+            )
+            ->close()
+            ->leftMap(static fn() => throw new FailedToWriteFile);
     }
 
     /**
@@ -177,7 +188,7 @@ final class Filesystem implements Adapter
         $file = new File\File(
             $file,
             File\Content\AtPath::of($path),
-            MediaType::of(\mime_content_type($path->toString()))->match(
+            MediaType::maybe(\mime_content_type($path->toString()))->match(
                 static fn($mediaType) => $mediaType,
                 static fn() => MediaType::null(),
             ),

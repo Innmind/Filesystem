@@ -13,7 +13,6 @@ use Innmind\Immutable\{
     Str,
     SideEffect,
 };
-use function Innmind\Immutable\join;
 
 /**
  * @psalm-immutable
@@ -91,7 +90,7 @@ final class Lines implements Content
     {
         $lines = $this->lines->map(static fn($line) => $line->toString());
 
-        return join("\n", $lines)->toString();
+        return Str::of("\n")->join($lines)->toString();
     }
 
     /**

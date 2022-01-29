@@ -6,11 +6,17 @@ namespace Innmind\Filesystem\File\Content;
 use Innmind\Filesystem\{
     File\Content,
     Stream\LazyStream,
+    Exception\FailedToLoadFile,
 };
-use Innmind\Stream\Readable;
+use Innmind\Stream\{
+    Readable,
+    PositionNotSeekable,
+};
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
+    Str,
+    Either,
 };
 
 /**
@@ -79,19 +85,24 @@ final class OfStream implements Content
 
     public function toString(): string
     {
-        $stream = ($this->load)();
-        /** @psalm-suppress ImpureMethodCall */
-        $stream->rewind();
-        /** @psalm-suppress ImpureMethodCall */
-        $content = $stream->toString();
-        /** @psalm-suppress ImpureMethodCall */
-        $stream->rewind();
+        /**
+         * @psalm-suppress ImpureFunctionCall
+         * @psalm-suppress ImpureMethodCall
+         * @var Either<PositionNotSeekable, Readable>
+         */
+        $either = ($this->load)()->rewind();
 
-        return $content;
+        return $either
+            ->flatMap(fn(Readable $stream) => $this->read($stream))
+            ->match(
+                static fn($content) => $content,
+                static fn() => throw new FailedToLoadFile,
+            );
     }
 
     public function stream(): Readable
     {
+        /** @psalm-suppress ImpureFunctionCall */
         return ($this->load)();
     }
 
@@ -102,15 +113,44 @@ final class OfStream implements Content
     {
         return Sequence::lazy(function() {
             $stream = $this->stream();
-            $stream->rewind();
+            /** @var Readable */
+            $stream = $stream->rewind()->match(
+                static fn($stream) => $stream,
+                static fn() => throw new FailedToLoadFile,
+            );
 
             while (!$stream->end()) {
-                $line = $stream->readLine();
-
-                yield Line::fromStream($line);
+                // we yield an empty line when the readLine() call doesn't return
+                // anything otherwise it will fail to load empty files or files
+                // ending with the "end of line" character
+                yield $stream
+                    ->readLine()
+                    ->map(static fn($line) => Line::fromStream($line))
+                    ->match(
+                        static fn($line) => $line,
+                        static fn() => Line::of(Str::of('')),
+                    );
             }
 
-            $stream->rewind();
+            $_ = $stream->rewind()->match(
+                static fn() => null, // rewind successful
+                static fn() => throw new FailedToLoadFile,
+            );
         });
+    }
+
+    /**
+     * @return Either<null, string>
+     */
+    private function read(Readable $stream): Either
+    {
+        /** @psalm-suppress ImpureMethodCall */
+        return $stream->toString()->match(
+            static fn($content) => $stream
+                ->rewind()
+                ->map(static fn() => $content)
+                ->leftMap(static fn() => null),
+            static fn() => Either::left(null),
+        );
     }
 }

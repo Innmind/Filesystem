@@ -9,22 +9,29 @@ use Innmind\Stream\{
     Stream\Position,
     Stream\Position\Mode,
     Stream\Size,
-    Exception\PositionNotSeekable,
+    PositionNotSeekable,
 };
 use Innmind\Immutable\{
     Str,
     Maybe,
+    Either,
+    SideEffect,
 };
 
 final class NullStream implements Readable
 {
     private bool $closed = false;
 
-    public function close(): void
+    public function close(): Either
     {
         $this->closed = true;
+
+        return Either::right(new SideEffect);
     }
 
+    /**
+     * @psalm-mutation-free
+     */
     public function closed(): bool
     {
         return $this->closed;
@@ -35,13 +42,15 @@ final class NullStream implements Readable
         return new Position(0);
     }
 
-    public function seek(Position $position, Mode $mode = null): void
+    public function seek(Position $position, Mode $mode = null): Either
     {
-        throw new PositionNotSeekable;
+        return Either::left(new PositionNotSeekable);
     }
 
-    public function rewind(): void
+    public function rewind(): Either
     {
+        /** @var Either<PositionNotSeekable, Stream> */
+        return Either::right($this);
     }
 
     public function end(): bool
@@ -49,23 +58,41 @@ final class NullStream implements Readable
         return true;
     }
 
+    /**
+     * @psalm-mutation-free
+     */
     public function size(): Maybe
     {
         return Maybe::just(new Size(0));
     }
 
-    public function read(int $length = null): Str
+    public function read(int $length = null): Maybe
     {
-        return Str::of('');
+        if ($this->closed) {
+            /** @var Maybe<Str> */
+            return Maybe::nothing();
+        }
+
+        return Maybe::just(Str::of(''));
     }
 
-    public function readLine(): Str
+    public function readLine(): Maybe
     {
-        return Str::of('');
+        if ($this->closed) {
+            /** @var Maybe<Str> */
+            return Maybe::nothing();
+        }
+
+        return Maybe::just(Str::of(''));
     }
 
-    public function toString(): string
+    public function toString(): Maybe
     {
-        return '';
+        if ($this->closed) {
+            /** @var Maybe<string> */
+            return Maybe::nothing();
+        }
+
+        return Maybe::just('');
     }
 }

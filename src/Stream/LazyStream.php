@@ -9,11 +9,13 @@ use Innmind\Stream\{
     Stream\Position,
     Stream\Position\Mode,
     Stream\Size,
+    PositionNotSeekable,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Str,
     Maybe,
+    Either,
 };
 
 final class LazyStream implements Readable
@@ -26,13 +28,17 @@ final class LazyStream implements Readable
         $this->path = $path;
     }
 
-    public function close(): void
+    public function close(): Either
     {
-        $this->stream()->close();
+        return $this->stream()->close();
     }
 
+    /**
+     * @psalm-mutation-free
+     */
     public function closed(): bool
     {
+        /** @psalm-suppress ImpureMethodCall */
         return $this->stream()->closed();
     }
 
@@ -41,12 +47,13 @@ final class LazyStream implements Readable
         return $this->stream()->position();
     }
 
-    public function seek(Position $position, Mode $mode = null): void
+    public function seek(Position $position, Mode $mode = null): Either
     {
-        $this->stream()->seek($position, $mode);
+        /** @var Either<PositionNotSeekable, Stream> */
+        return $this->stream()->seek($position, $mode)->map(fn() => $this);
     }
 
-    public function rewind(): void
+    public function rewind(): Either
     {
         if ($this->stream && !$this->stream->closed()) {
             // this trick allows to automatically close the opened files on the
@@ -55,9 +62,20 @@ final class LazyStream implements Readable
             // Adapter\Chunk\Fixed::__invoke() after persisting a file.
             // This does not break be behaviour of the streams as once the stream
             // is manually closed we won't reopen it here
-            $this->stream->close();
-            $this->stream = null;
+            /** @var Either<PositionNotSeekable, Stream> */
+            return $this
+                ->stream
+                ->close()
+                ->map(function() {
+                    $this->stream = null;
+
+                    return $this;
+                })
+                ->leftMap(static fn() => new PositionNotSeekable);
         }
+
+        /** @var Either<PositionNotSeekable, Stream> */
+        return Either::right($this);
     }
 
     public function end(): bool
@@ -65,22 +83,26 @@ final class LazyStream implements Readable
         return $this->stream()->end();
     }
 
+    /**
+     * @psalm-mutation-free
+     */
     public function size(): Maybe
     {
+        /** @psalm-suppress ImpureMethodCall */
         return $this->stream()->size();
     }
 
-    public function read(int $length = null): Str
+    public function read(int $length = null): Maybe
     {
         return $this->stream()->read($length);
     }
 
-    public function readLine(): Str
+    public function readLine(): Maybe
     {
         return $this->stream()->readLine();
     }
 
-    public function toString(): string
+    public function toString(): Maybe
     {
         return $this->stream()->toString();
     }
