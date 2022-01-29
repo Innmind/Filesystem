@@ -111,8 +111,15 @@ final class OfStream implements Content
      */
     private function sequence(): Sequence
     {
-        return Sequence::lazy(function() {
+        return Sequence::lazy(function($cleanup) {
             $stream = $this->stream();
+            $rewind = static function() use ($stream): void {
+                $_ = $stream->rewind()->match(
+                    static fn() => null, // rewind successfull
+                    static fn() => throw new FailedToLoadFile,
+                );
+            };
+            $cleanup($rewind);
             /** @var Readable */
             $stream = $stream->rewind()->match(
                 static fn($stream) => $stream,
@@ -132,10 +139,7 @@ final class OfStream implements Content
                     );
             }
 
-            $_ = $stream->rewind()->match(
-                static fn() => null, // rewind successful
-                static fn() => throw new FailedToLoadFile,
-            );
+            $rewind();
         });
     }
 
