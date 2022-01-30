@@ -14,26 +14,25 @@ composer install innmind/filesystem
 
 ## Usage
 
-The whole model is structures around files, directories, streams and adapters. [`File`](src/File.php), [`Directory`](src/Directory.php) and [`Stream`](https://github.com/Innmind/Stream/blob/develop/src/Readable.php) are immutable objects.
+The whole model is structured around files, directories, contents and adapters. [`File`](src/File.php), [`Directory`](src/Directory.php) and [`Content`](src/File/Content.php) are immutable objects.
 
 Example:
 ```php
 use Innmind\Filesystem\{
     File\File,
+    File\Content,
     Directory\Directory,
-    Name,
     Adapter\Filesystem,
 };
 use Innmind\Url\Path;
-use Innmind\Stream\Readable\Stream;
 
 $directory = Directory::named('uploads')->add(
     File::named(
         $_FILES['my_upload']['name'],
-        Stream::open($_FILES['my_upload']['tmp_name'])
-    )
+        Content\AtPath::of(Path::of($_FILES['my_upload']['tmp_name'])),
+    ),
 );
-$adapter = new Filesystem(Path::of('/var/www/web/'));
+$adapter = Filesystem::mount(Path::of('/var/www/web/'));
 $adapter->add($directory);
 ```
 
@@ -42,18 +41,6 @@ This example show you how you can create a new directory `uploads` in the folder
 **Note**: For performance reasons the filesystem adapter only persist to disk the files that have changed (achievable via the immutable nature of file objects).
 
 All adapters implements [`Adapter`](src/Adapter.php), so you can easily replace them; especially for unit tests, that's why the library comes with an [`InMemory`](src/Adapter/InMemory.php) adapter that only keeps the files into memory so you won't mess up your file system.
-
-By default when you call `add` or `remove` on an adapter the changes are directly applied, but you can change this behaviour by wrapping your adapter in another one implementing [`LazyAdapter`](src/LazyAdapter.php) (such as [`Lazy`](src/Adapter/Lazy.php)).
-
-Example:
-```php
-use Innmind\Filesystem\Adapter\LazyAdapter;
-
-$directory = /*....*/ ;
-$adapter = new Lazy(new Filesystem(Path::of('/var/www/web')));
-$adapter->add($directory); // nothing is written to disk
-$adapter->persist(); // every new files are persisted, and removals occur at this time as well
-```
 
 ## Properties
 
@@ -80,7 +67,7 @@ class MyAdapterTest extends TestCase
         $this
             ->forAll($property)
             ->then(function($property) {
-                $adapter = /* instanciate you implementation here */;
+                $adapter = /* instanciate your implementation here */;
 
                 if (!$property->applicableTo($adapter)) {
                     $this->markTestSkipped();
@@ -100,7 +87,7 @@ class MyAdapterTest extends TestCase
         $this
             ->forAll(Adapter::properties())
             ->then(function($properties) {
-                $properties->ensureHeldBy(/* instanciate you implementation here */);
+                $properties->ensureHeldBy(/* instanciate your implementation here */);
             });
     }
 
