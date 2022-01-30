@@ -12,6 +12,7 @@ use Innmind\Stream\Readable;
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
+    Maybe,
 };
 
 /**
@@ -62,6 +63,11 @@ final class AtPath implements Content
     public function reduce($carry, callable $reducer)
     {
         return $this->content->reduce($carry, $reducer);
+    }
+
+    public function size(): Maybe
+    {
+        return $this->content->size();
     }
 
     public function toString(): string

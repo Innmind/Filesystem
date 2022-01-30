@@ -4,9 +4,11 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\File;
 
 use Innmind\Filesystem\File\Content\Line;
+use Innmind\Stream\Stream\Size;
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
+    Maybe,
 };
 
 /**
@@ -52,5 +54,10 @@ interface Content
      * @return T
      */
     public function reduce($carry, callable $reducer);
+
+    /**
+     * @return Maybe<Size>
+     */
+    public function size(): Maybe;
     public function toString(): string;
 }

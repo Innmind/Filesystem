@@ -226,6 +226,73 @@ class LinesTest extends TestCase
             });
     }
 
+    public function testSize()
+    {
+        $content = Lines::of(Sequence::of(
+            Line::of(Str::of('')),
+        ));
+        $this->assertSame(0, $content->size()->match(
+            static fn($size) => $size->toInt(),
+            static fn() => null,
+        ));
+
+        $content = Lines::of(Sequence::of(
+            Line::of(Str::of('foo')),
+        ));
+        $this->assertSame(3, $content->size()->match(
+            static fn($size) => $size->toInt(),
+            static fn() => null,
+        ));
+
+        $content = Lines::of(Sequence::of(
+            Line::of(Str::of('foo')),
+            Line::of(Str::of('foo')),
+        ));
+        $this->assertSame(7, $content->size()->match(
+            static fn($size) => $size->toInt(),
+            static fn() => null,
+        ));
+
+        $content = Lines::of(Sequence::of(
+            Line::of(Str::of('foo')),
+            Line::of(Str::of('foo')),
+            Line::of(Str::of('')),
+        ));
+        $this->assertSame(8, $content->size()->match(
+            static fn($size) => $size->toInt(),
+            static fn() => null,
+        ));
+
+        $content = Lines::of(Sequence::of(
+            Line::of(Str::of('foo')),
+            Line::of(Str::of('')),
+            Line::of(Str::of('foo')),
+        ));
+        $this->assertSame(8, $content->size()->match(
+            static fn($size) => $size->toInt(),
+            static fn() => null,
+        ));
+
+        $this
+            ->forAll(Set\Sequence::of(
+                $this->strings(),
+                Set\Integers::between(0, 10),
+            ))
+            ->then(function($lines) {
+                $raw = \array_map(
+                    static fn($line) => $line->toString(),
+                    $lines,
+                );
+                $expectedSize = Str::of(\implode("\n", $raw), 'ASCII')->length();
+                $content = Lines::of(Sequence::of(...$lines));
+
+                $this->assertSame($expectedSize, $content->size()->match(
+                    static fn($size) => $size->toInt(),
+                    static fn() => null,
+                ));
+            });
+    }
+
     private function strings(): Set
     {
         return Set\Decorate::immutable(

@@ -4,10 +4,12 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\File\Content;
 
 use Innmind\Filesystem\File\Content;
+use Innmind\Stream\Stream\Size;
 use Innmind\Immutable\{
     Sequence,
     Str,
     SideEffect,
+    Maybe,
 };
 
 /**
@@ -80,6 +82,20 @@ final class Lines implements Content
     public function reduce($carry, callable $reducer)
     {
         return $this->lines->reduce($carry, $reducer);
+    }
+
+    public function size(): Maybe
+    {
+        // we compute the size line by line to avoid loading the whole file in memory
+        $size = $this->lines->reduce(
+            0,
+            static fn(int $size, Line $line): int => $size + Str::of($line->toString(), 'ASCII')->length() + 1, // the 1 is for the "end of line" character
+        );
+        // 1 is removed from the size because the last line won't have the
+        // "end of line" character
+        $size = \max(0, $size - 1);
+
+        return Maybe::just(new Size($size));
     }
 
     public function toString(): string

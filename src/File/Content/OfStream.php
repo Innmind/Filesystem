@@ -17,6 +17,7 @@ use Innmind\Immutable\{
     SideEffect,
     Str,
     Either,
+    Maybe,
 };
 
 /**
@@ -81,6 +82,11 @@ final class OfStream implements Content
     public function reduce($carry, callable $reducer)
     {
         return $this->lines()->reduce($carry, $reducer);
+    }
+
+    public function size(): Maybe
+    {
+        return $this->stream()->size();
     }
 
     public function toString(): string

@@ -241,6 +241,28 @@ class OfStreamTest extends TestCase
             });
     }
 
+    public function testSize()
+    {
+        $this
+            ->forAll(Set\Sequence::of(
+                $this->strings(),
+                Set\Integers::between(0, 10),
+            ))
+            ->then(function($lines) {
+                $expectedSize = Str::of(\implode("\n", $lines))->toEncoding('ASCII')->length();
+                \file_put_contents('/tmp/test_content', \implode("\n", $lines));
+                $content = OfStream::of(Stream::open(Path::of('/tmp/test_content')));
+
+                $this->assertSame(
+                    $expectedSize,
+                    $content->size()->match(
+                        static fn($size) => $size->toInt(),
+                        static fn() => null,
+                    ),
+                );
+            });
+    }
+
     private function strings(): Set
     {
         return Set\Decorate::immutable(
