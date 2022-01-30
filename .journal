@@ -43,5 +43,16 @@ return static function(Config $config): Config
                     Path::of('use_cases/backup_directory.md'),
                 ),
             ),
+            Entry::section(
+                'Testing',
+                Entry::markdown(
+                    'In your app',
+                    Path::of('testing/in_app.md'),
+                ),
+                Entry::markdown(
+                    'Your own adapter',
+                    Path::of('testing/own_adapter.md'),
+                ),
+            ),
         );
 };
