@@ -30,7 +30,6 @@ use Innmind\Immutable\{
 use Symfony\Component\{
     Filesystem\Filesystem as FS,
     Filesystem\Exception\IOException,
-    Finder\Finder,
 };
 
 final class Filesystem implements Adapter
