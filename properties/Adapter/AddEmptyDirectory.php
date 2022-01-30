@@ -31,18 +31,15 @@ final class AddEmptyDirectory implements Property
 
     public function ensureHeldBy(object $adapter): object
     {
-        $directory = new Directory(
-            $this->name,
-        );
+        $directory = Directory::of($this->name);
 
         Assert::assertFalse($adapter->contains($directory->name()));
         Assert::assertNull($adapter->add($directory));
         Assert::assertTrue($adapter->contains($directory->name()));
         Assert::assertSame(
             [],
-            $adapter
-                ->get($directory->name())
-                ->reduce(
+            $adapter->get($directory->name())->match(
+                static fn($dir) => $dir->reduce(
                     [],
                     static function(array $files, $file): array {
                         $files[] = $file;
@@ -50,6 +47,8 @@ final class AddEmptyDirectory implements Property
                         return $files;
                     },
                 ),
+                static fn() => null,
+            ),
         );
 
         return $adapter;

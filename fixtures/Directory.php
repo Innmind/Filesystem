@@ -38,7 +38,6 @@ final class Directory
     {
         if ($depth === $maxDepth) {
             $files = Set::of(
-                FileInterface::class,
                 new DataSet\Randomize(
                     File::any(),
                 ),
@@ -46,7 +45,6 @@ final class Directory
             );
         } else {
             $files = Set::of(
-                FileInterface::class,
                 new DataSet\Either(
                     new DataSet\Randomize(
                         File::any(),
@@ -58,7 +56,7 @@ final class Directory
         }
 
         $directory = DataSet\Composite::immutable(
-            static fn($name, $files): Model => new Model(
+            static fn($name, $files): Model => Model::of(
                 $name,
                 $files,
             ),
@@ -97,7 +95,7 @@ final class Directory
 
         return new DataSet\Either(
             $directory,
-            $modified
+            $modified,
         );
     }
 }

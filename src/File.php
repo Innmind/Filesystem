@@ -3,12 +3,15 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Stream\Readable;
+use Innmind\Filesystem\File\Content;
 use Innmind\MediaType\MediaType;
 
+/**
+ * @psalm-immutable
+ */
 interface File
 {
     public function name(): Name;
-    public function content(): Readable;
+    public function content(): Content;
     public function mediaType(): MediaType;
 }

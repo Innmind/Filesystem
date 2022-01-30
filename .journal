@@ -1,0 +1,58 @@
+<?php
+declare(strict_types = 1);
+
+use Halsey\Journal\{
+    Config,
+    Menu\Entry,
+};
+use Innmind\Url\Path;
+
+return static function(Config $config): Config
+{
+    return $config
+        ->package('innmind', 'filesystem', null, 'Filesystem')
+        ->menu(
+            Entry::markdown(
+                'Getting started',
+                Path::of('readme.md'),
+            ),
+            Entry::section(
+                'Use cases',
+                Entry::markdown(
+                    'Persist file',
+                    Path::of('use_cases/persist_hand_file.md'),
+                ),
+                Entry::markdown(
+                    'Persist uploaded file',
+                    Path::of('use_cases/persist_uploaded_file.md'),
+                ),
+                Entry::markdown(
+                    'Read file',
+                    Path::of('use_cases/read_file.md'),
+                ),
+                Entry::markdown(
+                    'Modify file',
+                    Path::of('use_cases/modify_file.md'),
+                ),
+                Entry::markdown(
+                    'Delete file',
+                    Path::of('use_cases/delete_file.md'),
+                ),
+                Entry::markdown(
+                    'Backup directory',
+                    Path::of('use_cases/backup_directory.md'),
+                ),
+            ),
+            Entry::section(
+                'Testing',
+                Entry::markdown(
+                    'In your app',
+                    Path::of('testing/in_app.md'),
+                ),
+                Entry::markdown(
+                    'Your own adapter',
+                    Path::of('testing/own_adapter.md'),
+                ),
+            ),
+        );
+};

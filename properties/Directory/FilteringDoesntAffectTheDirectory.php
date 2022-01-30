@@ -23,7 +23,8 @@ final class FilteringDoesntAffectTheDirectory implements Property
         $files = $directory->filter(static fn(): bool => true);
         $set = $directory->filter(static fn(): bool => false);
 
-        Assert::assertTrue($set->empty());
+        $directory->foreach(static fn($file) => Assert::assertFalse($set->contains($file->name())));
+        $directory->foreach(static fn($file) => Assert::assertTrue($files->contains($file->name())));
         $files->foreach(static fn($file) => Assert::assertTrue($directory->contains($file->name())));
 
         return $directory;

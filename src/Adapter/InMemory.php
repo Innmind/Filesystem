@@ -7,11 +7,11 @@ use Innmind\Filesystem\{
     Adapter,
     File,
     Name,
-    Exception\FileNotFound,
 };
 use Innmind\Immutable\{
     Map,
     Set,
+    Maybe,
 };
 
 final class InMemory implements Adapter
@@ -19,10 +19,15 @@ final class InMemory implements Adapter
     /** @var Map<string, File> */
     private Map $files;
 
-    public function __construct()
+    private function __construct()
     {
         /** @var Map<string, File> */
-        $this->files = Map::of('string', File::class);
+        $this->files = Map::of();
+    }
+
+    public static function new(): self
+    {
+        return new self;
     }
 
     public function add(File $file): void
@@ -33,12 +38,8 @@ final class InMemory implements Adapter
         );
     }
 
-    public function get(Name $file): File
+    public function get(Name $file): Maybe
     {
-        if (!$this->contains($file)) {
-            throw new FileNotFound($file->toString());
-        }
-
         return $this->files->get($file->toString());
     }
 
@@ -54,6 +55,6 @@ final class InMemory implements Adapter
 
     public function all(): Set
     {
-        return $this->files->values()->toSetOf(File::class);
+        return Set::of(...$this->files->values()->toList());
     }
 }

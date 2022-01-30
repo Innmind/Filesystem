@@ -7,29 +7,34 @@ use Innmind\Filesystem\{
     File as FileInterface,
     Name,
 };
-use Innmind\Stream\Readable;
 use Innmind\MediaType\MediaType;
 
+/**
+ * @psalm-immutable
+ */
 final class File implements FileInterface
 {
     private Name $name;
-    private Readable $content;
+    private Content $content;
     private MediaType $mediaType;
 
     public function __construct(
         Name $name,
-        Readable $content,
-        MediaType $mediaType = null
+        Content $content,
+        MediaType $mediaType = null,
     ) {
         $this->name = $name;
         $this->content = $content;
         $this->mediaType = $mediaType ?? MediaType::null();
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function named(
         string $name,
-        Readable $content,
-        MediaType $mediaType = null
+        Content $content,
+        MediaType $mediaType = null,
     ): self {
         return new self(new Name($name), $content, $mediaType);
     }
@@ -39,7 +44,7 @@ final class File implements FileInterface
         return $this->name;
     }
 
-    public function content(): Readable
+    public function content(): Content
     {
         return $this->content;
     }
@@ -47,16 +52,5 @@ final class File implements FileInterface
     public function mediaType(): MediaType
     {
         return $this->mediaType;
-    }
-
-    /**
-     * New file reference with a different content
-     */
-    public function withContent(Readable $content): self
-    {
-        $file = clone $this;
-        $file->content = $content;
-
-        return $file;
     }
 }

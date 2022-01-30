@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Directory;
 
-use Innmind\Filesystem\Event\FileWasRemoved;
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;
 
@@ -34,16 +33,11 @@ final class RemoveFile implements Property
         Assert::assertFalse($newDirectory->contains($file->name()));
         Assert::assertTrue($directory->contains($file->name()));
         Assert::assertGreaterThan(
-            $directory->modifications()->size(),
-            $newDirectory->modifications()->size(),
+            $directory->removed()->size(),
+            $newDirectory->removed()->size(),
         );
-        Assert::assertInstanceOf(
-            FileWasRemoved::class,
-            $newDirectory->modifications()->last(),
-        );
-        Assert::assertSame(
-            $file->name(),
-            $newDirectory->modifications()->last()->file(),
+        Assert::assertTrue(
+            $newDirectory->removed()->contains($file->name()),
         );
 
         return $newDirectory;

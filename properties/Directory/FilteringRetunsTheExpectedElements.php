@@ -33,9 +33,8 @@ final class FilteringRetunsTheExpectedElements implements Property
             ->add($this->file)
             ->filter(fn($file): bool => $file->name() === $this->file->name());
 
-        Assert::assertCount(0, $shouldBeEmpty);
-        Assert::assertCount(1, $shouldContainsOurFile);
-        Assert::assertTrue($shouldContainsOurFile->contains($this->file));
+        Assert::assertFalse($shouldBeEmpty->contains($this->file->name()));
+        Assert::assertTrue($shouldContainsOurFile->contains($this->file->name()));
 
         return $directory;
     }

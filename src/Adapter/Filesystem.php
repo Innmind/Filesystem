@@ -8,31 +8,28 @@ use Innmind\Filesystem\{
     File,
     Name,
     Directory,
-    Stream\LazyStream,
-    Source,
-    Exception\FileNotFound,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\RuntimeException,
     Exception\CannotPersistClosedStream,
     Exception\LinksAreNotSupported,
-    Event\FileWasRemoved,
+    Exception\FailedToWriteFile,
 };
-use Innmind\Stream\Writable\Stream;
-use Innmind\MediaType\{
-    MediaType,
-    Exception\InvalidMediaTypeString,
+use Innmind\Stream\{
+    Writable,
+    Writable\Stream,
 };
+use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Set,
     Str,
+    Maybe,
+    Either,
 };
 use Symfony\Component\{
     Filesystem\Filesystem as FS,
     Filesystem\Exception\IOException,
-    Finder\Finder,
-    Finder\SplFileInfo,
 };
 
 final class Filesystem implements Adapter
@@ -40,8 +37,11 @@ final class Filesystem implements Adapter
     private const INVALID_FILES = ['.', '..'];
     private Path $path;
     private FS $filesystem;
+    private Chunk $chunk;
+    /** @var \WeakMap<File, Path> */
+    private \WeakMap $loaded;
 
-    public function __construct(Path $path)
+    private function __construct(Path $path)
     {
         if (!$path->directory()) {
             throw new PathDoesntRepresentADirectory($path->toString());
@@ -49,10 +49,18 @@ final class Filesystem implements Adapter
 
         $this->path = $path;
         $this->filesystem = new FS;
+        $this->chunk = new Chunk;
+        /** @var \WeakMap<File, Path> */
+        $this->loaded = new \WeakMap;
 
         if (!$this->filesystem->exists($this->path->toString())) {
             $this->filesystem->mkdir($this->path->toString());
         }
+    }
+
+    public static function mount(Path $path): self
+    {
+        return new self($path);
     }
 
     public function add(File $file): void
@@ -60,13 +68,14 @@ final class Filesystem implements Adapter
         $this->createFileAt($this->path, $file);
     }
 
-    public function get(Name $file): File
+    public function get(Name $file): Maybe
     {
         if (!$this->contains($file)) {
-            throw new FileNotFound($file->toString());
+            /** @var Maybe<File> */
+            return Maybe::nothing();
         }
 
-        return $this->open($this->path, $file);
+        return Maybe::just($this->open($this->path, $file));
     }
 
     public function contains(Name $file): bool
@@ -97,10 +106,12 @@ final class Filesystem implements Adapter
 
         $path = $path->resolve(Path::of($name));
 
-        if ($file instanceof Source && $file->sourcedAt($this, $path)) {
+        if ($this->loaded->offsetExists($file) && $this->loaded[$file]->equals($path)) {
             // no need to persist untouched file where it was loaded from
             return;
         }
+
+        $this->loaded[$file] = $path;
 
         if ($file instanceof Directory) {
             $this->filesystem->mkdir($path->toString());
@@ -113,15 +124,13 @@ final class Filesystem implements Adapter
                 },
             );
             /**
-             * @psalm-suppress ArgumentTypeCoercion
              * @psalm-suppress MissingClosureReturnType
              */
-            $file
-                ->modifications()
-                ->filter(static fn(object $event): bool => $event instanceof FileWasRemoved)
-                ->filter(static fn(FileWasRemoved $event): bool => !$persisted->contains($event->file()->toString()))
-                ->foreach(fn(FileWasRemoved $event) => $this->filesystem->remove(
-                    $path->toString().$event->file()->toString(),
+            $_ = $file
+                ->removed()
+                ->filter(static fn($file): bool => !$persisted->contains($file->toString()))
+                ->foreach(fn($file) => $this->filesystem->remove(
+                    $path->toString().$file->toString(),
                 ));
 
             return;
@@ -131,13 +140,7 @@ final class Filesystem implements Adapter
             $this->filesystem->remove($path->toString());
         }
 
-        $stream = $file->content();
-
-        if ($stream->closed()) {
-            throw new CannotPersistClosedStream($path->toString());
-        }
-
-        $stream->rewind();
+        $chunks = ($this->chunk)($file->content());
 
         try {
             $this->filesystem->touch($path->toString());
@@ -153,19 +156,20 @@ final class Filesystem implements Adapter
             );
         }
 
-        $handle = new Stream(\fopen($path->toString(), 'w'));
+        $handle = Stream::of(\fopen($path->toString(), 'w'));
 
-        while (!$stream->end()) {
-            $handle->write(
-                $stream->read(8192)->toEncoding('ASCII'),
-            );
-        }
-
-        $handle->close();
-        // Calling the rewind here helps always leave the streams in a readable
-        // state. It also helps avoid a fatal error when handling too many files
-        // (see LazyStream::rewind() for more explanations)
-        $stream->rewind();
+        $_ = $chunks
+            ->reduce(
+                $handle,
+                static fn(Writable $handle, Str $chunk): Writable => $handle
+                    ->write($chunk->toEncoding('ASCII'))
+                    ->match(
+                        static fn($handle) => $handle,
+                        static fn() => throw new FailedToWriteFile,
+                    ),
+            )
+            ->close()
+            ->leftMap(static fn() => throw new FailedToWriteFile);
     }
 
     /**
@@ -178,32 +182,24 @@ final class Filesystem implements Adapter
         if (\is_dir($path->toString())) {
             $files = $this->list($folder->resolve(Path::of($file->toString().'/')));
 
-            return new Directory\Source(
-                Directory\Directory::defer($file, $files),
-                $this,
-                $path,
-            );
+            return Directory\Directory::lazy($file, $files);
         }
 
         if (\is_link($path->toString())) {
             throw new LinksAreNotSupported($path->toString());
         }
 
-        try {
-            $mediaType = MediaType::of(\mime_content_type($path->toString()));
-        } catch (InvalidMediaTypeString $e) {
-            $mediaType = MediaType::null();
-        }
-
-        return new File\Source(
-            new File\File(
-                $file,
-                new LazyStream($path),
-                $mediaType,
+        $file = new File\File(
+            $file,
+            File\Content\AtPath::of($path),
+            MediaType::maybe(\mime_content_type($path->toString()))->match(
+                static fn($mediaType) => $mediaType,
+                static fn() => MediaType::null(),
             ),
-            $this,
-            $path,
         );
+        $this->loaded[$file] = $path;
+
+        return $file;
     }
 
     /**
@@ -212,23 +208,17 @@ final class Filesystem implements Adapter
     private function list(Path $path): Set
     {
         /** @var Set<File> */
-        return Set::defer(
-            File::class,
-            (function(Path $folder): \Generator {
-                $files = Finder::create()
-                    ->depth('== 0')
-                    ->in($folder->toString())
-                    ->ignoreDotFiles(false);
+        return Set::lazy(function() use ($path): \Generator {
+            $files = new \FilesystemIterator($path->toString());
 
-                /** @var SplFileInfo $file */
-                foreach ($files as $file) {
-                    if (\is_link($file->getPathname())) {
-                        throw new LinksAreNotSupported($file->getPathname());
-                    }
-
-                    yield $this->open($folder, new Name($file->getRelativePathname()));
+            /** @var \SplFileInfo $file */
+            foreach ($files as $file) {
+                if (\is_link($file->getPathname())) {
+                    throw new LinksAreNotSupported($file->getPathname());
                 }
-            })($path),
-        );
+
+                yield $this->open($path, new Name($file->getBasename()));
+            }
+        });
     }
 }

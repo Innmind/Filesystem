@@ -1,3 +1,0 @@
-parameters:
-    ignoreErrors:
-        - '~\[BC\] SKIPPED: Roave\\BetterReflection\\Reflection\\ReflectionClass "Innmind\\BlackBox\\Property" could not be found in the located source~'

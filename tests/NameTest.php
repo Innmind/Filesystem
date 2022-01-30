@@ -142,7 +142,7 @@ class NameTest extends TestCase
                         ),
                         Set\Integers::between(255, 1024), // upper limit at 1024 to avoid out of memory
                     ),
-                )->filter(static fn(string $name): bool => $name !== '.' && $name !== '..')
+                )->filter(static fn(string $name): bool => $name !== '.' && $name !== '..'),
             )
             ->then(function($name) {
                 $this->expectException(DomainException::class);

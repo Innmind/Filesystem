@@ -9,7 +9,10 @@ use Innmind\Filesystem\{
     File,
     Name,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Maybe,
+};
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -19,7 +22,7 @@ class LoggerTest extends TestCase
     {
         $this->assertInstanceOf(
             Adapter::class,
-            new Logger(
+            Logger::psr(
                 $this->createMock(Adapter::class),
                 $this->createMock(LoggerInterface::class),
             ),
@@ -28,7 +31,7 @@ class LoggerTest extends TestCase
 
     public function testAdd()
     {
-        $adapter = new Logger(
+        $adapter = Logger::psr(
             $inner = $this->createMock(Adapter::class),
             $logger = $this->createMock(LoggerInterface::class),
         );
@@ -49,7 +52,7 @@ class LoggerTest extends TestCase
 
     public function testGet()
     {
-        $adapter = new Logger(
+        $adapter = Logger::psr(
             $inner = $this->createMock(Adapter::class),
             $logger = $this->createMock(LoggerInterface::class),
         );
@@ -65,14 +68,20 @@ class LoggerTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with($name)
-            ->willReturn($file);
+            ->willReturn(Maybe::just($file));
 
-        $this->assertSame($file, $adapter->get($name));
+        $this->assertSame(
+            $file,
+            $adapter->get($name)->match(
+                static fn($file) => $file,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testContains()
     {
-        $adapter = new Logger(
+        $adapter = Logger::psr(
             $inner = $this->createMock(Adapter::class),
             $logger = $this->createMock(LoggerInterface::class),
         );
@@ -91,7 +100,7 @@ class LoggerTest extends TestCase
 
     public function testRemove()
     {
-        $adapter = new Logger(
+        $adapter = Logger::psr(
             $inner = $this->createMock(Adapter::class),
             $logger = $this->createMock(LoggerInterface::class),
         );
@@ -109,7 +118,7 @@ class LoggerTest extends TestCase
 
     public function testAll()
     {
-        $adapter = new Logger(
+        $adapter = Logger::psr(
             $inner = $this->createMock(Adapter::class),
             $this->createMock(LoggerInterface::class),
         );

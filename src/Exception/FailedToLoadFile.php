@@ -3,6 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\Exception;
 
-class FileNotFound extends RuntimeException
+final class FailedToLoadFile extends RuntimeException
 {
 }

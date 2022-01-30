@@ -36,7 +36,10 @@ final class AddDirectory implements Property
         Assert::assertTrue($adapter->contains($this->directory->name()));
         $this->assertSame(
             $this->directory,
-            $adapter->get($this->directory->name()),
+            $adapter->get($this->directory->name())->match(
+                static fn($file) => $file,
+                static fn() => null,
+            ),
         );
 
         return $adapter;
@@ -58,7 +61,10 @@ final class AddDirectory implements Property
                 Assert::assertTrue($source->contains($file->name()));
 
                 $this->assertSame(
-                    $source->get($file->name()),
+                    $source->get($file->name())->match(
+                        static fn($file) => $file,
+                        static fn() => null,
+                    ),
                     $file,
                 );
             });

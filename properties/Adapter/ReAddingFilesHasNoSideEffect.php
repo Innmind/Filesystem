@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Adapter;
 
-use Innmind\Filesystem\Name;
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;
 
@@ -30,8 +29,11 @@ final class ReAddingFilesHasNoSideEffect implements Property
                     $file->content()->toString(),
                     $adapter
                         ->get($file->name())
-                        ->content()
-                        ->toString(),
+                        ->map(static fn($file) => $file->content())
+                        ->match(
+                            static fn($content) => $content->toString(),
+                            static fn() => null,
+                        ),
                 );
             });
 

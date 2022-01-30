@@ -1,3 +1,4 @@
-ignore_paths:
+ignore:
     - fixtures/*
     - properties/*
+    - properties/**/*
