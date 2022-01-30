@@ -3,14 +3,11 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Directory;
 
-use Innmind\Filesystem\{
-    Name,
-    Exception\FileNotFound,
-};
+use Innmind\Filesystem\Name;
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;
 
-final class AccessingUnknownFileThrowsAnException implements Property
+final class AccessingUnknownFileReturnsNothing implements Property
 {
     private Name $name;
 
@@ -21,7 +18,7 @@ final class AccessingUnknownFileThrowsAnException implements Property
 
     public function name(): string
     {
-        return "Accessing unknown file '{$this->name->toString()}' must throw an exception";
+        return "Accessing unknown file '{$this->name->toString()}' must return nothing";
     }
 
     public function applicableTo(object $directory): bool
@@ -31,13 +28,10 @@ final class AccessingUnknownFileThrowsAnException implements Property
 
     public function ensureHeldBy(object $directory): object
     {
-        try {
-            $directory->get($this->name);
-
-            Assert::fail('It should throw an exception');
-        } catch (FileNotFound $e) {
-            Assert::assertTrue(true);
-        }
+        Assert::assertNull($directory->get($this->name)->match(
+            static fn($file) => $file,
+            static fn() => null,
+        ));
 
         return $directory;
     }

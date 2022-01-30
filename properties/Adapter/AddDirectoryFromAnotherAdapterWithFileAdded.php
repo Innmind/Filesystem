@@ -37,14 +37,11 @@ final class AddDirectoryFromAnotherAdapterWithFileAdded implements Property
 
     public function ensureHeldBy(object $adapter): object
     {
-        // directories loaded from other adapters have files injecting at
+        // directories loaded from other adapters have files injected at
         // construct time (so there is no modifications())
-        $directory = new Directory(
+        $directory = Directory::of(
             $this->name,
-            Set::of(
-                File::class,
-                $this->file,
-            ),
+            Set::of($this->file),
         );
         $directory = $directory->add($this->added);
 
@@ -52,30 +49,38 @@ final class AddDirectoryFromAnotherAdapterWithFileAdded implements Property
         Assert::assertNull($adapter->add($directory));
         Assert::assertTrue($adapter->contains($directory->name()));
         Assert::assertTrue(
-            $adapter
-                ->get($directory->name())
-                ->contains($this->file->name()),
+            $adapter->get($directory->name())->match(
+                fn($dir) => $dir->contains($this->file->name()),
+                static fn() => false,
+            ),
         );
         Assert::assertTrue(
-            $adapter
-                ->get($directory->name())
-                ->contains($this->added->name()),
+            $adapter->get($directory->name())->match(
+                fn($dir) => $dir->contains($this->added->name()),
+                static fn() => false,
+            ),
         );
         Assert::assertSame(
             $this->file->content()->toString(),
             $adapter
                 ->get($directory->name())
-                ->get($this->file->name())
-                ->content()
-                ->toString(),
+                ->flatMap(fn($dir) => $dir->get($this->file->name()))
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
         );
         Assert::assertSame(
             $this->added->content()->toString(),
             $adapter
                 ->get($directory->name())
-                ->get($this->added->name())
-                ->content()
-                ->toString(),
+                ->flatMap(fn($dir) => $dir->get($this->added->name()))
+                ->map(static fn($file) => $file->content())
+                ->match(
+                    static fn($content) => $content->toString(),
+                    static fn() => null,
+                ),
         );
 
         return $adapter;

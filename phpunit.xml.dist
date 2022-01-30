@@ -11,6 +11,7 @@
   </coverage>
   <php>
     <env name="BLACKBOX_SET_SIZE" value="1"/>
+    <ini name="memory_limit" value="-1" />
   </php>
   <testsuites>
     <testsuite name="Filesystem test suite">

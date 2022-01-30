@@ -5,16 +5,13 @@ namespace Innmind\Filesystem\Tests\File;
 
 use Innmind\Filesystem\{
     File\File,
+    File\Content,
     File as FileInterface,
     Name,
 };
-use Innmind\Stream\Readable\Stream;
 use Innmind\MediaType\MediaType;
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\{
-    PHPUnit\BlackBox,
-    Set,
-};
+use Innmind\BlackBox\PHPUnit\BlackBox;
 use Fixtures\Innmind\Filesystem\Name as FName;
 use Fixtures\Innmind\MediaType\MediaType as FMediaType;
 
@@ -24,44 +21,34 @@ class FileTest extends TestCase
 
     public function testInterface()
     {
-        $f = new File($name = new Name('foo'), $c = Stream::ofContent('bar'));
+        $f = new File($name = new Name('foo'), $c = $this->createMock(Content::class));
 
         $this->assertInstanceOf(FileInterface::class, $f);
         $this->assertSame($name, $f->name());
         $this->assertSame($c, $f->content());
         $this->assertSame(
             'application/octet-stream',
-            $f->mediaType()->toString()
+            $f->mediaType()->toString(),
         );
     }
 
     public function testNamed()
     {
-        $file = File::named('foo', Stream::ofContent(''));
+        $file = File::named('foo', $this->createMock(Content::class));
 
         $this->assertInstanceOf(File::class, $file);
         $this->assertSame('foo', $file->name()->toString());
-    }
-
-    public function testWithContent()
-    {
-        $f = new File(new Name('foo'), $c = Stream::ofContent('bar'));
-        $f2 = $f->withContent($c2 = Stream::ofContent('baz'));
-
-        $this->assertNotSame($f, $f2);
-        $this->assertSame($f->name(), $f2->name());
-        $this->assertSame($c, $f->content());
-        $this->assertSame($c2, $f2->content());
     }
 
     public function testMediaType()
     {
         $f = new File(
             new Name('foo'),
-            Stream::ofContent('bar'),
-            $mt = MediaType::of('application/json')
+            $this->createMock(Content::class),
+            $mt = MediaType::of('application/json'),
         );
 
+        $this->assertNotNull($mt);
         $this->assertSame($mt, $f->mediaType());
     }
 
@@ -70,18 +57,17 @@ class FileTest extends TestCase
         $this
             ->forAll(
                 FName::any(),
-                Set\Strings::any(),
                 FMediaType::any(),
             )
-            ->then(function($name, $content, $mediaType) {
+            ->then(function($name, $mediaType) {
                 $file = new File(
                     $name,
-                    $stream = Stream::ofContent($content),
+                    $content = $this->createMock(Content::class),
                     $mediaType,
                 );
 
                 $this->assertSame($name, $file->name());
-                $this->assertSame($stream, $file->content());
+                $this->assertSame($content, $file->content());
                 $this->assertSame($mediaType, $file->mediaType());
             });
     }
@@ -89,14 +75,11 @@ class FileTest extends TestCase
     public function testByDefaultTheMediaTypeIsOctetStream()
     {
         $this
-            ->forAll(
-                FName::any(),
-                Set\Strings::any(),
-            )
-            ->then(function($name, $content) {
+            ->forAll(FName::any())
+            ->then(function($name) {
                 $file = new File(
                     $name,
-                    Stream::ofContent($content),
+                    $this->createMock(Content::class),
                 );
 
                 $this->assertSame(
@@ -111,45 +94,18 @@ class FileTest extends TestCase
         $this
             ->forAll(
                 FName::any(),
-                Set\Strings::any(),
                 FMediaType::any(),
             )
-            ->then(function($name, $content, $mediaType) {
+            ->then(function($name, $mediaType) {
                 $file = File::named(
                     $name->toString(),
-                    $stream = Stream::ofContent($content),
+                    $content = $this->createMock(Content::class),
                     $mediaType,
                 );
 
                 $this->assertTrue($file->name()->equals($name));
-                $this->assertSame($stream, $file->content());
+                $this->assertSame($content, $file->content());
                 $this->assertSame($mediaType, $file->mediaType());
-            });
-    }
-
-    public function testWithContentIsPure()
-    {
-        $this
-            ->forAll(
-                FName::any(),
-                Set\Strings::any(),
-                Set\Strings::any(),
-                FMediaType::any(),
-            )
-            ->then(function($name, $content, $content2, $mediaType) {
-                $file1 = new File(
-                    $name,
-                    $stream = Stream::ofContent($content),
-                    $mediaType,
-                );
-                $file2 = $file1->withContent(Stream::ofContent($content2));
-
-                $this->assertSame($name, $file1->name());
-                $this->assertSame($stream, $file1->content());
-                $this->assertSame($mediaType, $file1->mediaType());
-                $this->assertSame($name, $file2->name());
-                $this->assertSame($content2, $file2->content()->toString());
-                $this->assertSame($mediaType, $file2->mediaType());
             });
     }
 }

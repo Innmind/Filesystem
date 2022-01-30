@@ -7,57 +7,52 @@ use Innmind\Filesystem\{
     Directory as DirectoryInterface,
     Name,
     File,
-    Exception\FileNotFound,
+    File\Content,
     Exception\LogicException,
-    Event\FileWasAdded,
-    Event\FileWasRemoved,
 };
-use Innmind\Url\Path;
-use Innmind\Stream\Readable;
 use Innmind\MediaType\MediaType;
 use Innmind\Immutable\{
     Str,
-    Sequence,
     Set,
-};
-use function Innmind\Immutable\{
-    assertSet,
-    join,
+    Maybe,
+    SideEffect,
 };
 
+/**
+ * @psalm-immutable
+ */
 final class Directory implements DirectoryInterface
 {
     private Name $name;
-    private ?Readable $content = null;
     /** @var Set<File> */
     private Set $files;
     private MediaType $mediaType;
-    /** @var Sequence<object> */
-    private Sequence $modifications;
+    /** @var Set<Name> */
+    private Set $removed;
 
     /**
      * @param Set<File>|null $files
      */
-    public function __construct(Name $name, Set $files = null)
+    private function __construct(Name $name, Set $files = null, bool $validate = true)
     {
         /** @var Set<File> $default */
-        $default = Set::of(File::class);
+        $default = Set::of();
         $files ??= $default;
 
-        assertSet(File::class, $files, 2);
+        if ($validate) {
+            $_ = $files->reduce(
+                Set::strings(),
+                static function(Set $names, File $file): Set {
+                    $name = $file->name()->toString();
 
-        $files->reduce(
-            Set::strings(),
-            static function(Set $names, File $file): Set {
-                $name = $file->name()->toString();
+                    if ($names->contains($name)) {
+                        throw new LogicException("Same file '$name' found multiple times");
+                    }
 
-                if ($names->contains($name)) {
-                    throw new LogicException("Same file '$name' found multiple times");
-                }
-
-                return ($names)($name);
-            },
-        );
+                    return ($names)($name);
+                },
+            );
+        }
 
         $this->name = $name;
         $this->files = $files;
@@ -65,9 +60,23 @@ final class Directory implements DirectoryInterface
             'text',
             'directory',
         );
-        $this->modifications = Sequence::objects();
+        /** @var Set<Name> */
+        $this->removed = Set::of();
     }
 
+    /**
+     * @psalm-pure
+     *
+     * @param Set<File>|null $files
+     */
+    public static function of(Name $name, Set $files = null): self
+    {
+        return new self($name, $files);
+    }
+
+    /**
+     * @psalm-pure
+     */
     public static function named(string $name): self
     {
         return new self(new Name($name));
@@ -75,22 +84,18 @@ final class Directory implements DirectoryInterface
 
     /**
      * @internal
+     * @psalm-pure
      *
      * @param Set<File> $files
      */
-    public static function defer(Name $name, Set $files): self
+    public static function lazy(Name $name, Set $files): self
     {
-        assertSet(File::class, $files, 2);
-
-        $self = new self($name);
-        // we hijack the constructors to prevent checking for duplicates when
-        // using a deferred set of files as it will trigger to load the whole
+        // we prevent the contrusctor from checking for duplicates when
+        // using a lazy set of files as it will trigger to load the whole
         // directory tree, it's kinda safe to do this as this method should
         // only be used within the filesystem adapter and there should be no
         // duplicates on a concrete filesystem
-        $self->files = $files;
-
-        return $self;
+        return new self($name, $files, false);
     }
 
     public function name(): Name
@@ -98,22 +103,9 @@ final class Directory implements DirectoryInterface
         return $this->name;
     }
 
-    public function content(): Readable
+    public function content(): Content
     {
-        if ($this->content instanceof Readable) {
-            return $this->content;
-        }
-
-        /** @var Set<string> $names */
-        $names = $this
-            ->files
-            ->toSetOf('string', static fn($file): \Generator => yield $file->name()->toString())
-            ->sort(static fn(string $a, string $b): int => $a <=> $b);
-        $this->content = Readable\Stream::ofContent(
-            join("\n", $names)->toString(),
-        );
-
-        return $this->content;
+        return Content\None::of();
     }
 
     public function mediaType(): MediaType
@@ -126,42 +118,21 @@ final class Directory implements DirectoryInterface
         $files = $this->files->filter(static fn(File $known): bool => !$known->name()->equals($file->name()));
 
         $directory = clone $this;
-        $directory->content = null;
         $directory->files = ($files)($file);
-        $directory->record(new FileWasAdded($file));
 
         return $directory;
     }
 
-    public function get(Name $name): File
+    public function get(Name $name): Maybe
     {
-        $file = $this->files->reduce(
-            null,
-            static function(?File $found, File $file) use ($name): ?File {
-                if ($found) {
-                    return $found;
-                }
-
-                if ($file->name()->equals($name)) {
-                    return $file;
-                }
-
-                return null;
-            }
-        );
-
-        if (\is_null($file)) {
-            throw new FileNotFound($name->toString());
-        }
-
-        return $file;
+        return $this->files->find(static fn($file) => $file->name()->equals($name));
     }
 
     public function contains(Name $name): bool
     {
-        return $this->files->reduce(
-            false,
-            static fn(bool $found, File $file): bool => $found || $file->name()->equals($name),
+        return $this->get($name)->match(
+            static fn() => true,
+            static fn() => false,
         );
     }
 
@@ -172,56 +143,25 @@ final class Directory implements DirectoryInterface
         }
 
         $directory = clone $this;
-        $directory->content = null;
         $directory->files = $this->files->filter(static fn(File $file) => !$file->name()->equals($name));
-        $directory->record(new FileWasRemoved($name));
+        $directory->removed = ($directory->removed)($name);
 
         return $directory;
     }
 
-    public function replaceAt(Path $path, File $file): DirectoryInterface
+    public function foreach(callable $function): SideEffect
     {
-        $normalizedPath = Str::of($path->toString())->trim('/');
-        $pieces = $normalizedPath->split('/');
-
-        if ($normalizedPath->empty()) {
-            return $this->add($file);
-        }
-
-        $child = $this->get(new Name($pieces->first()->toString()));
-
-        if (!$child instanceof DirectoryInterface) {
-            throw new LogicException('Path doesn\'t reference a directory');
-        }
-
-        if ($pieces->count() === 1) {
-            return $this->add(
-                $child->add($file),
-            );
-        }
-
-        /** @var Set<string> $names */
-        $names = $pieces->drop(1)->toSequenceOf(
-            'string',
-            static fn($name): \Generator => yield $name->toString(),
-        );
-
-        return $this->add(
-            $child->replaceAt(
-                Path::of(join('/', $names)->toString()),
-                $file,
-            ),
-        );
+        return $this->files->foreach($function);
     }
 
-    public function foreach(callable $function): void
+    public function filter(callable $predicate): self
     {
-        $this->files->foreach($function);
-    }
-
-    public function filter(callable $predicate): Set
-    {
-        return $this->files->filter($predicate);
+        // it is safe to not check for duplicates here as either the current
+        // directory comes from the filesystem thus can't have duplicates or
+        // comes from a user and must have used the standard constructor that
+        // validates for duplicates, so they're can't be any duplicates after
+        // a filter
+        return self::lazy($this->name, $this->files->filter($predicate));
     }
 
     public function reduce($carry, callable $reducer)
@@ -229,13 +169,8 @@ final class Directory implements DirectoryInterface
         return $this->files->reduce($carry, $reducer);
     }
 
-    public function modifications(): Sequence
+    public function removed(): Set
     {
-        return $this->modifications;
-    }
-
-    private function record(object $event): void
-    {
-        $this->modifications = ($this->modifications)($event);
+        return $this->removed;
     }
 }

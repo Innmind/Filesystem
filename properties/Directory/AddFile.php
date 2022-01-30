@@ -36,17 +36,9 @@ final class AddFile implements Property
         Assert::assertNotSame($directory, $newDirectory);
         Assert::assertFalse($directory->contains($this->file->name()));
         Assert::assertTrue($newDirectory->contains($this->file->name()));
-        Assert::assertGreaterThan(
-            $directory->modifications()->size(),
-            $newDirectory->modifications()->size(),
-        );
-        Assert::assertInstanceOf(
-            FileWasAdded::class,
-            $newDirectory->modifications()->last(),
-        );
         Assert::assertSame(
-            $this->file,
-            $newDirectory->modifications()->last()->file(),
+            $directory->removed()->size(),
+            $newDirectory->removed()->size(),
         );
 
         return $newDirectory;

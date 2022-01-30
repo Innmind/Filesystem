@@ -38,7 +38,7 @@ final class Directory
                 Directory\AllFilesInTheDirectoryAreAccessible::class,
             ),
             Set\Property::of(
-                Directory\AccessingUnknownFileThrowsAnException::class,
+                Directory\AccessingUnknownFileReturnsNothing::class,
                 Name::any(),
             ),
             Set\Property::of(
@@ -55,7 +55,7 @@ final class Directory
                 Directory\RemoveDirectory::class,
             ),
             Set\Property::of(
-                Directory\ContentHoldsTheNamesOfTheFiles::class,
+                Directory\ContentHoldsNothing::class,
             ),
             Set\Property::of(
                 Directory\AddFile::class,
@@ -74,26 +74,6 @@ final class Directory
             ),
             Set\Property::of(
                 Directory\FilteringRetunsTheExpectedElements::class,
-                File::any(),
-            ),
-            Set\Property::of(
-                Directory\ReplacingFileAtEmptyPathIsSameAsAddingTheFile::class,
-                File::any(),
-            ),
-            Set\Property::of(
-                Directory\ReplacingFileAtUnknownPathMustThrowAnException::class,
-                Name::any(),
-                File::any(),
-            ),
-            Set\Property::of(
-                Directory\ReplacingFileAtPathTargetingAFileMustThrowAnException::class,
-                File::any(),
-                File::any(),
-            ),
-            Set\Property::of(
-                Directory\ReplaceFileInSubDirectory::class,
-                Name::any(),
-                Name::any(),
                 File::any(),
             ),
         ];

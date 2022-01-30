@@ -3,11 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Filesystem\Exception\FileNotFound;
-use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Sequence,
     Set,
+    Maybe,
+    SideEffect,
 };
 
 interface Directory extends File
@@ -15,24 +14,21 @@ interface Directory extends File
     public function add(File $file): self;
 
     /**
-     * @throws FileNotFound
+     * @return Maybe<File>
      */
-    public function get(Name $name): File;
+    public function get(Name $name): Maybe;
     public function contains(Name $name): bool;
     public function remove(Name $name): self;
-    public function replaceAt(Path $path, File $file): self;
 
     /**
      * @param callable(File): void $function
      */
-    public function foreach(callable $function): void;
+    public function foreach(callable $function): SideEffect;
 
     /**
      * @param callable(File): bool $predicate
-     *
-     * @return Set<File>
      */
-    public function filter(callable $predicate): Set;
+    public function filter(callable $predicate): self;
 
     /**
      * @template R
@@ -45,7 +41,10 @@ interface Directory extends File
     public function reduce($carry, callable $reducer);
 
     /**
-     * @return Sequence<object>
+     * This method should only be used for implementations of the Adapter
+     * interface, normal users should never have to use this method
+     *
+     * @return Set<Name>
      */
-    public function modifications(): Sequence;
+    public function removed(): Set;
 }

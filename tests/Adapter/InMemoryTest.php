@@ -7,18 +7,13 @@ use Innmind\Filesystem\{
     Adapter\InMemory,
     Adapter,
     Directory\Directory,
-    File as FileInterface,
     File\File,
+    File\Content\Lines,
     Name,
-    Exception\FileNotFound,
 };
-use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\Set;
-use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\{
-    PHPUnit\BlackBox,
-};
+use Innmind\BlackBox\PHPUnit\BlackBox;
 use Properties\Innmind\Filesystem\Adapter as PAdapter;
 
 class InMemoryTest extends TestCase
@@ -27,50 +22,55 @@ class InMemoryTest extends TestCase
 
     public function testInterface()
     {
-        $a = new InMemory;
+        $a = InMemory::new();
 
         $this->assertInstanceOf(Adapter::class, $a);
         $this->assertFalse($a->contains(new Name('foo')));
         $this->assertNull(
-            $a->add($d = new Directory(new Name('foo')))
+            $a->add($d = Directory::of(new Name('foo'))),
         );
         $this->assertTrue($a->contains(new Name('foo')));
-        $this->assertSame($d, $a->get(new Name('foo')));
+        $this->assertSame(
+            $d,
+            $a->get(new Name('foo'))->match(
+                static fn($file) => $file,
+                static fn() => null,
+            ),
+        );
         $this->assertNull($a->remove(new Name('foo')));
         $this->assertFalse($a->contains(new Name('foo')));
     }
 
-    public function testThrowWhenGettingUnknownFile()
+    public function testReturnNothingWhenGettingUnknownFile()
     {
-        $this->expectException(FileNotFound::class);
-        $this->expectExceptionMessage('foo');
-
-        (new InMemory)->get(new Name('foo'));
+        $this->assertNull(InMemory::new()->get(new Name('foo'))->match(
+            static fn($file) => $file,
+            static fn() => null,
+        ));
     }
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $this->assertNull((new InMemory)->remove(new Name('foo')));
+        $this->assertNull(InMemory::new()->remove(new Name('foo')));
     }
 
     public function testAll()
     {
-        $adapter = new InMemory;
+        $adapter = InMemory::new();
         $adapter->add($foo = new File(
             new Name('foo'),
-            Stream::ofContent('foo')
+            Lines::ofContent('foo'),
         ));
         $adapter->add($bar = new File(
             new Name('bar'),
-            Stream::ofContent('bar')
+            Lines::ofContent('bar'),
         ));
 
         $all = $adapter->all();
         $this->assertInstanceOf(Set::class, $all);
-        $this->assertSame(FileInterface::class, $all->type());
         $this->assertSame(
             [$foo, $bar],
-            unwrap($all),
+            $all->toList(),
         );
     }
 
@@ -82,11 +82,11 @@ class InMemoryTest extends TestCase
         $this
             ->forAll($property)
             ->then(function($property) {
-                if (!$property->applicableTo(new InMemory)) {
+                if (!$property->applicableTo(InMemory::new())) {
                     $this->markTestSkipped();
                 }
 
-                $property->ensureHeldBy(new InMemory);
+                $property->ensureHeldBy(InMemory::new());
             });
     }
 
@@ -98,7 +98,7 @@ class InMemoryTest extends TestCase
         $this
             ->forAll(PAdapter::properties())
             ->then(static function($properties) {
-                $properties->ensureHeldBy(new InMemory);
+                $properties->ensureHeldBy(InMemory::new());
             });
     }
 

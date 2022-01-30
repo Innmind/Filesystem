@@ -23,7 +23,10 @@ final class AllFilesInTheDirectoryAreAccessible implements Property
         $directory->foreach(static function($file) use ($directory) {
             Assert::assertSame(
                 $file->name(),
-                $directory->get($file->name())->name(),
+                $directory->get($file->name())->match(
+                    static fn($file) => $file->name(),
+                    static fn() => null,
+                ),
             );
         });
 
