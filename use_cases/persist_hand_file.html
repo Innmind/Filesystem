@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>innmind/filesystem</title>
+    <link rel="stylesheet" href="https://innmind.github.io/Filesystem/static/main.css"/>
+    <link rel="stylesheet" href="https://innmind.github.io/Filesystem/static/styles/default.css"/>
+    <link rel="stylesheet" href="https://innmind.github.io/Filesystem/static/styles/atom-one-dark.css"/>
+    <script src="https://innmind.github.io/Filesystem/static/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <a href="https://innmind.github.io/Filesystem/"><code>filesystem</code></a>
+    </header>
+    <aside>
+        <ul>
+                    <li>
+                                    <a href="https://innmind.github.io/Filesystem/index.html">
+                        Getting started
+                    </a>
+                            </li>
+                    <li>
+                                    <details open>
+                        <summary>
+                                                            Use cases
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item current">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/persist_hand_file.html">
+                                        Persist file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/persist_uploaded_file.html">
+                                        Persist uploaded file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/read_file.html">
+                                        Read file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/modify_file.html">
+                                        Modify file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/delete_file.html">
+                                        Delete file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/backup_directory.html">
+                                        Backup directory
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                    <li>
+                                    <details>
+                        <summary>
+                                                            Testing
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/testing/in_app.html">
+                                        In your app
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/testing/own_adapter.html">
+                                        Your own adapter
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                </ul>
+    </aside>
+    <main><h1 id="persist-a-file-created-by-hand"><a href="#persist-a-file-created-by-hand" class="anchor">#</a>Persist a file created by hand</h1>
+<h2 id="create-an-empty-file"><a href="#create-an-empty-file" class="anchor">#</a>Create an empty file</h2>
+<pre><code class="language-php">use Innmind\Filesystem\{
+    Adapter\filesystem,
+    File\File,
+};
+use Innmind\Url\Path;
+
+$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$filesystem->add(File::named('some name'));</code></pre>
+<p>This is equivalent of running the cli command <code>touch '/var/data/some name'</code>.</p>
+<h2 id="create-a-file-with-some-content"><a href="#create-a-file-with-some-content" class="anchor">#</a>Create a file with some content</h2>
+<pre><code class="language-php">use Innmind\Filesystem\{
+    Adapter\filesystem,
+    File\File,
+    File\Content\Lines,
+    File\Content\Line,
+};
+use Innmind\Url\Path;
+use Innmind\Immutable\{
+    Sequence,
+    Str,
+};
+
+$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$filesystem->add(File::named(
+    'some name',
+    Lines::of(Sequence::of(
+        Line::of(Str::of('first line')),
+        Line::of(Str::of('second line')),
+        Line::of(Str::of('etc...')),
+    ))
+));</code></pre>
+<p>When the file is persisted the <em>end of line</em> character will automatically added for you.</p>
+<h2 id="create-a-file-inside-a-directory"><a href="#create-a-file-inside-a-directory" class="anchor">#</a>Create a file inside a directory</h2>
+<pre><code class="language-php">use Innmind\Filesystem\{
+    Adapter\filesystem,
+    File\File,
+    Directory\Directory,
+};
+use Innmind\Url\Path;
+
+$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$filesystem->add(
+    Directory::named('whatever')->add(File::named('some name')),
+);</code></pre>
+<p>This is equivalent of running the cli command <code>touch '/var/data/whatever/some name'</code>.</p></main>
+    <footer>
+        <a href="https://github.com/innmind/Filesystem/" target="_blank">GitHub</a>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>innmind/filesystem</title>
+    <link rel="stylesheet" href="https://innmind.github.io/Filesystem/static/main.css"/>
+    <link rel="stylesheet" href="https://innmind.github.io/Filesystem/static/styles/default.css"/>
+    <link rel="stylesheet" href="https://innmind.github.io/Filesystem/static/styles/atom-one-dark.css"/>
+    <script src="https://innmind.github.io/Filesystem/static/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <a href="https://innmind.github.io/Filesystem/"><code>filesystem</code></a>
+    </header>
+    <aside>
+        <ul>
+                    <li>
+                                    <a href="https://innmind.github.io/Filesystem/index.html">
+                        Getting started
+                    </a>
+                            </li>
+                    <li>
+                                    <details open>
+                        <summary>
+                                                            Use cases
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/persist_hand_file.html">
+                                        Persist file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/persist_uploaded_file.html">
+                                        Persist uploaded file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/read_file.html">
+                                        Read file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item current">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/modify_file.html">
+                                        Modify file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/delete_file.html">
+                                        Delete file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/backup_directory.html">
+                                        Backup directory
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                    <li>
+                                    <details>
+                        <summary>
+                                                            Testing
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/testing/in_app.html">
+                                        In your app
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/testing/own_adapter.html">
+                                        Your own adapter
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                </ul>
+    </aside>
+    <main><h1 id="modify-a-file"><a href="#modify-a-file" class="anchor">#</a>Modify a file</h1>
+<p><strong>Important</strong>: You can't modify a file <em>in place</em>, meaning you can't read and write to the same file at once. You need to write to a different file first.</p>
+<h2 id="replace-a-line"><a href="#replace-a-line" class="anchor">#</a>Replace a line</h2>
+<pre><code class="language-php">use Innmind\Filesystem\{
+    Adapter\Filesystem,
+    File,
+    Name,
+};
+use Innmind\Url\Path;
+use Innmind\Immutable\Str;
+
+// replace the "unreleased" title with the new version
+$insertRelease = static function(Str $line): Str {
+    if ($line->startsWith('## [Unreleased]')) {
+        return Str::of('## 1.0.0 - 2022-01-30');
+    }
+
+    return $line;
+};
+// replace the old changelog with the new one containing the new release version
+$release = static function(File $changelog) use ($insertRelease): File {
+    return new File\File(
+        $changelog->name(),
+        $changelog->content()->map(
+            static fn($line) => $line->map($insertRelease),
+        ),
+        $changelog->mediaType(),
+    );
+}
+$filesystem = Filesystem::mount(Path::of('some/repository/'));
+$tmp = Filesystem::mount(Path::of('/tmp/'));
+$filesystem
+    ->get(new Name('CHANGELOG.md'))
+    ->map(static fn($changelog) => $release($changelog))
+    ->flatMap(static function($changelog) use ($tmp) {
+        // this operation is due to the fact that you cannot read and write to
+        // the same file at once
+        $tmp->add($changelog);
+
+        return $tmp->get($changelog->name());
+    })
+    ->match(
+        static fn($changelog) => $filesystem->add($changelog),
+        static fn() => null, // the changelog doesn't exist
+    );</code></pre>
+<p>This example modifies the <code>CHANGELOG.md</code> file to replace the <code>## [Unreleased]</code> title with a version number.</p>
+<h2 id="insert-a-new-line"><a href="#insert-a-new-line" class="anchor">#</a>Insert a new line</h2>
+<pre><code class="language-php">use Innmind\Filesystem\{
+    Adapter\Filesystem,
+    File,
+    File\Content,
+    File\Content\Line,
+    Name,
+};
+use Innmind\Url\Path;
+use Innmind\Immutable\{
+    Sequence,
+    Str,
+};
+
+// Insert "Jane Doe" after the user "John Doe"
+$updateUser = static function(Line $user): Content {
+    if ($user->toString() === 'John Doe') {
+        return Content\Lines::of(Sequence::of(
+            $user,
+            Line::of(Str::of('Jane Doe')),
+        ));
+    }
+
+    return Content\Lines::of(Sequence::of($user));
+};
+$update = static function(File $users) use ($updateUser): File {
+    return new File\File(
+        $users->name(),
+        $users->content()->flatMap(static fn($line) => $updateUser($line)),
+        $users->mediaType(),
+    );
+};
+$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$tmp = Filesystem::mount(Path::of('/tmp/'));
+$filesystem
+    ->get(new Name('users.csv'))
+    ->map(static fn($users) => $update($users))
+    ->flatMap(static function($changelog) use ($tmp) {
+        // this operation is due to the fact that you cannot read and write to
+        // the same file at once
+        $tmp->add($changelog);
+
+        return $tmp->get($changelog->name());
+    })
+    ->match(
+        static fn($users) => $filesystem->add($users),
+        static fn() => null, // the csv doesn't exist
+    );</code></pre>
+<p>This example will insert the user <code>Jane Doe</code> after <code>John Doe</code> wherever he is in the <code>users.csv</code> file. If the file doesn't exist then nothing happens.</p>
+<h2 id="merge-two-files"><a href="#merge-two-files" class="anchor">#</a>Merge two files</h2>
+<pre><code class="language-php">use Innmind\Filesystem\{
+    Adapter\Filesystem,
+    File,
+    File\Content,
+    Name,
+};
+use Innmind\Url\Path;
+use Innmind\Immutable\Maybe;
+
+$merge = static function(File $file1, File $file2): File {
+    return File\File::named(
+        'all_users.csv',
+        Content\Lines::of(
+            $file1->content()->lines()->append($file2->content()->lines()),
+        ),
+    );
+};
+$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$users1 = $filesystem->get(new Name('users1.csv'));
+$users2 = $filesystem->get(new Name('users2.csv'));
+Maybe::all($users1, $users2)
+    ->map(static fn($file1, $file2) => $merge($file1, $file2))
+    ->match(
+        static fn($merged) => $filesystem->add($merged),
+        static fn() => null,
+    );</code></pre>
+<p>This example will create a file <code>all_users.csv</code> containing both files <code>users1.csv</code> and <code>users2.csv</code>. If one of the files or both of them doesn't exist then the new file won't be created.</p></main>
+    <footer>
+        <a href="https://github.com/innmind/Filesystem/" target="_blank">GitHub</a>
+    </footer>
+</body>
+</html>

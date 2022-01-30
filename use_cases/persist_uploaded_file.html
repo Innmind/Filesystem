@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>innmind/filesystem</title>
+    <link rel="stylesheet" href="https://innmind.github.io/Filesystem/static/main.css"/>
+    <link rel="stylesheet" href="https://innmind.github.io/Filesystem/static/styles/default.css"/>
+    <link rel="stylesheet" href="https://innmind.github.io/Filesystem/static/styles/atom-one-dark.css"/>
+    <script src="https://innmind.github.io/Filesystem/static/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <a href="https://innmind.github.io/Filesystem/"><code>filesystem</code></a>
+    </header>
+    <aside>
+        <ul>
+                    <li>
+                                    <a href="https://innmind.github.io/Filesystem/index.html">
+                        Getting started
+                    </a>
+                            </li>
+                    <li>
+                                    <details open>
+                        <summary>
+                                                            Use cases
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/persist_hand_file.html">
+                                        Persist file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item current">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/persist_uploaded_file.html">
+                                        Persist uploaded file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/read_file.html">
+                                        Read file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/modify_file.html">
+                                        Modify file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/delete_file.html">
+                                        Delete file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/backup_directory.html">
+                                        Backup directory
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                    <li>
+                                    <details>
+                        <summary>
+                                                            Testing
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/testing/in_app.html">
+                                        In your app
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/testing/own_adapter.html">
+                                        Your own adapter
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                </ul>
+    </aside>
+    <main><h1 id="persist-an-uploaded-file"><a href="#persist-an-uploaded-file" class="anchor">#</a>Persist an uploaded file</h1>
+<pre><code class="language-php">use Innmind\Filesystem\{
+    File\File,
+    File\Content,
+    Directory\Directory,
+    Adapter\Filesystem,
+};
+use Innmind\Url\Path;
+
+$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$filesystem->add(
+    Directory::named('uploads')->add(
+        File::named(
+            $_FILES['my_upload']['name'],
+            Content\AtPath::of(Path::of($_FILES['my_upload']['tmp_name'])),
+        ),
+    )
+);</code></pre></main>
+    <footer>
+        <a href="https://github.com/innmind/Filesystem/" target="_blank">GitHub</a>
+    </footer>
+</body>
+</html>
