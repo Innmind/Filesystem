@@ -9,6 +9,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest]
         php-version: ['8.1']
+        dependencies: ['lowest', 'highest']
     name: 'PHPUnit'
     steps:
       - name: Checkout
@@ -21,6 +22,8 @@ jobs:
           coverage: none
       - name: Composer
         uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
       - name: PHPUnit
         run: php -dmemory_limit=-1 vendor/bin/phpunit
         env:
@@ -56,6 +59,7 @@ jobs:
     strategy:
       matrix:
         php-version: ['8.1']
+        dependencies: ['lowest', 'highest']
     name: 'Psalm'
     steps:
       - name: Checkout
@@ -67,6 +71,8 @@ jobs:
           extensions: mbstring, intl
       - name: Composer
         uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
       - name: Psalm
         run: vendor/bin/psalm --shepherd
   cs:
