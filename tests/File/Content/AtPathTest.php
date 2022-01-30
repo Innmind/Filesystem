@@ -192,7 +192,7 @@ class AtPathTest extends TestCase
             });
     }
 
-    public function testTransform()
+    public function testLines()
     {
         $this
             ->forAll(
@@ -208,7 +208,7 @@ class AtPathTest extends TestCase
                 $content = AtPath::of(Path::of('/tmp/test_content'));
 
                 $called = 0;
-                $sequence = $content->transform(function($line) use ($lines, $replacement, &$called) {
+                $sequence = $content->lines()->map(function($line) use ($lines, $replacement, &$called) {
                     $this->assertSame($lines[$called], $line->toString());
                     $called++;
 

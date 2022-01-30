@@ -37,13 +37,9 @@ interface Content
     public function filter(callable $filter): self;
 
     /**
-     * @template T
-     *
-     * @param callable(Line): T $map
-     *
-     * @return Sequence<T>
+     * @return Sequence<Line>
      */
-    public function transform(callable $map): Sequence;
+    public function lines(): Sequence;
 
     /**
      * @template T

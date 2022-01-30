@@ -84,7 +84,7 @@ class NoneTest extends TestCase
         $this->assertSame(1, $called);
     }
 
-    public function testTransform()
+    public function testLines()
     {
         $this
             ->forAll($this->strings())
@@ -93,7 +93,7 @@ class NoneTest extends TestCase
                 $content = None::of();
 
                 $called = 0;
-                $sequence = $content->transform(function($line) use ($replacement, &$called) {
+                $sequence = $content->lines()->map(function($line) use ($replacement, &$called) {
                     $this->assertSame('', $line->toString());
                     $called++;
 

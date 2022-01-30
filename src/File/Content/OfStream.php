@@ -61,7 +61,7 @@ final class OfStream implements Content
 
     public function map(callable $map): Content
     {
-        return Lines::of($this->transform($map));
+        return Lines::of($this->lines()->map($map));
     }
 
     public function flatMap(callable $map): Content
@@ -74,9 +74,11 @@ final class OfStream implements Content
         return Lines::of($this->lines()->filter($filter));
     }
 
-    public function transform(callable $map): Sequence
+    public function lines(): Sequence
     {
-        return $this->lines()->map($map);
+        return $this
+            ->sequence()
+            ->map(static fn($line) => Line::fromStream($line));
     }
 
     public function reduce($carry, callable $reducer)
@@ -110,16 +112,6 @@ final class OfStream implements Content
     {
         /** @psalm-suppress ImpureFunctionCall */
         return ($this->load)();
-    }
-
-    /**
-     * @return Sequence<Line>
-     */
-    private function lines(): Sequence
-    {
-        return $this
-            ->sequence()
-            ->map(static fn($line) => Line::fromStream($line));
     }
 
     /**

@@ -157,7 +157,7 @@ class LinesTest extends TestCase
             });
     }
 
-    public function testTransform()
+    public function testLines()
     {
         $this
             ->forAll(
@@ -171,7 +171,7 @@ class LinesTest extends TestCase
                 $content = Lines::of(Sequence::of(...$lines));
 
                 $called = 0;
-                $sequence = $content->transform(function($line) use ($lines, $replacement, &$called) {
+                $sequence = $content->lines()->map(function($line) use ($lines, $replacement, &$called) {
                     $this->assertSame($lines[$called], $line);
                     $called++;
 

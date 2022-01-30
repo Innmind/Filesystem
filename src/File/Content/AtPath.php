@@ -55,9 +55,9 @@ final class AtPath implements Content
         return $this->content->filter($filter);
     }
 
-    public function transform(callable $map): Sequence
+    public function lines(): Sequence
     {
-        return $this->content->transform($map);
+        return $this->content->lines();
     }
 
     public function reduce($carry, callable $reducer)

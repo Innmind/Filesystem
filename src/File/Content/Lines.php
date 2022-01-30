@@ -63,9 +63,7 @@ final class Lines implements Content
     public function flatMap(callable $map): Content
     {
         return new self($this->lines->flatMap(
-            static fn($line) => $map($line)->transform(
-                static fn(Line $line) => $line,
-            ),
+            static fn($line) => $map($line)->lines(),
         ));
     }
 
@@ -74,9 +72,9 @@ final class Lines implements Content
         return new self($this->lines->filter($filter));
     }
 
-    public function transform(callable $map): Sequence
+    public function lines(): Sequence
     {
-        return $this->lines->map($map);
+        return $this->lines;
     }
 
     public function reduce($carry, callable $reducer)

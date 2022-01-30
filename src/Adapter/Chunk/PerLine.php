@@ -24,7 +24,7 @@ final class PerLine
     {
         $firstLineRead = false;
 
-        return $content->transform(static function(Line $line) use (&$firstLineRead) {
+        return $content->lines()->map(static function(Line $line) use (&$firstLineRead) {
             if (!$firstLineRead) {
                 $firstLineRead = true;
 
