@@ -127,7 +127,13 @@ class LinesTest extends TestCase
                     $newContent .= $line->toString()."\n".$newLine->toString()."\n";
                 }
 
-                $this->assertSame(\rtrim($newContent, "\n"), $extra->toString());
+                // this happens if $lines contains one empty line and $newLine
+                // is an empty line as well
+                if ($newContent !== "\n") {
+                    $newContent = \rtrim($newContent, "\n");
+                }
+
+                $this->assertSame($newContent, $extra->toString());
             });
     }
 
