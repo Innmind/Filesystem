@@ -6,6 +6,8 @@
 
 Filesystem abstraction layer, the goal is to provide a model where you design how you put your files into directories without worrying where it will be persisted.
 
+[Documentation](https://innmind.github.com/Filesystem/)
+
 ## Installation
 
 ```sh
