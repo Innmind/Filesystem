@@ -161,7 +161,7 @@ class AtPathTest extends TestCase
                     $newContent .= $line."\n".$newLine->toString()."\n";
                 }
 
-                $this->assertSame($newContent, $extra->toString());
+                $this->assertSame(\substr($newContent, 0, -1), $extra->toString());
             });
     }
 
