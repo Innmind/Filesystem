@@ -137,13 +137,7 @@ class OfStreamTest extends TestCase
                     $newContent .= $line."\n".$newLine->toString()."\n";
                 }
 
-                // this happens if $lines contains one empty line and $newLine
-                // is an empty line as well
-                if ($newContent !== "\n") {
-                    $newContent = \substr($newContent, 0, -1);
-                }
-
-                $this->assertSame($newContent, $extra->toString());
+                $this->assertSame(\substr($newContent, 0, -1), $extra->toString());
             });
     }
 
