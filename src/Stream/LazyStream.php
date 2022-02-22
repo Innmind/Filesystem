@@ -78,8 +78,12 @@ final class LazyStream implements Readable
         return Either::right($this);
     }
 
+    /**
+     * @psalm-mutation-free
+     */
     public function end(): bool
     {
+        /** @psalm-suppress ImpureMethodCall */
         return $this->stream()->end();
     }
 

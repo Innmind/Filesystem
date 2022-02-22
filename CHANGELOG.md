@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.1.0 - 2022-02-22
+
+### Changed
+
+- `Innmind\Filesystem\Stream\LazyStream::end()` is declared as mutation free
+
 ## 5.0.0 - 2022-01-30
 
 ### Added
