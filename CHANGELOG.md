@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.2.0 - 2022-09-24
+
+### Added
+
+- `Innmind\Filesystem\Chunk`
+- `Innmind\Filesystem\File\Content\Chunkable`
+- `Innmind\Filesystem\File\Content\Line::str(): Innmind\Immutable\Str`
+
 ## 5.1.0 - 2022-02-22
 
 ### Changed

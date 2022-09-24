@@ -18,7 +18,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class AtPath implements Content
+final class AtPath implements Content, Chunkable
 {
     private OfStream $content;
 
@@ -75,14 +75,21 @@ final class AtPath implements Content
         return $this->content->toString();
     }
 
+    public function chunks(): Sequence
+    {
+        return $this->content->chunks();
+    }
+
     /**
      * This should be used only for reading chunk by chunk to persist the file
      * to the filesystem
      *
+     * @deprecated
      * @internal
      */
     public function stream(): Readable
     {
+        /** @psalm-suppress DeprecatedMethod */
         return $this->content->stream();
     }
 }

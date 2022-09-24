@@ -48,6 +48,11 @@ final class Line
         return self::of($map($this->content));
     }
 
+    public function str(): Str
+    {
+        return $this->content;
+    }
+
     public function toString(): string
     {
         return $this->content->toString();

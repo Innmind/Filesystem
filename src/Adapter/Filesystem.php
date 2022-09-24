@@ -8,6 +8,7 @@ use Innmind\Filesystem\{
     File,
     Name,
     Directory,
+    Chunk,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\RuntimeException,
