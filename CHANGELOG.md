@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `Innmind\Filesystem\Chunk`
+- `Innmind\Filesystem\File\Content\Chunkable`
+
 ## 5.1.0 - 2022-02-22
 
 ### Changed

@@ -18,7 +18,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class AtPath implements Content
+final class AtPath implements Content, Chunkable
 {
     private OfStream $content;
 
@@ -73,6 +73,11 @@ final class AtPath implements Content
     public function toString(): string
     {
         return $this->content->toString();
+    }
+
+    public function chunks(): Sequence
+    {
+        return $this->content->chunks();
     }
 
     /**

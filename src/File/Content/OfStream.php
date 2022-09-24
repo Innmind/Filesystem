@@ -8,10 +8,7 @@ use Innmind\Filesystem\{
     Stream\LazyStream,
     Exception\FailedToLoadFile,
 };
-use Innmind\Stream\{
-    Readable,
-    PositionNotSeekable,
-};
+use Innmind\Stream\Readable;
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
@@ -23,7 +20,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class OfStream implements Content
+final class OfStream implements Content, Chunkable
 {
     /** @var callable(): Readable */
     private $load;
@@ -100,6 +97,11 @@ final class OfStream implements Content
         return Str::of('')->join($lines)->toString();
     }
 
+    public function chunks(): Sequence
+    {
+        return $this->sequence(static fn(Readable $stream) => $stream->read(8192));
+    }
+
     /**
      * This should be used only for reading chunk by chunk to persist the file
      * to the filesystem
@@ -115,11 +117,16 @@ final class OfStream implements Content
     }
 
     /**
+     * @param ?callable(Readable): Maybe<Str> $read
+     *
      * @return Sequence<Str>
      */
-    private function sequence(): Sequence
+    private function sequence(callable $read = null): Sequence
     {
-        return Sequence::lazy(function($cleanup) {
+        /** @var callable(Readable): Maybe<Str> */
+        $read ??= static fn(Readable $stream): Maybe => $stream->readLine();
+
+        return Sequence::lazy(function($cleanup) use ($read) {
             $stream = $this->stream();
             $rewind = static function() use ($stream): void {
                 $_ = $stream->rewind()->match(
@@ -138,12 +145,10 @@ final class OfStream implements Content
                 // we yield an empty line when the readLine() call doesn't return
                 // anything otherwise it will fail to load empty files or files
                 // ending with the "end of line" character
-                yield $stream
-                    ->readLine()
-                    ->match(
-                        static fn($line) => $line,
-                        static fn() => Str::of(''),
-                    );
+                yield $read($stream)->match(
+                    static fn($line) => $line,
+                    static fn() => Str::of(''),
+                );
             }
 
             $rewind();

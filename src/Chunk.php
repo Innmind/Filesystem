@@ -1,30 +1,27 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Adapter\Chunk;
+namespace Innmind\Filesystem;
 
-use Innmind\Filesystem\File\{
-    Content,
-    Content\Line,
-};
 use Innmind\Immutable\{
     Sequence,
     Str,
 };
 
-/**
- * @internal
- */
-final class PerLine
+final class Chunk
 {
     /**
      * @return Sequence<Str>
      */
-    public function __invoke(Content $content): Sequence
+    public function __invoke(File\Content $content): Sequence
     {
+        if ($content instanceof File\Content\Chunkable) {
+            return $content->chunks();
+        }
+
         $firstLineRead = false;
 
-        return $content->lines()->map(static function(Line $line) use (&$firstLineRead) {
+        return $content->lines()->map(static function($line) use (&$firstLineRead) {
             if (!$firstLineRead) {
                 $firstLineRead = true;
 
