@@ -6,6 +6,7 @@
 
 - `Innmind\Filesystem\Chunk`
 - `Innmind\Filesystem\File\Content\Chunkable`
+- `Innmind\Filesystem\File\Content\Line::str(): Innmind\Immutable\Str`
 
 ## 5.1.0 - 2022-02-22
 

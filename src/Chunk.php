@@ -25,10 +25,10 @@ final class Chunk
             if (!$firstLineRead) {
                 $firstLineRead = true;
 
-                return Str::of($line->toString());
+                return $line->str();
             }
 
-            return Str::of("\n".$line->toString());
+            return $line->str()->prepend("\n");
         });
     }
 }
