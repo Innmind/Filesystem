@@ -13,6 +13,7 @@ use Innmind\Immutable\{
 };
 
 /**
+ * @deprecated
  * @internal
  */
 final class Chunk

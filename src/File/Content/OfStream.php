@@ -85,7 +85,7 @@ final class OfStream implements Content, Chunkable
 
     public function size(): Maybe
     {
-        return $this->stream()->size();
+        return $this->load()->size();
     }
 
     public function toString(): string
@@ -108,12 +108,12 @@ final class OfStream implements Content, Chunkable
      *
      * The stream returned MUST never be closed
      *
+     * @deprecated
      * @internal
      */
     public function stream(): Readable
     {
-        /** @psalm-suppress ImpureFunctionCall */
-        return ($this->load)();
+        return $this->load();
     }
 
     /**
@@ -127,7 +127,7 @@ final class OfStream implements Content, Chunkable
         $read ??= static fn(Readable $stream): Maybe => $stream->readLine();
 
         return Sequence::lazy(function($cleanup) use ($read) {
-            $stream = $this->stream();
+            $stream = $this->load();
             $rewind = static function() use ($stream): void {
                 $_ = $stream->rewind()->match(
                     static fn() => null, // rewind successfull
@@ -153,5 +153,11 @@ final class OfStream implements Content, Chunkable
 
             $rewind();
         });
+    }
+
+    private function load(): Readable
+    {
+        /** @psalm-suppress ImpureFunctionCall */
+        return ($this->load)();
     }
 }

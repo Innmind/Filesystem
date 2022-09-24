@@ -84,10 +84,12 @@ final class AtPath implements Content, Chunkable
      * This should be used only for reading chunk by chunk to persist the file
      * to the filesystem
      *
+     * @deprecated
      * @internal
      */
     public function stream(): Readable
     {
+        /** @psalm-suppress DeprecatedMethod */
         return $this->content->stream();
     }
 }
