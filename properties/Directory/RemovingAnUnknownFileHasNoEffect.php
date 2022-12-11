@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Directory;
 
-use Innmind\Filesystem\Name;
+use Innmind\Filesystem\{
+    Name,
+    Directory,
+};
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;
 
@@ -29,10 +32,22 @@ final class RemovingAnUnknownFileHasNoEffect implements Property
     public function ensureHeldBy(object $directory): object
     {
         Assert::assertSame(
-            $directory,
-            $directory->remove($this->name),
+            $this->toArray($directory),
+            $this->toArray($directory->remove($this->name)),
         );
 
         return $directory;
+    }
+
+    private function toArray(Directory $directory): array
+    {
+        return $directory->reduce(
+            [],
+            static function($all, $file) {
+                $all[] = $file;
+
+                return $all;
+            },
+        );
     }
 }

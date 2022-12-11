@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- `Innmind\Filesystem\Directory\Directory::remove()` no longer unwraps the whole directory
+
 ## 5.2.0 - 2022-09-24
 
 ### Added

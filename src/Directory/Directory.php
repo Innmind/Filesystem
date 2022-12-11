@@ -138,10 +138,6 @@ final class Directory implements DirectoryInterface
 
     public function remove(Name $name): DirectoryInterface
     {
-        if (!$this->contains($name)) {
-            return $this;
-        }
-
         $directory = clone $this;
         $directory->files = $this->files->filter(static fn(File $file) => !$file->name()->equals($name));
         $directory->removed = ($directory->removed)($name);
