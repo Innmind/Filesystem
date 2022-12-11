@@ -49,9 +49,6 @@ final class Directory
                 Directory\RemoveFile::class,
             ),
             Set\Property::of(
-                Directory\RemoveFileMustUnwrapSourceDecorator::class,
-            ),
-            Set\Property::of(
                 Directory\RemoveDirectory::class,
             ),
             Set\Property::of(
@@ -59,10 +56,6 @@ final class Directory
             ),
             Set\Property::of(
                 Directory\AddFile::class,
-                File::any(),
-            ),
-            Set\Property::of(
-                Directory\AddFileMustUnwrapSourceDecorator::class,
                 File::any(),
             ),
             Set\Property::of(
