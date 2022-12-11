@@ -33,29 +33,13 @@ final class Directory implements DirectoryInterface
     /**
      * @param Set<File>|null $files
      */
-    private function __construct(Name $name, Set $files = null, bool $validate = true)
+    private function __construct(Name $name, Set $files = null)
     {
         /** @var Set<File> $default */
         $default = Set::of();
-        $files ??= $default;
-
-        if ($validate) {
-            $_ = $files->reduce(
-                Set::strings(),
-                static function(Set $names, File $file): Set {
-                    $name = $file->name()->toString();
-
-                    if ($names->contains($name)) {
-                        throw new LogicException("Same file '$name' found multiple times");
-                    }
-
-                    return ($names)($name);
-                },
-            );
-        }
 
         $this->name = $name;
-        $this->files = $files;
+        $this->files = $files ?? $default;
         $this->mediaType = new MediaType(
             'text',
             'directory',
@@ -71,7 +55,13 @@ final class Directory implements DirectoryInterface
      */
     public static function of(Name $name, Set $files = null): self
     {
-        return new self($name, $files);
+        return new self($name, $files?->safeguard(
+            Set::strings(),
+            static fn(Set $names, $file) => match ($names->contains($file->name()->toString())) {
+                true => throw new LogicException("Same file '{$file->name()->toString()}' found multiple times"),
+                false => ($names)($file->name()->toString()),
+            },
+        ));
     }
 
     /**
@@ -95,7 +85,7 @@ final class Directory implements DirectoryInterface
         // directory tree, it's kinda safe to do this as this method should
         // only be used within the filesystem adapter and there should be no
         // duplicates on a concrete filesystem
-        return new self($name, $files, false);
+        return new self($name, $files);
     }
 
     public function name(): Name
