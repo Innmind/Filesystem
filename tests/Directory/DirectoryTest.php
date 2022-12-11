@@ -129,13 +129,6 @@ class DirectoryTest extends TestCase
         );
     }
 
-    public function testRemovingUnknownFileDoesntThrow()
-    {
-        $dir = Directory::of(new Name('foo'));
-
-        $this->assertSame($dir, $dir->remove(new Name('bar')));
-    }
-
     public function testForeach()
     {
         $directory = Directory::of(
