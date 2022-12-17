@@ -12,6 +12,7 @@
 - `Innmind\Filesystem\Adapter::root(): Innmind\Filesystem\Directory`
 - `Innmind\Filesystem\Directory::map(): Innmind\Filesystem\Directory`
 - `Innmind\Filesystem\Directory::flatMap(): Innmind\Filesystem\Directory`
+- `Innmind\Filesystem\File::rename(): Innmind\Filesystem\File`
 
 ### Changed
 

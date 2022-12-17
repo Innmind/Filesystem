@@ -70,6 +70,11 @@ final class File implements FileInterface
         return $this->mediaType;
     }
 
+    public function rename(Name $name): self
+    {
+        return new self($name, $this->content, $this->mediaType);
+    }
+
     public function withContent(Content $content, MediaType $mediaType = null): self
     {
         return new self(

@@ -150,4 +150,26 @@ class FileTest extends TestCase
                 $this->assertSame($file->mediaType(), $file2->mediaType());
             });
     }
+
+    public function testRename()
+    {
+        $this
+            ->forAll(
+                FName::any(),
+                FName::any(),
+            )
+            ->then(function($name1, $name2) {
+                $file1 = File::of(
+                    $name1,
+                    $this->createMock(Content::class),
+                );
+                $file2 = $file1->rename($name2);
+
+                $this->assertNotSame($file1, $file2);
+                $this->assertSame($file1->content(), $file2->content());
+                $this->assertSame($file1->mediaType(), $file2->mediaType());
+                $this->assertSame($name1, $file1->name());
+                $this->assertSame($name2, $file2->name());
+            });
+    }
 }

@@ -90,6 +90,10 @@ final class Directory
                 new Set\Randomize(File::any()),
                 new Set\Randomize(File::any()),
             ),
+            Set\Property::of(
+                Directory\Rename::class,
+                Name::any(),
+            ),
         ];
     }
 }

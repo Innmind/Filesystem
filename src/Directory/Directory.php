@@ -104,6 +104,15 @@ final class Directory implements DirectoryInterface
         );
     }
 
+    public function rename(Name $name): self
+    {
+        return new self(
+            $name,
+            $this->files,
+            $this->removed,
+        );
+    }
+
     public function withContent(Content $content, MediaType $mediaType = null): self
     {
         return $this;
