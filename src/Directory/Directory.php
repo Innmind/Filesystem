@@ -66,6 +66,8 @@ final class Directory implements DirectoryInterface
 
     /**
      * @psalm-pure
+     *
+     * @param non-empty-string $name
      */
     public static function named(string $name): self
     {

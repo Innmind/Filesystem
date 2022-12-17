@@ -115,8 +115,11 @@ final class HashedName implements Adapter
         $extension = \pathinfo($name->toString(), \PATHINFO_EXTENSION);
         $hash = Str::of(\sha1(\pathinfo($name->toString(), \PATHINFO_BASENAME)));
 
+        /** @psalm-suppress ArgumentTypeCoercion */
         $first = Name::of($hash->substring(0, 2)->toString());
+        /** @psalm-suppress ArgumentTypeCoercion */
         $second = Name::of($hash->substring(2, 2)->toString());
+        /** @psalm-suppress ArgumentTypeCoercion */
         $remaining = Name::of($hash->substring(4)->toString().($extension ? '.'.$extension : ''));
 
         return [$first, $second, $remaining];

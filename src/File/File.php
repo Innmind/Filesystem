@@ -30,6 +30,8 @@ final class File implements FileInterface
 
     /**
      * @psalm-pure
+     *
+     * @param non-empty-string $name
      */
     public static function named(
         string $name,

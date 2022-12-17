@@ -50,6 +50,8 @@ final class Name
     /**
      * @psalm-pure
      *
+     * @param non-empty-string $value
+     *
      * @throws DomainException
      */
     public static function of(string $value): self
