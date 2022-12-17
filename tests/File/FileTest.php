@@ -21,7 +21,7 @@ class FileTest extends TestCase
 
     public function testInterface()
     {
-        $f = new File($name = Name::of('foo'), $c = $this->createMock(Content::class));
+        $f = File::of($name = Name::of('foo'), $c = $this->createMock(Content::class));
 
         $this->assertInstanceOf(FileInterface::class, $f);
         $this->assertSame($name, $f->name());
@@ -42,7 +42,7 @@ class FileTest extends TestCase
 
     public function testMediaType()
     {
-        $f = new File(
+        $f = File::of(
             Name::of('foo'),
             $this->createMock(Content::class),
             $mt = MediaType::of('application/json'),
@@ -60,7 +60,7 @@ class FileTest extends TestCase
                 FMediaType::any(),
             )
             ->then(function($name, $mediaType) {
-                $file = new File(
+                $file = File::of(
                     $name,
                     $content = $this->createMock(Content::class),
                     $mediaType,
@@ -77,7 +77,7 @@ class FileTest extends TestCase
         $this
             ->forAll(FName::any())
             ->then(function($name) {
-                $file = new File(
+                $file = File::of(
                     $name,
                     $this->createMock(Content::class),
                 );
@@ -117,7 +117,7 @@ class FileTest extends TestCase
                 FMediaType::any(),
             )
             ->then(function($name, $mediaType) {
-                $file = new File(
+                $file = File::of(
                     $name,
                     $content = $this->createMock(Content::class),
                     $mediaType,
@@ -139,7 +139,7 @@ class FileTest extends TestCase
                 FMediaType::any(),
             )
             ->then(function($name, $mediaType) {
-                $file = new File(
+                $file = File::of(
                     $name,
                     $this->createMock(Content::class),
                     $mediaType,

@@ -18,6 +18,9 @@ final class File implements FileInterface
     private Content $content;
     private MediaType $mediaType;
 
+    /**
+     * @deprecated Use self::of() instead
+     */
     public function __construct(
         Name $name,
         Content $content,
@@ -26,6 +29,17 @@ final class File implements FileInterface
         $this->name = $name;
         $this->content = $content;
         $this->mediaType = $mediaType ?? MediaType::null();
+    }
+
+    /**
+     * @psalm-pure
+     */
+    public static function of(
+        Name $name,
+        Content $content,
+        MediaType $mediaType = null,
+    ): self {
+        return new self($name, $content, $mediaType);
     }
 
     /**

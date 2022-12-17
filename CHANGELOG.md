@@ -7,11 +7,13 @@
 - `Innmind\Filesystem\Name::of()` named constructor
 - `Innmind\Filesystem\Name::str(): Innmind\Immutable\Str`
 - `Innmind\Filesystem\File::withContent(): Innmind\Filesystem\File`
+- `Innmind\Filesystem\File\File::of()` named constructor
 
 ### Changed
 
 - `Innmind\Filesystem\Directory\Directory::remove()` no longer unwraps the whole directory
 - Calling `Innmind\Filesystem\Name` constructor is deprecated
+- Calling `Innmind\Filesystem\File\File` constructor is deprecated
 
 ## 5.2.0 - 2022-09-24
 

@@ -48,7 +48,7 @@ final class HashedName implements Adapter
         $first = $first->otherwise(static fn() => Maybe::just(Directory\Directory::of($hashes[0])));
         $second = $second
             ->otherwise(static fn() => Maybe::just(Directory\Directory::of($hashes[1])))
-            ->map(static fn($second) => $second->add(new File\File(
+            ->map(static fn($second) => $second->add(File\File::of(
                 $hashes[2],
                 $file->content(),
             )));
@@ -70,7 +70,7 @@ final class HashedName implements Adapter
         [, , $concreteFile] = $this->fetch($hashes[0], $hashes[1], $hashes[2]);
 
         /** @var Maybe<File> */
-        return $concreteFile->map(static fn($file) => new File\File(
+        return $concreteFile->map(static fn($file) => File\File::of(
             $originalName,
             $file->content(),
             $file->mediaType(),

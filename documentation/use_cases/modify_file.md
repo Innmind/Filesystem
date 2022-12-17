@@ -23,7 +23,7 @@ $insertRelease = static function(Str $line): Str {
 };
 // replace the old changelog with the new one containing the new release version
 $release = static function(File $changelog) use ($insertRelease): File {
-    return new File\File(
+    return File\File::of(
         $changelog->name(),
         $changelog->content()->map(
             static fn($line) => $line->map($insertRelease),
@@ -79,7 +79,7 @@ $updateUser = static function(Line $user): Content {
     return Content\Lines::of(Sequence::of($user));
 };
 $update = static function(File $users) use ($updateUser): File {
-    return new File\File(
+    return File\File::of(
         $users->name(),
         $users->content()->flatMap(static fn($line) => $updateUser($line)),
         $users->mediaType(),

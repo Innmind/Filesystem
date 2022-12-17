@@ -49,7 +49,7 @@ class HashedNameTest extends TestCase
             $inner = Filesystem::mount(Path::of('/tmp/hashed/')),
         );
 
-        $file = new File\File(Name::of('foo'), Lines::ofContent('content'));
+        $file = File\File::of(Name::of('foo'), Lines::ofContent('content'));
 
         $this->assertFalse($filesystem->contains(Name::of('foo')));
         $this->assertNull($filesystem->add($file));
@@ -77,7 +77,7 @@ class HashedNameTest extends TestCase
                 ),
         );
 
-        $file = new File\File(Name::of('foo'), Lines::ofContent('content bis'));
+        $file = File\File::of(Name::of('foo'), Lines::ofContent('content bis'));
 
         $this->assertNull($filesystem->add($file));
         $this->assertSame(
@@ -115,8 +115,8 @@ class HashedNameTest extends TestCase
             Filesystem::mount(Path::of('/tmp/hashed/')),
         );
 
-        $filesystem->add(new File\File(Name::of('foo'), Lines::ofContent('content')));
-        $filesystem->add(new File\File(Name::of('bar'), Lines::ofContent('content')));
+        $filesystem->add(File\File::of(Name::of('foo'), Lines::ofContent('content')));
+        $filesystem->add(File\File::of(Name::of('bar'), Lines::ofContent('content')));
 
         $all = $filesystem->all();
 

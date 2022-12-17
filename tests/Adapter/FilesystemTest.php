@@ -83,10 +83,10 @@ class FilesystemTest extends TestCase
         $adapter = Filesystem::mount(Path::of('/tmp/'));
 
         $directory = Directory::of(Name::of('foo'))
-            ->add(new File(Name::of('foo.md'), Lines::ofContent('# Foo')))
+            ->add(File::of(Name::of('foo.md'), Lines::ofContent('# Foo')))
             ->add(
                 Directory::of(Name::of('bar'))
-                    ->add(new File(Name::of('bar.md'), Lines::ofContent('# Bar'))),
+                    ->add(File::of(Name::of('bar.md'), Lines::ofContent('# Bar'))),
             );
         $adapter->add($directory);
         $this->assertSame(
@@ -153,7 +153,7 @@ class FilesystemTest extends TestCase
         $a = Filesystem::mount(Path::of('/tmp/'));
 
         $d = Directory::of(Name::of('foo'));
-        $d = $d->add(new File(Name::of('bar'), Lines::ofContent('some content')));
+        $d = $d->add(File::of(Name::of('bar'), Lines::ofContent('some content')));
         $a->add($d);
         $d = $d->remove(Name::of('bar'));
         $a->add($d);
@@ -173,7 +173,7 @@ class FilesystemTest extends TestCase
         $a = Filesystem::mount(Path::of('/tmp/'));
 
         $d = Directory::of(Name::of('foo'));
-        $d = $d->add(new File(Name::of('bar'), Lines::ofContent('some content')));
+        $d = $d->add(File::of(Name::of('bar'), Lines::ofContent('some content')));
         $a->add($d);
         $d = $d->remove(Name::of('bar'));
         $a->add($d);
@@ -213,7 +213,7 @@ class FilesystemTest extends TestCase
     public function testAll()
     {
         $adapter = Filesystem::mount(Path::of('/tmp/test/'));
-        $adapter->add(new File(
+        $adapter->add(File::of(
             Name::of('foo'),
             Lines::ofContent('foo'),
         ));
@@ -267,7 +267,7 @@ class FilesystemTest extends TestCase
     public function testAddingTheSameFileTwiceDoesNothing()
     {
         $adapter = Filesystem::mount(Path::of('/tmp/'));
-        $file = new File(
+        $file = File::of(
             Name::of('foo'),
             Lines::ofContent('foo'),
         );
@@ -337,7 +337,7 @@ class FilesystemTest extends TestCase
                         Directory::of(
                             Name::of(\str_repeat('a', 255)),
                             Set::of(
-                                new File(
+                                File::of(
                                     Name::of(\str_repeat('a', 255)),
                                     None::of(),
                                 ),
@@ -368,7 +368,7 @@ class FilesystemTest extends TestCase
                 $this->assertNull($filesystem->add(Directory::of(
                     Name::of(\chr($ord).'a'),
                     Set::of(
-                        new File(
+                        File::of(
                             Name::of('a'),
                             Lines::ofContent($content),
                         ),
@@ -398,7 +398,7 @@ class FilesystemTest extends TestCase
                 $this->assertNull($filesystem->add(Directory::of(
                     Name::of('a'.\chr($ord).'a'),
                     Set::of(
-                        new File(
+                        File::of(
                             Name::of('a'),
                             Lines::ofContent($content),
                         ),
@@ -430,7 +430,7 @@ class FilesystemTest extends TestCase
                 $this->assertNull($filesystem->add(Directory::of(
                     Name::of(\chr($ord)),
                     Set::of(
-                        new File(
+                        File::of(
                             Name::of('a'),
                             Lines::ofContent($content),
                         ),

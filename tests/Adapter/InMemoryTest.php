@@ -57,11 +57,11 @@ class InMemoryTest extends TestCase
     public function testAll()
     {
         $adapter = InMemory::new();
-        $adapter->add($foo = new File(
+        $adapter->add($foo = File::of(
             Name::of('foo'),
             Lines::ofContent('foo'),
         ));
-        $adapter->add($bar = new File(
+        $adapter->add($bar = File::of(
             Name::of('bar'),
             Lines::ofContent('bar'),
         ));
