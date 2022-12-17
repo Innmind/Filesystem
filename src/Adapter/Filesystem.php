@@ -218,7 +218,7 @@ final class Filesystem implements Adapter
                     throw new LinksAreNotSupported($file->getPathname());
                 }
 
-                yield $this->open($path, new Name($file->getBasename()));
+                yield $this->open($path, Name::of($file->getBasename()));
             }
         });
     }

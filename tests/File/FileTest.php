@@ -21,7 +21,7 @@ class FileTest extends TestCase
 
     public function testInterface()
     {
-        $f = new File($name = new Name('foo'), $c = $this->createMock(Content::class));
+        $f = new File($name = Name::of('foo'), $c = $this->createMock(Content::class));
 
         $this->assertInstanceOf(FileInterface::class, $f);
         $this->assertSame($name, $f->name());
@@ -43,7 +43,7 @@ class FileTest extends TestCase
     public function testMediaType()
     {
         $f = new File(
-            new Name('foo'),
+            Name::of('foo'),
             $this->createMock(Content::class),
             $mt = MediaType::of('application/json'),
         );

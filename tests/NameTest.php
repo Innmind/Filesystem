@@ -21,7 +21,7 @@ class NameTest extends TestCase
 
     public function testInterface()
     {
-        $n = new Name('foo');
+        $n = Name::of('foo');
 
         $this->assertSame('foo', $n->toString());
     }
@@ -31,13 +31,13 @@ class NameTest extends TestCase
         $this->expectException(DomainException::class);
         $this->expectExceptionMessage('A file name can\'t contain a slash, foo/bar given');
 
-        new Name('foo/bar');
+        Name::of('foo/bar');
     }
 
     public function testEquals()
     {
-        $this->assertTrue((new Name('foo'))->equals(new Name('foo')));
-        $this->assertFalse((new Name('foo'))->equals(new Name('bar')));
+        $this->assertTrue((Name::of('foo'))->equals(Name::of('foo')));
+        $this->assertFalse((Name::of('foo'))->equals(Name::of('bar')));
     }
 
     public function testEmptyNameIsNotAllowed()
@@ -45,7 +45,7 @@ class NameTest extends TestCase
         $this->expectException(DomainException::class);
         $this->expectExceptionMessage('A file name can\'t be empty');
 
-        new Name('');
+        Name::of('');
     }
 
     public function testAcceptsAnyValueNotContainingASlash()
@@ -55,7 +55,7 @@ class NameTest extends TestCase
                 Fixture::strings(),
             )
             ->then(function($value) {
-                $name = new Name($value);
+                $name = Name::of($value);
 
                 $this->assertSame($value, $name->toString());
             });
@@ -71,7 +71,7 @@ class NameTest extends TestCase
             ->then(function($a, $b) {
                 $this->expectException(DomainException::class);
 
-                new Name("$a/$b");
+                Name::of("$a/$b");
             });
     }
 
@@ -82,8 +82,8 @@ class NameTest extends TestCase
                 Fixture::strings(),
             )
             ->then(function($value) {
-                $name1 = new Name($value);
-                $name2 = new Name($value);
+                $name1 = Name::of($value);
+                $name2 = Name::of($value);
 
                 $this->assertTrue($name1->equals($name1));
                 $this->assertTrue($name1->equals($name2));
@@ -98,8 +98,8 @@ class NameTest extends TestCase
                 Fixture::strings(),
             )
             ->then(function($a, $b) {
-                $name1 = new Name($a);
-                $name2 = new Name($b);
+                $name1 = Name::of($a);
+                $name2 = Name::of($b);
 
                 $this->assertFalse($name1->equals($name2));
                 $this->assertFalse($name2->equals($name1));
@@ -114,7 +114,7 @@ class NameTest extends TestCase
                 $this->expectException(DomainException::class);
                 $this->expectExceptionMessage("'.' and '..' can't be used");
 
-                new Name($name);
+                Name::of($name);
             });
     }
 
@@ -122,7 +122,7 @@ class NameTest extends TestCase
     {
         $this->expectException(DomainException::class);
 
-        new Name('a'.\chr(0).'a');
+        Name::of('a'.\chr(0).'a');
     }
 
     public function testNamesLongerThan255AreNotAccepted()
@@ -147,7 +147,7 @@ class NameTest extends TestCase
             ->then(function($name) {
                 $this->expectException(DomainException::class);
 
-                new Name($name);
+                Name::of($name);
             });
     }
 
@@ -160,7 +160,7 @@ class NameTest extends TestCase
             ))
             ->then(function($ord) {
                 try {
-                    new Name(\chr($ord));
+                    Name::of(\chr($ord));
 
                     $this->fail('it should throw');
                 } catch (DomainException $e) {
@@ -195,7 +195,7 @@ class NameTest extends TestCase
         $this
             ->forAll(Set\Unicode::latinExtendedA())
             ->then(function(string $name) {
-                $this->assertInstanceOf(Name::class, new Name($name));
+                $this->assertInstanceOf(Name::class, Name::of($name));
             });
     }
 }

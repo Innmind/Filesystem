@@ -69,7 +69,7 @@ final class Directory implements DirectoryInterface
      */
     public static function named(string $name): self
     {
-        return new self(new Name($name));
+        return new self(Name::of($name));
     }
 
     /**

@@ -36,7 +36,7 @@ final class File implements FileInterface
         Content $content,
         MediaType $mediaType = null,
     ): self {
-        return new self(new Name($name), $content, $mediaType);
+        return new self(Name::of($name), $content, $mediaType);
     }
 
     public function name(): Name

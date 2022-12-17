@@ -2,9 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Innmind\Filesystem\Name::of()`
+
 ### Changed
 
 - `Innmind\Filesystem\Directory\Directory::remove()` no longer unwraps the whole directory
+- Calling `Innmind\Filesystem\Name` constructor is deprecated
 
 ## 5.2.0 - 2022-09-24
 

@@ -13,6 +13,9 @@ final class Name
 {
     private string $value;
 
+    /**
+     * @deprecated Use Name::of() instead
+     */
     public function __construct(string $value)
     {
         if (Str::of($value)->empty()) {
@@ -42,6 +45,16 @@ final class Name
         }
 
         $this->value = $value;
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @throws DomainException
+     */
+    public static function of(string $value): self
+    {
+        return new self($value);
     }
 
     public function equals(self $name): bool

@@ -34,7 +34,7 @@ $release = static function(File $changelog) use ($insertRelease): File {
 $filesystem = Filesystem::mount(Path::of('some/repository/'));
 $tmp = Filesystem::mount(Path::of('/tmp/'));
 $filesystem
-    ->get(new Name('CHANGELOG.md'))
+    ->get(Name::of('CHANGELOG.md'))
     ->map(static fn($changelog) => $release($changelog))
     ->flatMap(static function($changelog) use ($tmp) {
         // this operation is due to the fact that you cannot read and write to
@@ -88,7 +88,7 @@ $update = static function(File $users) use ($updateUser): File {
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
 $tmp = Filesystem::mount(Path::of('/tmp/'));
 $filesystem
-    ->get(new Name('users.csv'))
+    ->get(Name::of('users.csv'))
     ->map(static fn($users) => $update($users))
     ->flatMap(static function($changelog) use ($tmp) {
         // this operation is due to the fact that you cannot read and write to
@@ -126,8 +126,8 @@ $merge = static function(File $file1, File $file2): File {
     );
 };
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
-$users1 = $filesystem->get(new Name('users1.csv'));
-$users2 = $filesystem->get(new Name('users2.csv'));
+$users1 = $filesystem->get(Name::of('users1.csv'));
+$users2 = $filesystem->get(Name::of('users2.csv'));
 Maybe::all($users1, $users2)
     ->map(static fn($file1, $file2) => $merge($file1, $file2))
     ->match(

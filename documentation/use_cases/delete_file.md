@@ -10,7 +10,7 @@ use Innmind\Filesystem\{
 use Innmind\Url\Path;
 
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
-$filesystem->remove(new Name('some file'));
+$filesystem->remove(Name::of('some file'));
 ```
 
 If the file doesn't exist it will do nothing and if the name corresponds to a directory it will remove the whole directory.
@@ -27,9 +27,9 @@ use Innmind\Url\Path;
 
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
 $filesystem
-    ->get(new Name('some directory'))
+    ->get(Name::of('some directory'))
     ->filter(static fn($file) => $file instanceof Directory) // make sure we are dealing with a directory
-    ->map(static fn($directory) => $directory->remove(new Name('some file')))
+    ->map(static fn($directory) => $directory->remove(Name::of('some file')))
     ->match(
         static fn($directory) => $filesystem->add($directory), // the file will be removed here only
         static fn() => null,

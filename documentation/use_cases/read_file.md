@@ -20,7 +20,7 @@ $print = static function(File $file): void {
 
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
 $filesystem
-    ->get(new Name('some file'))
+    ->get(Name::of('some file'))
     ->match(
         static fn(File $file) => $print($file),
         static fn() => null, // the file doesn't exist
@@ -50,9 +50,9 @@ $print = static function(File $file): void {
 
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
 $filesystem
-    ->get(new Name('some directory'))
+    ->get(Name::of('some directory'))
     ->filter(static fn($file) => $file instanceof Directory) // make sure "some directory" is not a file
-    ->flatMap(static fn($directory) => $directory->get(new Name('some file')))
+    ->flatMap(static fn($directory) => $directory->get(Name::of('some file')))
     ->match(
         static fn(File $file) => $print($file),
         static fn() => null, // the file doesn't exist
