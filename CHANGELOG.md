@@ -17,6 +17,7 @@
 ### Changed
 
 - `Innmind\Filesystem\Directory\Directory::remove()` no longer unwraps the whole directory
+- `Innmind\Filesystem\Directory\Directory::filter()` no longer erase the previous removals
 
 ### Deprecated
 

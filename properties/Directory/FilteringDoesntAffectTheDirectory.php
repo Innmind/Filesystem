@@ -20,12 +20,14 @@ final class FilteringDoesntAffectTheDirectory implements Property
 
     public function ensureHeldBy(object $directory): object
     {
-        $files = $directory->filter(static fn(): bool => true);
-        $set = $directory->filter(static fn(): bool => false);
+        $all = $directory->filter(static fn(): bool => true);
+        $none = $directory->filter(static fn(): bool => false);
 
-        $directory->foreach(static fn($file) => Assert::assertFalse($set->contains($file->name())));
-        $directory->foreach(static fn($file) => Assert::assertTrue($files->contains($file->name())));
-        $files->foreach(static fn($file) => Assert::assertTrue($directory->contains($file->name())));
+        $directory->foreach(static fn($file) => Assert::assertFalse($none->contains($file->name())));
+        $directory->foreach(static fn($file) => Assert::assertTrue($all->contains($file->name())));
+        $all->foreach(static fn($file) => Assert::assertTrue($directory->contains($file->name())));
+        Assert::assertSame($directory->removed(), $all->removed());
+        Assert::assertSame($directory->removed(), $none->removed());
 
         return $directory;
     }

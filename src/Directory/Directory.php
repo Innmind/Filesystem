@@ -164,7 +164,11 @@ final class Directory implements DirectoryInterface
         // comes from a user and must have used the standard constructor that
         // validates for duplicates, so they're can't be any duplicates after
         // a filter
-        return self::lazy($this->name, $this->files->filter($predicate));
+        return new self(
+            $this->name,
+            $this->files->filter($predicate),
+            $this->removed,
+        );
     }
 
     public function map(callable $map): self
