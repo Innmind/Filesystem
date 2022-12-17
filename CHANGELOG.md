@@ -15,6 +15,12 @@
 - Calling `Innmind\Filesystem\Name` constructor is deprecated
 - Calling `Innmind\Filesystem\File\File` constructor is deprecated
 
+### Removed
+
+- `Innmind\Filesystem\Adapter\Chunk`
+- `Innmind\Filesystem\File\Content\AtPath::stream()`
+- `Innmind\Filesystem\File\Content\OfStream::stream()`
+
 ## 5.2.0 - 2022-09-24
 
 ### Added
