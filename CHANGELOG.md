@@ -5,6 +5,7 @@
 ### Added
 
 - `Innmind\Filesystem\Name::of()` named constructor
+- `Innmind\Filesystem\Name::str(): Innmind\Immutable\Str`
 
 ### Changed
 

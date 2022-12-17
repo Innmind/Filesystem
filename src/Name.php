@@ -64,6 +64,11 @@ final class Name
         return $this->value === $name->value;
     }
 
+    public function str(): Str
+    {
+        return Str::of($this->value);
+    }
+
     public function toString(): string
     {
         return $this->value;

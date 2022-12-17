@@ -8,6 +8,7 @@ use Innmind\Filesystem\{
     Exception\DomainException,
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\Str;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -196,6 +197,19 @@ class NameTest extends TestCase
             ->forAll(Set\Unicode::latinExtendedA())
             ->then(function(string $name) {
                 $this->assertInstanceOf(Name::class, Name::of($name));
+            });
+    }
+
+    public function testStr()
+    {
+        $this
+            ->forAll(Fixture::strings())
+            ->then(function($value) {
+                $this->assertInstanceOf(Str::class, Name::of($value)->str());
+                $this->assertSame(
+                    $value,
+                    Name::of($value)->str()->toString(),
+                );
             });
     }
 }
