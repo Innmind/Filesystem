@@ -40,7 +40,7 @@ class DirectoryTest extends TestCase
         $this->assertSame('foo', $d->name()->toString());
         $this->assertSame('', $d->content()->toString());
         $this->assertSame('text/directory', $d->mediaType()->toString());
-        $this->assertSame($d->mediaType(), $d->mediaType());
+        $this->assertEquals($d->mediaType(), $d->mediaType());
     }
 
     public function testNamed()

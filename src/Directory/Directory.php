@@ -26,7 +26,6 @@ final class Directory implements DirectoryInterface
     private Name $name;
     /** @var Set<File> */
     private Set $files;
-    private MediaType $mediaType;
     /** @var Set<Name> */
     private Set $removed;
 
@@ -40,10 +39,6 @@ final class Directory implements DirectoryInterface
 
         $this->name = $name;
         $this->files = $files ?? $default;
-        $this->mediaType = new MediaType(
-            'text',
-            'directory',
-        );
         /** @var Set<Name> */
         $this->removed = Set::of();
     }
@@ -102,7 +97,10 @@ final class Directory implements DirectoryInterface
 
     public function mediaType(): MediaType
     {
-        return $this->mediaType;
+        return new MediaType(
+            'text',
+            'directory',
+        );
     }
 
     public function withContent(Content $content, MediaType $mediaType = null): self
