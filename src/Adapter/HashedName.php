@@ -103,7 +103,7 @@ final class HashedName implements Adapter
 
     public function all(): Set
     {
-        return $this->root()->files();
+        return Set::of(...$this->root()->files()->toList());
     }
 
     public function root(): Directory

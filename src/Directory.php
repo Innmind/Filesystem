@@ -6,6 +6,7 @@ namespace Innmind\Filesystem;
 use Innmind\Filesystem\Exception\DuplicatedFile;
 use Innmind\Immutable\{
     Set,
+    Sequence,
     Maybe,
     SideEffect,
 };
@@ -64,7 +65,7 @@ interface Directory extends File
     public function removed(): Set;
 
     /**
-     * @return Set<File>
+     * @return Sequence<File>
      */
-    public function files(): Set;
+    public function files(): Sequence;
 }

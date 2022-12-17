@@ -56,14 +56,14 @@ final class InMemory implements Adapter
 
     public function all(): Set
     {
-        return $this->root()->files();
+        return Set::of(...$this->root()->files()->toList());
     }
 
     public function root(): Directory
     {
         return Directory\Directory::of(
             Name::of('root'),
-            Set::of(...$this->files->values()->toList()),
+            $this->files->values(),
         );
     }
 }

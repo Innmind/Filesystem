@@ -8,11 +8,12 @@
 - `Innmind\Filesystem\Name::str(): Innmind\Immutable\Str`
 - `Innmind\Filesystem\File::withContent(): Innmind\Filesystem\File`
 - `Innmind\Filesystem\File\File::of()` named constructor
-- `Innmind\Filesystem\Directory::files(): Innmind\Immutable\Set<Innmind\Filesystem\File>`
+- `Innmind\Filesystem\Directory::files(): Innmind\Immutable\Sequence<Innmind\Filesystem\File>`
 - `Innmind\Filesystem\Adapter::root(): Innmind\Filesystem\Directory`
 - `Innmind\Filesystem\Directory::map(): Innmind\Filesystem\Directory`
 - `Innmind\Filesystem\Directory::flatMap(): Innmind\Filesystem\Directory`
 - `Innmind\Filesystem\File::rename(): Innmind\Filesystem\File`
+- `Innmind\Filesystem\Directory\Directory::of()` `$files` parameter accepts an `Innmind\Immutable\Sequence<Innmind\Filesystem\File>`
 
 ### Changed
 

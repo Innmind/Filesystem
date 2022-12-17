@@ -24,6 +24,7 @@ use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Set,
+    Sequence,
     Str,
     Maybe,
     Either,
@@ -91,7 +92,7 @@ final class Filesystem implements Adapter
 
     public function all(): Set
     {
-        return $this->root()->files();
+        return Set::of(...$this->root()->files()->toList());
     }
 
     public function root(): Directory
@@ -212,12 +213,12 @@ final class Filesystem implements Adapter
     }
 
     /**
-     * @return Set<File>
+     * @return Sequence<File>
      */
-    private function list(Path $path): Set
+    private function list(Path $path): Sequence
     {
-        /** @var Set<File> */
-        return Set::lazy(function() use ($path): \Generator {
+        /** @var Sequence<File> */
+        return Sequence::lazy(function() use ($path): \Generator {
             $files = new \FilesystemIterator($path->toString());
 
             /** @var \SplFileInfo $file */

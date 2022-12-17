@@ -14,6 +14,7 @@ use Innmind\Filesystem\{
 };
 use Innmind\Immutable\{
     Set,
+    Sequence,
     SideEffect,
 };
 use PHPUnit\Framework\TestCase;
@@ -133,7 +134,7 @@ class DirectoryTest extends TestCase
     {
         $directory = Directory::of(
             Name::of('foo'),
-            Set::lazy(static function() {
+            Sequence::lazy(static function() {
                 yield File\File::of(Name::of('foo'), Lines::ofContent('foo'));
                 yield File\File::of(Name::of('bar'), Lines::ofContent('bar'));
                 yield File\File::of(Name::of('foobar'), Lines::ofContent('foobar'));
@@ -155,7 +156,7 @@ class DirectoryTest extends TestCase
     {
         $directory = Directory::of(
             Name::of('foo'),
-            Set::lazy(static function() {
+            Sequence::lazy(static function() {
                 yield File\File::of(Name::of('foo'), Lines::ofContent('foo'));
                 yield File\File::of(Name::of('bar'), Lines::ofContent('bar'));
                 yield File\File::of(Name::of('foobar'), Lines::ofContent('foobar'));
@@ -175,7 +176,7 @@ class DirectoryTest extends TestCase
     {
         $directory = Directory::of(
             Name::of('foo'),
-            Set::lazy(static function() {
+            Sequence::lazy(static function() {
                 yield File\File::of(Name::of('foo'), Lines::ofContent('foo'));
                 yield File\File::of(Name::of('bar'), Lines::ofContent('bar'));
                 yield File\File::of(Name::of('foobar'), Lines::ofContent('foobar'));
@@ -309,7 +310,7 @@ class DirectoryTest extends TestCase
 
                 Directory::of(
                     $directory,
-                    Set::of(
+                    Sequence::of(
                         File\File::named($file->toString(), None::of()),
                         File\File::named($file->toString(), None::of()),
                     ),
@@ -326,7 +327,7 @@ class DirectoryTest extends TestCase
                     Directory::class,
                     Directory::lazy(
                         $name,
-                        Set::lazy(static function() {
+                        Sequence::lazy(static function() {
                             throw new \Exception;
 
                             yield false;

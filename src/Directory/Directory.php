@@ -12,8 +12,8 @@ use Innmind\Filesystem\{
 };
 use Innmind\MediaType\MediaType;
 use Innmind\Immutable\{
-    Str,
     Set,
+    Sequence,
     Maybe,
     SideEffect,
 };
@@ -24,16 +24,16 @@ use Innmind\Immutable\{
 final class Directory implements DirectoryInterface
 {
     private Name $name;
-    /** @var Set<File> */
-    private Set $files;
+    /** @var Sequence<File> */
+    private Sequence $files;
     /** @var Set<Name> */
     private Set $removed;
 
     /**
-     * @param Set<File> $files
+     * @param Sequence<File> $files
      * @param Set<Name> $removed
      */
-    private function __construct(Name $name, Set $files, Set $removed)
+    private function __construct(Name $name, Sequence $files, Set $removed)
     {
         $this->name = $name;
         $this->files = $files;
@@ -43,15 +43,19 @@ final class Directory implements DirectoryInterface
     /**
      * @psalm-pure
      *
-     * @param Set<File>|null $files
+     * @param Set<File>|Sequence<File>|null $files
      *
      * @throws DuplicatedFile
      */
-    public static function of(Name $name, Set $files = null): self
+    public static function of(Name $name, Set|Sequence $files = null): self
     {
+        if ($files instanceof Set) {
+            $files = Sequence::of(...$files->toList());
+        }
+
         return new self(
             $name,
-            self::safeguard($files ?? Set::of()),
+            self::safeguard($files ?? Sequence::of()),
             Set::of(),
         );
     }
@@ -65,7 +69,7 @@ final class Directory implements DirectoryInterface
     {
         return new self(
             Name::of($name),
-            Set::of(),
+            Sequence::of(),
             Set::of(),
         );
     }
@@ -74,9 +78,9 @@ final class Directory implements DirectoryInterface
      * @internal
      * @psalm-pure
      *
-     * @param Set<File> $files
+     * @param Sequence<File> $files
      */
-    public static function lazy(Name $name, Set $files): self
+    public static function lazy(Name $name, Sequence $files): self
     {
         // we prevent the contrusctor from checking for duplicates when
         // using a lazy set of files as it will trigger to load the whole
@@ -182,8 +186,8 @@ final class Directory implements DirectoryInterface
 
     public function flatMap(callable $map): self
     {
-        /** @var callable(File): Set<File> */
-        $map = static fn(File $file): Set => $map($file)->files();
+        /** @var callable(File): Sequence<File> */
+        $map = static fn(File $file): Sequence => $map($file)->files();
 
         return new self(
             $this->name,
@@ -202,7 +206,7 @@ final class Directory implements DirectoryInterface
         return $this->removed;
     }
 
-    public function files(): Set
+    public function files(): Sequence
     {
         return $this->files;
     }
@@ -210,13 +214,13 @@ final class Directory implements DirectoryInterface
     /**
      * @psalm-pure
      *
-     * @param Set<File> $files
+     * @param Sequence<File> $files
      *
      * @throws DuplicatedFile
      *
-     * @return Set<File>
+     * @return Sequence<File>
      */
-    private static function safeguard(Set $files): Set
+    private static function safeguard(Sequence $files): Sequence
     {
         return $files->safeguard(
             Set::strings(),

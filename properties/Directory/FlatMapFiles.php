@@ -35,16 +35,26 @@ final class FlatMapFiles implements Property
 
     public function ensureHeldBy(object $directory): object
     {
-        $directory2 = $directory->flatMap(fn() => Directory::of(
+        $directory2 = $directory->flatMap(fn($file) => Directory::of(
             Name::of('doesntmatter'),
-            Set::of($this->file1, $this->file2),
+            Set::of(
+                $this->file1->rename(Name::of($this->file1->name()->toString().$file->name()->toString())),
+                $this->file2->rename(Name::of($this->file2->name()->toString().$file->name()->toString())),
+            ),
         ));
 
         Assert::assertNotSame($directory, $directory2);
         Assert::assertSame($directory->name()->toString(), $directory2->name()->toString());
-        Assert::assertNotSame([$this->file1, $this->file2], $directory->files()->toList());
-        Assert::assertSame([$this->file1, $this->file2], $directory2->files()->toList());
-        Assert::assertSame($directory->removed(), $directory2->removed());
+        Assert::assertNotSame($directory->files(), $directory2->files());
+        Assert::assertSame($directory->files()->size() * 2, $directory2->files()->size());
+        Assert::assertSame(
+            [$this->file1->content(), $this->file2->content()],
+            $directory2
+                ->files()
+                ->map(static fn($file) => $file->content())
+                ->distinct()
+                ->toList(),
+        );
 
         return $directory2;
     }

@@ -28,12 +28,20 @@ final class MapFiles implements Property
 
     public function ensureHeldBy(object $directory): object
     {
-        $directory2 = $directory->map(fn() => $this->file);
+        $directory2 = $directory->map(fn($file) => $this->file->rename($file->name()));
 
         Assert::assertNotSame($directory, $directory2);
         Assert::assertSame($directory->name()->toString(), $directory2->name()->toString());
-        Assert::assertNotSame([$this->file], $directory->files()->toList());
-        Assert::assertSame([$this->file], $directory2->files()->toList());
+        Assert::assertNotSame($directory->files(), $directory2->files());
+        Assert::assertSame($directory->files()->size(), $directory2->files()->size());
+        Assert::assertSame(
+            [$this->file->content()],
+            $directory2
+                ->files()
+                ->map(static fn($file) => $file->content())
+                ->distinct()
+                ->toList(),
+        );
         Assert::assertSame($directory->removed(), $directory2->removed());
 
         return $directory2;
