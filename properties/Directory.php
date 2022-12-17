@@ -69,6 +69,9 @@ final class Directory
                 Directory\FilteringRetunsTheExpectedElements::class,
                 File::any(),
             ),
+            Set\Property::of(
+                Directory\AllFilesAreAccessible::class,
+            ),
         ];
     }
 }

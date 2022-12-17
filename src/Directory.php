@@ -47,4 +47,9 @@ interface Directory extends File
      * @return Set<Name>
      */
     public function removed(): Set;
+
+    /**
+     * @return Set<File>
+     */
+    public function files(): Set;
 }

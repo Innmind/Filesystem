@@ -164,4 +164,9 @@ final class Directory implements DirectoryInterface
     {
         return $this->removed;
     }
+
+    public function files(): Set
+    {
+        return $this->files;
+    }
 }

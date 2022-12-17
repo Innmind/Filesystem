@@ -8,6 +8,7 @@
 - `Innmind\Filesystem\Name::str(): Innmind\Immutable\Str`
 - `Innmind\Filesystem\File::withContent(): Innmind\Filesystem\File`
 - `Innmind\Filesystem\File\File::of()` named constructor
+- `Innmind\Filesystem\Directory::files(): Innmind\Immutable\Set<Innmind\Filesystem\File>`
 
 ### Changed
 
