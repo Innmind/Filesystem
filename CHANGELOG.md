@@ -9,6 +9,7 @@
 - `Innmind\Filesystem\File::withContent(): Innmind\Filesystem\File`
 - `Innmind\Filesystem\File\File::of()` named constructor
 - `Innmind\Filesystem\Directory::files(): Innmind\Immutable\Set<Innmind\Filesystem\File>`
+- `Innmind\Filesystem\Adapter::root(): Innmind\Filesystem\Directory`
 
 ### Changed
 
@@ -18,6 +19,7 @@
 
 - `Innmind\Filesystem\Name` constructor
 - `Innmind\Filesystem\File\File` constructor
+- `Innmind\Filesystem\Adapter::all()`
 
 ### Removed
 

@@ -7,6 +7,7 @@ use Innmind\Filesystem\{
     Adapter,
     File,
     Name,
+    Directory,
 };
 use Innmind\Immutable\{
     Map,
@@ -55,6 +56,14 @@ final class InMemory implements Adapter
 
     public function all(): Set
     {
-        return Set::of(...$this->files->values()->toList());
+        return $this->root()->files();
+    }
+
+    public function root(): Directory
+    {
+        return Directory\Directory::of(
+            Name::of('root'),
+            Set::of(...$this->files->values()->toList()),
+        );
     }
 }

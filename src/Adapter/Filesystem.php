@@ -91,7 +91,15 @@ final class Filesystem implements Adapter
 
     public function all(): Set
     {
-        return $this->list($this->path);
+        return $this->root()->files();
+    }
+
+    public function root(): Directory
+    {
+        return Directory\Directory::lazy(
+            Name::of('root'),
+            $this->list($this->path),
+        );
     }
 
     /**

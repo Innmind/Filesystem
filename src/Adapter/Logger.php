@@ -7,6 +7,7 @@ use Innmind\Filesystem\{
     Adapter,
     File,
     Name,
+    Directory,
 };
 use Innmind\Immutable\{
     Set,
@@ -70,6 +71,11 @@ final class Logger implements Adapter
 
     public function all(): Set
     {
-        return $this->filesystem->all();
+        return $this->root()->files();
+    }
+
+    public function root(): Directory
+    {
+        return $this->filesystem->root();
     }
 }

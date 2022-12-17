@@ -103,8 +103,13 @@ final class HashedName implements Adapter
 
     public function all(): Set
     {
+        return $this->root()->files();
+    }
+
+    public function root(): Directory
+    {
         //this is not ideal but the names can't be determined from the hashes
-        return $this->filesystem->all();
+        return $this->filesystem->root();
     }
 
     /**

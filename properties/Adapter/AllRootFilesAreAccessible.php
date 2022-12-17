@@ -21,12 +21,29 @@ final class AllRootFilesAreAccessible implements Property
     public function ensureHeldBy(object $adapter): object
     {
         $adapter
-            ->all()
+            ->root()
+            ->files()
             ->foreach(static function($file) use ($adapter) {
                 Assert::assertTrue($adapter->contains($file->name()));
                 Assert::assertSame(
                     $file->content()->toString(),
                     $adapter
+                        ->get($file->name())
+                        ->map(static fn($file) => $file->content())
+                        ->match(
+                            static fn($content) => $content->toString(),
+                            static fn() => null,
+                        ),
+                );
+            });
+        Assert::assertSame($adapter->root()->files()->size(), $adapter->all()->size());
+        $adapter
+            ->all()
+            ->foreach(static function($file) use ($adapter) {
+                Assert::assertSame(
+                    $file->content()->toString(),
+                    $adapter
+                        ->root()
                         ->get($file->name())
                         ->map(static fn($file) => $file->content())
                         ->match(
