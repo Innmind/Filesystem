@@ -55,4 +55,13 @@ final class File implements FileInterface
     {
         return $this->mediaType;
     }
+
+    public function withContent(Content $content, MediaType $mediaType = null): self
+    {
+        return new self(
+            $this->name,
+            $content,
+            $mediaType ?? $this->mediaType,
+        );
+    }
 }

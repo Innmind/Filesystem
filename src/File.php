@@ -14,4 +14,9 @@ interface File
     public function name(): Name;
     public function content(): Content;
     public function mediaType(): MediaType;
+
+    /**
+     * This method called on a directory DOES NOTHING
+     */
+    public function withContent(Content $content, MediaType $mediaType = null): self;
 }

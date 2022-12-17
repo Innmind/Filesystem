@@ -105,6 +105,11 @@ final class Directory implements DirectoryInterface
         return $this->mediaType;
     }
 
+    public function withContent(Content $content, MediaType $mediaType = null): self
+    {
+        return $this;
+    }
+
     public function add(File $file): DirectoryInterface
     {
         $files = $this->files->filter(static fn(File $known): bool => !$known->name()->equals($file->name()));

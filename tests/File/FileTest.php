@@ -108,4 +108,46 @@ class FileTest extends TestCase
                 $this->assertSame($mediaType, $file->mediaType());
             });
     }
+
+    public function testWithContent()
+    {
+        $this
+            ->forAll(
+                FName::any(),
+                FMediaType::any(),
+            )
+            ->then(function($name, $mediaType) {
+                $file = new File(
+                    $name,
+                    $content = $this->createMock(Content::class),
+                    $mediaType,
+                );
+                $file2 = $file->withContent($content2 = $this->createMock(Content::class));
+
+                $this->assertNotSame($file, $file2);
+                $this->assertNotSame($file->content(), $file2->content());
+                $this->assertSame($content, $file->content());
+                $this->assertSame($content2, $file2->content());
+            });
+    }
+
+    public function testWithContentKeepsTheMediaTypeByDefault()
+    {
+        $this
+            ->forAll(
+                FName::any(),
+                FMediaType::any(),
+            )
+            ->then(function($name, $mediaType) {
+                $file = new File(
+                    $name,
+                    $this->createMock(Content::class),
+                    $mediaType,
+                );
+                $file2 = $file->withContent($this->createMock(Content::class));
+
+                $this->assertNotSame($file, $file2);
+                $this->assertSame($file->mediaType(), $file2->mediaType());
+            });
+    }
 }

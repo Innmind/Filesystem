@@ -6,6 +6,7 @@
 
 - `Innmind\Filesystem\Name::of()` named constructor
 - `Innmind\Filesystem\Name::str(): Innmind\Immutable\Str`
+- `Innmind\Filesystem\File::withContent(): Innmind\Filesystem\File`
 
 ### Changed
 
