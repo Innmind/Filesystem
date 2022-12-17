@@ -12,8 +12,11 @@
 ### Changed
 
 - `Innmind\Filesystem\Directory\Directory::remove()` no longer unwraps the whole directory
-- Calling `Innmind\Filesystem\Name` constructor is deprecated
-- Calling `Innmind\Filesystem\File\File` constructor is deprecated
+
+### Deprecated
+
+- `Innmind\Filesystem\Name` constructor
+- `Innmind\Filesystem\File\File` constructor
 
 ### Removed
 
