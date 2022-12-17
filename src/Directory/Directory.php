@@ -30,17 +30,14 @@ final class Directory implements DirectoryInterface
     private Set $removed;
 
     /**
-     * @param Set<File>|null $files
+     * @param Set<File> $files
+     * @param Set<Name> $removed
      */
-    private function __construct(Name $name, Set $files = null)
+    private function __construct(Name $name, Set $files, Set $removed)
     {
-        /** @var Set<File> $default */
-        $default = Set::of();
-
         $this->name = $name;
-        $this->files = $files ?? $default;
-        /** @var Set<Name> */
-        $this->removed = Set::of();
+        $this->files = $files;
+        $this->removed = $removed;
     }
 
     /**
@@ -52,13 +49,11 @@ final class Directory implements DirectoryInterface
      */
     public static function of(Name $name, Set $files = null): self
     {
-        return new self($name, $files?->safeguard(
-            Set::strings(),
-            static fn(Set $names, $file) => match ($names->contains($file->name()->toString())) {
-                true => throw new DuplicatedFile($file->name()),
-                false => ($names)($file->name()->toString()),
-            },
-        ));
+        return new self(
+            $name,
+            self::safeguard($files ?? Set::of()),
+            Set::of(),
+        );
     }
 
     /**
@@ -68,7 +63,11 @@ final class Directory implements DirectoryInterface
      */
     public static function named(string $name): self
     {
-        return new self(Name::of($name));
+        return new self(
+            Name::of($name),
+            Set::of(),
+            Set::of(),
+        );
     }
 
     /**
@@ -84,7 +83,7 @@ final class Directory implements DirectoryInterface
         // directory tree, it's kinda safe to do this as this method should
         // only be used within the filesystem adapter and there should be no
         // duplicates on a concrete filesystem
-        return new self($name, $files);
+        return new self($name, $files, Set::of());
     }
 
     public function name(): Name
@@ -112,12 +111,14 @@ final class Directory implements DirectoryInterface
 
     public function add(File $file): DirectoryInterface
     {
-        $files = $this->files->filter(static fn(File $known): bool => !$known->name()->equals($file->name()));
-
-        $directory = clone $this;
-        $directory->files = ($files)($file);
-
-        return $directory;
+        return new self(
+            $this->name,
+            $this
+                ->files
+                ->filter(static fn(File $known): bool => !$known->name()->equals($file->name()))
+                ->add($file),
+            $this->removed,
+        );
     }
 
     public function get(Name $name): Maybe
@@ -135,11 +136,11 @@ final class Directory implements DirectoryInterface
 
     public function remove(Name $name): DirectoryInterface
     {
-        $directory = clone $this;
-        $directory->files = $this->files->filter(static fn(File $file) => !$file->name()->equals($name));
-        $directory->removed = ($directory->removed)($name);
-
-        return $directory;
+        return new self(
+            $this->name,
+            $this->files->filter(static fn(File $file) => !$file->name()->equals($name)),
+            ($this->removed)($name),
+        );
     }
 
     public function foreach(callable $function): SideEffect
@@ -157,6 +158,15 @@ final class Directory implements DirectoryInterface
         return self::lazy($this->name, $this->files->filter($predicate));
     }
 
+    public function map(callable $map): self
+    {
+        return new self(
+            $this->name,
+            self::safeguard($this->files->map($map)),
+            $this->removed,
+        );
+    }
+
     public function reduce($carry, callable $reducer)
     {
         return $this->files->reduce($carry, $reducer);
@@ -170,5 +180,25 @@ final class Directory implements DirectoryInterface
     public function files(): Set
     {
         return $this->files;
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param Set<File> $files
+     *
+     * @throws DuplicatedFile
+     *
+     * @return Set<File>
+     */
+    private static function safeguard(Set $files): Set
+    {
+        return $files->safeguard(
+            Set::strings(),
+            static fn(Set $names, $file) => match ($names->contains($file->name()->toString())) {
+                true => throw new DuplicatedFile($file->name()),
+                false => ($names)($file->name()->toString()),
+            },
+        );
     }
 }

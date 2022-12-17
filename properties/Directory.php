@@ -72,6 +72,14 @@ final class Directory
             Set\Property::of(
                 Directory\AllFilesAreAccessible::class,
             ),
+            Set\Property::of(
+                Directory\MapFiles::class,
+                File::any(),
+            ),
+            Set\Property::of(
+                Directory\ThrowWhenMappingToSameFileTwice::class,
+                File::any(),
+            ),
         ];
     }
 }

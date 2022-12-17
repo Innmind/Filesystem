@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
+use Innmind\Filesystem\Exception\DuplicatedFile;
 use Innmind\Immutable\{
     Set,
     Maybe,
@@ -29,6 +30,13 @@ interface Directory extends File
      * @param callable(File): bool $predicate
      */
     public function filter(callable $predicate): self;
+
+    /**
+     * @param callable(File): File $map
+     *
+     * @throws DuplicatedFile
+     */
+    public function map(callable $map): self;
 
     /**
      * @template R

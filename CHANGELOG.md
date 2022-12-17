@@ -10,6 +10,7 @@
 - `Innmind\Filesystem\File\File::of()` named constructor
 - `Innmind\Filesystem\Directory::files(): Innmind\Immutable\Set<Innmind\Filesystem\File>`
 - `Innmind\Filesystem\Adapter::root(): Innmind\Filesystem\Directory`
+- `Innmind\Filesystem\Directory::map(): Innmind\Filesystem\Directory`
 
 ### Changed
 
