@@ -167,6 +167,18 @@ final class Directory implements DirectoryInterface
         );
     }
 
+    public function flatMap(callable $map): self
+    {
+        /** @var callable(File): Set<File> */
+        $map = static fn(File $file): Set => $map($file)->files();
+
+        return new self(
+            $this->name,
+            self::safeguard($this->files->flatMap($map)),
+            $this->removed,
+        );
+    }
+
     public function reduce($carry, callable $reducer)
     {
         return $this->files->reduce($carry, $reducer);

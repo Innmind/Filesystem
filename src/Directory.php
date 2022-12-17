@@ -39,6 +39,13 @@ interface Directory extends File
     public function map(callable $map): self;
 
     /**
+     * @param callable(File): self $map
+     *
+     * @throws DuplicatedFile
+     */
+    public function flatMap(callable $map): self;
+
+    /**
      * @template R
      *
      * @param R $carry

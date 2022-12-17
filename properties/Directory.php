@@ -80,6 +80,16 @@ final class Directory
                 Directory\ThrowWhenMappingToSameFileTwice::class,
                 File::any(),
             ),
+            Set\Property::of(
+                Directory\FlatMapFiles::class,
+                new Set\Randomize(File::any()),
+                new Set\Randomize(File::any()),
+            ),
+            Set\Property::of(
+                Directory\ThrowWhenFlatMappingToSameFileTwice::class,
+                new Set\Randomize(File::any()),
+                new Set\Randomize(File::any()),
+            ),
         ];
     }
 }

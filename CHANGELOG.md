@@ -11,6 +11,7 @@
 - `Innmind\Filesystem\Directory::files(): Innmind\Immutable\Set<Innmind\Filesystem\File>`
 - `Innmind\Filesystem\Adapter::root(): Innmind\Filesystem\Directory`
 - `Innmind\Filesystem\Directory::map(): Innmind\Filesystem\Directory`
+- `Innmind\Filesystem\Directory::flatMap(): Innmind\Filesystem\Directory`
 
 ### Changed
 
