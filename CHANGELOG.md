@@ -4,7 +4,7 @@
 
 ### Added
 
-- `Innmind\Filesystem\Name::of()`
+- `Innmind\Filesystem\Name::of()` named constructor
 
 ### Changed
 
