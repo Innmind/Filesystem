@@ -42,6 +42,10 @@ return static function(Config $config): Config
                     'Backup directory',
                     Path::of('use_cases/backup_directory.md'),
                 ),
+                Entry::markdown(
+                    'Load FTP files',
+                    Path::of('use_cases/load_ftp_files.md'),
+                ),
             ),
             Entry::section(
                 'Testing',
