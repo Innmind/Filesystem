@@ -8,7 +8,7 @@ use Innmind\Filesystem\{
     Name,
     File,
     File\Content,
-    Exception\LogicException,
+    Exception\DuplicatedFile,
 };
 use Innmind\MediaType\MediaType;
 use Innmind\Immutable\{
@@ -47,13 +47,15 @@ final class Directory implements DirectoryInterface
      * @psalm-pure
      *
      * @param Set<File>|null $files
+     *
+     * @throws DuplicatedFile
      */
     public static function of(Name $name, Set $files = null): self
     {
         return new self($name, $files?->safeguard(
             Set::strings(),
             static fn(Set $names, $file) => match ($names->contains($file->name()->toString())) {
-                true => throw new LogicException("Same file '{$file->name()->toString()}' found multiple times"),
+                true => throw new DuplicatedFile($file->name()),
                 false => ($names)($file->name()->toString()),
             },
         ));
