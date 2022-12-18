@@ -35,11 +35,18 @@ final class FlatMapFiles implements Property
 
     public function ensureHeldBy(object $directory): object
     {
+        // we hash the names to avoid having names too long
         $directory2 = $directory->flatMap(fn($file) => Directory::of(
             Name::of('doesntmatter'),
             Set::of(
-                $this->file1->rename(Name::of($this->file1->name()->toString().$file->name()->toString())),
-                $this->file2->rename(Name::of($this->file2->name()->toString().$file->name()->toString())),
+                $this->file1->rename(Name::of(\hash(
+                    'sha512',
+                    $this->file1->name()->toString().$file->name()->toString()),
+                )),
+                $this->file2->rename(Name::of(\hash(
+                    'sha512',
+                    $this->file2->name()->toString().$file->name()->toString()),
+                )),
             ),
         ));
 
