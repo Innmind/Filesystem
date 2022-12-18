@@ -39,6 +39,7 @@ use Innmind\Filesystem\{
     Directory,
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\Predicate\Instance;
 
 $print = static function(File $file): void {
     $file
@@ -51,7 +52,7 @@ $print = static function(File $file): void {
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
 $filesystem
     ->get(Name::of('some directory'))
-    ->filter(static fn($file) => $file instanceof Directory) // make sure "some directory" is not a file
+    ->keep(Instance::of(Directory::class)) // make sure "some directory" is not a file
     ->flatMap(static fn($directory) => $directory->get(Name::of('some file')))
     ->match(
         static fn(File $file) => $print($file),
