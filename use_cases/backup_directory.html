@@ -55,6 +55,11 @@
                                         Backup directory
                                     </a>
                                 </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/load_ftp_files.html">
+                                        Load FTP files
+                                    </a>
+                                </li>
                                                     </ul>
                     </details>
                             </li>
@@ -86,7 +91,7 @@ use Innmind\Url\Path;
 $source = Filesystem::mount(Path::of('/var/data/'));
 $backup = Filesystem::mount(Path::of('/volumes/backup/'));
 $source
-    ->all()
+    ->root()
     ->foreach(static fn($file) => $backup->add($file));</code></pre>
 <p>This example will copy all files and directories from <code>/var/data/</code> inside the folder <code>/volumes/backup/</code>. This operation is a merge and not an overwrite, meaning that files in the backup that don't exist in the source folder won't be deleted.</p></main>
     <footer>

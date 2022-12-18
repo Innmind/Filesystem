@@ -55,6 +55,11 @@
                                         Backup directory
                                     </a>
                                 </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Filesystem/use_cases/load_ftp_files.html">
+                                        Load FTP files
+                                    </a>
+                                </li>
                                                     </ul>
                     </details>
                             </li>
@@ -82,7 +87,7 @@
     <main><h1 id="read-a-file-from-the-filesystem"><a href="#read-a-file-from-the-filesystem" class="anchor">#</a>Read a file from the filesystem</h1>
 <h2 id="at-the-root-of-the-adapter"><a href="#at-the-root-of-the-adapter" class="anchor">#</a>At the root of the adapter</h2>
 <pre><code class="language-php">use Innmind\Filesystem\{
-    Adapter\filesystem,
+    Adapter\Filesystem,
     File,
     Name,
 };
@@ -98,7 +103,7 @@ $print = static function(File $file): void {
 
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
 $filesystem
-    ->get(new Name('some file'))
+    ->get(Name::of('some file'))
     ->match(
         static fn(File $file) => $print($file),
         static fn() => null, // the file doesn't exist
@@ -106,12 +111,13 @@ $filesystem
 <p>This example will print each line to the screen, or nothing if the file doesn't exist.</p>
 <h2 id="inside-a-directory"><a href="#inside-a-directory" class="anchor">#</a>Inside a directory</h2>
 <pre><code class="language-php">use Innmind\Filesystem\{
-    Adapter\filesystem,
+    Adapter\Filesystem,
     File,
     Name,
     Directory,
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\Predicate\Instance;
 
 $print = static function(File $file): void {
     $file
@@ -123,9 +129,9 @@ $print = static function(File $file): void {
 
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
 $filesystem
-    ->get(new Name('some directory'))
-    ->filter(static fn($file) => $file instanceof Directory) // make sure "some directory" is not a file
-    ->flatMap(static fn($directory) => $directory->get(new Name('some file')))
+    ->get(Name::of('some directory'))
+    ->keep(Instance::of(Directory::class)) // make sure "some directory" is not a file
+    ->flatMap(static fn($directory) => $directory->get(Name::of('some file')))
     ->match(
         static fn(File $file) => $print($file),
         static fn() => null, // the file doesn't exist
