@@ -91,6 +91,9 @@ final class Adapter
                 File::any(),
                 File::any(),
             ),
+            Set\Property::of(
+                Adapter\RootDirectoryIsNamedRoot::class,
+            ),
         ];
     }
 }

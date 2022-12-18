@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Directory;
 
-use Innmind\Filesystem\{
-    File,
-    Event\FileWasAdded,
-};
+use Innmind\Filesystem\File;
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;
 

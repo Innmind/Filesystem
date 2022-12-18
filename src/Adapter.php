@@ -23,7 +23,10 @@ interface Adapter
     public function remove(Name $file): void;
 
     /**
+     * @deprecated Use self::root() instead
+     *
      * @return Set<File>
      */
     public function all(): Set;
+    public function root(): Directory;
 }

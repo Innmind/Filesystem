@@ -46,11 +46,11 @@ class FilesystemTest extends TestCase
         $adapter = Filesystem::mount(Path::of('/tmp/'));
 
         $this->assertInstanceOf(Adapter::class, $adapter);
-        $this->assertFalse($adapter->contains(new Name('foo')));
-        $this->assertNull($adapter->add(Directory::of(new Name('foo'))));
-        $this->assertTrue($adapter->contains(new Name('foo')));
-        $this->assertNull($adapter->remove(new Name('foo')));
-        $this->assertFalse($adapter->contains(new Name('foo')));
+        $this->assertFalse($adapter->contains(Name::of('foo')));
+        $this->assertNull($adapter->add(Directory::of(Name::of('foo'))));
+        $this->assertTrue($adapter->contains(Name::of('foo')));
+        $this->assertNull($adapter->remove(Name::of('foo')));
+        $this->assertFalse($adapter->contains(Name::of('foo')));
     }
 
     public function testThrowWhenPathToMountIsNotADirectory()
@@ -65,7 +65,7 @@ class FilesystemTest extends TestCase
     {
         $this->assertNull(
             Filesystem::mount(Path::of('/tmp/'))
-                ->get(new Name('foo'))
+                ->get(Name::of('foo'))
                 ->match(
                     static fn($file) => $file,
                     static fn() => null,
@@ -75,25 +75,25 @@ class FilesystemTest extends TestCase
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $this->assertNull(Filesystem::mount(Path::of('/tmp/'))->remove(new Name('foo')));
+        $this->assertNull(Filesystem::mount(Path::of('/tmp/'))->remove(Name::of('foo')));
     }
 
     public function testCreateNestedStructure()
     {
         $adapter = Filesystem::mount(Path::of('/tmp/'));
 
-        $directory = Directory::of(new Name('foo'))
-            ->add(new File(new Name('foo.md'), Lines::ofContent('# Foo')))
+        $directory = Directory::of(Name::of('foo'))
+            ->add(File::of(Name::of('foo.md'), Lines::ofContent('# Foo')))
             ->add(
-                Directory::of(new Name('bar'))
-                    ->add(new File(new Name('bar.md'), Lines::ofContent('# Bar'))),
+                Directory::of(Name::of('bar'))
+                    ->add(File::of(Name::of('bar.md'), Lines::ofContent('# Bar'))),
             );
         $adapter->add($directory);
         $this->assertSame(
             '# Foo',
             $adapter
-                ->get(new Name('foo'))
-                ->flatMap(static fn($dir) => $dir->get(new Name('foo.md')))
+                ->get(Name::of('foo'))
+                ->flatMap(static fn($dir) => $dir->get(Name::of('foo.md')))
                 ->map(static fn($file) => $file->content())
                 ->match(
                     static fn($content) => $content->toString(),
@@ -103,9 +103,9 @@ class FilesystemTest extends TestCase
         $this->assertSame(
             '# Bar',
             $adapter
-                ->get(new Name('foo'))
-                ->flatMap(static fn($dir) => $dir->get(new Name('bar')))
-                ->flatMap(static fn($dir) => $dir->get(new Name('bar.md')))
+                ->get(Name::of('foo'))
+                ->flatMap(static fn($dir) => $dir->get(Name::of('bar')))
+                ->flatMap(static fn($dir) => $dir->get(Name::of('bar.md')))
                 ->map(static fn($file) => $file->content())
                 ->match(
                     static fn($content) => $content->toString(),
@@ -114,12 +114,12 @@ class FilesystemTest extends TestCase
         );
 
         $adapter = Filesystem::mount(Path::of('/tmp/'));
-        $this->assertTrue($adapter->contains(new Name('foo')));
+        $this->assertTrue($adapter->contains(Name::of('foo')));
         $this->assertSame(
             '# Foo',
             $adapter
-                ->get(new Name('foo'))
-                ->flatMap(static fn($dir) => $dir->get(new Name('foo.md')))
+                ->get(Name::of('foo'))
+                ->flatMap(static fn($dir) => $dir->get(Name::of('foo.md')))
                 ->map(static fn($file) => $file->content())
                 ->match(
                     static fn($content) => $content->toString(),
@@ -127,17 +127,17 @@ class FilesystemTest extends TestCase
                 ),
         );
         $this->assertTrue(
-            $adapter->get(new Name('foo'))->match(
-                static fn($dir) => $dir->contains(new Name('bar')),
+            $adapter->get(Name::of('foo'))->match(
+                static fn($dir) => $dir->contains(Name::of('bar')),
                 static fn() => false,
             ),
         );
         $this->assertSame(
             '# Bar',
             $adapter
-                ->get(new Name('foo'))
-                ->flatMap(static fn($dir) => $dir->get(new Name('bar')))
-                ->flatMap(static fn($dir) => $dir->get(new Name('bar.md')))
+                ->get(Name::of('foo'))
+                ->flatMap(static fn($dir) => $dir->get(Name::of('bar')))
+                ->flatMap(static fn($dir) => $dir->get(Name::of('bar.md')))
                 ->map(static fn($file) => $file->content())
                 ->match(
                     static fn($content) => $content->toString(),
@@ -145,48 +145,48 @@ class FilesystemTest extends TestCase
                 ),
         );
 
-        $adapter->remove(new Name('foo'));
+        $adapter->remove(Name::of('foo'));
     }
 
     public function testRemoveFileWhenRemovedFromFolder()
     {
         $a = Filesystem::mount(Path::of('/tmp/'));
 
-        $d = Directory::of(new Name('foo'));
-        $d = $d->add(new File(new Name('bar'), Lines::ofContent('some content')));
+        $d = Directory::of(Name::of('foo'));
+        $d = $d->add(File::of(Name::of('bar'), Lines::ofContent('some content')));
         $a->add($d);
-        $d = $d->remove(new Name('bar'));
+        $d = $d->remove(Name::of('bar'));
         $a->add($d);
         $this->assertSame(1, $d->removed()->count());
         $a = Filesystem::mount(Path::of('/tmp/'));
         $this->assertFalse(
-            $a->get(new Name('foo'))->match(
-                static fn($dir) => $dir->contains(new Name('bar')),
+            $a->get(Name::of('foo'))->match(
+                static fn($dir) => $dir->contains(Name::of('bar')),
                 static fn() => true,
             ),
         );
-        $a->remove(new Name('foo'));
+        $a->remove(Name::of('foo'));
     }
 
     public function testDoesntFailWhenAddindSameDirectoryTwiceThatContainsARemovedFile()
     {
         $a = Filesystem::mount(Path::of('/tmp/'));
 
-        $d = Directory::of(new Name('foo'));
-        $d = $d->add(new File(new Name('bar'), Lines::ofContent('some content')));
+        $d = Directory::of(Name::of('foo'));
+        $d = $d->add(File::of(Name::of('bar'), Lines::ofContent('some content')));
         $a->add($d);
-        $d = $d->remove(new Name('bar'));
+        $d = $d->remove(Name::of('bar'));
         $a->add($d);
         $a->add($d);
         $this->assertSame(1, $d->removed()->count());
         $a = Filesystem::mount(Path::of('/tmp/'));
         $this->assertFalse(
-            $a->get(new Name('foo'))->match(
-                static fn($dir) => $dir->contains(new Name('bar')),
+            $a->get(Name::of('foo'))->match(
+                static fn($dir) => $dir->contains(Name::of('bar')),
                 static fn() => true,
             ),
         );
-        $a->remove(new Name('foo'));
+        $a->remove(Name::of('foo'));
     }
 
     public function testLoadWithMediaType()
@@ -200,21 +200,21 @@ class FilesystemTest extends TestCase
         $this->assertSame(
             'text/html',
             $a
-                ->get(new Name('some_content.html'))
+                ->get(Name::of('some_content.html'))
                 ->map(static fn($file) => $file->mediaType())
                 ->match(
                     static fn($mediaType) => $mediaType->toString(),
                     static fn() => null,
                 ),
         );
-        $a->remove(new Name('some_content.html'));
+        $a->remove(Name::of('some_content.html'));
     }
 
     public function testAll()
     {
         $adapter = Filesystem::mount(Path::of('/tmp/test/'));
-        $adapter->add(new File(
-            new Name('foo'),
+        $adapter->add(File::of(
+            Name::of('foo'),
             Lines::ofContent('foo'),
         ));
         \file_put_contents('/tmp/test/bar', 'bar');
@@ -235,7 +235,7 @@ class FilesystemTest extends TestCase
         $this->assertSame(
             'foo',
             $adapter
-                ->get(new Name('foo'))
+                ->get(Name::of('foo'))
                 ->map(static fn($file) => $file->content())
                 ->match(
                     static fn($content) => $content->toString(),
@@ -245,7 +245,7 @@ class FilesystemTest extends TestCase
         $this->assertSame(
             'bar',
             $adapter
-                ->get(new Name('bar'))
+                ->get(Name::of('bar'))
                 ->map(static fn($file) => $file->content())
                 ->match(
                     static fn($content) => $content->toString(),
@@ -254,21 +254,21 @@ class FilesystemTest extends TestCase
         );
         $this->assertInstanceOf(
             DirectoryInterface::class,
-            $adapter->get(new Name('baz'))->match(
+            $adapter->get(Name::of('baz'))->match(
                 static fn($dir) => $dir,
                 static fn() => null,
             ),
         );
-        $adapter->remove(new Name('foo'));
-        $adapter->remove(new Name('bar'));
-        $adapter->remove(new Name('baz'));
+        $adapter->remove(Name::of('foo'));
+        $adapter->remove(Name::of('bar'));
+        $adapter->remove(Name::of('baz'));
     }
 
     public function testAddingTheSameFileTwiceDoesNothing()
     {
         $adapter = Filesystem::mount(Path::of('/tmp/'));
-        $file = new File(
-            new Name('foo'),
+        $file = File::of(
+            Name::of('foo'),
             Lines::ofContent('foo'),
         );
 
@@ -329,16 +329,16 @@ class FilesystemTest extends TestCase
         $this->expectException(PathTooLong::class);
 
         $filesystem->add(Directory::of(
-            new Name(\str_repeat('a', 255)),
+            Name::of(\str_repeat('a', 255)),
             Set::of(
                 Directory::of(
-                    new Name(\str_repeat('a', 255)),
+                    Name::of(\str_repeat('a', 255)),
                     Set::of(
                         Directory::of(
-                            new Name(\str_repeat('a', 255)),
+                            Name::of(\str_repeat('a', 255)),
                             Set::of(
-                                new File(
-                                    new Name(\str_repeat('a', 255)),
+                                File::of(
+                                    Name::of(\str_repeat('a', 255)),
                                     None::of(),
                                 ),
                             ),
@@ -366,10 +366,10 @@ class FilesystemTest extends TestCase
                 $filesystem = Filesystem::mount(Path::of($path));
 
                 $this->assertNull($filesystem->add(Directory::of(
-                    new Name(\chr($ord).'a'),
+                    Name::of(\chr($ord).'a'),
                     Set::of(
-                        new File(
-                            new Name('a'),
+                        File::of(
+                            Name::of('a'),
                             Lines::ofContent($content),
                         ),
                     ),
@@ -396,10 +396,10 @@ class FilesystemTest extends TestCase
                 $filesystem = Filesystem::mount(Path::of($path));
 
                 $this->assertNull($filesystem->add(Directory::of(
-                    new Name('a'.\chr($ord).'a'),
+                    Name::of('a'.\chr($ord).'a'),
                     Set::of(
-                        new File(
-                            new Name('a'),
+                        File::of(
+                            Name::of('a'),
                             Lines::ofContent($content),
                         ),
                     ),
@@ -428,10 +428,10 @@ class FilesystemTest extends TestCase
                 $filesystem = Filesystem::mount(Path::of($path));
 
                 $this->assertNull($filesystem->add(Directory::of(
-                    new Name(\chr($ord)),
+                    Name::of(\chr($ord)),
                     Set::of(
-                        new File(
-                            new Name('a'),
+                        File::of(
+                            Name::of('a'),
                             Lines::ofContent($content),
                         ),
                     ),
@@ -453,7 +453,7 @@ class FilesystemTest extends TestCase
         $this->expectException(LinksAreNotSupported::class);
         $this->expectExceptionMessage($path.'bar');
 
-        $filesystem->get(new Name('bar'));
+        $filesystem->get(Name::of('bar'));
     }
 
     public function testThrowsWhenListContainsALink()

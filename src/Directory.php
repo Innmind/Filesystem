@@ -3,8 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
+use Innmind\Filesystem\Exception\DuplicatedFile;
 use Innmind\Immutable\{
     Set,
+    Sequence,
     Maybe,
     SideEffect,
 };
@@ -31,6 +33,20 @@ interface Directory extends File
     public function filter(callable $predicate): self;
 
     /**
+     * @param callable(File): File $map
+     *
+     * @throws DuplicatedFile
+     */
+    public function map(callable $map): self;
+
+    /**
+     * @param callable(File): self $map
+     *
+     * @throws DuplicatedFile
+     */
+    public function flatMap(callable $map): self;
+
+    /**
      * @template R
      *
      * @param R $carry
@@ -47,4 +63,9 @@ interface Directory extends File
      * @return Set<Name>
      */
     public function removed(): Set;
+
+    /**
+     * @return Sequence<File>
+     */
+    public function files(): Sequence;
 }

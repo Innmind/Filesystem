@@ -14,7 +14,7 @@ final class Name
     public static function any(): Set
     {
         return Set\Decorate::immutable(
-            static fn(string $name): Model => new Model($name),
+            static fn(string $name): Model => Model::of($name),
             self::strings(),
         );
     }

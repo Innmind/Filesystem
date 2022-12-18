@@ -24,6 +24,7 @@ use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Set,
+    Sequence,
     Str,
     Maybe,
     Either,
@@ -91,7 +92,15 @@ final class Filesystem implements Adapter
 
     public function all(): Set
     {
-        return $this->list($this->path);
+        return Set::of(...$this->root()->files()->toList());
+    }
+
+    public function root(): Directory
+    {
+        return Directory\Directory::lazy(
+            Name::of('root'),
+            $this->list($this->path),
+        );
     }
 
     /**
@@ -190,7 +199,7 @@ final class Filesystem implements Adapter
             throw new LinksAreNotSupported($path->toString());
         }
 
-        $file = new File\File(
+        $file = File\File::of(
             $file,
             File\Content\AtPath::of($path),
             MediaType::maybe(\mime_content_type($path->toString()))->match(
@@ -204,12 +213,12 @@ final class Filesystem implements Adapter
     }
 
     /**
-     * @return Set<File>
+     * @return Sequence<File>
      */
-    private function list(Path $path): Set
+    private function list(Path $path): Sequence
     {
-        /** @var Set<File> */
-        return Set::lazy(function() use ($path): \Generator {
+        /** @var Sequence<File> */
+        return Sequence::lazy(function() use ($path): \Generator {
             $files = new \FilesystemIterator($path->toString());
 
             /** @var \SplFileInfo $file */
@@ -218,7 +227,8 @@ final class Filesystem implements Adapter
                     throw new LinksAreNotSupported($file->getPathname());
                 }
 
-                yield $this->open($path, new Name($file->getBasename()));
+                /** @psalm-suppress ArgumentTypeCoercion */
+                yield $this->open($path, Name::of($file->getBasename()));
             }
         });
     }

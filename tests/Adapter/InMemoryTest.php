@@ -25,25 +25,25 @@ class InMemoryTest extends TestCase
         $a = InMemory::new();
 
         $this->assertInstanceOf(Adapter::class, $a);
-        $this->assertFalse($a->contains(new Name('foo')));
+        $this->assertFalse($a->contains(Name::of('foo')));
         $this->assertNull(
-            $a->add($d = Directory::of(new Name('foo'))),
+            $a->add($d = Directory::of(Name::of('foo'))),
         );
-        $this->assertTrue($a->contains(new Name('foo')));
+        $this->assertTrue($a->contains(Name::of('foo')));
         $this->assertSame(
             $d,
-            $a->get(new Name('foo'))->match(
+            $a->get(Name::of('foo'))->match(
                 static fn($file) => $file,
                 static fn() => null,
             ),
         );
-        $this->assertNull($a->remove(new Name('foo')));
-        $this->assertFalse($a->contains(new Name('foo')));
+        $this->assertNull($a->remove(Name::of('foo')));
+        $this->assertFalse($a->contains(Name::of('foo')));
     }
 
     public function testReturnNothingWhenGettingUnknownFile()
     {
-        $this->assertNull(InMemory::new()->get(new Name('foo'))->match(
+        $this->assertNull(InMemory::new()->get(Name::of('foo'))->match(
             static fn($file) => $file,
             static fn() => null,
         ));
@@ -51,18 +51,18 @@ class InMemoryTest extends TestCase
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $this->assertNull(InMemory::new()->remove(new Name('foo')));
+        $this->assertNull(InMemory::new()->remove(Name::of('foo')));
     }
 
     public function testAll()
     {
         $adapter = InMemory::new();
-        $adapter->add($foo = new File(
-            new Name('foo'),
+        $adapter->add($foo = File::of(
+            Name::of('foo'),
             Lines::ofContent('foo'),
         ));
-        $adapter->add($bar = new File(
-            new Name('bar'),
+        $adapter->add($bar = File::of(
+            Name::of('bar'),
             Lines::ofContent('bar'),
         ));
 

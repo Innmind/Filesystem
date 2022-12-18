@@ -8,7 +8,6 @@ use Innmind\Filesystem\{
     Stream\LazyStream,
 };
 use Innmind\Url\Path;
-use Innmind\Stream\Readable;
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
@@ -78,18 +77,5 @@ final class AtPath implements Content, Chunkable
     public function chunks(): Sequence
     {
         return $this->content->chunks();
-    }
-
-    /**
-     * This should be used only for reading chunk by chunk to persist the file
-     * to the filesystem
-     *
-     * @deprecated
-     * @internal
-     */
-    public function stream(): Readable
-    {
-        /** @psalm-suppress DeprecatedMethod */
-        return $this->content->stream();
     }
 }

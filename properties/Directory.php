@@ -69,6 +69,31 @@ final class Directory
                 Directory\FilteringRetunsTheExpectedElements::class,
                 File::any(),
             ),
+            Set\Property::of(
+                Directory\AllFilesAreAccessible::class,
+            ),
+            Set\Property::of(
+                Directory\MapFiles::class,
+                File::any(),
+            ),
+            Set\Property::of(
+                Directory\ThrowWhenMappingToSameFileTwice::class,
+                File::any(),
+            ),
+            Set\Property::of(
+                Directory\FlatMapFiles::class,
+                new Set\Randomize(File::any()),
+                new Set\Randomize(File::any()),
+            ),
+            Set\Property::of(
+                Directory\ThrowWhenFlatMappingToSameFileTwice::class,
+                new Set\Randomize(File::any()),
+                new Set\Randomize(File::any()),
+            ),
+            Set\Property::of(
+                Directory\Rename::class,
+                Name::any(),
+            ),
         ];
     }
 }

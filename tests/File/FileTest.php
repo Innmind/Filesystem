@@ -21,7 +21,7 @@ class FileTest extends TestCase
 
     public function testInterface()
     {
-        $f = new File($name = new Name('foo'), $c = $this->createMock(Content::class));
+        $f = File::of($name = Name::of('foo'), $c = $this->createMock(Content::class));
 
         $this->assertInstanceOf(FileInterface::class, $f);
         $this->assertSame($name, $f->name());
@@ -42,8 +42,8 @@ class FileTest extends TestCase
 
     public function testMediaType()
     {
-        $f = new File(
-            new Name('foo'),
+        $f = File::of(
+            Name::of('foo'),
             $this->createMock(Content::class),
             $mt = MediaType::of('application/json'),
         );
@@ -60,7 +60,7 @@ class FileTest extends TestCase
                 FMediaType::any(),
             )
             ->then(function($name, $mediaType) {
-                $file = new File(
+                $file = File::of(
                     $name,
                     $content = $this->createMock(Content::class),
                     $mediaType,
@@ -77,7 +77,7 @@ class FileTest extends TestCase
         $this
             ->forAll(FName::any())
             ->then(function($name) {
-                $file = new File(
+                $file = File::of(
                     $name,
                     $this->createMock(Content::class),
                 );
@@ -106,6 +106,70 @@ class FileTest extends TestCase
                 $this->assertTrue($file->name()->equals($name));
                 $this->assertSame($content, $file->content());
                 $this->assertSame($mediaType, $file->mediaType());
+            });
+    }
+
+    public function testWithContent()
+    {
+        $this
+            ->forAll(
+                FName::any(),
+                FMediaType::any(),
+            )
+            ->then(function($name, $mediaType) {
+                $file = File::of(
+                    $name,
+                    $content = $this->createMock(Content::class),
+                    $mediaType,
+                );
+                $file2 = $file->withContent($content2 = $this->createMock(Content::class));
+
+                $this->assertNotSame($file, $file2);
+                $this->assertNotSame($file->content(), $file2->content());
+                $this->assertSame($content, $file->content());
+                $this->assertSame($content2, $file2->content());
+            });
+    }
+
+    public function testWithContentKeepsTheMediaTypeByDefault()
+    {
+        $this
+            ->forAll(
+                FName::any(),
+                FMediaType::any(),
+            )
+            ->then(function($name, $mediaType) {
+                $file = File::of(
+                    $name,
+                    $this->createMock(Content::class),
+                    $mediaType,
+                );
+                $file2 = $file->withContent($this->createMock(Content::class));
+
+                $this->assertNotSame($file, $file2);
+                $this->assertSame($file->mediaType(), $file2->mediaType());
+            });
+    }
+
+    public function testRename()
+    {
+        $this
+            ->forAll(
+                FName::any(),
+                FName::any(),
+            )
+            ->then(function($name1, $name2) {
+                $file1 = File::of(
+                    $name1,
+                    $this->createMock(Content::class),
+                );
+                $file2 = $file1->rename($name2);
+
+                $this->assertNotSame($file1, $file2);
+                $this->assertSame($file1->content(), $file2->content());
+                $this->assertSame($file1->mediaType(), $file2->mediaType());
+                $this->assertSame($name1, $file1->name());
+                $this->assertSame($name2, $file2->name());
             });
     }
 }

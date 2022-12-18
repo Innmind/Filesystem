@@ -16,4 +16,5 @@ composer require innmind/filesystem
 - [Modify a file](use_cases/modify_file.md)
 - [Delete a file](use_cases/delete_file.md)
 - [Backup a directory](use_cases/backup_directory.md)
+- [Load FTP files](use_cases/load_ftp_files.md)
 
