@@ -4,7 +4,7 @@
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\filesystem,
+    Adapter\Filesystem,
     File,
     Name,
 };
@@ -33,7 +33,7 @@ This example will print each line to the screen, or nothing if the file doesn't 
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\filesystem,
+    Adapter\Filesystem,
     File,
     Name,
     Directory,

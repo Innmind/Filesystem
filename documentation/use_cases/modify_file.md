@@ -23,12 +23,10 @@ $insertRelease = static function(Str $line): Str {
 };
 // replace the old changelog with the new one containing the new release version
 $release = static function(File $changelog) use ($insertRelease): File {
-    return File\File::of(
-        $changelog->name(),
+    return $changelog->withContent(
         $changelog->content()->map(
             static fn($line) => $line->map($insertRelease),
         ),
-        $changelog->mediaType(),
     );
 }
 $filesystem = Filesystem::mount(Path::of('some/repository/'));
@@ -79,10 +77,8 @@ $updateUser = static function(Line $user): Content {
     return Content\Lines::of(Sequence::of($user));
 };
 $update = static function(File $users) use ($updateUser): File {
-    return File\File::of(
-        $users->name(),
+    return $users->withContent(
         $users->content()->flatMap(static fn($line) => $updateUser($line)),
-        $users->mediaType(),
     );
 };
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
@@ -90,12 +86,12 @@ $tmp = Filesystem::mount(Path::of('/tmp/'));
 $filesystem
     ->get(Name::of('users.csv'))
     ->map(static fn($users) => $update($users))
-    ->flatMap(static function($changelog) use ($tmp) {
+    ->flatMap(static function($users) use ($tmp) {
         // this operation is due to the fact that you cannot read and write to
         // the same file at once
-        $tmp->add($changelog);
+        $tmp->add($users);
 
-        return $tmp->get($changelog->name());
+        return $tmp->get($users->name());
     })
     ->match(
         static fn($users) => $filesystem->add($users),

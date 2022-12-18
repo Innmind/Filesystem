@@ -9,19 +9,19 @@ use Innmind\Filesystem\{
     Directory,
 };
 use Innmind\Url\Path;
-use Innmind\Immutable\Set;
+use Innmind\Immutable\Sequence;
 
 /**
- * @return Set<File>
+ * @return Sequence<File>
  */
-function flatten(File $file): Set
+function flatten(File $file): Sequence
 {
     if ($file instanceof Directory) {
         // bring all the files from sub directories to the same level
         return $file->files()->flatMap(flatten(...));
     }
 
-    return Set::of($file);
+    return Sequence::of($file);
 }
 
 Filesystem::mount(Path::of('/path/to/ftp/directory/'))
