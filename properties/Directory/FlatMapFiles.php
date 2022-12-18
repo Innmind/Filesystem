@@ -11,6 +11,7 @@ use Innmind\Filesystem\{
 use Innmind\Immutable\Set;
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;
+use Ramsey\Uuid\Uuid;
 
 final class FlatMapFiles implements Property
 {
@@ -35,18 +36,12 @@ final class FlatMapFiles implements Property
 
     public function ensureHeldBy(object $directory): object
     {
-        // we hash the names to avoid having names too long
+        // we use uuids to avoid duplicates
         $directory2 = $directory->flatMap(fn($file) => Directory::of(
             Name::of('doesntmatter'),
             Set::of(
-                $this->file1->rename(Name::of(\hash(
-                    'sha512',
-                    $this->file1->name()->toString().$file->name()->toString()),
-                )),
-                $this->file2->rename(Name::of(\hash(
-                    'sha512',
-                    $this->file2->name()->toString().$file->name()->toString()),
-                )),
+                $this->file1->rename(Name::of(Uuid::uuid4()->toString())),
+                $this->file2->rename(Name::of(Uuid::uuid4()->toString())),
             ),
         ));
 
