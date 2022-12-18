@@ -103,20 +103,6 @@ final class OfStream implements Content, Chunkable
     }
 
     /**
-     * This should be used only for reading chunk by chunk to persist the file
-     * to the filesystem
-     *
-     * The stream returned MUST never be closed
-     *
-     * @deprecated
-     * @internal
-     */
-    public function stream(): Readable
-    {
-        return $this->load();
-    }
-
-    /**
      * @param ?callable(Readable): Maybe<Str> $read
      *
      * @return Sequence<Str>

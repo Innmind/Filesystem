@@ -15,7 +15,7 @@ final class File
     public static function any(): Set
     {
         return Set\Composite::immutable(
-            static fn($name, $content, $mediaType) => new Model(
+            static fn($name, $content, $mediaType) => Model::of(
                 $name,
                 Lines::ofContent($content),
                 $mediaType,

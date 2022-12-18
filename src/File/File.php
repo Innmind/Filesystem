@@ -18,6 +18,9 @@ final class File implements FileInterface
     private Content $content;
     private MediaType $mediaType;
 
+    /**
+     * @deprecated Use self::of() instead
+     */
     public function __construct(
         Name $name,
         Content $content,
@@ -31,12 +34,25 @@ final class File implements FileInterface
     /**
      * @psalm-pure
      */
+    public static function of(
+        Name $name,
+        Content $content,
+        MediaType $mediaType = null,
+    ): self {
+        return new self($name, $content, $mediaType);
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param non-empty-string $name
+     */
     public static function named(
         string $name,
         Content $content,
         MediaType $mediaType = null,
     ): self {
-        return new self(new Name($name), $content, $mediaType);
+        return new self(Name::of($name), $content, $mediaType);
     }
 
     public function name(): Name
@@ -52,5 +68,19 @@ final class File implements FileInterface
     public function mediaType(): MediaType
     {
         return $this->mediaType;
+    }
+
+    public function rename(Name $name): self
+    {
+        return new self($name, $this->content, $this->mediaType);
+    }
+
+    public function withContent(Content $content, MediaType $mediaType = null): self
+    {
+        return new self(
+            $this->name,
+            $content,
+            $mediaType ?? $this->mediaType,
+        );
     }
 }

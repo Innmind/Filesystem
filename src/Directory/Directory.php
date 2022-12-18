@@ -8,12 +8,12 @@ use Innmind\Filesystem\{
     Name,
     File,
     File\Content,
-    Exception\LogicException,
+    Exception\DuplicatedFile,
 };
 use Innmind\MediaType\MediaType;
 use Innmind\Immutable\{
-    Str,
     Set,
+    Sequence,
     Maybe,
     SideEffect,
 };
@@ -24,78 +24,70 @@ use Innmind\Immutable\{
 final class Directory implements DirectoryInterface
 {
     private Name $name;
-    /** @var Set<File> */
-    private Set $files;
-    private MediaType $mediaType;
+    /** @var Sequence<File> */
+    private Sequence $files;
     /** @var Set<Name> */
     private Set $removed;
 
     /**
-     * @param Set<File>|null $files
+     * @param Sequence<File> $files
+     * @param Set<Name> $removed
      */
-    private function __construct(Name $name, Set $files = null, bool $validate = true)
+    private function __construct(Name $name, Sequence $files, Set $removed)
     {
-        /** @var Set<File> $default */
-        $default = Set::of();
-        $files ??= $default;
-
-        if ($validate) {
-            $_ = $files->reduce(
-                Set::strings(),
-                static function(Set $names, File $file): Set {
-                    $name = $file->name()->toString();
-
-                    if ($names->contains($name)) {
-                        throw new LogicException("Same file '$name' found multiple times");
-                    }
-
-                    return ($names)($name);
-                },
-            );
-        }
-
         $this->name = $name;
         $this->files = $files;
-        $this->mediaType = new MediaType(
-            'text',
-            'directory',
-        );
-        /** @var Set<Name> */
-        $this->removed = Set::of();
+        $this->removed = $removed;
     }
 
     /**
      * @psalm-pure
      *
-     * @param Set<File>|null $files
+     * @param Set<File>|Sequence<File>|null $files
+     *
+     * @throws DuplicatedFile
      */
-    public static function of(Name $name, Set $files = null): self
+    public static function of(Name $name, Set|Sequence $files = null): self
     {
-        return new self($name, $files);
+        if ($files instanceof Set) {
+            $files = Sequence::of(...$files->toList());
+        }
+
+        return new self(
+            $name,
+            self::safeguard($files ?? Sequence::of()),
+            Set::of(),
+        );
     }
 
     /**
      * @psalm-pure
+     *
+     * @param non-empty-string $name
      */
     public static function named(string $name): self
     {
-        return new self(new Name($name));
+        return new self(
+            Name::of($name),
+            Sequence::of(),
+            Set::of(),
+        );
     }
 
     /**
      * @internal
      * @psalm-pure
      *
-     * @param Set<File> $files
+     * @param Sequence<File> $files
      */
-    public static function lazy(Name $name, Set $files): self
+    public static function lazy(Name $name, Sequence $files): self
     {
         // we prevent the contrusctor from checking for duplicates when
         // using a lazy set of files as it will trigger to load the whole
         // directory tree, it's kinda safe to do this as this method should
         // only be used within the filesystem adapter and there should be no
         // duplicates on a concrete filesystem
-        return new self($name, $files, false);
+        return new self($name, $files, Set::of());
     }
 
     public function name(): Name
@@ -110,17 +102,36 @@ final class Directory implements DirectoryInterface
 
     public function mediaType(): MediaType
     {
-        return $this->mediaType;
+        return new MediaType(
+            'text',
+            'directory',
+        );
+    }
+
+    public function rename(Name $name): self
+    {
+        return new self(
+            $name,
+            $this->files,
+            $this->removed,
+        );
+    }
+
+    public function withContent(Content $content, MediaType $mediaType = null): self
+    {
+        return $this;
     }
 
     public function add(File $file): DirectoryInterface
     {
-        $files = $this->files->filter(static fn(File $known): bool => !$known->name()->equals($file->name()));
-
-        $directory = clone $this;
-        $directory->files = ($files)($file);
-
-        return $directory;
+        return new self(
+            $this->name,
+            $this
+                ->files
+                ->filter(static fn(File $known): bool => !$known->name()->equals($file->name()))
+                ->add($file),
+            $this->removed,
+        );
     }
 
     public function get(Name $name): Maybe
@@ -138,15 +149,11 @@ final class Directory implements DirectoryInterface
 
     public function remove(Name $name): DirectoryInterface
     {
-        if (!$this->contains($name)) {
-            return $this;
-        }
-
-        $directory = clone $this;
-        $directory->files = $this->files->filter(static fn(File $file) => !$file->name()->equals($name));
-        $directory->removed = ($directory->removed)($name);
-
-        return $directory;
+        return new self(
+            $this->name,
+            $this->files->filter(static fn(File $file) => !$file->name()->equals($name)),
+            ($this->removed)($name),
+        );
     }
 
     public function foreach(callable $function): SideEffect
@@ -161,7 +168,32 @@ final class Directory implements DirectoryInterface
         // comes from a user and must have used the standard constructor that
         // validates for duplicates, so they're can't be any duplicates after
         // a filter
-        return self::lazy($this->name, $this->files->filter($predicate));
+        return new self(
+            $this->name,
+            $this->files->filter($predicate),
+            $this->removed,
+        );
+    }
+
+    public function map(callable $map): self
+    {
+        return new self(
+            $this->name,
+            self::safeguard($this->files->map($map)),
+            $this->removed,
+        );
+    }
+
+    public function flatMap(callable $map): self
+    {
+        /** @var callable(File): Sequence<File> */
+        $map = static fn(File $file): Sequence => $map($file)->files();
+
+        return new self(
+            $this->name,
+            self::safeguard($this->files->flatMap($map)),
+            $this->removed,
+        );
     }
 
     public function reduce($carry, callable $reducer)
@@ -172,5 +204,30 @@ final class Directory implements DirectoryInterface
     public function removed(): Set
     {
         return $this->removed;
+    }
+
+    public function files(): Sequence
+    {
+        return $this->files;
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param Sequence<File> $files
+     *
+     * @throws DuplicatedFile
+     *
+     * @return Sequence<File>
+     */
+    private static function safeguard(Sequence $files): Sequence
+    {
+        return $files->safeguard(
+            Set::strings(),
+            static fn(Set $names, $file) => match ($names->contains($file->name()->toString())) {
+                true => throw new DuplicatedFile($file->name()),
+                false => ($names)($file->name()->toString()),
+            },
+        );
     }
 }

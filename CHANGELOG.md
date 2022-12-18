@@ -1,5 +1,37 @@
 # Changelog
 
+## 6.0.0 - 2022-12-18
+
+### Added
+
+- `Innmind\Filesystem\Name::of()` named constructor
+- `Innmind\Filesystem\Name::str(): Innmind\Immutable\Str`
+- `Innmind\Filesystem\File::withContent(): Innmind\Filesystem\File`
+- `Innmind\Filesystem\File\File::of()` named constructor
+- `Innmind\Filesystem\Directory::files(): Innmind\Immutable\Sequence<Innmind\Filesystem\File>`
+- `Innmind\Filesystem\Adapter::root(): Innmind\Filesystem\Directory`
+- `Innmind\Filesystem\Directory::map(): Innmind\Filesystem\Directory`
+- `Innmind\Filesystem\Directory::flatMap(): Innmind\Filesystem\Directory`
+- `Innmind\Filesystem\File::rename(): Innmind\Filesystem\File`
+- `Innmind\Filesystem\Directory\Directory::of()` `$files` parameter accepts an `Innmind\Immutable\Sequence<Innmind\Filesystem\File>`
+
+### Changed
+
+- `Innmind\Filesystem\Directory\Directory::remove()` no longer unwraps the whole directory
+- `Innmind\Filesystem\Directory\Directory::filter()` no longer erase the previous removals
+
+### Deprecated
+
+- `Innmind\Filesystem\Name` constructor
+- `Innmind\Filesystem\File\File` constructor
+- `Innmind\Filesystem\Adapter::all()`
+
+### Removed
+
+- `Innmind\Filesystem\Adapter\Chunk`
+- `Innmind\Filesystem\File\Content\AtPath::stream()`
+- `Innmind\Filesystem\File\Content\OfStream::stream()`
+
 ## 5.2.0 - 2022-09-24
 
 ### Added

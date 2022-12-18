@@ -8,6 +8,7 @@ use Innmind\Filesystem\{
     Adapter,
     File,
     Name,
+    Directory\Directory,
 };
 use Innmind\Immutable\{
     Set,
@@ -38,7 +39,7 @@ class LoggerTest extends TestCase
         $file = $this->createMock(File::class);
         $file
             ->method('name')
-            ->willReturn(new Name('foo'));
+            ->willReturn(Name::of('foo'));
         $logger
             ->expects($this->once())
             ->method('debug');
@@ -56,7 +57,7 @@ class LoggerTest extends TestCase
             $inner = $this->createMock(Adapter::class),
             $logger = $this->createMock(LoggerInterface::class),
         );
-        $name = new Name('foo');
+        $name = Name::of('foo');
         $file = $this->createMock(File::class);
         $file
             ->method('name')
@@ -85,7 +86,7 @@ class LoggerTest extends TestCase
             $inner = $this->createMock(Adapter::class),
             $logger = $this->createMock(LoggerInterface::class),
         );
-        $name = new Name('foo');
+        $name = Name::of('foo');
         $logger
             ->expects($this->once())
             ->method('debug');
@@ -104,7 +105,7 @@ class LoggerTest extends TestCase
             $inner = $this->createMock(Adapter::class),
             $logger = $this->createMock(LoggerInterface::class),
         );
-        $name = new Name('foo');
+        $name = Name::of('foo');
         $logger
             ->expects($this->once())
             ->method('debug');
@@ -122,12 +123,18 @@ class LoggerTest extends TestCase
             $inner = $this->createMock(Adapter::class),
             $this->createMock(LoggerInterface::class),
         );
-        $all = Set::of(File::class);
+        $all = Set::of($file = File\File::named(
+            'watev',
+            $this->createMock(File\Content::class),
+        ));
         $inner
             ->expects($this->once())
-            ->method('all')
-            ->willReturn($all);
+            ->method('root')
+            ->willReturn(Directory::of(
+                Name::of('root'),
+                $all,
+            ));
 
-        $this->assertSame($all, $adapter->all());
+        $this->assertSame([$file], $adapter->all()->toList());
     }
 }

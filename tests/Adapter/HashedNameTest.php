@@ -49,17 +49,17 @@ class HashedNameTest extends TestCase
             $inner = Filesystem::mount(Path::of('/tmp/hashed/')),
         );
 
-        $file = new File\File(new Name('foo'), Lines::ofContent('content'));
+        $file = File\File::of(Name::of('foo'), Lines::ofContent('content'));
 
-        $this->assertFalse($filesystem->contains(new Name('foo')));
+        $this->assertFalse($filesystem->contains(Name::of('foo')));
         $this->assertNull($filesystem->add($file));
-        $this->assertTrue($filesystem->contains(new Name('foo')));
+        $this->assertTrue($filesystem->contains(Name::of('foo')));
         $this->assertSame(
             'content',
             (string) $inner
-                ->get(new Name('0b'))
-                ->flatMap(static fn($directory) => $directory->get(new Name('ee')))
-                ->flatMap(static fn($directory) => $directory->get(new Name('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33')))
+                ->get(Name::of('0b'))
+                ->flatMap(static fn($directory) => $directory->get(Name::of('ee')))
+                ->flatMap(static fn($directory) => $directory->get(Name::of('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33')))
                 ->map(static fn($file) => $file->content())
                 ->match(
                     static fn($content) => $content->toString(),
@@ -69,7 +69,7 @@ class HashedNameTest extends TestCase
         $this->assertSame(
             'content',
             $filesystem
-                ->get(new Name('foo'))
+                ->get(Name::of('foo'))
                 ->map(static fn($file) => $file->content())
                 ->match(
                     static fn($content) => $content->toString(),
@@ -77,15 +77,15 @@ class HashedNameTest extends TestCase
                 ),
         );
 
-        $file = new File\File(new Name('foo'), Lines::ofContent('content bis'));
+        $file = File\File::of(Name::of('foo'), Lines::ofContent('content bis'));
 
         $this->assertNull($filesystem->add($file));
         $this->assertSame(
             'content bis',
             (string) $inner
-                ->get(new Name('0b'))
-                ->flatMap(static fn($directory) => $directory->get(new Name('ee')))
-                ->flatMap(static fn($directory) => $directory->get(new Name('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33')))
+                ->get(Name::of('0b'))
+                ->flatMap(static fn($directory) => $directory->get(Name::of('ee')))
+                ->flatMap(static fn($directory) => $directory->get(Name::of('c7b5ea3f0fdbc95d0dd47f3c5bc275da8a33')))
                 ->map(static fn($file) => $file->content())
                 ->match(
                     static fn($content) => $content->toString(),
@@ -93,8 +93,8 @@ class HashedNameTest extends TestCase
                 ),
         );
 
-        $this->assertNull($filesystem->remove(new Name('foo')));
-        $this->assertFalse($filesystem->contains(new Name('foo')));
+        $this->assertNull($filesystem->remove(Name::of('foo')));
+        $this->assertFalse($filesystem->contains(Name::of('foo')));
     }
 
     public function testReturnNothingWhenGettingUnknownFile()
@@ -103,7 +103,7 @@ class HashedNameTest extends TestCase
             Filesystem::mount(Path::of('/tmp/hashed/')),
         );
 
-        $this->assertNull($filesystem->get(new Name('foo'))->match(
+        $this->assertNull($filesystem->get(Name::of('foo'))->match(
             static fn($file) => $file,
             static fn() => null,
         ));
@@ -115,8 +115,8 @@ class HashedNameTest extends TestCase
             Filesystem::mount(Path::of('/tmp/hashed/')),
         );
 
-        $filesystem->add(new File\File(new Name('foo'), Lines::ofContent('content')));
-        $filesystem->add(new File\File(new Name('bar'), Lines::ofContent('content')));
+        $filesystem->add(File\File::of(Name::of('foo'), Lines::ofContent('content')));
+        $filesystem->add(File\File::of(Name::of('bar'), Lines::ofContent('content')));
 
         $all = $filesystem->all();
 
@@ -134,6 +134,6 @@ class HashedNameTest extends TestCase
             Filesystem::mount(Path::of('/tmp/hashed/')),
         );
 
-        $this->assertNull($filesystem->remove(new Name('foo')));
+        $this->assertNull($filesystem->remove(Name::of('foo')));
     }
 }

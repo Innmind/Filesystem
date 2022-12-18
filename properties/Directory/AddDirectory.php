@@ -6,7 +6,6 @@ namespace Properties\Innmind\Filesystem\Directory;
 use Innmind\Filesystem\{
     Directory\Directory,
     Name,
-    Event\FileWasAdded,
 };
 use Innmind\BlackBox\Property;
 use PHPUnit\Framework\Assert;

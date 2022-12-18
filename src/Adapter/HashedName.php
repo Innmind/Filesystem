@@ -48,7 +48,7 @@ final class HashedName implements Adapter
         $first = $first->otherwise(static fn() => Maybe::just(Directory\Directory::of($hashes[0])));
         $second = $second
             ->otherwise(static fn() => Maybe::just(Directory\Directory::of($hashes[1])))
-            ->map(static fn($second) => $second->add(new File\File(
+            ->map(static fn($second) => $second->add(File\File::of(
                 $hashes[2],
                 $file->content(),
             )));
@@ -70,7 +70,7 @@ final class HashedName implements Adapter
         [, , $concreteFile] = $this->fetch($hashes[0], $hashes[1], $hashes[2]);
 
         /** @var Maybe<File> */
-        return $concreteFile->map(static fn($file) => new File\File(
+        return $concreteFile->map(static fn($file) => File\File::of(
             $originalName,
             $file->content(),
             $file->mediaType(),
@@ -103,8 +103,13 @@ final class HashedName implements Adapter
 
     public function all(): Set
     {
+        return Set::of(...$this->root()->files()->toList());
+    }
+
+    public function root(): Directory
+    {
         //this is not ideal but the names can't be determined from the hashes
-        return $this->filesystem->all();
+        return $this->filesystem->root();
     }
 
     /**
@@ -115,9 +120,12 @@ final class HashedName implements Adapter
         $extension = \pathinfo($name->toString(), \PATHINFO_EXTENSION);
         $hash = Str::of(\sha1(\pathinfo($name->toString(), \PATHINFO_BASENAME)));
 
-        $first = new Name($hash->substring(0, 2)->toString());
-        $second = new Name($hash->substring(2, 2)->toString());
-        $remaining = new Name($hash->substring(4)->toString().($extension ? '.'.$extension : ''));
+        /** @psalm-suppress ArgumentTypeCoercion */
+        $first = Name::of($hash->substring(0, 2)->toString());
+        /** @psalm-suppress ArgumentTypeCoercion */
+        $second = Name::of($hash->substring(2, 2)->toString());
+        /** @psalm-suppress ArgumentTypeCoercion */
+        $remaining = Name::of($hash->substring(4)->toString().($extension ? '.'.$extension : ''));
 
         return [$first, $second, $remaining];
     }

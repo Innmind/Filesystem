@@ -7,7 +7,7 @@ use Innmind\Url\Path;
 $source = Filesystem::mount(Path::of('/var/data/'));
 $backup = Filesystem::mount(Path::of('/volumes/backup/'));
 $source
-    ->all()
+    ->root()
     ->foreach(static fn($file) => $backup->add($file));
 ```
 

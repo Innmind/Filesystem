@@ -49,9 +49,6 @@ final class Directory
                 Directory\RemoveFile::class,
             ),
             Set\Property::of(
-                Directory\RemoveFileMustUnwrapSourceDecorator::class,
-            ),
-            Set\Property::of(
                 Directory\RemoveDirectory::class,
             ),
             Set\Property::of(
@@ -59,10 +56,6 @@ final class Directory
             ),
             Set\Property::of(
                 Directory\AddFile::class,
-                File::any(),
-            ),
-            Set\Property::of(
-                Directory\AddFileMustUnwrapSourceDecorator::class,
                 File::any(),
             ),
             Set\Property::of(
@@ -75,6 +68,31 @@ final class Directory
             Set\Property::of(
                 Directory\FilteringRetunsTheExpectedElements::class,
                 File::any(),
+            ),
+            Set\Property::of(
+                Directory\AllFilesAreAccessible::class,
+            ),
+            Set\Property::of(
+                Directory\MapFiles::class,
+                File::any(),
+            ),
+            Set\Property::of(
+                Directory\ThrowWhenMappingToSameFileTwice::class,
+                File::any(),
+            ),
+            Set\Property::of(
+                Directory\FlatMapFiles::class,
+                new Set\Randomize(File::any()),
+                new Set\Randomize(File::any()),
+            ),
+            Set\Property::of(
+                Directory\ThrowWhenFlatMappingToSameFileTwice::class,
+                new Set\Randomize(File::any()),
+                new Set\Randomize(File::any()),
+            ),
+            Set\Property::of(
+                Directory\Rename::class,
+                Name::any(),
             ),
         ];
     }
