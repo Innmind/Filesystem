@@ -489,6 +489,23 @@ class FilesystemTest extends TestCase
             });
     }
 
+    public function testRegressionAddingFileInDirectoryDueToCaseSensitivity()
+    {
+        $property = new PAdapter\AddRemoveAddModificationsStillAddTheFile(
+            Directory::named('0')
+                ->add($file = File::named('L', None::of()))
+                ->remove($file->name()),
+            File::named('l', None::of()),
+        );
+
+        $path = \sys_get_temp_dir().'/innmind/filesystem/';
+        (new FS)->remove($path);
+
+        $property->ensureHeldBy(Filesystem::mount(Path::of($path)));
+
+        (new FS)->remove($path);
+    }
+
     public function properties(): iterable
     {
         foreach (PAdapter::list() as $property) {
