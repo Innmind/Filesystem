@@ -6,6 +6,7 @@ namespace Tests\Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     Adapter\Filesystem,
     Adapter,
+    CaseSensitivity,
     File\File,
     File\Content\None,
     File\Content\Lines,
@@ -500,8 +501,12 @@ class FilesystemTest extends TestCase
 
         $path = \sys_get_temp_dir().'/innmind/filesystem/';
         (new FS)->remove($path);
+        $adapter = Filesystem::mount(Path::of($path))->withCaseSensitivity(match (\PHP_OS) {
+            'Darwin' => CaseSensitivity::insensitive,
+            default => CaseSensitivity::sensitive,
+        });
 
-        $property->ensureHeldBy(Filesystem::mount(Path::of($path)));
+        $property->ensureHeldBy($adapter);
 
         (new FS)->remove($path);
     }

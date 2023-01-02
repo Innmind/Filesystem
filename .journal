@@ -46,6 +46,10 @@ return static function(Config $config): Config
                     'Load FTP files',
                     Path::of('use_cases/load_ftp_files.md'),
                 ),
+                Entry::markdown(
+                    'Case sensitivity',
+                    Path::of('case_sensitivity.md'),
+                ),
             ),
             Entry::section(
                 'Testing',

@@ -9,6 +9,7 @@ use Innmind\Filesystem\{
     Name,
     Directory,
     Chunk,
+    CaseSensitivity,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\RuntimeException,
@@ -38,18 +39,20 @@ final class Filesystem implements Adapter
 {
     private const INVALID_FILES = ['.', '..'];
     private Path $path;
+    private CaseSensitivity $case;
     private FS $filesystem;
     private Chunk $chunk;
     /** @var \WeakMap<File, Path> */
     private \WeakMap $loaded;
 
-    private function __construct(Path $path)
+    private function __construct(Path $path, CaseSensitivity $case)
     {
         if (!$path->directory()) {
             throw new PathDoesntRepresentADirectory($path->toString());
         }
 
         $this->path = $path;
+        $this->case = $case;
         $this->filesystem = new FS;
         $this->chunk = new Chunk;
         /** @var \WeakMap<File, Path> */
@@ -62,7 +65,12 @@ final class Filesystem implements Adapter
 
     public static function mount(Path $path): self
     {
-        return new self($path);
+        return new self($path, CaseSensitivity::sensitive);
+    }
+
+    public function withCaseSensitivity(CaseSensitivity $case): self
+    {
+        return new self($this->path, $case);
     }
 
     public function add(File $file): void
@@ -125,12 +133,13 @@ final class Filesystem implements Adapter
 
         if ($file instanceof Directory) {
             $this->filesystem->mkdir($path->toString());
+            /** @var Set<Name> */
             $persisted = $file->reduce(
-                Set::strings(),
+                Set::of(),
                 function(Set $persisted, File $file) use ($path): Set {
                     $this->createFileAt($path, $file);
 
-                    return ($persisted)($file->name()->toString());
+                    return ($persisted)($file->name());
                 },
             );
             /**
@@ -138,7 +147,7 @@ final class Filesystem implements Adapter
              */
             $_ = $file
                 ->removed()
-                ->filter(static fn($file): bool => !$persisted->contains($file->toString()))
+                ->filter(fn($file): bool => !$this->case->contains($file, $persisted))
                 ->foreach(fn($file) => $this->filesystem->remove(
                     $path->toString().$file->toString(),
                 ));
