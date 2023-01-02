@@ -1,5 +1,12 @@
 # Changelog
 
+## 6.1.0 - 2023-01-02
+
+### Added
+
+- `Innmind\Filesystem\CaseSensitivity` enum
+- `Innmind\Filesystem\Adapter\Filesystem::withCaseSensitivity()`
+
 ## 6.0.0 - 2022-12-18
 
 ### Added

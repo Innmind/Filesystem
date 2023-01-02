@@ -6,6 +6,7 @@ namespace Tests\Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     Adapter\Filesystem,
     Adapter,
+    CaseSensitivity,
     File\File,
     File\Content\None,
     File\Content\Lines,
@@ -487,6 +488,27 @@ class FilesystemTest extends TestCase
                 $this->assertCount(1, $all);
                 $this->assertSame($name, $all[0]->name()->toString());
             });
+    }
+
+    public function testRegressionAddingFileInDirectoryDueToCaseSensitivity()
+    {
+        $property = new PAdapter\AddRemoveAddModificationsStillAddTheFile(
+            Directory::named('0')
+                ->add($file = File::named('L', None::of()))
+                ->remove($file->name()),
+            File::named('l', None::of()),
+        );
+
+        $path = \sys_get_temp_dir().'/innmind/filesystem/';
+        (new FS)->remove($path);
+        $adapter = Filesystem::mount(Path::of($path))->withCaseSensitivity(match (\PHP_OS) {
+            'Darwin' => CaseSensitivity::insensitive,
+            default => CaseSensitivity::sensitive,
+        });
+
+        $property->ensureHeldBy($adapter);
+
+        (new FS)->remove($path);
     }
 
     public function properties(): iterable
