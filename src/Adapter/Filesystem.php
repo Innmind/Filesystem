@@ -18,8 +18,9 @@ use Innmind\Filesystem\{
     Exception\FailedToWriteFile,
 };
 use Innmind\Stream\{
+    Capabilities,
+    Streams,
     Writable,
-    Writable\Stream,
 };
 use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
@@ -38,6 +39,7 @@ use Symfony\Component\{
 final class Filesystem implements Adapter
 {
     private const INVALID_FILES = ['.', '..'];
+    private Capabilities $capabilities;
     private Path $path;
     private CaseSensitivity $case;
     private FS $filesystem;
@@ -45,12 +47,16 @@ final class Filesystem implements Adapter
     /** @var \WeakMap<File, Path> */
     private \WeakMap $loaded;
 
-    private function __construct(Path $path, CaseSensitivity $case)
-    {
+    private function __construct(
+        Capabilities $capabilities,
+        Path $path,
+        CaseSensitivity $case,
+    ) {
         if (!$path->directory()) {
             throw new PathDoesntRepresentADirectory($path->toString());
         }
 
+        $this->capabilities = $capabilities;
         $this->path = $path;
         $this->case = $case;
         $this->filesystem = new FS;
@@ -63,14 +69,18 @@ final class Filesystem implements Adapter
         }
     }
 
-    public static function mount(Path $path): self
+    public static function mount(Path $path, Capabilities $capabilities = null): self
     {
-        return new self($path, CaseSensitivity::sensitive);
+        return new self(
+            $capabilities ?? Streams::of(),
+            $path,
+            CaseSensitivity::sensitive,
+        );
     }
 
     public function withCaseSensitivity(CaseSensitivity $case): self
     {
-        return new self($this->path, $case);
+        return new self($this->capabilities, $this->path, $case);
     }
 
     public function add(File $file): void
@@ -175,7 +185,7 @@ final class Filesystem implements Adapter
             );
         }
 
-        $handle = Stream::of(\fopen($path->toString(), 'w'));
+        $handle = $this->capabilities->writable()->open($path);
 
         $_ = $chunks
             ->reduce(
@@ -210,7 +220,7 @@ final class Filesystem implements Adapter
 
         $file = File\File::of(
             $file,
-            File\Content\AtPath::of($path),
+            File\Content\AtPath::of($path, $this->capabilities->readable()),
             MediaType::maybe(\mime_content_type($path->toString()))->match(
                 static fn($mediaType) => $mediaType,
                 static fn() => MediaType::null(),

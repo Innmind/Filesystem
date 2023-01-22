@@ -7,6 +7,7 @@ use Innmind\Filesystem\{
     File\Content,
     Stream\LazyStream,
 };
+use Innmind\Stream\Capabilities\Readable;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
@@ -29,9 +30,9 @@ final class AtPath implements Content, Chunkable
     /**
      * @psalm-pure
      */
-    public static function of(Path $path): self
+    public static function of(Path $path, Readable $capabilities = null): self
     {
-        return new self(OfStream::lazy(static fn() => new LazyStream($path)));
+        return new self(OfStream::lazy(static fn() => new LazyStream($path, $capabilities)));
     }
 
     public function foreach(callable $function): SideEffect
