@@ -18,6 +18,9 @@ use Innmind\Immutable\{
     Either,
 };
 
+/**
+ * @internal
+ */
 final class LazyStream implements Readable
 {
     private Path $path;
