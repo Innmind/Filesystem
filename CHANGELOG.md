@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- `Innmind\Filesystem\Adapter\Filesystem::mount()` now accepts `Innmind\Stream\Capabilities` as a second argument
+- `Innmind\Filesystem\Stream\LazyStream` is now declared internal, future versions may introduce BC breaks
+
 ## 6.1.0 - 2023-01-02
 
 ### Added
