@@ -198,7 +198,10 @@ final class Filesystem implements Adapter
                     ),
             )
             ->close()
-            ->leftMap(static fn() => throw new FailedToWriteFile);
+            ->match(
+                static fn() => null,
+                static fn() => throw new FailedToWriteFile,
+            );
     }
 
     /**
