@@ -72,7 +72,7 @@ final class Filesystem implements Adapter
     public static function mount(Path $path, Capabilities $capabilities = null): self
     {
         return new self(
-            $capabilities ?? Streams::of(),
+            $capabilities ?? Streams::fromAmbientAuthority(),
             $path,
             CaseSensitivity::sensitive,
         );
