@@ -34,6 +34,15 @@ final class LazyStream implements Readable
         $this->capabilities = $capabilities;
     }
 
+    /**
+     * @psalm-mutation-free
+     */
+    public function resource()
+    {
+        /** @psalm-suppress ImpureMethodCall */
+        return $this->stream()->resource();
+    }
+
     public function close(): Either
     {
         return $this->stream()->close();
