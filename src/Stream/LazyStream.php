@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\Stream;
 
 use Innmind\Stream\{
+    Capabilities,
     Stream,
     Readable,
     Stream\Position,
@@ -18,14 +19,28 @@ use Innmind\Immutable\{
     Either,
 };
 
+/**
+ * @internal
+ */
 final class LazyStream implements Readable
 {
     private Path $path;
+    private ?Capabilities\Readable $capabilities;
     private ?Readable $stream = null;
 
-    public function __construct(Path $path)
+    public function __construct(Path $path, Capabilities\Readable $capabilities = null)
     {
         $this->path = $path;
+        $this->capabilities = $capabilities;
+    }
+
+    /**
+     * @psalm-mutation-free
+     */
+    public function resource()
+    {
+        /** @psalm-suppress ImpureMethodCall */
+        return $this->stream()->resource();
     }
 
     public function close(): Either
@@ -113,6 +128,9 @@ final class LazyStream implements Readable
 
     private function stream(): Readable
     {
-        return $this->stream ?? $this->stream = Readable\Stream::open($this->path);
+        return $this->stream ??= match ($this->capabilities) {
+            null => Readable\Stream::open($this->path),
+            default => $this->capabilities->open($this->path),
+        };
     }
 }
