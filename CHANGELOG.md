@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `Innmind\Filesystem\File\Content\Chunks`
+
 ## 6.2.0 - 2023-01-29
 
 ### Changed
