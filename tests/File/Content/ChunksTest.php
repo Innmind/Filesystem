@@ -296,7 +296,7 @@ class ChunksTest extends TestCase
 
     private function lines(array $chunks): array
     {
-        return \explode("\n", implode('', $chunks));
+        return \explode("\n", \implode('', $chunks));
     }
 
     private function chunks(): Set
