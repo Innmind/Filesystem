@@ -17,5 +17,6 @@ composer require innmind/filesystem
 - [Delete a file](use_cases/delete_file.md)
 - [Backup a directory](use_cases/backup_directory.md)
 - [Load FTP files](use_cases/load_ftp_files.md)
+- [Persist a process output](use_cases/persist_process_output.md)
 - [Working with case insensitive filesystems](case_sensitivity.md)
 

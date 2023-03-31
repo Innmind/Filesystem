@@ -50,6 +50,10 @@ return static function(Config $config): Config
                     'Case sensitivity',
                     Path::of('case_sensitivity.md'),
                 ),
+                Entry::markdown(
+                    'Persist process output',
+                    Path::of('use_cases/persist_process_output.md'),
+                ),
             ),
             Entry::section(
                 'Testing',
