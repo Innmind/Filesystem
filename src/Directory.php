@@ -11,6 +11,9 @@ use Innmind\Immutable\{
     SideEffect,
 };
 
+/**
+ * @psalm-immutable
+ */
 interface Directory extends File
 {
     public function add(File $file): self;
