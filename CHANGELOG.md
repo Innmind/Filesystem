@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.3.1 - 2023-04-15
+
+### Changed
+
+- `Innmind\Filesystem\Directory` is declared immutable (released as a bugfix since it should have here since the start)
+
 ## 6.3.0 - 2023-03-31
 
 ### Added
