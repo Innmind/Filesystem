@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.3.2 - 2023-04-30
+
+### Changed
+
+- `Innmind\Filesystem\File\Content\Chunkable` and `Innmind\Filesystem\Chunk` are declared immutable (released as a bugfix since it should have been here since the start)
+
 ## 6.3.1 - 2023-04-15
 
 ### Changed
