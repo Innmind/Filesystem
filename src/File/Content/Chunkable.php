@@ -8,6 +8,9 @@ use Innmind\Immutable\{
     Str,
 };
 
+/**
+ * @psalm-immutable
+ */
 interface Chunkable
 {
     /**
