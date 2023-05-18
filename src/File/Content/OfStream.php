@@ -15,6 +15,7 @@ use Innmind\Immutable\{
     Str,
     Either,
     Maybe,
+    Monoid\Concat,
 };
 
 /**
@@ -90,11 +91,10 @@ final class OfStream implements Content, Chunkable
 
     public function toString(): string
     {
-        $lines = $this
-            ->sequence()
-            ->map(static fn($line) => $line->toString());
-
-        return Str::of('')->join($lines)->toString();
+        return $this
+            ->chunks()
+            ->fold(new Concat)
+            ->toString();
     }
 
     public function chunks(): Sequence
@@ -133,7 +133,10 @@ final class OfStream implements Content, Chunkable
                 // ending with the "end of line" character
                 yield $read($stream)->match(
                     static fn($line) => $line,
-                    static fn() => Str::of(''),
+                    static fn() => match ($stream->end()) {
+                        true => Str::of(''),
+                        false => throw new FailedToLoadFile,
+                    },
                 );
             }
 

@@ -5,6 +5,8 @@ namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter,
+    Adapter\InMemory\Overwrite,
+    Adapter\InMemory\Merge,
     File,
     Name,
     Directory,
@@ -17,53 +19,52 @@ use Innmind\Immutable\{
 
 final class InMemory implements Adapter
 {
-    /** @var Map<string, File> */
-    private Map $files;
+    private Directory $root;
+    private Overwrite|Merge $behaviour;
 
-    private function __construct()
+    private function __construct(Overwrite|Merge $behaviour)
     {
-        /** @var Map<string, File> */
-        $this->files = Map::of();
+        $this->root = Directory\Directory::named('root');
+        $this->behaviour = $behaviour;
     }
 
     public static function new(): self
     {
-        return new self;
+        return new self(new Overwrite);
+    }
+
+    public static function emulateFilesystem(): self
+    {
+        return new self(new Merge);
     }
 
     public function add(File $file): void
     {
-        $this->files = ($this->files)(
-            $file->name()->toString(),
-            $file,
-        );
+        $this->root = ($this->behaviour)($this->root, $file);
     }
 
     public function get(Name $file): Maybe
     {
-        return $this->files->get($file->toString());
+        return $this->root->get($file);
     }
 
     public function contains(Name $file): bool
     {
-        return $this->files->contains($file->toString());
+        return $this->root->contains($file);
     }
 
     public function remove(Name $file): void
     {
-        $this->files = $this->files->remove($file->toString());
+        $this->root = $this->root->remove($file);
     }
 
     public function all(): Set
     {
-        return Set::of(...$this->root()->files()->toList());
+        return $this->root()->files()->toSet();
     }
 
     public function root(): Directory
     {
-        return Directory\Directory::of(
-            Name::of('root'),
-            $this->files->values(),
-        );
+        return $this->root;
     }
 }

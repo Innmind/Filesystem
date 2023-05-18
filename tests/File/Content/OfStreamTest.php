@@ -263,6 +263,24 @@ class OfStreamTest extends TestCase
             });
     }
 
+    public function testLoadingFilesWithVariousEnds()
+    {
+        \touch('/tmp/test_empty_file');
+        $this->assertSame('', OfStream::of(Stream::open(Path::of('/tmp/test_empty_file')))->toString());
+
+        \file_put_contents(
+            '/tmp/test_single_line',
+            'foo',
+        );
+        $this->assertSame('foo', OfStream::of(Stream::open(Path::of('/tmp/test_single_line')))->toString());
+
+        \file_put_contents(
+            '/tmp/test_end_new_line',
+            "foo\n",
+        );
+        $this->assertSame("foo\n", OfStream::of(Stream::open(Path::of('/tmp/test_end_new_line')))->toString());
+    }
+
     private function strings(): Set
     {
         return Set\Decorate::immutable(

@@ -1,5 +1,17 @@
 # Changelog
 
+## 6.4.0 - 2023-05-18
+
+### Added
+
+- `Innmind\Filesystem\Adapter\InMemory::emulateFilesystem()` it will merge directories (instead of the overwriting done by `::new()`)
+
+### Fixed
+
+- Accessing the media type of a file no longer raise an error when it's unavailable, instead it defaults to `application/octet-stream`
+- When adding a `Directory` loaded via `Adapter\Filesystem` the sub directories are no longer loaded if not modified
+- Throw an exception when failing to load a file
+
 ## 6.3.2 - 2023-04-30
 
 ### Changed

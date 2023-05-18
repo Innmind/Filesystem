@@ -143,15 +143,16 @@ final class Filesystem implements Adapter
 
         if ($file instanceof Directory) {
             $this->filesystem->mkdir($path->toString());
-            /** @var Set<Name> */
-            $persisted = $file->reduce(
-                Set::of(),
-                function(Set $persisted, File $file) use ($path): Set {
+            $persisted = $file
+                ->files()
+                ->map(function($file) use ($path) {
                     $this->createFileAt($path, $file);
 
-                    return ($persisted)($file->name());
-                },
-            );
+                    return $file;
+                })
+                ->map(static fn($file) => $file->name())
+                ->memoize()
+                ->toSet();
             /**
              * @psalm-suppress MissingClosureReturnType
              */
@@ -212,9 +213,13 @@ final class Filesystem implements Adapter
         $path = $folder->resolve(Path::of($file->toString()));
 
         if (\is_dir($path->toString())) {
-            $files = $this->list($folder->resolve(Path::of($file->toString().'/')));
+            $directoryPath = $folder->resolve(Path::of($file->toString().'/'));
+            $files = $this->list($directoryPath);
 
-            return Directory\Directory::lazy($file, $files);
+            $directory = Directory\Directory::lazy($file, $files);
+            $this->loaded[$directory] = $directoryPath;
+
+            return $directory;
         }
 
         if (\is_link($path->toString())) {
@@ -224,7 +229,7 @@ final class Filesystem implements Adapter
         $file = File\File::of(
             $file,
             File\Content\AtPath::of($path, $this->capabilities->readable()),
-            MediaType::maybe(\mime_content_type($path->toString()))->match(
+            MediaType::maybe(@\mime_content_type($path->toString()) ?: '')->match(
                 static fn($mediaType) => $mediaType,
                 static fn() => MediaType::null(),
             ),
