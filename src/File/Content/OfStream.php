@@ -133,7 +133,10 @@ final class OfStream implements Content, Chunkable
                 // ending with the "end of line" character
                 yield $read($stream)->match(
                     static fn($line) => $line,
-                    static fn() => Str::of(''),
+                    static fn() => match ($stream->end()) {
+                        true => Str::of(''),
+                        false => throw new FailedToLoadFile,
+                    },
                 );
             }
 
