@@ -224,7 +224,7 @@ final class Filesystem implements Adapter
         $file = File\File::of(
             $file,
             File\Content\AtPath::of($path, $this->capabilities->readable()),
-            MediaType::maybe(\mime_content_type($path->toString()))->match(
+            MediaType::maybe(@\mime_content_type($path->toString()) ?: '')->match(
                 static fn($mediaType) => $mediaType,
                 static fn() => MediaType::null(),
             ),

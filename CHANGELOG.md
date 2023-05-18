@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Accessing the media type of a file no longer raise an error when it's unavailable, instead it defaults to `application/octet-stream`
+
 ## 6.3.2 - 2023-04-30
 
 ### Changed
