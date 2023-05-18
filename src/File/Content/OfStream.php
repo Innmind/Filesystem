@@ -92,7 +92,7 @@ final class OfStream implements Content, Chunkable
     public function toString(): string
     {
         return $this
-            ->sequence()
+            ->chunks()
             ->fold(new Concat)
             ->toString();
     }
