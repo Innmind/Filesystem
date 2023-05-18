@@ -17,13 +17,11 @@ use Innmind\Immutable\{
 
 final class InMemory implements Adapter
 {
-    /** @var Map<string, File> */
-    private Map $files;
+    private Directory $root;
 
     private function __construct()
     {
-        /** @var Map<string, File> */
-        $this->files = Map::of();
+        $this->root = Directory\Directory::named('root');
     }
 
     public static function new(): self
@@ -33,37 +31,31 @@ final class InMemory implements Adapter
 
     public function add(File $file): void
     {
-        $this->files = ($this->files)(
-            $file->name()->toString(),
-            $file,
-        );
+        $this->root = $this->root->add($file);
     }
 
     public function get(Name $file): Maybe
     {
-        return $this->files->get($file->toString());
+        return $this->root->get($file);
     }
 
     public function contains(Name $file): bool
     {
-        return $this->files->contains($file->toString());
+        return $this->root->contains($file);
     }
 
     public function remove(Name $file): void
     {
-        $this->files = $this->files->remove($file->toString());
+        $this->root = $this->root->remove($file);
     }
 
     public function all(): Set
     {
-        return Set::of(...$this->root()->files()->toList());
+        return $this->root()->files()->toSet();
     }
 
     public function root(): Directory
     {
-        return Directory\Directory::of(
-            Name::of('root'),
-            $this->files->values(),
-        );
+        return $this->root;
     }
 }
