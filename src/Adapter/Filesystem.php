@@ -143,15 +143,16 @@ final class Filesystem implements Adapter
 
         if ($file instanceof Directory) {
             $this->filesystem->mkdir($path->toString());
-            /** @var Set<Name> */
-            $persisted = $file->reduce(
-                Set::of(),
-                function(Set $persisted, File $file) use ($path): Set {
+            $persisted = $file
+                ->files()
+                ->map(function($file) use ($path) {
                     $this->createFileAt($path, $file);
 
-                    return ($persisted)($file->name());
-                },
-            );
+                    return $file;
+                })
+                ->map(static fn($file) => $file->name())
+                ->memoize()
+                ->toSet();
             /**
              * @psalm-suppress MissingClosureReturnType
              */
