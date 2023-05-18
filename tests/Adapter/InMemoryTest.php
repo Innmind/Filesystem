@@ -9,9 +9,13 @@ use Innmind\Filesystem\{
     Directory\Directory,
     File\File,
     File\Content\Lines,
+    File\Content\None,
     Name,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\{
+    Set,
+    Sequence,
+};
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\PHPUnit\BlackBox;
 use Properties\Innmind\Filesystem\Adapter as PAdapter;
@@ -74,6 +78,61 @@ class InMemoryTest extends TestCase
         );
     }
 
+    public function testEmulateFilesystem()
+    {
+        $adapter = InMemory::emulateFilesystem();
+        $adapter->add(Directory::of(
+            Name::of('foo'),
+            Sequence::of(
+                Directory::named('bar'),
+                File::named('baz', None::of()),
+            ),
+        ));
+        $adapter->add(Directory::of(
+            Name::of('foo'),
+            Sequence::of(
+                Directory::of(
+                    Name::of('bar'),
+                    Sequence::of(File::named('baz', None::of())),
+                ),
+                Directory::of(
+                    Name::of('foo'),
+                    Sequence::of(File::named('foo', None::of())),
+                ),
+            ),
+        ));
+
+        $this->assertTrue(
+            $adapter
+                ->get(Name::of('foo'))
+                ->flatMap(static fn($directory) => $directory->get(Name::of('baz')))
+                ->match(
+                    static fn() => true,
+                    static fn() => false,
+                ),
+        );
+        $this->assertTrue(
+            $adapter
+                ->get(Name::of('foo'))
+                ->flatMap(static fn($directory) => $directory->get(Name::of('bar')))
+                ->flatMap(static fn($directory) => $directory->get(Name::of('baz')))
+                ->match(
+                    static fn() => true,
+                    static fn() => false,
+                ),
+        );
+        $this->assertTrue(
+            $adapter
+                ->get(Name::of('foo'))
+                ->flatMap(static fn($directory) => $directory->get(Name::of('foo')))
+                ->flatMap(static fn($directory) => $directory->get(Name::of('foo')))
+                ->match(
+                    static fn() => true,
+                    static fn() => false,
+                ),
+        );
+    }
+
     /**
      * @dataProvider properties
      */
@@ -91,6 +150,22 @@ class InMemoryTest extends TestCase
     }
 
     /**
+     * @dataProvider properties
+     */
+    public function testHoldPropertyWhenEmulatingFilesystem($property)
+    {
+        $this
+            ->forAll($property)
+            ->then(function($property) {
+                if (!$property->applicableTo(InMemory::emulateFilesystem())) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy(InMemory::emulateFilesystem());
+            });
+    }
+
+    /**
      * @group properties
      */
     public function testHoldProperties()
@@ -99,6 +174,18 @@ class InMemoryTest extends TestCase
             ->forAll(PAdapter::properties())
             ->then(static function($properties) {
                 $properties->ensureHeldBy(InMemory::new());
+            });
+    }
+
+    /**
+     * @group properties
+     */
+    public function testHoldPropertiesWhenEmulatingFilesystem()
+    {
+        $this
+            ->forAll(PAdapter::properties())
+            ->then(static function($properties) {
+                $properties->ensureHeldBy(InMemory::emulateFilesystem());
             });
     }
 

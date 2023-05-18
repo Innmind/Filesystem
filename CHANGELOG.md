@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Innmind\Filesystem\Adapter\InMemory::emulateFilesystem()` it will merge directories (instead of the overwriting done by `::new()`)
+
 ### Fixed
 
 - Accessing the media type of a file no longer raise an error when it's unavailable, instead it defaults to `application/octet-stream`
