@@ -5,6 +5,7 @@
 ### Fixed
 
 - Accessing the media type of a file no longer raise an error when it's unavailable, instead it defaults to `application/octet-stream`
+- When adding a `Directory` loaded via `Adapter\Filesystem` the sub directories are no longer loaded if not modified
 
 ## 6.3.2 - 2023-04-30
 

@@ -212,9 +212,13 @@ final class Filesystem implements Adapter
         $path = $folder->resolve(Path::of($file->toString()));
 
         if (\is_dir($path->toString())) {
-            $files = $this->list($folder->resolve(Path::of($file->toString().'/')));
+            $directoryPath = $folder->resolve(Path::of($file->toString().'/'));
+            $files = $this->list($directoryPath);
 
-            return Directory\Directory::lazy($file, $files);
+            $directory = Directory\Directory::lazy($file, $files);
+            $this->loaded[$directory] = $directoryPath;
+
+            return $directory;
         }
 
         if (\is_link($path->toString())) {
