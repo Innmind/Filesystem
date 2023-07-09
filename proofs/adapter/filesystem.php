@@ -20,8 +20,12 @@ return static function() {
         function($assert, $properties) {
             $path = \sys_get_temp_dir().'/innmind/filesystem/';
             (new FS)->remove($path);
+            $filesystem = Filesystem::mount(Path::of($path))->withCaseSensitivity(match (\PHP_OS) {
+                    'Darwin' => CaseSensitivity::insensitive,
+                    default => CaseSensitivity::sensitive,
+                });;
 
-            $properties->ensureHeldBy($assert, Filesystem::mount(Path::of($path)));
+            $properties->ensureHeldBy($assert, $filesystem);
 
             (new FS)->remove($path);
         },
@@ -34,7 +38,10 @@ return static function() {
             function($assert, $property) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
-                $filesystem = Filesystem::mount(Path::of($path));
+                $filesystem = Filesystem::mount(Path::of($path))->withCaseSensitivity(match (\PHP_OS) {
+                    'Darwin' => CaseSensitivity::insensitive,
+                    default => CaseSensitivity::sensitive,
+                });;
 
                 if ($property->applicableTo($filesystem)) {
                     $property->ensureHeldBy($assert, $filesystem);
