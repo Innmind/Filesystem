@@ -174,8 +174,7 @@ class NameTest extends TestCase
         $this
             ->forAll(Set\Sequence::of(
                 Fixture::any(),
-                Set\Integers::between(1, 10), // enough to prove the behaviour
-            ))
+            )->between(1, 10)) // enough to prove the behaviour
             ->then(function($names) {
                 $strings = \array_map(
                     static fn($name) => $name->toString(),

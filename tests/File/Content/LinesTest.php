@@ -31,10 +31,7 @@ class LinesTest extends TestCase
     public function testForeach()
     {
         $this
-            ->forAll(Set\Sequence::of(
-                $this->strings(),
-                Set\Integers::between(1, 10),
-            ))
+            ->forAll(Set\Sequence::of($this->strings())->between(1, 10))
             ->then(function($lines) {
                 $content = Lines::of(Sequence::of(...$lines));
                 $called = 0;
@@ -69,10 +66,7 @@ class LinesTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Sequence::of(
-                    $this->strings(),
-                    Set\Integers::between(1, 10),
-                ),
+                Set\Sequence::of($this->strings())->between(1, 10),
                 $this->strings(),
             )
             ->then(function($lines, $replacement) {
@@ -96,10 +90,7 @@ class LinesTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Sequence::of(
-                    $this->strings(),
-                    Set\Integers::between(1, 10),
-                ),
+                Set\Sequence::of($this->strings())->between(1, 10),
                 $this->strings(),
             )
             ->then(function($lines, $newLine) {
@@ -134,10 +125,7 @@ class LinesTest extends TestCase
     public function testFilter()
     {
         $this
-            ->forAll(Set\Sequence::of(
-                $this->strings(),
-                Set\Integers::between(1, 10),
-            ))
+            ->forAll(Set\Sequence::of($this->strings())->between(1, 10))
             ->then(function($lines) {
                 $content = Lines::of(Sequence::of(...$lines));
                 $shouldBeEmpty = $content->filter(static fn() => false);
@@ -161,10 +149,7 @@ class LinesTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Sequence::of(
-                    $this->strings(),
-                    Set\Integers::between(1, 10),
-                ),
+                Set\Sequence::of($this->strings())->between(1, 10),
                 $this->strings(),
             )
             ->then(function($lines, $replacement) {
@@ -189,10 +174,7 @@ class LinesTest extends TestCase
     public function testReduce()
     {
         $this
-            ->forAll(Set\Sequence::of(
-                $this->strings(),
-                Set\Integers::between(1, 10),
-            ))
+            ->forAll(Set\Sequence::of($this->strings())->between(1, 10))
             ->then(function($lines) {
                 $content = Lines::of(Sequence::of(...$lines));
 
@@ -209,10 +191,7 @@ class LinesTest extends TestCase
     public function testToString()
     {
         $this
-            ->forAll(Set\Sequence::of(
-                $this->strings(),
-                Set\Integers::between(1, 10),
-            ))
+            ->forAll(Set\Sequence::of($this->strings())->between(1, 10))
             ->then(function($lines) {
                 $content = Lines::of(Sequence::of(...$lines));
 
@@ -274,10 +253,7 @@ class LinesTest extends TestCase
         ));
 
         $this
-            ->forAll(Set\Sequence::of(
-                $this->strings(),
-                Set\Integers::between(0, 10),
-            ))
+            ->forAll(Set\Sequence::of($this->strings())->between(0, 10))
             ->then(function($lines) {
                 $raw = \array_map(
                     static fn($line) => $line->toString(),

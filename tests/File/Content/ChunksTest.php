@@ -260,8 +260,7 @@ class ChunksTest extends TestCase
         $this
             ->forAll(Set\Sequence::of(
                 Set\Unicode::strings(),
-                Set\Integers::between(0, 10),
-            ))
+            )->between(0, 10))
             ->then(function($chunks) {
                 $expectedSize = Str::of(\implode('', $chunks), 'ASCII')->length();
                 $content = Chunks::of(Sequence::of(...$chunks)->map(Str::of(...)));
@@ -303,8 +302,7 @@ class ChunksTest extends TestCase
     {
         return Set\Sequence::of(
             Set\Unicode::strings(),
-            Set\Integers::between(1, 10),
-        );
+        )->between(1, 10);
     }
 
     private function strings(): Set
