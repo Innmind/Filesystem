@@ -4,12 +4,20 @@ declare(strict_types = 1);
 namespace Properties\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
+    Adapter,
     Directory,
     File,
 };
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
+use Fixtures\Innmind\Filesystem\Directory as FDirectory;
 
+/**
+ * @implements Property<Adapter>
+ */
 final class AddDirectory implements Property
 {
     private Directory $directory;
@@ -19,9 +27,9 @@ final class AddDirectory implements Property
         $this->directory = $directory;
     }
 
-    public function name(): string
+    public static function any(): Set
     {
-        return "Add directory '{$this->directory->name()->toString()}'";
+        return FDirectory::any()->map(static fn($directory) => new self($directory));
     }
 
     public function applicableTo(object $adapter): bool
@@ -29,12 +37,13 @@ final class AddDirectory implements Property
         return !$adapter->contains($this->directory->name());
     }
 
-    public function ensureHeldBy(object $adapter): object
+    public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        Assert::assertFalse($adapter->contains($this->directory->name()));
-        Assert::assertNull($adapter->add($this->directory));
-        Assert::assertTrue($adapter->contains($this->directory->name()));
+        $assert->false($adapter->contains($this->directory->name()));
+        $assert->null($adapter->add($this->directory));
+        $assert->true($adapter->contains($this->directory->name()));
         $this->assertSame(
+            $assert,
             $this->directory,
             $adapter->get($this->directory->name())->match(
                 static fn($file) => $file,
@@ -45,22 +54,23 @@ final class AddDirectory implements Property
         return $adapter;
     }
 
-    private function assertSame(File $source, File $target): void
+    private function assertSame(Assert $assert, File $source, File $target): void
     {
-        Assert::assertSame(
+        $assert->same(
             $source->name()->toString(),
             $target->name()->toString(),
         );
-        Assert::assertSame(
+        $assert->same(
             $source->content()->toString(),
             $target->content()->toString(),
         );
 
         if ($target instanceof Directory) {
-            $target->foreach(function($file) use ($source) {
-                Assert::assertTrue($source->contains($file->name()));
+            $target->foreach(function($file) use ($assert, $source) {
+                $assert->true($source->contains($file->name()));
 
                 $this->assertSame(
+                    $assert,
                     $source->get($file->name())->match(
                         static fn($file) => $file,
                         static fn() => null,

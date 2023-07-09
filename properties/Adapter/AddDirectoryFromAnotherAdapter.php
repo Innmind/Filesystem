@@ -4,14 +4,25 @@ declare(strict_types = 1);
 namespace Properties\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
+    Adapter,
     Directory\Directory,
     File,
     Name,
 };
 use Innmind\Immutable\Set;
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\BlackBox\{
+    Property,
+    Set as DataSet,
+    Runner\Assert,
+};
+use Fixtures\Innmind\Filesystem\{
+    Name as FName,
+    File as FFile,
+};
 
+/**
+ * @implements Property<Adapter>
+ */
 final class AddDirectoryFromAnotherAdapter implements Property
 {
     private Name $name;
@@ -23,9 +34,13 @@ final class AddDirectoryFromAnotherAdapter implements Property
         $this->file = $file;
     }
 
-    public function name(): string
+    public static function any(): DataSet
     {
-        return "Add directory '{$this->name->toString()}' loaded from another adapter";
+        return DataSet\Composite::immutable(
+            static fn(...$args) => new self(...$args),
+            FName::any(),
+            FFile::any(),
+        );
     }
 
     public function applicableTo(object $adapter): bool
@@ -33,7 +48,7 @@ final class AddDirectoryFromAnotherAdapter implements Property
         return !$adapter->contains($this->name);
     }
 
-    public function ensureHeldBy(object $adapter): object
+    public function ensureHeldBy(Assert $assert, object $adapter): object
     {
         // directories loaded from other adapters have files injected at
         // construct time (so there is no modifications())
@@ -42,16 +57,16 @@ final class AddDirectoryFromAnotherAdapter implements Property
             Set::of($this->file),
         );
 
-        Assert::assertFalse($adapter->contains($directory->name()));
-        Assert::assertNull($adapter->add($directory));
-        Assert::assertTrue($adapter->contains($directory->name()));
-        Assert::assertTrue(
+        $assert->false($adapter->contains($directory->name()));
+        $assert->null($adapter->add($directory));
+        $assert->true($adapter->contains($directory->name()));
+        $assert->true(
             $adapter->get($directory->name())->match(
                 fn($dir) => $dir->contains($this->file->name()),
                 static fn() => false,
             ),
         );
-        Assert::assertSame(
+        $assert->same(
             $this->file->content()->toString(),
             $adapter
                 ->get($directory->name())

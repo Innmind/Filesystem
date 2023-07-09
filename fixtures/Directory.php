@@ -10,7 +10,8 @@ use Innmind\Filesystem\{
 use Properties\Innmind\Filesystem\Directory as Properties;
 use Innmind\BlackBox\{
     Set as DataSet,
-    Properties as Ensure,
+    Runner\Assert,
+    Runner\Stats,
 };
 use Fixtures\Innmind\Immutable\Set;
 
@@ -38,15 +39,15 @@ final class Directory
     {
         if ($depth === $maxDepth) {
             $files = Set::of(
-                new DataSet\Randomize(
+                DataSet\Randomize::of(
                     File::any(),
                 ),
                 DataSet\Integers::between(0, 5),
             );
         } else {
             $files = Set::of(
-                new DataSet\Either(
-                    new DataSet\Randomize(
+                DataSet\Either::any(
+                    DataSet\Randomize::of(
                         File::any(),
                     ),
                     self::atDepth($depth + 1, $maxDepth),
@@ -74,26 +75,19 @@ final class Directory
         );
 
         $modified = DataSet\Composite::immutable(
-            static fn($directory, $properties): Model => $properties->ensureHeldBy($directory),
-            $directory,
-            DataSet\Decorate::immutable(
-                static fn(array $properties): Ensure => new Ensure(...$properties),
-                DataSet\Sequence::of(
-                    new DataSet\Either(
-                        DataSet\Property::of(
-                            Properties\RemoveFile::class,
-                        ),
-                        DataSet\Property::of(
-                            Properties\AddFile::class,
-                            File::any(),
-                        ),
-                    ),
-                    DataSet\Integers::between(1, 10),
-                ),
+            static fn($directory, $properties): Model => $properties->ensureHeldBy(
+                // not ideal but no other simple way for now
+                Assert::of(Stats::new()),
+                $directory,
             ),
+            $directory,
+            DataSet\Properties::any(
+                Properties\RemoveFile::any(),
+                Properties\AddFile::any(),
+            )->atMost(10),
         );
 
-        return new DataSet\Either(
+        return DataSet\Either::any(
             $directory,
             $modified,
         );

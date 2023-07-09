@@ -3,10 +3,20 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Directory;
 
-use Innmind\Filesystem\Name;
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\Filesystem\{
+    Directory,
+    Name,
+};
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
+use Fixtures\Innmind\Filesystem\Name as FName;
 
+/**
+ * @implements Property<Directory>
+ */
 final class Rename implements Property
 {
     private Name $name;
@@ -16,9 +26,9 @@ final class Rename implements Property
         $this->name = $name;
     }
 
-    public function name(): string
+    public static function any(): Set
     {
-        return "Rename to '{$this->name->toString()}'";
+        return FName::any()->map(static fn($name) => new self($name));
     }
 
     public function applicableTo(object $directory): bool
@@ -26,18 +36,24 @@ final class Rename implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $directory): object
+    public function ensureHeldBy(Assert $assert, object $directory): object
     {
         $directory2 = $directory->rename($this->name);
 
-        Assert::assertNotSame($directory, $directory2);
-        Assert::assertNotSame($this->name, $directory->name());
-        Assert::assertSame($this->name, $directory2->name());
-        Assert::assertSame(
+        $assert
+            ->expected($directory)
+            ->not()
+            ->same($directory2);
+        $assert
+            ->expected($this->name)
+            ->not()
+            ->same($directory->name());
+        $assert->same($this->name, $directory2->name());
+        $assert->same(
             $directory->files(),
             $directory2->files(),
         );
-        Assert::assertSame(
+        $assert->same(
             $directory->removed(),
             $directory2->removed(),
         );

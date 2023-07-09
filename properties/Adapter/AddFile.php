@@ -3,10 +3,20 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Adapter;
 
-use Innmind\Filesystem\File;
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\Filesystem\{
+    Adapter,
+    File,
+};
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
+use Fixtures\Innmind\Filesystem\File as FFile;
 
+/**
+ * @implements Property<Adapter>
+ */
 final class AddFile implements Property
 {
     private File $file;
@@ -16,9 +26,9 @@ final class AddFile implements Property
         $this->file = $file;
     }
 
-    public function name(): string
+    public static function any(): Set
     {
-        return "Add file '{$this->file->name()->toString()}'";
+        return FFile::any()->map(static fn($file) => new self($file));
     }
 
     public function applicableTo(object $adapter): bool
@@ -26,12 +36,12 @@ final class AddFile implements Property
         return !$adapter->contains($this->file->name());
     }
 
-    public function ensureHeldBy(object $adapter): object
+    public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        Assert::assertFalse($adapter->contains($this->file->name()));
-        Assert::assertNull($adapter->add($this->file));
-        Assert::assertTrue($adapter->contains($this->file->name()));
-        Assert::assertSame(
+        $assert->false($adapter->contains($this->file->name()));
+        $assert->null($adapter->add($this->file));
+        $assert->true($adapter->contains($this->file->name()));
+        $assert->same(
             $this->file->content()->toString(),
             $adapter
                 ->get($this->file->name())

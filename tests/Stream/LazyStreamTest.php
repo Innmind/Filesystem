@@ -11,14 +11,9 @@ use Innmind\Stream\{
 use Innmind\Url\Path;
 use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
-use Fixtures\Innmind\Stream\Readable as FReadable;
-use Properties\Innmind\Stream\Readable as PReadable;
 
 class LazyStreamTest extends TestCase
 {
-    use BlackBox;
-
     private $stream;
 
     public function setUp(): void
@@ -134,21 +129,5 @@ class LazyStreamTest extends TestCase
             static fn($value) => $value->toString(),
             static fn() => null,
         ));
-    }
-
-    public function testHoldProperties()
-    {
-        $this
-            ->forAll(
-                PReadable::properties(),
-                FReadable::any(),
-            )
-            ->then(static function($properties, $content) {
-                $path = \tempnam(\sys_get_temp_dir(), 'lazy_stream');
-                $stream = new LazyStream(Path::of($path));
-                \file_put_contents($path, $content->toString());
-
-                $properties->ensureHeldBy($stream);
-            });
     }
 }

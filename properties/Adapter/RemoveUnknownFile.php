@@ -3,10 +3,20 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Adapter;
 
-use Innmind\Filesystem\Name;
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\Filesystem\{
+    Adapter,
+    Name,
+};
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
+use Fixtures\Innmind\Filesystem\Name as FName;
 
+/**
+ * @implements Property<Adapter>
+ */
 final class RemoveUnknownFile implements Property
 {
     private Name $name;
@@ -16,9 +26,9 @@ final class RemoveUnknownFile implements Property
         $this->name = $name;
     }
 
-    public function name(): string
+    public static function any(): Set
     {
-        return "Remove unknown file '{$this->name->toString()}'";
+        return FName::any()->map(static fn($name) => new self($name));
     }
 
     public function applicableTo(object $adapter): bool
@@ -26,10 +36,10 @@ final class RemoveUnknownFile implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $adapter): object
+    public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        Assert::assertNull($adapter->remove($this->name));
-        Assert::assertFalse($adapter->contains($this->name));
+        $assert->null($adapter->remove($this->name));
+        $assert->false($adapter->contains($this->name));
 
         return $adapter;
     }

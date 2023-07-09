@@ -29,7 +29,6 @@ use Innmind\BlackBox\{
     Set as DataSet,
 };
 use Fixtures\Innmind\Filesystem\Name as FName;
-use Properties\Innmind\Filesystem\Adapter as PAdapter;
 
 class FilesystemTest extends TestCase
 {
@@ -277,45 +276,6 @@ class FilesystemTest extends TestCase
         $this->assertNull($adapter->add($file));
     }
 
-    /**
-     * @dataProvider properties
-     */
-    public function testHoldProperty($property)
-    {
-        $this
-            ->forAll($property)
-            ->then(function($property) {
-                $path = \sys_get_temp_dir().'/innmind/filesystem/';
-                (new FS)->remove($path);
-                $adapter = Filesystem::mount(Path::of($path));
-
-                if (!$property->applicableTo($adapter)) {
-                    $this->markTestSkipped();
-                }
-
-                $property->ensureHeldBy($adapter);
-
-                (new FS)->remove($path);
-            });
-    }
-
-    /**
-     * @group properties
-     */
-    public function testHoldProperties()
-    {
-        $this
-            ->forAll(PAdapter::properties())
-            ->then(static function($properties) {
-                $path = \sys_get_temp_dir().'/innmind/filesystem/';
-                (new FS)->remove($path);
-
-                $properties->ensureHeldBy(Filesystem::mount(Path::of($path)));
-
-                (new FS)->remove($path);
-            });
-    }
-
     public function testPathTooLongThrowAnException()
     {
         if (\PHP_OS !== 'Darwin') {
@@ -354,7 +314,7 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                new DataSet\Either(
+                DataSet\Either::any(
                     DataSet\Integers::between(1, 46),
                     DataSet\Integers::between(48, 127),
                 ),
@@ -384,7 +344,7 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                new DataSet\Either(
+                DataSet\Either::any(
                     DataSet\Integers::between(1, 46),
                     DataSet\Integers::between(48, 127),
                 ),
@@ -414,7 +374,7 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                new DataSet\Either(
+                DataSet\Either::any(
                     DataSet\Integers::between(1, 8),
                     DataSet\Integers::between(14, 31),
                     DataSet\Integers::between(33, 45),
@@ -488,33 +448,5 @@ class FilesystemTest extends TestCase
                 $this->assertCount(1, $all);
                 $this->assertSame($name, $all[0]->name()->toString());
             });
-    }
-
-    public function testRegressionAddingFileInDirectoryDueToCaseSensitivity()
-    {
-        $property = new PAdapter\AddRemoveAddModificationsStillAddTheFile(
-            Directory::named('0')
-                ->add($file = File::named('L', None::of()))
-                ->remove($file->name()),
-            File::named('l', None::of()),
-        );
-
-        $path = \sys_get_temp_dir().'/innmind/filesystem/';
-        (new FS)->remove($path);
-        $adapter = Filesystem::mount(Path::of($path))->withCaseSensitivity(match (\PHP_OS) {
-            'Darwin' => CaseSensitivity::insensitive,
-            default => CaseSensitivity::sensitive,
-        });
-
-        $property->ensureHeldBy($adapter);
-
-        (new FS)->remove($path);
-    }
-
-    public function properties(): iterable
-    {
-        foreach (PAdapter::list() as $property) {
-            yield [$property];
-        }
     }
 }

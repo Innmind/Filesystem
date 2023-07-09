@@ -3,14 +3,21 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Adapter;
 
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\Filesystem\Adapter;
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
 
+/**
+ * @implements Property<Adapter>
+ */
 final class ReAddingFilesHasNoSideEffect implements Property
 {
-    public function name(): string
+    public static function any(): Set
     {
-        return 'Re-adding files has no side effect';
+        return Set\Elements::of(new self);
     }
 
     public function applicableTo(object $adapter): bool
@@ -18,14 +25,14 @@ final class ReAddingFilesHasNoSideEffect implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $adapter): object
+    public function ensureHeldBy(Assert $assert, object $adapter): object
     {
         $adapter
             ->all()
-            ->foreach(static function($file) use ($adapter) {
+            ->foreach(static function($file) use ($assert, $adapter) {
                 $adapter->add($file);
-                Assert::assertTrue($adapter->contains($file->name()));
-                Assert::assertSame(
+                $assert->true($adapter->contains($file->name()));
+                $assert->same(
                     $file->content()->toString(),
                     $adapter
                         ->get($file->name())

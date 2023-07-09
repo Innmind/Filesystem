@@ -4,12 +4,23 @@ declare(strict_types = 1);
 namespace Properties\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
+    Adapter,
     Directory,
     File,
 };
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
+use Fixtures\Innmind\Filesystem\{
+    Directory as FDirectory,
+    File as FFile,
+};
 
+/**
+ * @implements Property<Adapter>
+ */
 final class RemoveAddRemoveModificationsDoesntAddTheFile implements Property
 {
     private Directory $directory;
@@ -21,9 +32,13 @@ final class RemoveAddRemoveModificationsDoesntAddTheFile implements Property
         $this->file = $file;
     }
 
-    public function name(): string
+    public static function any(): Set
     {
-        return "Add/remove/add still add the file '{$this->file->name()->toString()}'";
+        return Set\Composite::immutable(
+            static fn(...$args) => new self(...$args),
+            FDirectory::any(),
+            FFile::any(),
+        );
     }
 
     public function applicableTo(object $adapter): bool
@@ -31,7 +46,7 @@ final class RemoveAddRemoveModificationsDoesntAddTheFile implements Property
         return !$adapter->contains($this->directory->name());
     }
 
-    public function ensureHeldBy(object $adapter): object
+    public function ensureHeldBy(Assert $assert, object $adapter): object
     {
         $adapter->add(
             $this
@@ -40,7 +55,7 @@ final class RemoveAddRemoveModificationsDoesntAddTheFile implements Property
                 ->add($this->file)
                 ->remove($this->file->name()),
         );
-        Assert::assertFalse(
+        $assert->false(
             $adapter->get($this->directory->name())->match(
                 fn($dir) => $dir->contains($this->file->name()),
                 static fn() => true,

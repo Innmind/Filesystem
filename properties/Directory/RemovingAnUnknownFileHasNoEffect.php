@@ -7,9 +7,16 @@ use Innmind\Filesystem\{
     Name,
     Directory,
 };
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
+use Fixtures\Innmind\Filesystem\Name as FName;
 
+/**
+ * @implements Property<Directory>
+ */
 final class RemovingAnUnknownFileHasNoEffect implements Property
 {
     private Name $name;
@@ -19,9 +26,9 @@ final class RemovingAnUnknownFileHasNoEffect implements Property
         $this->name = $name;
     }
 
-    public function name(): string
+    public static function any(): Set
     {
-        return "Removing unknown file '{$this->name->toString()}' has no effect";
+        return FName::any()->map(static fn($name) => new self($name));
     }
 
     public function applicableTo(object $directory): bool
@@ -29,9 +36,9 @@ final class RemovingAnUnknownFileHasNoEffect implements Property
         return !$directory->contains($this->name);
     }
 
-    public function ensureHeldBy(object $directory): object
+    public function ensureHeldBy(Assert $assert, object $directory): object
     {
-        Assert::assertSame(
+        $assert->same(
             $this->toArray($directory),
             $this->toArray($directory->remove($this->name)),
         );

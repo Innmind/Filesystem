@@ -17,13 +17,9 @@ use Innmind\Immutable\{
     Sequence,
 };
 use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
-use Properties\Innmind\Filesystem\Adapter as PAdapter;
 
 class InMemoryTest extends TestCase
 {
-    use BlackBox;
-
     public function testInterface()
     {
         $a = InMemory::new();
@@ -131,68 +127,5 @@ class InMemoryTest extends TestCase
                     static fn() => false,
                 ),
         );
-    }
-
-    /**
-     * @dataProvider properties
-     */
-    public function testHoldProperty($property)
-    {
-        $this
-            ->forAll($property)
-            ->then(function($property) {
-                if (!$property->applicableTo(InMemory::new())) {
-                    $this->markTestSkipped();
-                }
-
-                $property->ensureHeldBy(InMemory::new());
-            });
-    }
-
-    /**
-     * @dataProvider properties
-     */
-    public function testHoldPropertyWhenEmulatingFilesystem($property)
-    {
-        $this
-            ->forAll($property)
-            ->then(function($property) {
-                if (!$property->applicableTo(InMemory::emulateFilesystem())) {
-                    $this->markTestSkipped();
-                }
-
-                $property->ensureHeldBy(InMemory::emulateFilesystem());
-            });
-    }
-
-    /**
-     * @group properties
-     */
-    public function testHoldProperties()
-    {
-        $this
-            ->forAll(PAdapter::properties())
-            ->then(static function($properties) {
-                $properties->ensureHeldBy(InMemory::new());
-            });
-    }
-
-    /**
-     * @group properties
-     */
-    public function testHoldPropertiesWhenEmulatingFilesystem()
-    {
-        $this
-            ->forAll(PAdapter::properties())
-            ->then(static function($properties) {
-                $properties->ensureHeldBy(InMemory::emulateFilesystem());
-            });
-    }
-
-    public function properties(): iterable
-    {
-        foreach (PAdapter::list() as $property) {
-            yield [$property];
-        }
     }
 }

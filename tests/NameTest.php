@@ -141,8 +141,7 @@ class NameTest extends TestCase
                                 ...\range(48, 127),
                             ),
                         ),
-                        Set\Integers::between(255, 1024), // upper limit at 1024 to avoid out of memory
-                    ),
+                    )->between(255, 1024), // upper limit at 1024 to avoid out of memory
                 )->filter(static fn(string $name): bool => $name !== '.' && $name !== '..'),
             )
             ->then(function($name) {
@@ -175,8 +174,7 @@ class NameTest extends TestCase
         $this
             ->forAll(Set\Sequence::of(
                 Fixture::any(),
-                Set\Integers::between(1, 10), // enough to prove the behaviour
-            ))
+            )->between(1, 10)) // enough to prove the behaviour
             ->then(function($names) {
                 $strings = \array_map(
                     static fn($name) => $name->toString(),

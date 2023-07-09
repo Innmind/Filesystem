@@ -24,22 +24,15 @@ final class Name
      */
     public static function strings(): Set
     {
-        return Set\Decorate::immutable(
-            static fn(array $chrs): string => \implode('', $chrs),
-            Set\Sequence::of(
-                Set\Decorate::immutable(
-                    static fn(int $chr): string => \chr($chr),
-                    new Set\Either(
-                        Set\Integers::between(1, 46),
-                        Set\Integers::between(48, 127),
-                    ),
-                ),
-                Set\Integers::between(1, 255),
-            ),
-        )->filter(
-            static fn(string $name): bool => $name !== '.' &&
-                $name !== '..' &&
-                !\preg_match('~\s+~', $name),
-        );
+        return Set\Strings::madeOf(
+            Set\Integers::between(1, 46)->map(\chr(...)),
+            Set\Integers::between(48, 127)->map(\chr(...)),
+        )
+            ->between(1, 255)
+            ->filter(
+                static fn(string $name): bool => $name !== '.' &&
+                    $name !== '..' &&
+                    !\preg_match('~\s+~', $name),
+            );
     }
 }

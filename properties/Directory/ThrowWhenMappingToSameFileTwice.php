@@ -4,12 +4,20 @@ declare(strict_types = 1);
 namespace Properties\Innmind\Filesystem\Directory;
 
 use Innmind\Filesystem\{
+    Directory,
     File,
     Exception\DuplicatedFile,
 };
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
+use Fixtures\Innmind\Filesystem\File as FFile;
 
+/**
+ * @implements Property<Directory>
+ */
 final class ThrowWhenMappingToSameFileTwice implements Property
 {
     private File $file;
@@ -19,9 +27,9 @@ final class ThrowWhenMappingToSameFileTwice implements Property
         $this->file = $file;
     }
 
-    public function name(): string
+    public static function any(): Set
     {
-        return 'Throw when mapping to same file twice';
+        return FFile::any()->map(static fn($file) => new self($file));
     }
 
     public function applicableTo(object $directory): bool
@@ -29,7 +37,7 @@ final class ThrowWhenMappingToSameFileTwice implements Property
         return $directory->files()->size() >= 2;
     }
 
-    public function ensureHeldBy(object $directory): object
+    public function ensureHeldBy(Assert $assert, object $directory): object
     {
         try {
             // calling toList in case it uses a lazy Set of files, so we need to
@@ -42,9 +50,11 @@ final class ThrowWhenMappingToSameFileTwice implements Property
                 ->files()
                 ->toList();
 
-            Assert::fail('It should throw');
+            $assert->fail('It should throw');
         } catch (\Exception $e) {
-            Assert::assertInstanceOf(DuplicatedFile::class, $e);
+            $assert
+                ->object($e)
+                ->instance(DuplicatedFile::class);
         }
 
         return $directory;

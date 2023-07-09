@@ -77,7 +77,10 @@ final class LazyStream implements Readable
             // File\Content\OfStream::chunks() after persisting a file.
             // This does not break be behaviour of the streams as once the stream
             // is manually closed we won't reopen it here
-            /** @var Either<PositionNotSeekable, Stream> */
+            /**
+             * @psalm-suppress InvalidArgument
+             * @var Either<PositionNotSeekable, Stream>
+             */
             return $this
                 ->stream
                 ->close()

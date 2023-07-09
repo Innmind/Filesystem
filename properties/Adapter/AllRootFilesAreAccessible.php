@@ -3,14 +3,21 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Adapter;
 
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\Filesystem\Adapter;
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
 
+/**
+ * @implements Property<Adapter>
+ */
 final class AllRootFilesAreAccessible implements Property
 {
-    public function name(): string
+    public static function any(): Set
     {
-        return 'All root files are accessible';
+        return Set\Elements::of(new self);
     }
 
     public function applicableTo(object $adapter): bool
@@ -18,14 +25,14 @@ final class AllRootFilesAreAccessible implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $adapter): object
+    public function ensureHeldBy(Assert $assert, object $adapter): object
     {
         $adapter
             ->root()
             ->files()
-            ->foreach(static function($file) use ($adapter) {
-                Assert::assertTrue($adapter->contains($file->name()));
-                Assert::assertSame(
+            ->foreach(static function($file) use ($assert, $adapter) {
+                $assert->true($adapter->contains($file->name()));
+                $assert->same(
                     $file->content()->toString(),
                     $adapter
                         ->get($file->name())
@@ -36,11 +43,11 @@ final class AllRootFilesAreAccessible implements Property
                         ),
                 );
             });
-        Assert::assertSame($adapter->root()->files()->size(), $adapter->all()->size());
+        $assert->same($adapter->root()->files()->size(), $adapter->all()->size());
         $adapter
             ->all()
-            ->foreach(static function($file) use ($adapter) {
-                Assert::assertSame(
+            ->foreach(static function($file) use ($assert, $adapter) {
+                $assert->same(
                     $file->content()->toString(),
                     $adapter
                         ->root()
