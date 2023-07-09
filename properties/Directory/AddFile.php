@@ -3,10 +3,20 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Directory;
 
-use Innmind\Filesystem\File;
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\Filesystem\{
+    Directory,
+    File,
+};
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
+use Fixtures\Innmind\Filesystem\File as FFile;
 
+/**
+ * @implements Property<Directory>
+ */
 final class AddFile implements Property
 {
     private File $file;
@@ -16,9 +26,9 @@ final class AddFile implements Property
         $this->file = $file;
     }
 
-    public function name(): string
+    public static function any(): Set
     {
-        return "Add file '{$this->file->name()->toString()}'";
+        return FFile::any()->map(static fn($file) => new self($file));
     }
 
     public function applicableTo(object $directory): bool
@@ -26,14 +36,17 @@ final class AddFile implements Property
         return !$directory->contains($this->file->name());
     }
 
-    public function ensureHeldBy(object $directory): object
+    public function ensureHeldBy(Assert $assert, object $directory): object
     {
-        Assert::assertFalse($directory->contains($this->file->name()));
+        $assert->false($directory->contains($this->file->name()));
         $newDirectory = $directory->add($this->file);
-        Assert::assertNotSame($directory, $newDirectory);
-        Assert::assertFalse($directory->contains($this->file->name()));
-        Assert::assertTrue($newDirectory->contains($this->file->name()));
-        Assert::assertSame(
+        $assert
+            ->expected($directory)
+            ->not()
+            ->same($newDirectory);
+        $assert->false($directory->contains($this->file->name()));
+        $assert->true($newDirectory->contains($this->file->name()));
+        $assert->same(
             $directory->removed()->size(),
             $newDirectory->removed()->size(),
         );

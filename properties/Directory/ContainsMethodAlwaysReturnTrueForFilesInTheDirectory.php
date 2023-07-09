@@ -3,14 +3,21 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Directory;
 
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\Filesystem\Directory;
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
 
+/**
+ * @implements Property<Directory>
+ */
 final class ContainsMethodAlwaysReturnTrueForFilesInTheDirectory implements Property
 {
-    public function name(): string
+    public static function any(): Set
     {
-        return 'contains() always return true for file in the directory';
+        return Set\Elements::of(new self);
     }
 
     public function applicableTo(object $directory): bool
@@ -18,10 +25,10 @@ final class ContainsMethodAlwaysReturnTrueForFilesInTheDirectory implements Prop
         return true;
     }
 
-    public function ensureHeldBy(object $directory): object
+    public function ensureHeldBy(Assert $assert, object $directory): object
     {
-        $directory->foreach(static function($file) use ($directory) {
-            Assert::assertTrue($directory->contains($file->name()));
+        $directory->foreach(static function($file) use ($assert, $directory) {
+            $assert->true($directory->contains($file->name()));
         });
 
         return $directory;

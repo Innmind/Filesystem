@@ -3,10 +3,20 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Directory;
 
-use Innmind\Filesystem\File;
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\Filesystem\{
+    Directory,
+    File,
+};
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
+use Fixtures\Innmind\Filesystem\File as FFile;
 
+/**
+ * @implements Property<Directory>
+ */
 final class MapFiles implements Property
 {
     private File $file;
@@ -16,9 +26,9 @@ final class MapFiles implements Property
         $this->file = $file;
     }
 
-    public function name(): string
+    public static function any(): Set
     {
-        return 'Map files';
+        return FFile::any()->map(static fn($file) => new self($file));
     }
 
     public function applicableTo(object $directory): bool
@@ -26,15 +36,21 @@ final class MapFiles implements Property
         return !$directory->files()->empty();
     }
 
-    public function ensureHeldBy(object $directory): object
+    public function ensureHeldBy(Assert $assert, object $directory): object
     {
         $directory2 = $directory->map(fn($file) => $this->file->rename($file->name()));
 
-        Assert::assertNotSame($directory, $directory2);
-        Assert::assertSame($directory->name()->toString(), $directory2->name()->toString());
-        Assert::assertNotSame($directory->files(), $directory2->files());
-        Assert::assertSame($directory->files()->size(), $directory2->files()->size());
-        Assert::assertSame(
+        $assert
+            ->expected($directory)
+            ->not()
+            ->same($directory2);
+        $assert->same($directory->name()->toString(), $directory2->name()->toString());
+        $assert
+            ->expected($directory->files())
+            ->not()
+            ->same($directory2->files());
+        $assert->same($directory->files()->size(), $directory2->files()->size());
+        $assert->same(
             [$this->file->content()],
             $directory2
                 ->files()
@@ -42,7 +58,7 @@ final class MapFiles implements Property
                 ->distinct()
                 ->toList(),
         );
-        Assert::assertSame($directory->removed(), $directory2->removed());
+        $assert->same($directory->removed(), $directory2->removed());
 
         return $directory2;
     }

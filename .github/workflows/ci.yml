@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest]
-        php-version: ['8.1', '8.2']
+        php-version: ['8.2']
         dependencies: ['lowest', 'highest']
     name: 'PHPUnit'
     steps:
@@ -29,12 +29,63 @@ jobs:
         env:
           BLACKBOX_SET_SIZE: 20
           BLACKBOX_DETAILED_PROPERTIES: 1
+  blackbox:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        php-version: ['8.2']
+        dependency-versions: ['lowest', 'highest']
+    name: 'BlackBox'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, intl
+          coverage: none
+      - name: Composer
+        uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+      - name: BlackBox
+        run: php blackbox.php
+  blackbox_coverage:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        php-version: ['8.2']
+        dependency-versions: ['lowest', 'highest']
+    name: 'BlackBox Coverage'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, intl
+          coverage: xdebug
+      - name: Composer
+        uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+      - name: BlackBox
+        run: php blackbox.php
+        env:
+          ENABLE_COVERAGE: 'true'
+      - uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
   coverage:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest]
-        php-version: ['8.1', '8.2']
+        php-version: ['8.2']
     name: 'Coverage'
     steps:
       - name: Checkout
@@ -58,7 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['8.1', '8.2']
+        php-version: ['8.2']
         dependencies: ['lowest', 'highest']
     name: 'Psalm'
     steps:
@@ -79,7 +130,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['8.1']
+        php-version: ['8.2']
     name: 'CS'
     steps:
       - name: Checkout

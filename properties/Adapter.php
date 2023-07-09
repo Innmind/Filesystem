@@ -7,11 +7,6 @@ use Innmind\BlackBox\{
     Set,
     Property,
 };
-use Fixtures\Innmind\Filesystem\{
-    File,
-    Name,
-    Directory,
-};
 
 final class Adapter
 {
@@ -24,76 +19,26 @@ final class Adapter
     }
 
     /**
-     * @return list<Property>
+     * @return non-empty-list<Set<Property>>
      */
     public static function list(): array
     {
         return [
-            Set\Property::of(
-                Adapter\AddFile::class,
-                File::any(),
-            ),
-            Set\Property::of(
-                Adapter\AddEmptyDirectory::class,
-                Name::any(),
-            ),
-            Set\Property::of(
-                Adapter\AddDirectoryFromAnotherAdapter::class,
-                Name::any(),
-                File::any(),
-            ),
-            Set\Property::of(
-                Adapter\AddDirectoryFromAnotherAdapterWithFileAdded::class,
-                Name::any(),
-                File::any(),
-                File::any(),
-            ),
-            Set\Property::of(
-                Adapter\AddDirectoryFromAnotherAdapterWithFileRemoved::class,
-                Name::any(),
-                File::any(),
-                File::any(),
-            ),
-            Set\Property::of(
-                Adapter\RemoveUnknownFile::class,
-                Name::any(),
-            ),
-            Set\Property::of(
-                Adapter\RemoveFile::class,
-                File::any(),
-            ),
-            Set\Property::of(
-                Adapter\AllRootFilesAreAccessible::class,
-            ),
-            Set\Property::of(
-                Adapter\AccessingUnknownFileReturnsNothing::class,
-                Name::any(),
-            ),
-            Set\Property::of(
-                Adapter\AddDirectory::class,
-                Directory::any(),
-            ),
-            Set\Property::of(
-                Adapter\AddRemoveAddModificationsStillAddTheFile::class,
-                Directory::any(),
-                File::any(),
-            ),
-            Set\Property::of(
-                Adapter\RemoveAddRemoveModificationsDoesntAddTheFile::class,
-                Directory::any(),
-                File::any(),
-            ),
-            Set\Property::of(
-                Adapter\ReAddingFilesHasNoSideEffect::class,
-            ),
-            Set\Property::of(
-                Adapter\AddFileWithSameNameAsDirectoryDeleteTheDirectory::class,
-                File::any(),
-                File::any(),
-            ),
-            Set\Property::of(
-                Adapter\RootDirectoryIsNamedRoot::class,
-            ),
+            Adapter\AddFile::any(),
+            Adapter\AddEmptyDirectory::any(),
+            Adapter\AddDirectoryFromAnotherAdapter::any(),
+            Adapter\AddDirectoryFromAnotherAdapterWithFileAdded::any(),
+            Adapter\AddDirectoryFromAnotherAdapterWithFileRemoved::any(),
+            Adapter\RemoveUnknownFile::any(),
+            Adapter\RemoveFile::any(),
+            Adapter\AllRootFilesAreAccessible::any(),
+            Adapter\AccessingUnknownFileReturnsNothing::any(),
+            Adapter\AddDirectory::any(),
+            Adapter\AddRemoveAddModificationsStillAddTheFile::any(),
+            Adapter\RemoveAddRemoveModificationsDoesntAddTheFile::any(),
+            Adapter\ReAddingFilesHasNoSideEffect::any(),
+            Adapter\AddFileWithSameNameAsDirectoryDeleteTheDirectory::any(),
+            Adapter\RootDirectoryIsNamedRoot::any(),
         ];
     }
 }

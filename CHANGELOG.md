@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Require `innmind/black-box` `5`
+
+### Removed
+
+- Support for PHP `8.1`
+
 ## 6.4.0 - 2023-05-18
 
 ### Added

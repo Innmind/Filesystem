@@ -181,7 +181,7 @@ final class Filesystem implements Adapter
 
             throw new RuntimeException(
                 $e->getMessage(),
-                (int) $e->getCode(),
+                $e->getCode(),
                 $e,
             );
         }

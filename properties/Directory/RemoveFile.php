@@ -3,14 +3,21 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Directory;
 
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\Filesystem\Directory;
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
 
+/**
+ * @implements Property<Directory>
+ */
 final class RemoveFile implements Property
 {
-    public function name(): string
+    public static function any(): Set
     {
-        return 'Remove file';
+        return Set\Elements::of(new self);
     }
 
     public function applicableTo(object $directory): bool
@@ -22,7 +29,7 @@ final class RemoveFile implements Property
         );
     }
 
-    public function ensureHeldBy(object $directory): object
+    public function ensureHeldBy(Assert $assert, object $directory): object
     {
         $file = $directory->reduce(
             null,
@@ -30,13 +37,12 @@ final class RemoveFile implements Property
         );
 
         $newDirectory = $directory->remove($file->name());
-        Assert::assertFalse($newDirectory->contains($file->name()));
-        Assert::assertTrue($directory->contains($file->name()));
-        Assert::assertGreaterThan(
-            $directory->removed()->size(),
-            $newDirectory->removed()->size(),
-        );
-        Assert::assertTrue(
+        $assert->false($newDirectory->contains($file->name()));
+        $assert->true($directory->contains($file->name()));
+        $assert
+            ->number($newDirectory->removed()->size())
+            ->greaterThan($directory->removed()->size());
+        $assert->true(
             $newDirectory->removed()->contains($file->name()),
         );
 

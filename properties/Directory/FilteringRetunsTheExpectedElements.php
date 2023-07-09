@@ -3,10 +3,20 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Directory;
 
-use Innmind\Filesystem\File;
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\Filesystem\{
+    Directory,
+    File,
+};
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
+use Fixtures\Innmind\Filesystem\File as FFile;
 
+/**
+ * @implements Property<Directory>
+ */
 final class FilteringRetunsTheExpectedElements implements Property
 {
     private File $file;
@@ -16,9 +26,9 @@ final class FilteringRetunsTheExpectedElements implements Property
         $this->file = $file;
     }
 
-    public function name(): string
+    public static function any(): Set
     {
-        return 'Filtering returns the expected elements';
+        return FFile::any()->map(static fn($file) => new self($file));
     }
 
     public function applicableTo(object $directory): bool
@@ -26,15 +36,15 @@ final class FilteringRetunsTheExpectedElements implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $directory): object
+    public function ensureHeldBy(Assert $assert, object $directory): object
     {
         $shouldBeEmpty = $directory->filter(fn($file): bool => $file === $this->file);
         $shouldContainsOurFile = $directory
             ->add($this->file)
             ->filter(fn($file): bool => $file->name() === $this->file->name());
 
-        Assert::assertFalse($shouldBeEmpty->contains($this->file->name()));
-        Assert::assertTrue($shouldContainsOurFile->contains($this->file->name()));
+        $assert->false($shouldBeEmpty->contains($this->file->name()));
+        $assert->true($shouldContainsOurFile->contains($this->file->name()));
 
         return $directory;
     }

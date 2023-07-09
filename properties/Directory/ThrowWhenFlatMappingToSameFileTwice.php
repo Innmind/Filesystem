@@ -5,14 +5,21 @@ namespace Properties\Innmind\Filesystem\Directory;
 
 use Innmind\Filesystem\{
     File,
-    Directory\Directory,
+    Directory,
     Name,
     Exception\DuplicatedFile,
 };
 use Innmind\Immutable\Set;
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\BlackBox\{
+    Property,
+    Set as DataSet,
+    Runner\Assert,
+};
+use Fixtures\Innmind\Filesystem\File as FFile;
 
+/**
+ * @implements Property<Directory>
+ */
 final class ThrowWhenFlatMappingToSameFileTwice implements Property
 {
     private File $file1;
@@ -24,9 +31,13 @@ final class ThrowWhenFlatMappingToSameFileTwice implements Property
         $this->file2 = $file2;
     }
 
-    public function name(): string
+    public static function any(): DataSet
     {
-        return 'Throw when flatMapping to same file twice';
+        return DataSet\Composite::immutable(
+            static fn(...$args) => new self(...$args),
+            DataSet\Randomize::of(FFile::any()),
+            DataSet\Randomize::of(FFile::any()),
+        );
     }
 
     public function applicableTo(object $directory): bool
@@ -34,13 +45,13 @@ final class ThrowWhenFlatMappingToSameFileTwice implements Property
         return $directory->files()->size() >= 2;
     }
 
-    public function ensureHeldBy(object $directory): object
+    public function ensureHeldBy(Assert $assert, object $directory): object
     {
         try {
             // calling toList in case it uses a lazy Set of files, so we need to
             // unwrap the list to trigger the safeguard
             $directory
-                ->flatMap(fn() => Directory::of(
+                ->flatMap(fn() => Directory\Directory::of(
                     Name::of('doesntmatter'),
                     Set::of(
                         File\File::of(
@@ -56,9 +67,11 @@ final class ThrowWhenFlatMappingToSameFileTwice implements Property
                 ->files()
                 ->toList();
 
-            Assert::fail('It should throw');
+            $assert->fail('It should throw');
         } catch (\Exception $e) {
-            Assert::assertInstanceOf(DuplicatedFile::class, $e);
+            $assert
+                ->object($e)
+                ->instance(DuplicatedFile::class);
         }
 
         return $directory;

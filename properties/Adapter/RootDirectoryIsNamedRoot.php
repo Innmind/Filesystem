@@ -3,14 +3,21 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Adapter;
 
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\Filesystem\Adapter;
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
 
+/**
+ * @implements Property<Adapter>
+ */
 final class RootDirectoryIsNamedRoot implements Property
 {
-    public function name(): string
+    public static function any(): Set
     {
-        return 'Root directory is named root';
+        return Set\Elements::of(new self);
     }
 
     public function applicableTo(object $adapter): bool
@@ -18,9 +25,9 @@ final class RootDirectoryIsNamedRoot implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $adapter): object
+    public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        Assert::assertSame('root', $adapter->root()->name()->toString());
+        $assert->same('root', $adapter->root()->name()->toString());
 
         return $adapter;
     }

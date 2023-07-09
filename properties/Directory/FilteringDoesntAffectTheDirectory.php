@@ -3,14 +3,21 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Directory;
 
-use Innmind\BlackBox\Property;
-use PHPUnit\Framework\Assert;
+use Innmind\Filesystem\Directory;
+use Innmind\BlackBox\{
+    Property,
+    Set,
+    Runner\Assert,
+};
 
+/**
+ * @implements Property<Directory>
+ */
 final class FilteringDoesntAffectTheDirectory implements Property
 {
-    public function name(): string
+    public static function any(): Set
     {
-        return 'Filtering doesn\'t affect the directory';
+        return Set\Elements::of(new self);
     }
 
     public function applicableTo(object $directory): bool
@@ -18,16 +25,16 @@ final class FilteringDoesntAffectTheDirectory implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $directory): object
+    public function ensureHeldBy(Assert $assert, object $directory): object
     {
         $all = $directory->filter(static fn(): bool => true);
         $none = $directory->filter(static fn(): bool => false);
 
-        $directory->foreach(static fn($file) => Assert::assertFalse($none->contains($file->name())));
-        $directory->foreach(static fn($file) => Assert::assertTrue($all->contains($file->name())));
-        $all->foreach(static fn($file) => Assert::assertTrue($directory->contains($file->name())));
-        Assert::assertSame($directory->removed(), $all->removed());
-        Assert::assertSame($directory->removed(), $none->removed());
+        $directory->foreach(static fn($file) => $assert->false($none->contains($file->name())));
+        $directory->foreach(static fn($file) => $assert->true($all->contains($file->name())));
+        $all->foreach(static fn($file) => $assert->true($directory->contains($file->name())));
+        $assert->same($directory->removed(), $all->removed());
+        $assert->same($directory->removed(), $none->removed());
 
         return $directory;
     }
