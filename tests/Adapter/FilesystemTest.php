@@ -29,7 +29,6 @@ use Innmind\BlackBox\{
     Set as DataSet,
 };
 use Fixtures\Innmind\Filesystem\Name as FName;
-use Properties\Innmind\Filesystem\Adapter as PAdapter;
 
 class FilesystemTest extends TestCase
 {
