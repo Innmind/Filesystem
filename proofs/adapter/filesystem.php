@@ -14,42 +14,33 @@ use Innmind\BlackBox\Set;
 use Symfony\Component\Filesystem\Filesystem as FS;
 
 return static function() {
-    yield proof(
+    yield properties(
         'Filesystem properties',
-        given(Adapter::properties()),
-        function($assert, $properties) {
+        Adapter::properties(),
+        Set\Call::of(function() {
             $path = \sys_get_temp_dir().'/innmind/filesystem/';
             (new FS)->remove($path);
-            $filesystem = Filesystem::mount(Path::of($path))->withCaseSensitivity(match (\PHP_OS) {
-                    'Darwin' => CaseSensitivity::insensitive,
-                    default => CaseSensitivity::sensitive,
-                });;
 
-            $properties->ensureHeldBy($assert, $filesystem);
-
-            (new FS)->remove($path);
-        },
+            return Filesystem::mount(Path::of($path))->withCaseSensitivity(match (\PHP_OS) {
+                'Darwin' => CaseSensitivity::insensitive,
+                default => CaseSensitivity::sensitive,
+            });
+        }),
     );
 
-    foreach (Adapter::list() as $property) {
-        yield proof(
-            'Filesystem property',
-            given($property),
-            function($assert, $property) {
+    foreach (Adapter::alwaysApplicable() as $property) {
+        yield property(
+            $property,
+            Set\Call::of(function() {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
-                $filesystem = Filesystem::mount(Path::of($path))->withCaseSensitivity(match (\PHP_OS) {
+
+                return Filesystem::mount(Path::of($path))->withCaseSensitivity(match (\PHP_OS) {
                     'Darwin' => CaseSensitivity::insensitive,
                     default => CaseSensitivity::sensitive,
-                });;
-
-                if ($property->applicableTo($filesystem)) {
-                    $property->ensureHeldBy($assert, $filesystem);
-                }
-
-                (new FS)->remove($path);
-            },
-        );
+                });
+            }),
+        )->named('Filesystem');
     }
 
     yield test(

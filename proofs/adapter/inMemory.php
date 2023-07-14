@@ -7,43 +7,25 @@ use Properties\Innmind\Filesystem\Adapter;
 use Innmind\BlackBox\Set;
 
 return static function() {
-    yield proof(
+    yield properties(
         'InMemory properties',
-        given(Adapter::properties()),
-        function($assert, $properties) {
-            $properties->ensureHeldBy($assert, InMemory::new());
-        },
+        Adapter::properties(),
+        Set\Call::of(InMemory::new(...)),
     );
-    yield proof(
+    yield properties(
         'InMemory properties emulating filesystem',
-        given(Adapter::properties()),
-        function($assert, $properties) {
-            $properties->ensureHeldBy($assert, InMemory::emulateFilesystem());
-        },
+        Adapter::properties(),
+        Set\Call::of(InMemory::emulateFilesystem(...)),
     );
 
-    foreach (Adapter::list() as $property) {
-        yield proof(
-            'InMemory property',
-            given($property),
-            function($assert, $property) {
-                $filesystem = InMemory::new();
-
-                if ($property->applicableTo($filesystem)) {
-                    $property->ensureHeldBy($assert, $filesystem);
-                }
-            },
-        );
-        yield proof(
-            'InMemory property emulating filesystem',
-            given($property),
-            function($assert, $property) {
-                $filesystem = InMemory::emulateFilesystem();
-
-                if ($property->applicableTo($filesystem)) {
-                    $property->ensureHeldBy($assert, $filesystem);
-                }
-            },
-        );
+    foreach (Adapter::alwaysApplicable() as $property) {
+        yield property(
+            $property,
+            Set\Call::of(InMemory::new(...)),
+        )->named('InMemory');
+        yield property(
+            $property,
+            Set\Call::of(InMemory::emulateFilesystem(...)),
+        )->named('InMemory emulating filesystem');
     }
 };

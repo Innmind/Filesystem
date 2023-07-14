@@ -23,25 +23,55 @@ final class Directory
      */
     public static function list(): array
     {
+        return \array_map(
+            static fn($property) => [$property, 'any'](),
+            self::all(),
+        );
+    }
+
+    /**
+     * @return non-empty-list<class-string<Property>>
+     */
+    public static function all(): array
+    {
         return [
-            Directory\MediaTypeIsAlwaysTheSame::any(),
-            Directory\ContainsMethodAlwaysReturnTrueForFilesInTheDirectory::any(),
-            Directory\AllFilesInTheDirectoryAreAccessible::any(),
-            Directory\AccessingUnknownFileReturnsNothing::any(),
-            Directory\RemovingAnUnknownFileHasNoEffect::any(),
-            Directory\RemoveFile::any(),
-            Directory\RemoveDirectory::any(),
-            Directory\ContentHoldsNothing::any(),
-            Directory\AddFile::any(),
-            Directory\AddDirectory::any(),
-            Directory\FilteringDoesntAffectTheDirectory::any(),
-            Directory\FilteringRetunsTheExpectedElements::any(),
-            Directory\AllFilesAreAccessible::any(),
-            Directory\MapFiles::any(),
-            Directory\ThrowWhenMappingToSameFileTwice::any(),
-            Directory\FlatMapFiles::any(),
-            Directory\ThrowWhenFlatMappingToSameFileTwice::any(),
-            Directory\Rename::any(),
+            Directory\MediaTypeIsAlwaysTheSame::class,
+            Directory\ContainsMethodAlwaysReturnTrueForFilesInTheDirectory::class,
+            Directory\AllFilesInTheDirectoryAreAccessible::class,
+            Directory\AccessingUnknownFileReturnsNothing::class,
+            Directory\RemovingAnUnknownFileHasNoEffect::class,
+            Directory\RemoveFile::class,
+            Directory\RemoveDirectory::class,
+            Directory\ContentHoldsNothing::class,
+            Directory\AddFile::class,
+            Directory\AddDirectory::class,
+            Directory\FilteringDoesntAffectTheDirectory::class,
+            Directory\FilteringRetunsTheExpectedElements::class,
+            Directory\AllFilesAreAccessible::class,
+            Directory\MapFiles::class,
+            Directory\ThrowWhenMappingToSameFileTwice::class,
+            Directory\FlatMapFiles::class,
+            Directory\ThrowWhenFlatMappingToSameFileTwice::class,
+            Directory\Rename::class,
+        ];
+    }
+
+    /**
+     * @return non-empty-list<class-string<Property>>
+     */
+    public static function alwaysApplicable(): array
+    {
+        return [
+            Directory\MediaTypeIsAlwaysTheSame::class,
+            Directory\ContainsMethodAlwaysReturnTrueForFilesInTheDirectory::class,
+            Directory\AllFilesInTheDirectoryAreAccessible::class,
+            Directory\ContentHoldsNothing::class,
+            Directory\AddFile::class,
+            Directory\AddDirectory::class,
+            Directory\FilteringDoesntAffectTheDirectory::class,
+            Directory\FilteringRetunsTheExpectedElements::class,
+            Directory\AllFilesAreAccessible::class,
+            Directory\Rename::class,
         ];
     }
 }
