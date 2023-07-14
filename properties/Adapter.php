@@ -42,6 +42,7 @@ final class Adapter
             Adapter\AddDirectoryFromAnotherAdapterWithFileRemoved::class,
             Adapter\RemoveUnknownFile::class,
             Adapter\RemoveFile::class,
+            Adapter\RemoveFileInDirectory::class,
             Adapter\AllRootFilesAreAccessible::class,
             Adapter\AccessingUnknownFileReturnsNothing::class,
             Adapter\AddDirectory::class,
@@ -61,6 +62,7 @@ final class Adapter
         return [
             Adapter\RemoveUnknownFile::class,
             Adapter\RemoveFile::class,
+            Adapter\RemoveFileInDirectory::class,
             Adapter\AllRootFilesAreAccessible::class,
             Adapter\ReAddingFilesHasNoSideEffect::class,
             Adapter\RootDirectoryIsNamedRoot::class,

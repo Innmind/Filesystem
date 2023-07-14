@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.5.1 - 2023-07-14
+
+### Fixed
+
+- Deleting a file in a directory for the adapter `InMemory::emulateFilesystem()` wasn't applied
+
 ## 6.5.0 - 2023-07-09
 
 ### Changed
