@@ -11,71 +11,47 @@ use Properties\Innmind\Filesystem\Directory as PDirectory;
 use Innmind\BlackBox\Set;
 
 return static function() {
-    yield proof(
+    yield properties(
         'Empty Directory properties',
-        given(
-            PDirectory::properties(),
-            Name::any(),
-        ),
-        function($assert, $properties, $name) {
-            $properties->ensureHeldBy($assert, Directory::of($name));
-        },
+        PDirectory::properties(),
+        Name::any()->map(Directory::of(...)),
     );
-    yield proof(
+    yield properties(
         'Non EmptyDirectory properties',
-        given(
-            PDirectory::properties(),
+        PDirectory::properties(),
+        Set\Composite::immutable(
+            Directory::of(...),
             Name::any(),
             Sequence::of(
                 Set\Randomize::of(File::any()),
                 Set\Integers::between(1, 5), // only to speed up tests
+            )->filter(
+                static fn($files) => $files
+                    ->groupBy(static fn($file) => $file->name()->toString())
+                    ->size() === $files->size(), // do not accept duplicated files
             ),
-        )->filter(
-            static fn($properties, $name, $files) => $files
-                ->groupBy(static fn($file) => $file->name()->toString())
-                ->size() === $files->size(), // do not accept duplicated files
         ),
-        function($assert, $properties, $name, $files) {
-            $properties->ensureHeldBy($assert, Directory::of($name, $files));
-        },
     );
 
-    foreach (PDirectory::list() as $property) {
-        yield proof(
-            'Empty Directory property',
-            given(
-                $property,
-                Name::any(),
-            ),
-            function($assert, $property, $name) {
-                $directory = Directory::of($name);
-
-                if ($property->applicableTo($directory)) {
-                    $property->ensureHeldBy($assert, $directory);
-                }
-            },
-        );
-        yield proof(
-            'Non EmptyDirectory property',
-            given(
-                $property,
+    foreach (PDirectory::alwaysApplicable() as $property) {
+        yield property(
+            $property,
+            Name::any()->map(Directory::of(...)),
+        )->named('Empty Directory');
+        yield property(
+            $property,
+            Set\Composite::immutable(
+                Directory::of(...),
                 Name::any(),
                 Sequence::of(
                     Set\Randomize::of(File::any()),
                     Set\Integers::between(1, 5), // only to speed up tests
+                )->filter(
+                    static fn($files) => $files
+                        ->groupBy(static fn($file) => $file->name()->toString())
+                        ->size() === $files->size(), // do not accept duplicated files
                 ),
-            )->filter(
-                static fn($property, $name, $files) => $files
-                    ->groupBy(static fn($file) => $file->name()->toString())
-                    ->size() === $files->size(), // do not accept duplicated files
             ),
-            function($assert, $property, $name, $files) {
-                $directory = Directory::of($name, $files);
-
-                if ($property->applicableTo($directory)) {
-                    $property->ensureHeldBy($assert, $directory);
-                }
-            },
-        );
+        )->named('Non empty Directory');
     }
 };

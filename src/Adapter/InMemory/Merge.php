@@ -35,6 +35,14 @@ final class Merge
 
     private function merge(Directory $existing, Directory $new): Directory
     {
+        $existing = $new
+            ->removed()
+            ->filter(static fn($name) => !$new->contains($name))
+            ->reduce(
+                $existing,
+                static fn(Directory $existing, $name) => $existing->remove($name),
+            );
+
         return $new->reduce(
             $existing,
             fn(Directory $directory, $file) => $this($directory, $file),
