@@ -6,6 +6,10 @@
 
 - Support for `innmind/immutable` `5`
 
+### Deprecated
+
+- `Innmind\Filesystem\Adapter\HashedName`
+
 ## 6.5.1 - 2023-07-14
 
 ### Fixed

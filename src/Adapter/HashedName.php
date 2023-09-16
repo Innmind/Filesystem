@@ -21,6 +21,8 @@ use Innmind\Immutable\{
  * following the pattern /[ab]/[cd]/{remaining-of-the-hash}
  *
  * You can't add directories via this adapter
+ *
+ * @deprecated
  */
 final class HashedName implements Adapter
 {
