@@ -87,7 +87,7 @@ final class Lines implements Content
         // we compute the size line by line to avoid loading the whole file in memory
         $size = $this->lines->reduce(
             0,
-            static fn(int $size, Line $line): int => $size + $line->str()->toEncoding('ASCII')->length() + 1, // the 1 is for the "end of line" character
+            static fn(int $size, Line $line): int => $size + $line->str()->toEncoding(Str\Encoding::ascii)->length() + 1, // the 1 is for the "end of line" character
         );
         // 1 is removed from the size because the last line won't have the
         // "end of line" character

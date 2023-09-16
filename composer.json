@@ -16,7 +16,7 @@
     },
     "require": {
         "php": "~8.2",
-        "innmind/immutable": "~4.15",
+        "innmind/immutable": "~4.15|~5.0",
         "symfony/filesystem": "~6.0",
         "innmind/stream": "~4.1",
         "innmind/media-type": "~2.1",

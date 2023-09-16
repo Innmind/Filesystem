@@ -175,7 +175,7 @@ final class Filesystem implements Adapter
         try {
             $this->filesystem->touch($path->toString());
         } catch (IOException $e) {
-            if (\PHP_OS === 'Darwin' && Str::of($path->toString(), 'ASCII')->length() > 1014) {
+            if (\PHP_OS === 'Darwin' && Str::of($path->toString(), Str\Encoding::ascii)->length() > 1014) {
                 throw new PathTooLong($path->toString(), 0, $e);
             }
 
@@ -192,7 +192,7 @@ final class Filesystem implements Adapter
             ->reduce(
                 $handle,
                 static fn(Writable $handle, Str $chunk): Writable => $handle
-                    ->write($chunk->toEncoding('ASCII'))
+                    ->write($chunk->toEncoding(Str\Encoding::ascii))
                     ->match(
                         static fn($handle) => $handle,
                         static fn() => throw new FailedToWriteFile,

@@ -22,7 +22,7 @@ final class Name
             throw new DomainException('A file name can\'t be empty');
         }
 
-        if (Str::of($value, 'ASCII')->length() > 255) {
+        if (Str::of($value, Str\Encoding::ascii)->length() > 255) {
             throw new DomainException($value);
         }
 
