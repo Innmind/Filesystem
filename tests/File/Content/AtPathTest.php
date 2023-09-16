@@ -249,7 +249,7 @@ class AtPathTest extends TestCase
         $this
             ->forAll(Set\Sequence::of($this->strings())->between(0, 10))
             ->then(function($lines) {
-                $expectedSize = Str::of(\implode("\n", $lines))->toEncoding('ASCII')->length();
+                $expectedSize = Str::of(\implode("\n", $lines))->toEncoding(Str\Encoding::ascii)->length();
                 \file_put_contents('/tmp/test_content', \implode("\n", $lines));
                 $content = AtPath::of(Path::of('/tmp/test_content'));
 

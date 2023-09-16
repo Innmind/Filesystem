@@ -16,7 +16,7 @@
     },
     "require": {
         "php": "~8.2",
-        "innmind/immutable": "~4.15",
+        "innmind/immutable": "~4.15|~5.0",
         "symfony/filesystem": "~6.0",
         "innmind/stream": "~4.1",
         "innmind/media-type": "~2.1",
@@ -38,7 +38,7 @@
     "require-dev": {
         "phpunit/phpunit": "~10.2",
         "vimeo/psalm": "~5.13",
-        "innmind/black-box": "~5.1",
+        "innmind/black-box": "^5.5.1",
         "innmind/coding-standard": "~2.0",
         "ramsey/uuid": "^4.6"
     },

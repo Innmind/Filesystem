@@ -262,7 +262,7 @@ class ChunksTest extends TestCase
                 Set\Unicode::strings(),
             )->between(0, 10))
             ->then(function($chunks) {
-                $expectedSize = Str::of(\implode('', $chunks), 'ASCII')->length();
+                $expectedSize = Str::of(\implode('', $chunks), Str\Encoding::ascii)->length();
                 $content = Chunks::of(Sequence::of(...$chunks)->map(Str::of(...)));
 
                 $this->assertSame($expectedSize, $content->size()->match(

@@ -259,7 +259,7 @@ class LinesTest extends TestCase
                     static fn($line) => $line->toString(),
                     $lines,
                 );
-                $expectedSize = Str::of(\implode("\n", $raw), 'ASCII')->length();
+                $expectedSize = Str::of(\implode("\n", $raw), Str\Encoding::ascii)->length();
                 $content = Lines::of(Sequence::of(...$lines));
 
                 $this->assertSame($expectedSize, $content->size()->match(

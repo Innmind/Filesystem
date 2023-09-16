@@ -1,5 +1,15 @@
 # Changelog
 
+## 6.6.0 - 2023-09-16
+
+### Added
+
+- Support for `innmind/immutable` `5`
+
+### Deprecated
+
+- `Innmind\Filesystem\Adapter\HashedName`
+
 ## 6.5.1 - 2023-07-14
 
 ### Fixed
