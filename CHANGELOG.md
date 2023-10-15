@@ -10,6 +10,7 @@
 ### Removed
 
 - `Innmind\Filesystem\Adapter\HashedName`
+- `Innmind\Filesystem\Adapter::all()`
 
 ## 6.6.0 - 2023-09-16
 

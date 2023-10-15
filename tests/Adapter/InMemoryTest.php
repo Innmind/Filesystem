@@ -54,7 +54,7 @@ class InMemoryTest extends TestCase
         $this->assertNull(InMemory::new()->remove(Name::of('foo')));
     }
 
-    public function testAll()
+    public function testRoot()
     {
         $adapter = InMemory::new();
         $adapter->add($foo = File::of(
@@ -66,8 +66,7 @@ class InMemoryTest extends TestCase
             Lines::ofContent('bar'),
         ));
 
-        $all = $adapter->all();
-        $this->assertInstanceOf(Set::class, $all);
+        $all = $adapter->root()->files();
         $this->assertSame(
             [$foo, $bar],
             $all->toList(),

@@ -108,11 +108,6 @@ final class Filesystem implements Adapter
         $this->filesystem->remove($this->path->toString().'/'.$file->toString());
     }
 
-    public function all(): Set
-    {
-        return Set::of(...$this->root()->files()->toList());
-    }
-
     public function root(): Directory
     {
         return Directory\Directory::lazy(

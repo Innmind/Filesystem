@@ -43,22 +43,6 @@ final class AllRootFilesAreAccessible implements Property
                         ),
                 );
             });
-        $assert->same($adapter->root()->files()->size(), $adapter->all()->size());
-        $adapter
-            ->all()
-            ->foreach(static function($file) use ($assert, $adapter) {
-                $assert->same(
-                    $file->content()->toString(),
-                    $adapter
-                        ->root()
-                        ->get($file->name())
-                        ->map(static fn($file) => $file->content())
-                        ->match(
-                            static fn($content) => $content->toString(),
-                            static fn() => null,
-                        ),
-                );
-            });
 
         return $adapter;
     }

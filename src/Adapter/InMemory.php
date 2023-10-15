@@ -58,11 +58,6 @@ final class InMemory implements Adapter
         $this->root = $this->root->remove($file);
     }
 
-    public function all(): Set
-    {
-        return $this->root()->files()->toSet();
-    }
-
     public function root(): Directory
     {
         return $this->root;

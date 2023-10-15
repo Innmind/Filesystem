@@ -21,12 +21,5 @@ interface Adapter
     public function get(Name $file): Maybe;
     public function contains(Name $file): bool;
     public function remove(Name $file): void;
-
-    /**
-     * @deprecated Use self::root() instead
-     *
-     * @return Set<File>
-     */
-    public function all(): Set;
     public function root(): Directory;
 }

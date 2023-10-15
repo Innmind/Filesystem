@@ -210,7 +210,7 @@ class FilesystemTest extends TestCase
         $a->remove(Name::of('some_content.html'));
     }
 
-    public function testAll()
+    public function testRoot()
     {
         $adapter = Filesystem::mount(Path::of('/tmp/test/'));
         $adapter->add(File::of(
@@ -221,8 +221,7 @@ class FilesystemTest extends TestCase
         \mkdir('/tmp/test/baz');
         \file_put_contents('/tmp/test/baz/foobar', 'baz');
 
-        $all = $adapter->all();
-        $this->assertInstanceOf(Set::class, $all);
+        $all = $adapter->root()->files();
         $this->assertCount(3, $all);
         $all = Map::of(
             ...$all
@@ -429,7 +428,7 @@ class FilesystemTest extends TestCase
         $this->expectException(LinksAreNotSupported::class);
         $this->expectExceptionMessage($path.'bar');
 
-        $filesystem->all()->toList();
+        $filesystem->root()->files()->toList();
     }
 
     public function testDotFilesAreListed()
@@ -444,7 +443,7 @@ class FilesystemTest extends TestCase
 
                 $filesystem = Filesystem::mount(Path::of($path));
 
-                $all = $filesystem->all()->toList();
+                $all = $filesystem->root()->files()->toList();
                 $this->assertCount(1, $all);
                 $this->assertSame($name, $all[0]->name()->toString());
             });

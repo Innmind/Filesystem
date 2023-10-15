@@ -69,11 +69,6 @@ final class Logger implements Adapter
         $this->filesystem->remove($file);
     }
 
-    public function all(): Set
-    {
-        return Set::of(...$this->root()->files()->toList());
-    }
-
     public function root(): Directory
     {
         return $this->filesystem->root();

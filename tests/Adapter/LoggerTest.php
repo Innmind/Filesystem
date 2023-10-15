@@ -117,7 +117,7 @@ class LoggerTest extends TestCase
         $this->assertNull($adapter->remove($name));
     }
 
-    public function testAll()
+    public function testRoot()
     {
         $adapter = Logger::psr(
             $inner = $this->createMock(Adapter::class),
@@ -135,6 +135,6 @@ class LoggerTest extends TestCase
                 $all,
             ));
 
-        $this->assertSame([$file], $adapter->all()->toList());
+        $this->assertSame([$file], $adapter->root()->files()->toList());
     }
 }
