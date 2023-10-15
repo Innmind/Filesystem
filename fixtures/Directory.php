@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Fixtures\Innmind\Filesystem;
 
-use Innmind\Filesystem\{
-    Directory\Directory as Model,
-    File as FileInterface,
-};
+use Innmind\Filesystem\Directory\Directory as Model;
 use Properties\Innmind\Filesystem\Directory as Properties;
 use Innmind\BlackBox\{
     Set as DataSet,

@@ -54,11 +54,11 @@ final class ThrowWhenFlatMappingToSameFileTwice implements Property
                 ->flatMap(fn() => Directory\Directory::of(
                     Name::of('doesntmatter'),
                     Set::of(
-                        File\File::of(
+                        File::of(
                             $this->file1->name(),
                             $this->file1->content(),
                         ),
-                        File\File::of(
+                        File::of(
                             $this->file2->name(),
                             $this->file2->content(),
                         ),

@@ -218,7 +218,7 @@ final class Filesystem implements Adapter
             throw new LinksAreNotSupported($path->toString());
         }
 
-        $file = File\File::of(
+        $file = File::of(
             $file,
             File\Content::atPath($path, $this->capabilities->readable()),
             MediaType::maybe(@\mime_content_type($path->toString()) ?: '')->match(

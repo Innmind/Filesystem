@@ -43,7 +43,7 @@ final class ThrowWhenMappingToSameFileTwice implements Property
             // calling toList in case it uses a lazy Set of files, so we need to
             // unwrap the list to trigger the safeguard
             $directory
-                ->map(fn() => File\File::of(
+                ->map(fn() => File::of(
                     $this->file->name(),
                     $this->file->content(),
                 ))

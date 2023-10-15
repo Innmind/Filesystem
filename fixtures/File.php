@@ -3,9 +3,9 @@ declare(strict_types = 1);
 
 namespace Fixtures\Innmind\Filesystem;
 
-use Innmind\Filesystem\File\{
+use Innmind\Filesystem\{
     File as Model,
-    Content,
+    File\Content,
 };
 use Innmind\BlackBox\Set;
 use Fixtures\Innmind\MediaType\MediaType;
