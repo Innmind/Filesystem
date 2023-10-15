@@ -10,7 +10,7 @@ use Innmind\BlackBox\{
     Runner\Assert,
     Runner\Stats,
 };
-use Fixtures\Innmind\Immutable\Set;
+use Fixtures\Innmind\Immutable\Sequence;
 
 final class Directory
 {
@@ -35,14 +35,14 @@ final class Directory
     private static function atDepth(int $depth, int $maxDepth): DataSet
     {
         if ($depth === $maxDepth) {
-            $files = Set::of(
+            $files = Sequence::of(
                 DataSet\Randomize::of(
                     File::any(),
                 ),
                 DataSet\Integers::between(0, 5),
             );
         } else {
-            $files = Set::of(
+            $files = Sequence::of(
                 DataSet\Either::any(
                     DataSet\Randomize::of(
                         File::any(),

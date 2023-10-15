@@ -9,10 +9,10 @@ use Innmind\Filesystem\{
     File,
     Name,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\{
     Property,
-    Set as DataSet,
+    Set,
     Runner\Assert,
 };
 use Fixtures\Innmind\Filesystem\{
@@ -36,9 +36,9 @@ final class AddDirectoryFromAnotherAdapterWithFileRemoved implements Property
         $this->removed = $removed;
     }
 
-    public static function any(): DataSet
+    public static function any(): Set
     {
-        return DataSet\Composite::immutable(
+        return Set\Composite::immutable(
             static fn(...$args) => new self(...$args),
             FName::any(),
             FFile::any(),
@@ -57,7 +57,7 @@ final class AddDirectoryFromAnotherAdapterWithFileRemoved implements Property
         // construct time (so there is no modifications())
         $directory = Directory::of(
             $this->name,
-            Set::of(
+            Sequence::of(
                 $this->removed,
                 $this->file,
             ),

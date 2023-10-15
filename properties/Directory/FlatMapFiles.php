@@ -8,10 +8,10 @@ use Innmind\Filesystem\{
     Directory,
     Name,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\{
     Property,
-    Set as DataSet,
+    Set,
     Runner\Assert,
 };
 use Fixtures\Innmind\Filesystem\File as FFile;
@@ -31,12 +31,12 @@ final class FlatMapFiles implements Property
         $this->file2 = $file2;
     }
 
-    public static function any(): DataSet
+    public static function any(): Set
     {
-        return DataSet\Composite::immutable(
+        return Set\Composite::immutable(
             static fn(...$args) => new self(...$args),
-            DataSet\Randomize::of(FFile::any()),
-            DataSet\Randomize::of(FFile::any()),
+            Set\Randomize::of(FFile::any()),
+            Set\Randomize::of(FFile::any()),
         );
     }
 
@@ -50,7 +50,7 @@ final class FlatMapFiles implements Property
         // we use uuids to avoid duplicates
         $directory2 = $directory->flatMap(fn($file) => Directory::of(
             Name::of('doesntmatter'),
-            Set::of(
+            Sequence::of(
                 $this->file1->rename(Name::of(Uuid::uuid4()->toString())),
                 $this->file2->rename(Name::of(Uuid::uuid4()->toString())),
             ),

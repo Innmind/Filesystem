@@ -36,16 +36,12 @@ final class Directory
     /**
      * @psalm-pure
      *
-     * @param Set<File|self>|Sequence<File|self>|null $files
+     * @param Sequence<File|self>|null $files
      *
      * @throws DuplicatedFile
      */
-    public static function of(Name $name, Set|Sequence $files = null): self
+    public static function of(Name $name, Sequence $files = null): self
     {
-        if ($files instanceof Set) {
-            $files = Sequence::of(...$files->toList());
-        }
-
         return new self(
             $name,
             self::safeguard($files ?? Sequence::of()),

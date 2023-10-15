@@ -11,7 +11,7 @@ use Innmind\Filesystem\{
     Directory,
 };
 use Innmind\Immutable\{
-    Set,
+    Sequence,
     Maybe,
 };
 use Psr\Log\LoggerInterface;
@@ -117,7 +117,7 @@ class LoggerTest extends TestCase
             $inner = $this->createMock(Adapter::class),
             $this->createMock(LoggerInterface::class),
         );
-        $all = Set::of($file = File::named(
+        $all = Sequence::of($file = File::named(
             'watev',
             File\Content::none(),
         ));

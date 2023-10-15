@@ -18,14 +18,14 @@ use Innmind\Filesystem\{
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Set,
+    Sequence,
     Map,
 };
 use Symfony\Component\Filesystem\Filesystem as FS;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
-    Set as DataSet,
+    Set,
 };
 use Fixtures\Innmind\Filesystem\Name as FName;
 
@@ -289,13 +289,13 @@ class FilesystemTest extends TestCase
 
         $filesystem->add(Directory::of(
             Name::of(\str_repeat('a', 255)),
-            Set::of(
+            Sequence::of(
                 Directory::of(
                     Name::of(\str_repeat('a', 255)),
-                    Set::of(
+                    Sequence::of(
                         Directory::of(
                             Name::of(\str_repeat('a', 255)),
-                            Set::of(
+                            Sequence::of(
                                 File::of(
                                     Name::of(\str_repeat('a', 255)),
                                     Content::none(),
@@ -312,11 +312,11 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                DataSet\Either::any(
-                    DataSet\Integers::between(1, 46),
-                    DataSet\Integers::between(48, 127),
+                Set\Either::any(
+                    Set\Integers::between(1, 46),
+                    Set\Integers::between(48, 127),
                 ),
-                DataSet\Strings::any(),
+                Set\Strings::any(),
             )
             ->then(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
@@ -326,7 +326,7 @@ class FilesystemTest extends TestCase
 
                 $this->assertNull($filesystem->add(Directory::of(
                     Name::of(\chr($ord).'a'),
-                    Set::of(
+                    Sequence::of(
                         File::of(
                             Name::of('a'),
                             Content::ofString($content),
@@ -342,11 +342,11 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                DataSet\Either::any(
-                    DataSet\Integers::between(1, 46),
-                    DataSet\Integers::between(48, 127),
+                Set\Either::any(
+                    Set\Integers::between(1, 46),
+                    Set\Integers::between(48, 127),
                 ),
-                DataSet\Strings::any(),
+                Set\Strings::any(),
             )
             ->then(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
@@ -356,7 +356,7 @@ class FilesystemTest extends TestCase
 
                 $this->assertNull($filesystem->add(Directory::of(
                     Name::of('a'.\chr($ord).'a'),
-                    Set::of(
+                    Sequence::of(
                         File::of(
                             Name::of('a'),
                             Content::ofString($content),
@@ -372,13 +372,13 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                DataSet\Either::any(
-                    DataSet\Integers::between(1, 8),
-                    DataSet\Integers::between(14, 31),
-                    DataSet\Integers::between(33, 45),
-                    DataSet\Integers::between(48, 127),
+                Set\Either::any(
+                    Set\Integers::between(1, 8),
+                    Set\Integers::between(14, 31),
+                    Set\Integers::between(33, 45),
+                    Set\Integers::between(48, 127),
                 ),
-                DataSet\Strings::any(),
+                Set\Strings::any(),
             )
             ->then(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
@@ -388,7 +388,7 @@ class FilesystemTest extends TestCase
 
                 $this->assertNull($filesystem->add(Directory::of(
                     Name::of(\chr($ord)),
-                    Set::of(
+                    Sequence::of(
                         File::of(
                             Name::of('a'),
                             Content::ofString($content),
