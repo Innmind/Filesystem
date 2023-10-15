@@ -18,10 +18,7 @@ final class File implements FileInterface
     private Content $content;
     private MediaType $mediaType;
 
-    /**
-     * @deprecated Use self::of() instead
-     */
-    public function __construct(
+    private function __construct(
         Name $name,
         Content $content,
         MediaType $mediaType = null,
