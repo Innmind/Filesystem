@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Innmind\Filesystem\File\Content::chunks()`
+
 ### Changed
 
 - `Innmind\Filesystem\Name` constructor is now private, use `::of()` named constructor instead
@@ -11,6 +15,8 @@
 
 - `Innmind\Filesystem\Adapter\HashedName`
 - `Innmind\Filesystem\Adapter::all()`
+- `Innmind\Filesystem\Chunk`
+- `Innmind\Filesystem\File\Content\Chunkable`
 
 ## 6.6.0 - 2023-09-16
 

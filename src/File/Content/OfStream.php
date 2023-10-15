@@ -21,7 +21,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class OfStream implements Content, Chunkable
+final class OfStream implements Content
 {
     /** @var callable(): Readable */
     private $load;

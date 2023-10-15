@@ -8,7 +8,6 @@ use Innmind\Filesystem\{
     File,
     Name,
     Directory,
-    Chunk,
     CaseSensitivity,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
@@ -43,7 +42,6 @@ final class Filesystem implements Adapter
     private Path $path;
     private CaseSensitivity $case;
     private FS $filesystem;
-    private Chunk $chunk;
     /** @var \WeakMap<File, Path> */
     private \WeakMap $loaded;
 
@@ -60,7 +58,6 @@ final class Filesystem implements Adapter
         $this->path = $path;
         $this->case = $case;
         $this->filesystem = new FS;
-        $this->chunk = new Chunk;
         /** @var \WeakMap<File, Path> */
         $this->loaded = new \WeakMap;
 
@@ -165,7 +162,7 @@ final class Filesystem implements Adapter
             $this->filesystem->remove($path->toString());
         }
 
-        $chunks = ($this->chunk)($file->content());
+        $chunks = $file->content()->chunks();
 
         try {
             $this->filesystem->touch($path->toString());

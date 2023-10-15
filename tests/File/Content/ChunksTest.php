@@ -5,7 +5,6 @@ namespace Tests\Innmind\Filesystem\File\Content;
 
 use Innmind\Filesystem\File\{
     Content\Chunks,
-    Content\Chunkable,
     Content\Lines,
     Content\Line,
     Content,
@@ -28,7 +27,6 @@ class ChunksTest extends TestCase
     public function testInterface()
     {
         $this->assertInstanceOf(Content::class, Chunks::of(Sequence::of()));
-        $this->assertInstanceOf(Chunkable::class, Chunks::of(Sequence::of()));
     }
 
     public function testForeach()

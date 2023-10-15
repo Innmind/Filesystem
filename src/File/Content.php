@@ -6,6 +6,7 @@ namespace Innmind\Filesystem\File;
 use Innmind\Filesystem\File\Content\Line;
 use Innmind\Stream\Stream\Size;
 use Innmind\Immutable\{
+    Str,
     Sequence,
     SideEffect,
     Maybe,
@@ -40,6 +41,11 @@ interface Content
      * @return Sequence<Line>
      */
     public function lines(): Sequence;
+
+    /**
+     * @return Sequence<Str>
+     */
+    public function chunks(): Sequence;
 
     /**
      * @template T

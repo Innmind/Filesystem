@@ -15,7 +15,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class Chunks implements Content, Chunkable
+final class Chunks implements Content
 {
     /** @var Sequence<Str> */
     private Sequence $chunks;

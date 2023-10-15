@@ -77,6 +77,21 @@ final class Lines implements Content
         return $this->lines;
     }
 
+    public function chunks(): Sequence
+    {
+        $firstLineRead = false;
+
+        return $this->lines->map(static function($line) use (&$firstLineRead) {
+            if (!$firstLineRead) {
+                $firstLineRead = true;
+
+                return $line->str();
+            }
+
+            return $line->str()->prepend("\n");
+        });
+    }
+
     public function reduce($carry, callable $reducer)
     {
         return $this->lines->reduce($carry, $reducer);

@@ -18,7 +18,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class AtPath implements Content, Chunkable
+final class AtPath implements Content
 {
     private OfStream $content;
 
