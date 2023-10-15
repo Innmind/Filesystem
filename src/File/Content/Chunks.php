@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\Filesystem\File\Content;
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
@@ -13,9 +12,10 @@ use Innmind\Immutable\{
 };
 
 /**
+ * @internal
  * @psalm-immutable
  */
-final class Chunks implements Content
+final class Chunks implements Implementation
 {
     /** @var Sequence<Str> */
     private Sequence $chunks;
@@ -43,17 +43,17 @@ final class Chunks implements Content
         return $this->content()->foreach($function);
     }
 
-    public function map(callable $map): Content
+    public function map(callable $map): Implementation
     {
         return $this->content()->map($map);
     }
 
-    public function flatMap(callable $map): Content
+    public function flatMap(callable $map): Implementation
     {
         return $this->content()->flatMap($map);
     }
 
-    public function filter(callable $filter): Content
+    public function filter(callable $filter): Implementation
     {
         return $this->content()->filter($filter);
     }
@@ -92,7 +92,7 @@ final class Chunks implements Content
             ->toString();
     }
 
-    private function content(): Content
+    private function content(): Implementation
     {
         return Lines::of($this->lines());
     }

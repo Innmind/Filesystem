@@ -5,7 +5,7 @@ namespace Fixtures\Innmind\Filesystem;
 
 use Innmind\Filesystem\File\{
     File as Model,
-    Content\Lines,
+    Content,
 };
 use Innmind\BlackBox\Set;
 use Fixtures\Innmind\MediaType\MediaType;
@@ -17,7 +17,7 @@ final class File
         return Set\Composite::immutable(
             static fn($name, $content, $mediaType) => Model::of(
                 $name,
-                Lines::ofContent($content),
+                Content::ofString($content),
                 $mediaType,
             ),
             Name::any(),

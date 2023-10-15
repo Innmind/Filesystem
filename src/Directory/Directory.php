@@ -97,7 +97,7 @@ final class Directory implements DirectoryInterface
 
     public function content(): Content
     {
-        return Content\None::of();
+        return Content::none();
     }
 
     public function mediaType(): MediaType

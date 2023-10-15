@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\Filesystem\{
-    File\Content,
-    Stream\LazyStream,
-};
+use Innmind\Filesystem\Stream\LazyStream;
 use Innmind\Stream\Capabilities\Readable;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
@@ -16,9 +13,10 @@ use Innmind\Immutable\{
 };
 
 /**
+ * @internal
  * @psalm-immutable
  */
-final class AtPath implements Content
+final class AtPath implements Implementation
 {
     private OfStream $content;
 
@@ -40,17 +38,17 @@ final class AtPath implements Content
         return $this->content->foreach($function);
     }
 
-    public function map(callable $map): Content
+    public function map(callable $map): Implementation
     {
         return $this->content->map($map);
     }
 
-    public function flatMap(callable $map): Content
+    public function flatMap(callable $map): Implementation
     {
         return $this->content->flatMap($map);
     }
 
-    public function filter(callable $filter): Content
+    public function filter(callable $filter): Implementation
     {
         return $this->content->filter($filter);
     }

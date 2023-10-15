@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\Filesystem\File\Content;
 use Innmind\Stream\Stream\Size;
 use Innmind\Immutable\{
     Sequence,
@@ -13,9 +12,10 @@ use Innmind\Immutable\{
 };
 
 /**
+ * @internal
  * @psalm-immutable
  */
-final class Lines implements Content
+final class Lines implements Implementation
 {
     /** @var Sequence<Line> */
     private Sequence $lines;
@@ -55,19 +55,19 @@ final class Lines implements Content
         return $this->lines->foreach($function);
     }
 
-    public function map(callable $map): Content
+    public function map(callable $map): Implementation
     {
         return new self($this->lines->map($map));
     }
 
-    public function flatMap(callable $map): Content
+    public function flatMap(callable $map): Implementation
     {
         return new self($this->lines->flatMap(
             static fn($line) => $map($line)->lines(),
         ));
     }
 
-    public function filter(callable $filter): Content
+    public function filter(callable $filter): Implementation
     {
         return new self($this->lines->filter($filter));
     }
