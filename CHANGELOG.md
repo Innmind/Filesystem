@@ -7,6 +7,10 @@
 - `Innmind\Filesystem\Name` constructor is now private, use `::of()` named constructor instead
 - `Innmind\Filesystem\File\File` constructor is now private, use `::of()` named constructor instead
 
+### Removed
+
+- `Innmind\Filesystem\Adapter\HashedName`
+
 ## 6.6.0 - 2023-09-16
 
 ### Added
