@@ -16,7 +16,7 @@ use Innmind\Immutable\Predicate\Instance;
  */
 final class Merge
 {
-    public function __invoke(Directory $parent, File $file): Directory
+    public function __invoke(Directory $parent, File|Directory $file): Directory
     {
         if (!$file instanceof Directory) {
             return $parent->add($file);

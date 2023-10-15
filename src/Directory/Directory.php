@@ -7,10 +7,8 @@ use Innmind\Filesystem\{
     Directory as DirectoryInterface,
     Name,
     File,
-    File\Content,
     Exception\DuplicatedFile,
 };
-use Innmind\MediaType\MediaType;
 use Innmind\Immutable\{
     Set,
     Sequence,
@@ -24,13 +22,13 @@ use Innmind\Immutable\{
 final class Directory implements DirectoryInterface
 {
     private Name $name;
-    /** @var Sequence<File> */
+    /** @var Sequence<File|DirectoryInterface> */
     private Sequence $files;
     /** @var Set<Name> */
     private Set $removed;
 
     /**
-     * @param Sequence<File> $files
+     * @param Sequence<File|DirectoryInterface> $files
      * @param Set<Name> $removed
      */
     private function __construct(Name $name, Sequence $files, Set $removed)
@@ -43,7 +41,7 @@ final class Directory implements DirectoryInterface
     /**
      * @psalm-pure
      *
-     * @param Set<File>|Sequence<File>|null $files
+     * @param Set<File|DirectoryInterface>|Sequence<File|DirectoryInterface>|null $files
      *
      * @throws DuplicatedFile
      */
@@ -78,7 +76,7 @@ final class Directory implements DirectoryInterface
      * @internal
      * @psalm-pure
      *
-     * @param Sequence<File> $files
+     * @param Sequence<File|DirectoryInterface> $files
      */
     public static function lazy(Name $name, Sequence $files): self
     {
@@ -95,19 +93,6 @@ final class Directory implements DirectoryInterface
         return $this->name;
     }
 
-    public function content(): Content
-    {
-        return Content::none();
-    }
-
-    public function mediaType(): MediaType
-    {
-        return new MediaType(
-            'text',
-            'directory',
-        );
-    }
-
     public function rename(Name $name): self
     {
         return new self(
@@ -117,18 +102,13 @@ final class Directory implements DirectoryInterface
         );
     }
 
-    public function withContent(Content $content, MediaType $mediaType = null): self
-    {
-        return $this;
-    }
-
-    public function add(File $file): DirectoryInterface
+    public function add(File|DirectoryInterface $file): DirectoryInterface
     {
         return new self(
             $this->name,
             $this
                 ->files
-                ->filter(static fn(File $known): bool => !$known->name()->equals($file->name()))
+                ->filter(static fn(File|DirectoryInterface $known): bool => !$known->name()->equals($file->name()))
                 ->add($file),
             $this->removed,
         );
@@ -151,7 +131,7 @@ final class Directory implements DirectoryInterface
     {
         return new self(
             $this->name,
-            $this->files->filter(static fn(File $file) => !$file->name()->equals($name)),
+            $this->files->filter(static fn(File|DirectoryInterface $file) => !$file->name()->equals($name)),
             ($this->removed)($name),
         );
     }
@@ -186,8 +166,8 @@ final class Directory implements DirectoryInterface
 
     public function flatMap(callable $map): self
     {
-        /** @var callable(File): Sequence<File> */
-        $map = static fn(File $file): Sequence => $map($file)->files();
+        /** @var callable(File|DirectoryInterface): Sequence<File|DirectoryInterface> */
+        $map = static fn(File|DirectoryInterface $file): Sequence => $map($file)->files();
 
         return new self(
             $this->name,
@@ -214,11 +194,11 @@ final class Directory implements DirectoryInterface
     /**
      * @psalm-pure
      *
-     * @param Sequence<File> $files
+     * @param Sequence<File|DirectoryInterface> $files
      *
      * @throws DuplicatedFile
      *
-     * @return Sequence<File>
+     * @return Sequence<File|DirectoryInterface>
      */
     private static function safeguard(Sequence $files): Sequence
     {

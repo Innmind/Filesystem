@@ -35,14 +35,12 @@ final class Directory
     public static function all(): array
     {
         return [
-            Directory\MediaTypeIsAlwaysTheSame::class,
             Directory\ContainsMethodAlwaysReturnTrueForFilesInTheDirectory::class,
             Directory\AllFilesInTheDirectoryAreAccessible::class,
             Directory\AccessingUnknownFileReturnsNothing::class,
             Directory\RemovingAnUnknownFileHasNoEffect::class,
             Directory\RemoveFile::class,
             Directory\RemoveDirectory::class,
-            Directory\ContentHoldsNothing::class,
             Directory\AddFile::class,
             Directory\AddDirectory::class,
             Directory\FilteringDoesntAffectTheDirectory::class,
@@ -62,10 +60,8 @@ final class Directory
     public static function alwaysApplicable(): array
     {
         return [
-            Directory\MediaTypeIsAlwaysTheSame::class,
             Directory\ContainsMethodAlwaysReturnTrueForFilesInTheDirectory::class,
             Directory\AllFilesInTheDirectoryAreAccessible::class,
-            Directory\ContentHoldsNothing::class,
             Directory\AddFile::class,
             Directory\AddDirectory::class,
             Directory\FilteringDoesntAffectTheDirectory::class,

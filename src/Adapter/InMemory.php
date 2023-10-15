@@ -38,7 +38,7 @@ final class InMemory implements Adapter
         return new self(new Merge);
     }
 
-    public function add(File $file): void
+    public function add(File|Directory $file): void
     {
         $this->root = ($this->behaviour)($this->root, $file);
     }

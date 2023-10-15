@@ -14,36 +14,38 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-interface Directory extends File
+interface Directory
 {
-    public function add(File $file): self;
+    public function name(): Name;
+    public function rename(Name $name): self;
+    public function add(File|self $file): self;
 
     /**
-     * @return Maybe<File>
+     * @return Maybe<File|self>
      */
     public function get(Name $name): Maybe;
     public function contains(Name $name): bool;
     public function remove(Name $name): self;
 
     /**
-     * @param callable(File): void $function
+     * @param callable(File|self): void $function
      */
     public function foreach(callable $function): SideEffect;
 
     /**
-     * @param callable(File): bool $predicate
+     * @param callable(File|self): bool $predicate
      */
     public function filter(callable $predicate): self;
 
     /**
-     * @param callable(File): File $map
+     * @param callable(File|self): File $map
      *
      * @throws DuplicatedFile
      */
     public function map(callable $map): self;
 
     /**
-     * @param callable(File): self $map
+     * @param callable(File|self): self $map
      *
      * @throws DuplicatedFile
      */
@@ -53,7 +55,7 @@ interface Directory extends File
      * @template R
      *
      * @param R $carry
-     * @param callable(R, File): R $reducer
+     * @param callable(R, File|self): R $reducer
      *
      * @return R
      */
@@ -68,7 +70,7 @@ interface Directory extends File
     public function removed(): Set;
 
     /**
-     * @return Sequence<File>
+     * @return Sequence<File|self>
      */
     public function files(): Sequence;
 }

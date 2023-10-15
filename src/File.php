@@ -15,9 +15,5 @@ interface File
     public function content(): Content;
     public function mediaType(): MediaType;
     public function rename(Name $name): self;
-
-    /**
-     * This method called on a directory DOES NOTHING
-     */
     public function withContent(Content $content, MediaType $mediaType = null): self;
 }

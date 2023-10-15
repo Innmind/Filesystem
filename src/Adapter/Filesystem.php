@@ -42,7 +42,7 @@ final class Filesystem implements Adapter
     private Path $path;
     private CaseSensitivity $case;
     private FS $filesystem;
-    /** @var \WeakMap<File, Path> */
+    /** @var \WeakMap<File|Directory, Path> */
     private \WeakMap $loaded;
 
     private function __construct(
@@ -58,7 +58,7 @@ final class Filesystem implements Adapter
         $this->path = $path;
         $this->case = $case;
         $this->filesystem = new FS;
-        /** @var \WeakMap<File, Path> */
+        /** @var \WeakMap<File|Directory, Path> */
         $this->loaded = new \WeakMap;
 
         if (!$this->filesystem->exists($this->path->toString())) {
@@ -80,7 +80,7 @@ final class Filesystem implements Adapter
         return new self($this->capabilities, $this->path, $case);
     }
 
-    public function add(File $file): void
+    public function add(File|Directory $file): void
     {
         $this->createFileAt($this->path, $file);
     }
@@ -88,7 +88,7 @@ final class Filesystem implements Adapter
     public function get(Name $file): Maybe
     {
         if (!$this->contains($file)) {
-            /** @var Maybe<File> */
+            /** @var Maybe<File|Directory> */
             return Maybe::nothing();
         }
 
@@ -116,7 +116,7 @@ final class Filesystem implements Adapter
     /**
      * Create the wished file at the given absolute path
      */
-    private function createFileAt(Path $path, File $file): void
+    private function createFileAt(Path $path, File|Directory $file): void
     {
         $name = $file->name()->toString();
 
@@ -200,7 +200,7 @@ final class Filesystem implements Adapter
     /**
      * Open the file in the given folder
      */
-    private function open(Path $folder, Name $file): File
+    private function open(Path $folder, Name $file): File|Directory
     {
         $path = $folder->resolve(Path::of($file->toString()));
 
@@ -232,7 +232,7 @@ final class Filesystem implements Adapter
     }
 
     /**
-     * @return Sequence<File>
+     * @return Sequence<File|Directory>
      */
     private function list(Path $path): Sequence
     {

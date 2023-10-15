@@ -11,6 +11,7 @@
 - `Innmind\Filesystem\Name` constructor is now private, use `::of()` named constructor instead
 - `Innmind\Filesystem\File\File` constructor is now private, use `::of()` named constructor instead
 - `Innmind\Filesystem\File\Content` is now a final class and its different implementations are declared internal, use the `Content` named constructors instead
+- `Innmind\Filesystem\Directory` no longer extends `File`, all previous function typed against `File` are now typed `File|Directory`
 
 ### Removed
 

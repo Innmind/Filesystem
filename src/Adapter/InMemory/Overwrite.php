@@ -13,7 +13,7 @@ use Innmind\Filesystem\{
  */
 final class Overwrite
 {
-    public function __invoke(Directory $parent, File $file): Directory
+    public function __invoke(Directory $parent, File|Directory $file): Directory
     {
         return $parent->add($file);
     }
