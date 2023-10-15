@@ -11,12 +11,13 @@ use Innmind\Immutable\Str;
  */
 final class Name
 {
+    /** @var non-empty-string */
     private string $value;
 
     /**
-     * @deprecated Use Name::of() instead
+     * @param non-empty-string $value
      */
-    public function __construct(string $value)
+    private function __construct(string $value)
     {
         if (Str::of($value)->empty()) {
             throw new DomainException('A file name can\'t be empty');
@@ -69,6 +70,9 @@ final class Name
         return Str::of($this->value);
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function toString(): string
     {
         return $this->value;

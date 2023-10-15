@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- `Innmind\Filesystem\Name` constructor is now private, use `::of()` named constructor instead
+
 ## 6.6.0 - 2023-09-16
 
 ### Added
