@@ -32,7 +32,7 @@ final class AllFilesAreAccessible implements Property
                 [],
                 static fn($all, $file) => \array_merge($all, [$file]),
             ),
-            $directory->files()->toList(),
+            $directory->all()->toList(),
         );
 
         return $directory;

@@ -136,7 +136,7 @@ final class Filesystem implements Adapter
         if ($file instanceof Directory) {
             $this->filesystem->mkdir($path->toString());
             $persisted = $file
-                ->files()
+                ->all()
                 ->map(function($file) use ($path) {
                     $this->createFileAt($path, $file);
 

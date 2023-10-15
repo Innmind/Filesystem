@@ -34,20 +34,20 @@ final class ThrowWhenMappingToSameFileTwice implements Property
 
     public function applicableTo(object $directory): bool
     {
-        return $directory->files()->size() >= 2;
+        return $directory->all()->size() >= 2;
     }
 
     public function ensureHeldBy(Assert $assert, object $directory): object
     {
         try {
-            // calling toList in case it uses a lazy Set of files, so we need to
-            // unwrap the list to trigger the safeguard
+            // calling toList in case it uses a lazy Sequence of files, so we
+            // need to unwrap the list to trigger the safeguard
             $directory
                 ->map(fn() => File::of(
                     $this->file->name(),
                     $this->file->content(),
                 ))
-                ->files()
+                ->all()
                 ->toList();
 
             $assert->fail('It should throw');

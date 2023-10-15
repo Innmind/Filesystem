@@ -14,6 +14,7 @@
 - `Innmind\Filesystem\Directory` no longer extends `File`, all previous function typed against `File` are now typed `File|Directory`
 - `Innmind\Filesystem\File` is now a final class instead of an interface
 - `Innmind\Filesystem\Directory` is now a final class instead of an interface
+- `Innmind\Filesystem\Directory::files()` has been renamed to `::all()`
 
 ### Removed
 

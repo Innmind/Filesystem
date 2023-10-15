@@ -129,6 +129,6 @@ class LoggerTest extends TestCase
                 $all,
             ));
 
-        $this->assertSame([$file], $adapter->root()->files()->toList());
+        $this->assertSame([$file], $adapter->root()->all()->toList());
     }
 }

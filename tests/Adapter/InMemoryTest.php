@@ -65,7 +65,7 @@ class InMemoryTest extends TestCase
             Content::ofString('bar'),
         ));
 
-        $all = $adapter->root()->files();
+        $all = $adapter->root()->all();
         $this->assertSame(
             [$foo, $bar],
             $all->toList(),

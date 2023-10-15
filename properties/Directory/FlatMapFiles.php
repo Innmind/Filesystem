@@ -42,7 +42,7 @@ final class FlatMapFiles implements Property
 
     public function applicableTo(object $directory): bool
     {
-        return !$directory->files()->empty();
+        return !$directory->all()->empty();
     }
 
     public function ensureHeldBy(Assert $assert, object $directory): object
@@ -62,14 +62,14 @@ final class FlatMapFiles implements Property
             ->same($directory2);
         $assert->same($directory->name()->toString(), $directory2->name()->toString());
         $assert
-            ->expected($directory->files())
+            ->expected($directory->all())
             ->not()
-            ->same($directory2->files());
-        $assert->same($directory->files()->size() * 2, $directory2->files()->size());
+            ->same($directory2->all());
+        $assert->same($directory->all()->size() * 2, $directory2->all()->size());
         $assert->same(
             [$this->file1->content(), $this->file2->content()],
             $directory2
-                ->files()
+                ->all()
                 ->map(static fn($file) => $file->content())
                 ->distinct()
                 ->toList(),

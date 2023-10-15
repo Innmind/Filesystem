@@ -32,7 +32,6 @@ final class AllRootFilesAreAccessible implements Property
     {
         $adapter
             ->root()
-            ->files()
             ->foreach(static function($file) use ($assert, $adapter) {
                 $assert->true($adapter->contains($file->name()));
 

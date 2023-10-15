@@ -42,7 +42,7 @@ final class ThrowWhenFlatMappingToSameFileTwice implements Property
 
     public function applicableTo(object $directory): bool
     {
-        return $directory->files()->size() >= 2;
+        return $directory->all()->size() >= 2;
     }
 
     public function ensureHeldBy(Assert $assert, object $directory): object
@@ -64,7 +64,7 @@ final class ThrowWhenFlatMappingToSameFileTwice implements Property
                         ),
                     ),
                 ))
-                ->files()
+                ->all()
                 ->toList();
 
             $assert->fail('It should throw');

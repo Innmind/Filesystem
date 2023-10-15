@@ -177,7 +177,7 @@ final class Directory
     public function flatMap(callable $map): self
     {
         /** @var callable(File|self): Sequence<File|self> */
-        $map = static fn(File|self $file): Sequence => $map($file)->files();
+        $map = static fn(File|self $file): Sequence => $map($file)->all();
 
         return new self(
             $this->name,
@@ -213,7 +213,7 @@ final class Directory
     /**
      * @return Sequence<File|self>
      */
-    public function files(): Sequence
+    public function all(): Sequence
     {
         return $this->files;
     }
