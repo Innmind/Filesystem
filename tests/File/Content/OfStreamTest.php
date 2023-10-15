@@ -8,7 +8,7 @@ use Innmind\Filesystem\File\{
     Content\Lines,
     Content\None,
     Content\Line,
-    Content,
+    Content\Implementation,
 };
 use Innmind\Url\Path;
 use Innmind\Stream\Readable\Stream;
@@ -29,7 +29,7 @@ class OfStreamTest extends TestCase
 
     public function testInterface()
     {
-        $this->assertInstanceOf(Content::class, OfStream::of(Stream::open(Path::of('/dev/null'))));
+        $this->assertInstanceOf(Implementation::class, OfStream::of(Stream::open(Path::of('/dev/null'))));
     }
 
     public function testForeach()

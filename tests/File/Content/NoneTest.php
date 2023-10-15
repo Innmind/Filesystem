@@ -4,9 +4,8 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Filesystem\File\Content;
 
 use Innmind\Filesystem\File\{
-    Content\None,
-    Content\Line,
     Content,
+    Content\Line,
 };
 use Innmind\Immutable\{
     Str,
@@ -23,14 +22,9 @@ class NoneTest extends TestCase
 {
     use BlackBox;
 
-    public function testInterface()
-    {
-        $this->assertInstanceOf(Content::class, None::of());
-    }
-
     public function testForeachCalledOnce()
     {
-        $content = None::of();
+        $content = Content::none();
         $called = 0;
 
         $this->assertInstanceOf(
@@ -49,7 +43,7 @@ class NoneTest extends TestCase
             ->forAll($this->strings())
             ->then(function($replacement) {
                 $replacement = Line::of(Str::of($replacement));
-                $content = None::of();
+                $content = Content::none();
                 $mapped = $content->map(static fn() => $replacement);
                 $called = 0;
 
@@ -67,7 +61,7 @@ class NoneTest extends TestCase
 
     public function testFilter()
     {
-        $content = None::of();
+        $content = Content::none();
         $shouldBeEmpty = $content->filter(static fn() => false);
         $shouldBeTheSame = $content->filter(static fn() => true);
 
@@ -90,7 +84,7 @@ class NoneTest extends TestCase
             ->forAll($this->strings())
             ->then(function($replacement) {
                 $replacement = Line::of(Str::of($replacement));
-                $content = None::of();
+                $content = Content::none();
 
                 $called = 0;
                 $sequence = $content->lines()->map(function($line) use ($replacement, &$called) {
@@ -110,7 +104,7 @@ class NoneTest extends TestCase
 
     public function testReduce()
     {
-        $content = None::of();
+        $content = Content::none();
 
         $this->assertSame(
             1,
@@ -123,7 +117,7 @@ class NoneTest extends TestCase
 
     public function testToString()
     {
-        $this->assertSame('', None::of()->toString());
+        $this->assertSame('', Content::none()->toString());
     }
 
     private function strings(): Set

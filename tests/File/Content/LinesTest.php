@@ -6,7 +6,7 @@ namespace Tests\Innmind\Filesystem\File\Content;
 use Innmind\Filesystem\File\{
     Content\Lines,
     Content\Line,
-    Content,
+    Content\Implementation,
 };
 use Innmind\Immutable\{
     Str,
@@ -25,7 +25,7 @@ class LinesTest extends TestCase
 
     public function testInterface()
     {
-        $this->assertInstanceOf(Content::class, Lines::of(Sequence::of()));
+        $this->assertInstanceOf(Implementation::class, Lines::of(Sequence::of()));
     }
 
     public function testForeach()

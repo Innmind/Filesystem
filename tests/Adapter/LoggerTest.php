@@ -36,10 +36,7 @@ class LoggerTest extends TestCase
             $inner = $this->createMock(Adapter::class),
             $logger = $this->createMock(LoggerInterface::class),
         );
-        $file = $this->createMock(File::class);
-        $file
-            ->method('name')
-            ->willReturn(Name::of('foo'));
+        $file = $file = File::of(Name::of('foo'), File\Content::none());
         $logger
             ->expects($this->once())
             ->method('debug');
@@ -58,10 +55,7 @@ class LoggerTest extends TestCase
             $logger = $this->createMock(LoggerInterface::class),
         );
         $name = Name::of('foo');
-        $file = $this->createMock(File::class);
-        $file
-            ->method('name')
-            ->willReturn($name);
+        $file = File::of($name, File\Content::none());
         $logger
             ->expects($this->once())
             ->method('debug');
@@ -123,9 +117,9 @@ class LoggerTest extends TestCase
             $inner = $this->createMock(Adapter::class),
             $this->createMock(LoggerInterface::class),
         );
-        $all = Set::of($file = File\File::named(
+        $all = Set::of($file = File::named(
             'watev',
-            $this->createMock(File\Content::class),
+            File\Content::none(),
         ));
         $inner
             ->expects($this->once())

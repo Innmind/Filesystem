@@ -7,9 +7,8 @@ use Innmind\Filesystem\{
     Adapter\Filesystem,
     Adapter,
     CaseSensitivity,
-    File\File,
-    File\Content\None,
-    File\Content\Lines,
+    File,
+    File\Content,
     Name,
     Directory as DirectoryInterface,
     Directory\Directory,
@@ -83,10 +82,10 @@ class FilesystemTest extends TestCase
         $adapter = Filesystem::mount(Path::of('/tmp/'));
 
         $directory = Directory::of(Name::of('foo'))
-            ->add(File::of(Name::of('foo.md'), Lines::ofContent('# Foo')))
+            ->add(File::of(Name::of('foo.md'), Content::ofString('# Foo')))
             ->add(
                 Directory::of(Name::of('bar'))
-                    ->add(File::of(Name::of('bar.md'), Lines::ofContent('# Bar'))),
+                    ->add(File::of(Name::of('bar.md'), Content::ofString('# Bar'))),
             );
         $adapter->add($directory);
         $this->assertSame(
@@ -153,7 +152,7 @@ class FilesystemTest extends TestCase
         $a = Filesystem::mount(Path::of('/tmp/'));
 
         $d = Directory::of(Name::of('foo'));
-        $d = $d->add(File::of(Name::of('bar'), Lines::ofContent('some content')));
+        $d = $d->add(File::of(Name::of('bar'), Content::ofString('some content')));
         $a->add($d);
         $d = $d->remove(Name::of('bar'));
         $a->add($d);
@@ -173,7 +172,7 @@ class FilesystemTest extends TestCase
         $a = Filesystem::mount(Path::of('/tmp/'));
 
         $d = Directory::of(Name::of('foo'));
-        $d = $d->add(File::of(Name::of('bar'), Lines::ofContent('some content')));
+        $d = $d->add(File::of(Name::of('bar'), Content::ofString('some content')));
         $a->add($d);
         $d = $d->remove(Name::of('bar'));
         $a->add($d);
@@ -215,7 +214,7 @@ class FilesystemTest extends TestCase
         $adapter = Filesystem::mount(Path::of('/tmp/test/'));
         $adapter->add(File::of(
             Name::of('foo'),
-            Lines::ofContent('foo'),
+            Content::ofString('foo'),
         ));
         \file_put_contents('/tmp/test/bar', 'bar');
         \mkdir('/tmp/test/baz');
@@ -268,7 +267,7 @@ class FilesystemTest extends TestCase
         $adapter = Filesystem::mount(Path::of('/tmp/'));
         $file = File::of(
             Name::of('foo'),
-            Lines::ofContent('foo'),
+            Content::ofString('foo'),
         );
 
         $this->assertNull($adapter->add($file));
@@ -299,7 +298,7 @@ class FilesystemTest extends TestCase
                             Set::of(
                                 File::of(
                                     Name::of(\str_repeat('a', 255)),
-                                    None::of(),
+                                    Content::none(),
                                 ),
                             ),
                         ),
@@ -330,7 +329,7 @@ class FilesystemTest extends TestCase
                     Set::of(
                         File::of(
                             Name::of('a'),
-                            Lines::ofContent($content),
+                            Content::ofString($content),
                         ),
                     ),
                 )));
@@ -360,7 +359,7 @@ class FilesystemTest extends TestCase
                     Set::of(
                         File::of(
                             Name::of('a'),
-                            Lines::ofContent($content),
+                            Content::ofString($content),
                         ),
                     ),
                 )));
@@ -392,7 +391,7 @@ class FilesystemTest extends TestCase
                     Set::of(
                         File::of(
                             Name::of('a'),
-                            Lines::ofContent($content),
+                            Content::ofString($content),
                         ),
                     ),
                 )));

@@ -7,7 +7,7 @@ use Innmind\Filesystem\File\{
     Content\Chunks,
     Content\Lines,
     Content\Line,
-    Content,
+    Content\Implementation,
 };
 use Innmind\Immutable\{
     Str,
@@ -26,7 +26,7 @@ class ChunksTest extends TestCase
 
     public function testInterface()
     {
-        $this->assertInstanceOf(Content::class, Chunks::of(Sequence::of()));
+        $this->assertInstanceOf(Implementation::class, Chunks::of(Sequence::of()));
     }
 
     public function testForeach()

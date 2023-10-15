@@ -7,9 +7,8 @@ use Innmind\Filesystem\{
     Adapter\InMemory,
     Adapter,
     Directory\Directory,
-    File\File,
-    File\Content\Lines,
-    File\Content\None,
+    File,
+    File\Content,
     Name,
 };
 use Innmind\Immutable\{
@@ -59,11 +58,11 @@ class InMemoryTest extends TestCase
         $adapter = InMemory::new();
         $adapter->add($foo = File::of(
             Name::of('foo'),
-            Lines::ofContent('foo'),
+            Content::ofString('foo'),
         ));
         $adapter->add($bar = File::of(
             Name::of('bar'),
-            Lines::ofContent('bar'),
+            Content::ofString('bar'),
         ));
 
         $all = $adapter->root()->files();
@@ -80,7 +79,7 @@ class InMemoryTest extends TestCase
             Name::of('foo'),
             Sequence::of(
                 Directory::named('bar'),
-                File::named('baz', None::of()),
+                File::named('baz', Content::none()),
             ),
         ));
         $adapter->add(Directory::of(
@@ -88,11 +87,11 @@ class InMemoryTest extends TestCase
             Sequence::of(
                 Directory::of(
                     Name::of('bar'),
-                    Sequence::of(File::named('baz', None::of())),
+                    Sequence::of(File::named('baz', Content::none())),
                 ),
                 Directory::of(
                     Name::of('foo'),
-                    Sequence::of(File::named('foo', None::of())),
+                    Sequence::of(File::named('foo', Content::none())),
                 ),
             ),
         ));

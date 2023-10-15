@@ -8,7 +8,7 @@ use Innmind\Filesystem\File\{
     Content\Lines,
     Content\None,
     Content\Line,
-    Content,
+    Content\Implementation,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
@@ -28,7 +28,7 @@ class AtPathTest extends TestCase
 
     public function testInterface()
     {
-        $this->assertInstanceOf(Content::class, AtPath::of(Path::of('/dev/null')));
+        $this->assertInstanceOf(Implementation::class, AtPath::of(Path::of('/dev/null')));
     }
 
     public function testForeach()
