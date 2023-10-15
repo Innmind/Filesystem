@@ -48,7 +48,7 @@ final class FlatMapFiles implements Property
     public function ensureHeldBy(Assert $assert, object $directory): object
     {
         // we use uuids to avoid duplicates
-        $directory2 = $directory->flatMap(fn($file) => Directory\Directory::of(
+        $directory2 = $directory->flatMap(fn($file) => Directory::of(
             Name::of('doesntmatter'),
             Set::of(
                 $this->file1->rename(Name::of(Uuid::uuid4()->toString())),

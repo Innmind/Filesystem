@@ -11,7 +11,7 @@ use Innmind\Filesystem\{
     File\Content,
     Name,
     Directory as DirectoryInterface,
-    Directory\Directory,
+    Directory,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\LinksAreNotSupported,

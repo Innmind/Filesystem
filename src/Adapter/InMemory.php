@@ -24,7 +24,7 @@ final class InMemory implements Adapter
 
     private function __construct(Overwrite|Merge $behaviour)
     {
-        $this->root = Directory\Directory::named('root');
+        $this->root = Directory::named('root');
         $this->behaviour = $behaviour;
     }
 

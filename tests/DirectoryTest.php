@@ -1,11 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Tests\Directory;
+namespace Innmind\Filesystem\Tests;
 
 use Innmind\Filesystem\{
-    Directory\Directory,
-    Directory as DirectoryInterface,
+    Directory,
     File,
     Name,
     File\Content,
@@ -28,7 +27,6 @@ class DirectoryTest extends TestCase
     {
         $d = Directory::of(Name::of('foo'));
 
-        $this->assertInstanceOf(DirectoryInterface::class, $d);
         $this->assertSame('foo', $d->name()->toString());
     }
 
@@ -48,7 +46,7 @@ class DirectoryTest extends TestCase
             $file = File::of(Name::of('foo'), Content::ofString('bar')),
         );
 
-        $this->assertInstanceOf(DirectoryInterface::class, $d2);
+        $this->assertInstanceOf(Directory::class, $d2);
         $this->assertNotSame($d, $d2);
         $this->assertSame($d->name(), $d2->name());
         $this->assertSame(0, $d->removed()->count());
@@ -103,7 +101,7 @@ class DirectoryTest extends TestCase
 
         $d2 = $d->remove(Name::of('bar'));
 
-        $this->assertInstanceOf(DirectoryInterface::class, $d2);
+        $this->assertInstanceOf(Directory::class, $d2);
         $this->assertNotSame($d, $d2);
         $this->assertSame($d->name(), $d2->name());
         $this->assertSame(0, $d->removed()->count());
@@ -178,7 +176,7 @@ class DirectoryTest extends TestCase
             static fn($file) => \strpos($file->name()->toString(), 'foo') === 0,
         );
 
-        $this->assertInstanceOf(DirectoryInterface::class, $filtered);
+        $this->assertInstanceOf(Directory::class, $filtered);
         $files = $filtered->reduce(
             Set::objects(),
             static fn($files, $file) => ($files)($file),

@@ -8,7 +8,7 @@ use Innmind\Filesystem\{
     Adapter,
     File,
     Name,
-    Directory\Directory,
+    Directory,
 };
 use Innmind\Immutable\{
     Set,

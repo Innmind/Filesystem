@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 use Innmind\Filesystem\{
     Adapter\Filesystem,
-    Directory\Directory,
+    Directory,
     File,
     File\Content,
     CaseSensitivity,

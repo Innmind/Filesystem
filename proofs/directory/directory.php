@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use Innmind\Filesystem\Directory\Directory;
+use Innmind\Filesystem\Directory;
 use Fixtures\Innmind\Filesystem\{
     Name,
     File,

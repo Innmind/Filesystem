@@ -107,7 +107,7 @@ final class Filesystem implements Adapter
 
     public function root(): Directory
     {
-        return Directory\Directory::lazy(
+        return Directory::lazy(
             Name::of('root'),
             $this->list($this->path),
         );
@@ -208,7 +208,7 @@ final class Filesystem implements Adapter
             $directoryPath = $folder->resolve(Path::of($file->toString().'/'));
             $files = $this->list($directoryPath);
 
-            $directory = Directory\Directory::lazy($file, $files);
+            $directory = Directory::lazy($file, $files);
             $this->loaded[$directory] = $directoryPath;
 
             return $directory;

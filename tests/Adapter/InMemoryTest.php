@@ -6,7 +6,7 @@ namespace Tests\Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     Adapter\InMemory,
     Adapter,
-    Directory\Directory,
+    Directory,
     File,
     File\Content,
     Name,

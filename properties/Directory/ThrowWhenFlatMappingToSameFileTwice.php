@@ -51,7 +51,7 @@ final class ThrowWhenFlatMappingToSameFileTwice implements Property
             // calling toList in case it uses a lazy Set of files, so we need to
             // unwrap the list to trigger the safeguard
             $directory
-                ->flatMap(fn() => Directory\Directory::of(
+                ->flatMap(fn() => Directory::of(
                     Name::of('doesntmatter'),
                     Set::of(
                         File::of(
