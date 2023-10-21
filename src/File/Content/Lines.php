@@ -62,14 +62,22 @@ final class Lines implements Implementation
 
     public function flatMap(callable $map): Implementation
     {
-        return new self($this->lines->flatMap(
-            static fn($line) => $map($line)->lines(),
-        ));
+        return new self(
+            $this
+                ->lines
+                ->flatMap(static fn($line) => $map($line)->lines())
+                ->pad(1, Line::of(Str::of(''))),
+        );
     }
 
     public function filter(callable $filter): Implementation
     {
-        return new self($this->lines->filter($filter));
+        return new self(
+            $this
+                ->lines
+                ->filter($filter)
+                ->pad(1, Line::of(Str::of(''))),
+        );
     }
 
     public function lines(): Sequence

@@ -105,7 +105,7 @@ class LinesTest extends TestCase
                 $empty->foreach(static function() use (&$called) {
                     ++$called;
                 });
-                $this->assertSame(0, $called);
+                $this->assertSame(1, $called);
 
                 $called = 0;
                 $extra->foreach(static function() use (&$called) {
@@ -135,7 +135,7 @@ class LinesTest extends TestCase
                 $shouldBeEmpty->foreach(static function() use (&$called) {
                     ++$called;
                 });
-                $this->assertSame(0, $called);
+                $this->assertSame(1, $called);
 
                 $called = 0;
                 $shouldBeTheSame->foreach(static function() use (&$called) {

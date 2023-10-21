@@ -16,6 +16,10 @@
 - `Innmind\Filesystem\Directory` is now a final class instead of an interface
 - `Innmind\Filesystem\Directory::files()` has been renamed to `::all()`
 
+### Fixed
+
+- An inconsistency in `File\Content` that must contain at least one line but it wasn't applied after a `Content::filter()`
+
 ### Removed
 
 - `Innmind\Filesystem\Adapter\HashedName`
