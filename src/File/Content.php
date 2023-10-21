@@ -93,24 +93,6 @@ final class Content
     }
 
     /**
-     * @psalm-pure
-     */
-    public static function ofStream(Stream $stream): self
-    {
-        return new self(Content\OfStream::lazy(static fn() => $stream));
-    }
-
-    /**
-     * @psalm-pure
-     *
-     * @param callable(): Stream $load
-     */
-    public static function lazy(callable $load): self
-    {
-        return new self(Content\OfStream::lazy($load));
-    }
-
-    /**
      * @param callable(Line): void $function
      */
     public function foreach(callable $function): SideEffect
