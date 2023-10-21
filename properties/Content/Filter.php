@@ -54,8 +54,8 @@ final class Filter implements Property
             $all->lines()->size(),
         );
         $assert->same(
-            $systemUnderTest->chunks()->size(),
-            $all->chunks()->size(),
+            $systemUnderTest->toString(),
+            $all->toString(),
         );
 
         return $all;

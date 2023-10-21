@@ -25,7 +25,7 @@ final class Lines implements Implementation
      */
     private function __construct(Sequence $lines)
     {
-        $this->lines = $lines;
+        $this->lines = $lines->pad(1, Line::of(Str::of('')));
     }
 
     /**
@@ -62,22 +62,14 @@ final class Lines implements Implementation
 
     public function flatMap(callable $map): Implementation
     {
-        return new self(
-            $this
-                ->lines
-                ->flatMap(static fn($line) => $map($line)->lines())
-                ->pad(1, Line::of(Str::of(''))),
-        );
+        return new self($this->lines->flatMap(
+            static fn($line) => $map($line)->lines(),
+        ));
     }
 
     public function filter(callable $filter): Implementation
     {
-        return new self(
-            $this
-                ->lines
-                ->filter($filter)
-                ->pad(1, Line::of(Str::of(''))),
-        );
+        return new self($this->lines->filter($filter));
     }
 
     public function lines(): Sequence

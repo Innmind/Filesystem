@@ -139,7 +139,8 @@ class AtPathTest extends TestCase
                 $empty->foreach(static function() use (&$called) {
                     ++$called;
                 });
-                $this->assertSame(1, $called);
+                // not empty because Lines::of() make sure there is at least 1 line
+                $this->assertSame(\count($lines), $called);
 
                 $called = 0;
                 $extra->foreach(static function() use (&$called) {
@@ -170,7 +171,7 @@ class AtPathTest extends TestCase
                 $shouldBeEmpty->foreach(static function() use (&$called) {
                     ++$called;
                 });
-                $this->assertSame(0, $called);
+                $this->assertSame(1, $called);
 
                 $called = 0;
                 $shouldBeTheSame->foreach(static function() use (&$called) {

@@ -16,6 +16,11 @@ use Innmind\Filesystem\{
     Exception\LinksAreNotSupported,
     Exception\FailedToWriteFile,
 };
+use Innmind\TimeContinuum\ElapsedPeriod;
+use Innmind\IO\{
+    IO,
+    Readable,
+};
 use Innmind\Stream\{
     Capabilities,
     Streams,
@@ -39,6 +44,7 @@ final class Filesystem implements Adapter
 {
     private const INVALID_FILES = ['.', '..'];
     private Capabilities $capabilities;
+    private Readable $io;
     private Path $path;
     private CaseSensitivity $case;
     private FS $filesystem;
@@ -47,6 +53,7 @@ final class Filesystem implements Adapter
 
     private function __construct(
         Capabilities $capabilities,
+        Readable $io,
         Path $path,
         CaseSensitivity $case,
     ) {
@@ -55,6 +62,7 @@ final class Filesystem implements Adapter
         }
 
         $this->capabilities = $capabilities;
+        $this->io = $io;
         $this->path = $path;
         $this->case = $case;
         $this->filesystem = new FS;
@@ -66,10 +74,20 @@ final class Filesystem implements Adapter
         }
     }
 
-    public static function mount(Path $path, Capabilities $capabilities = null): self
-    {
+    public static function mount(
+        Path $path,
+        Capabilities $capabilities = null,
+        IO $io = null,
+    ): self {
+        $capabilities ??= Streams::fromAmbientAuthority();
+        $io ??= IO::of(static fn(?ElapsedPeriod $period) => match ($period) {
+            null => $capabilities->watch()->waitForever(),
+            default => $capabilities->watch()->timeoutAfter($period),
+        });
+
         return new self(
-            $capabilities ?? Streams::fromAmbientAuthority(),
+            $capabilities,
+            $io->readable(),
             $path,
             CaseSensitivity::sensitive,
         );
@@ -77,7 +95,7 @@ final class Filesystem implements Adapter
 
     public function withCaseSensitivity(CaseSensitivity $case): self
     {
-        return new self($this->capabilities, $this->path, $case);
+        return new self($this->capabilities, $this->io, $this->path, $case);
     }
 
     public function add(File|Directory $file): void
@@ -220,7 +238,11 @@ final class Filesystem implements Adapter
 
         $file = File::of(
             $file,
-            File\Content::atPath($path, $this->capabilities->readable()),
+            File\Content::atPath(
+                $this->capabilities->readable(),
+                $this->io,
+                $path,
+            ),
             MediaType::maybe(@\mime_content_type($path->toString()) ?: '')->match(
                 static fn($mediaType) => $mediaType,
                 static fn() => MediaType::null(),

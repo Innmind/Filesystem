@@ -105,7 +105,8 @@ class LinesTest extends TestCase
                 $empty->foreach(static function() use (&$called) {
                     ++$called;
                 });
-                $this->assertSame(1, $called);
+                // not empty because Lines::of() make sure there is at least 1 line
+                $this->assertSame(\count($lines), $called);
 
                 $called = 0;
                 $extra->foreach(static function() use (&$called) {

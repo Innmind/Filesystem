@@ -7,9 +7,10 @@ use Innmind\Filesystem\File\Content\{
     Implementation,
     Line,
 };
+use Innmind\IO;
 use Innmind\Stream\{
     Stream\Size,
-    Readable,
+    Readable as Stream,
     Capabilities,
 };
 use Innmind\Url\Path;
@@ -35,9 +36,12 @@ final class Content
     /**
      * @psalm-pure
      */
-    public static function atPath(Path $path, Capabilities\Readable $capabilities = null): self
-    {
-        return new self(Content\AtPath::of($path, $capabilities));
+    public static function atPath(
+        Capabilities\Readable $capabilities,
+        IO\Readable $io,
+        Path $path,
+    ): self {
+        return new self(Content\IO::of($capabilities, $io, $path));
     }
 
     /**
@@ -83,7 +87,7 @@ final class Content
     /**
      * @psalm-pure
      */
-    public static function ofStream(Readable $stream): self
+    public static function ofStream(Stream $stream): self
     {
         return new self(Content\OfStream::lazy(static fn() => $stream));
     }
@@ -91,7 +95,7 @@ final class Content
     /**
      * @psalm-pure
      *
-     * @param callable(): Readable $load
+     * @param callable(): Stream $load
      */
     public static function lazy(callable $load): self
     {
