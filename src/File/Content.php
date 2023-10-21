@@ -46,6 +46,8 @@ final class Content
 
     /**
      * @psalm-pure
+     *
+     * This method is to be used with sockets that can't be read twice
      */
     public static function oneShot(IO\Readable\Stream $io): self
     {
