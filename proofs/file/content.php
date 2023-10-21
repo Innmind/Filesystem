@@ -1,12 +1,19 @@
 <?php
 declare(strict_types = 1);
 
-use Innmind\Filesystem\File\Content as Model;
+use Innmind\Filesystem\File\{
+    Content as Model,
+    Content\Line,
+};
 use Properties\Innmind\Filesystem\Content;
 use Innmind\BlackBox\Set;
 use Innmind\IO\IO;
 use Innmind\Stream\Streams;
 use Innmind\Url\Path;
+use Innmind\Immutable\{
+    Str,
+    Sequence,
+};
 
 return static function() {
     $capabilities = Streams::fromAmbientAuthority();
@@ -30,6 +37,24 @@ return static function() {
         [
             'Content::none()',
             Set\Elements::of(Model::none()),
+        ],
+        [
+            'Content::ofLines()',
+            Set\Sequence::of(
+                Set\Strings::madeOf(
+                    Set\Unicode::any()->filter(static fn($char) => $char !== "\n"),
+                )
+                    ->map(Str::of(...))
+                    ->map(Line::of(...)),
+            )
+                ->map(static fn($lines) => Model::ofLines(Sequence::of(...$lines))),
+        ],
+        [
+            'Content::ofChunks()',
+            Set\Sequence::of(
+                Set\Strings::madeOf(Set\Unicode::any())->map(Str::of(...)),
+            )
+                ->map(static fn($chunks) => Model::ofChunks(Sequence::of(...$chunks))),
         ],
     ];
 
