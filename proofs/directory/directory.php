@@ -17,7 +17,7 @@ return static function() {
         Name::any()->map(Directory::of(...)),
     );
     yield properties(
-        'Non EmptyDirectory properties',
+        'Non empty Directory properties',
         PDirectory::properties(),
         Set\Composite::immutable(
             Directory::of(...),
