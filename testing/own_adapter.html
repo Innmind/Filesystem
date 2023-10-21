@@ -95,59 +95,26 @@
                 </ul>
     </aside>
     <main><h1 id="your-own-adapter"><a href="#your-own-adapter" class="anchor">#</a>Your own adapter</h1>
-<p>This library allows you to extend its behaviour by creating new implementations of the exposed interfaces (<code>File</code>, <code>Directory</code> and <code>Adapter</code>). The interfaces are strict enough to guide you through the expected behaviour but the type system can't express all of them, leaving the door open to inconsistencies between implementations. That's why the library expose a set of properties (as declared by <a href="https://packagist.org/packages/innmind/black-box"><code>innmind/black-box</code></a>) to help you make sure your implementations fulfill the expected behaviours.</p>
-<p>You can test properties on your adapter as follow (with PHPUnit):</p>
+<p>This library allows you to extend its behaviour by creating new implementations of the exposed interface <code>Adapter</code>. The interface is strict enough to guide you through the expected behaviour but the type system can't express all of them, leaving the door open to inconsistencies between implementations. That's why the library expose a set of properties (as declared by <a href="https://packagist.org/packages/innmind/black-box"><code>innmind/black-box</code></a>) to help you make sure your implementations fulfill the expected behaviours.</p>
+<p>You can test properties on your adapter as follow:</p>
 <pre><code class="language-php">use Properties\Innmind\Filesystem\Adapter;
-use Innmind\BlackBox\PHPUnit\BlackBox;
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\Set;
 
-class MyAdapterTest extends TestCase
-{
-    use BlackBox;
+return static function() {
+    yield properties(
+        'YourAdapter',
+        Adapter::properties(),
+        Set\Call::of(fn() => /* instanciate YourAdapter here */),
+    );
 
-    /**
-     * This test will make sure each property is held by your adapter
-     *
-     * @dataProvider properties
-     */
-    public function testHoldProperty($property)
-    {
-        $this
-            ->forAll($property)
-            ->then(function($property) {
-                $adapter = /* instanciate your implementation here */;
-
-                if (!$property->applicableTo($adapter)) {
-                    $this->markTestSkipped();
-                }
-
-                $property->ensureHeldBy($adapter);
-            });
+    foreach (Adapter::alwaysApplicable() as $property) {
+        yield property(
+            $property,
+            Set\Call::of(fn() => /* instanciate YourAdapter here */),
+        )->named('YourAdapter');
     }
-
-    /**
-     * This test will try to prove your adapter hold any sequence of property
-     *
-     * This is useful to find bugs due to state mismanage
-     */
-    public function testHoldProperties()
-    {
-        $this
-            ->forAll(Adapter::properties())
-            ->then(function($properties) {
-                $properties->ensureHeldBy(/* instanciate your implementation here */);
-            });
-    }
-
-    public function properties(): iterable
-    {
-        foreach (Adapter::list() as $property) {
-            yield [$property];
-        }
-    }
-}</code></pre>
-<p>You can use the same logic to test <code>Directory</code> implementations with <code>Properties\Innmind\Filesystem\Directory</code>.</p>
-<p><strong>Note</strong>: there is no properties for the <code>File</code> interface as it doesn't expose any behaviour.</p></main>
+};</code></pre>
+<p>Then you can <a href="https://github.com/Innmind/BlackBox/blob/develop/documentation/organize.md">run your proofs</a> via BlackBox.</p></main>
     <footer>
         <a href="https://github.com/innmind/Filesystem/" target="_blank">GitHub</a>
     </footer>

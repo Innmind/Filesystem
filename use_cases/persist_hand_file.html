@@ -98,19 +98,19 @@
 <h2 id="create-an-empty-file"><a href="#create-an-empty-file" class="anchor">#</a>Create an empty file</h2>
 <pre><code class="language-php">use Innmind\Filesystem\{
     Adapter\Filesystem,
-    File\File,
+    File,
     File\Content,
 };
 use Innmind\Url\Path;
 
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
-$filesystem->add(File::named('some name'), Content\None::of());</code></pre>
+$filesystem->add(File::named('some name'), Content::none());</code></pre>
 <p>This is equivalent of running the cli command <code>touch '/var/data/some name'</code>.</p>
 <h2 id="create-a-file-with-some-content"><a href="#create-a-file-with-some-content" class="anchor">#</a>Create a file with some content</h2>
 <pre><code class="language-php">use Innmind\Filesystem\{
     Adapter\Filesystem,
-    File\File,
-    File\Content\Lines,
+    File,
+    File\Content,
     File\Content\Line,
 };
 use Innmind\Url\Path;
@@ -122,7 +122,7 @@ use Innmind\Immutable\{
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
 $filesystem->add(File::named(
     'some name',
-    Lines::of(Sequence::of(
+    Content::ofLines(Sequence::of(
         Line::of(Str::of('first line')),
         Line::of(Str::of('second line')),
         Line::of(Str::of('etc...')),
@@ -132,15 +132,15 @@ $filesystem->add(File::named(
 <h2 id="create-a-file-inside-a-directory"><a href="#create-a-file-inside-a-directory" class="anchor">#</a>Create a file inside a directory</h2>
 <pre><code class="language-php">use Innmind\Filesystem\{
     Adapter\Filesystem,
-    File\File,
+    File,
     File\Content,
-    Directory\Directory,
+    Directory,
 };
 use Innmind\Url\Path;
 
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
 $filesystem->add(
-    Directory::named('whatever')->add(File::named('some name'), Content\None::of()),
+    Directory::named('whatever')->add(File::named('some name'), Content::none()),
 );</code></pre>
 <p>This is equivalent of running the cli command <code>touch '/var/data/whatever/some name'</code>.</p></main>
     <footer>

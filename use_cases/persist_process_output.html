@@ -97,7 +97,7 @@
     <main><h1 id="persist-a-process-output"><a href="#persist-a-process-output" class="anchor">#</a>Persist a process output</h1>
 <p>This example uses the <a href="https://packagist.org/packages/innmind/operating-system"><code>innmind/operating-system</code></a> package.</p>
 <pre><code class="language-php">use Innmind\Filesystem\{
-    File\File,
+    File,
     File\Content,
     Adapter\Filesystem,
 };
@@ -107,7 +107,7 @@ use Innmind\Url\Path;
 
 $os = Factory::build();
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
-$fileContent = Content\Chunks::of(
+$fileContent = Content::ofChunks(
     $os
         ->control()
         ->processes()
