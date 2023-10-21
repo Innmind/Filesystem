@@ -26,7 +26,11 @@ return static function() {
                     IO::of($capabilities->watch()->waitForever(...))->readable(),
                     $path,
                 )),
-        ]
+        ],
+        [
+            'Content::none()',
+            Set\Elements::of(Model::none()),
+        ],
     ];
 
     foreach ($implementations as [$name, $content]) {
