@@ -3,10 +3,18 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem;
 
-use Innmind\BlackBox\Set;
+use Innmind\Filesystem\File\Content as Model;
+use Innmind\BlackBox\{
+    Set,
+    Property,
+    Properties,
+};
 
 final class Content
 {
+    /**
+     * @return Set<Properties>
+     */
     public static function properties(): Set
     {
         return Set\Properties::any(
@@ -17,6 +25,9 @@ final class Content
         );
     }
 
+    /**
+     * @return class-string<Property<Model>>
+     */
     public static function all(): array
     {
         return [
