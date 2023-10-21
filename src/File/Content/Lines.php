@@ -38,18 +38,6 @@ final class Lines implements Implementation
         return new self($lines);
     }
 
-    /**
-     * @psalm-pure
-     */
-    public static function ofContent(string $content): self
-    {
-        return new self(
-            Str::of($content)
-                ->split("\n")
-                ->map(static fn($line) => Line::fromStream($line)),
-        );
-    }
-
     public function foreach(callable $function): SideEffect
     {
         return $this->lines->foreach($function);
