@@ -46,6 +46,14 @@ final class Content
 
     /**
      * @psalm-pure
+     */
+    public static function oneShot(IO\Readable\Stream $io): self
+    {
+        return new self(Content\OneShot::of($io));
+    }
+
+    /**
+     * @psalm-pure
      *
      * @param Sequence<Str> $chunks
      */
