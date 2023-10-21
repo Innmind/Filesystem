@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Adapter;
 
-use Innmind\Filesystem\Adapter;
+use Innmind\Filesystem\{
+    Adapter,
+    Directory,
+};
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -29,28 +32,16 @@ final class AllRootFilesAreAccessible implements Property
     {
         $adapter
             ->root()
-            ->files()
             ->foreach(static function($file) use ($assert, $adapter) {
                 $assert->true($adapter->contains($file->name()));
+
+                if ($file instanceof Directory) {
+                    return;
+                }
+
                 $assert->same(
                     $file->content()->toString(),
                     $adapter
-                        ->get($file->name())
-                        ->map(static fn($file) => $file->content())
-                        ->match(
-                            static fn($content) => $content->toString(),
-                            static fn() => null,
-                        ),
-                );
-            });
-        $assert->same($adapter->root()->files()->size(), $adapter->all()->size());
-        $adapter
-            ->all()
-            ->foreach(static function($file) use ($assert, $adapter) {
-                $assert->same(
-                    $file->content()->toString(),
-                    $adapter
-                        ->root()
                         ->get($file->name())
                         ->map(static fn($file) => $file->content())
                         ->match(

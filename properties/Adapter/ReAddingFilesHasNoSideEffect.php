@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Adapter;
 
-use Innmind\Filesystem\Adapter;
+use Innmind\Filesystem\{
+    Adapter,
+    Directory,
+};
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -28,10 +31,15 @@ final class ReAddingFilesHasNoSideEffect implements Property
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
         $adapter
-            ->all()
+            ->root()
             ->foreach(static function($file) use ($assert, $adapter) {
                 $adapter->add($file);
                 $assert->true($adapter->contains($file->name()));
+
+                if ($file instanceof Directory) {
+                    return;
+                }
+
                 $assert->same(
                     $file->content()->toString(),
                     $adapter

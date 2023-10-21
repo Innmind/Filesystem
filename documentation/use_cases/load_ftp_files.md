@@ -14,11 +14,11 @@ use Innmind\Immutable\Sequence;
 /**
  * @return Sequence<File>
  */
-function flatten(File $file): Sequence
+function flatten(File|Directory $file): Sequence
 {
     if ($file instanceof Directory) {
         // bring all the files from sub directories to the same level
-        return $file->files()->flatMap(flatten(...));
+        return $file->all()->flatMap(flatten(...));
     }
 
     return Sequence::of($file);
@@ -26,7 +26,7 @@ function flatten(File $file): Sequence
 
 Filesystem::mount(Path::of('/path/to/ftp/directory/'))
     ->root()
-    ->files()
+    ->all()
     ->flatMap(flatten(...))
     ->foreach(static fn(File $csv) => doYourStuff($csv));
 ```

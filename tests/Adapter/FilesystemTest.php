@@ -7,26 +7,25 @@ use Innmind\Filesystem\{
     Adapter\Filesystem,
     Adapter,
     CaseSensitivity,
-    File\File,
-    File\Content\None,
-    File\Content\Lines,
+    File,
+    File\Content,
     Name,
     Directory as DirectoryInterface,
-    Directory\Directory,
+    Directory,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\LinksAreNotSupported,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Set,
+    Sequence,
     Map,
 };
 use Symfony\Component\Filesystem\Filesystem as FS;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
-    Set as DataSet,
+    Set,
 };
 use Fixtures\Innmind\Filesystem\Name as FName;
 
@@ -83,10 +82,10 @@ class FilesystemTest extends TestCase
         $adapter = Filesystem::mount(Path::of('/tmp/'));
 
         $directory = Directory::of(Name::of('foo'))
-            ->add(File::of(Name::of('foo.md'), Lines::ofContent('# Foo')))
+            ->add(File::of(Name::of('foo.md'), Content::ofString('# Foo')))
             ->add(
                 Directory::of(Name::of('bar'))
-                    ->add(File::of(Name::of('bar.md'), Lines::ofContent('# Bar'))),
+                    ->add(File::of(Name::of('bar.md'), Content::ofString('# Bar'))),
             );
         $adapter->add($directory);
         $this->assertSame(
@@ -153,7 +152,7 @@ class FilesystemTest extends TestCase
         $a = Filesystem::mount(Path::of('/tmp/'));
 
         $d = Directory::of(Name::of('foo'));
-        $d = $d->add(File::of(Name::of('bar'), Lines::ofContent('some content')));
+        $d = $d->add(File::of(Name::of('bar'), Content::ofString('some content')));
         $a->add($d);
         $d = $d->remove(Name::of('bar'));
         $a->add($d);
@@ -173,7 +172,7 @@ class FilesystemTest extends TestCase
         $a = Filesystem::mount(Path::of('/tmp/'));
 
         $d = Directory::of(Name::of('foo'));
-        $d = $d->add(File::of(Name::of('bar'), Lines::ofContent('some content')));
+        $d = $d->add(File::of(Name::of('bar'), Content::ofString('some content')));
         $a->add($d);
         $d = $d->remove(Name::of('bar'));
         $a->add($d);
@@ -210,19 +209,18 @@ class FilesystemTest extends TestCase
         $a->remove(Name::of('some_content.html'));
     }
 
-    public function testAll()
+    public function testRoot()
     {
         $adapter = Filesystem::mount(Path::of('/tmp/test/'));
         $adapter->add(File::of(
             Name::of('foo'),
-            Lines::ofContent('foo'),
+            Content::ofString('foo'),
         ));
         \file_put_contents('/tmp/test/bar', 'bar');
         \mkdir('/tmp/test/baz');
         \file_put_contents('/tmp/test/baz/foobar', 'baz');
 
-        $all = $adapter->all();
-        $this->assertInstanceOf(Set::class, $all);
+        $all = $adapter->root()->all();
         $this->assertCount(3, $all);
         $all = Map::of(
             ...$all
@@ -269,7 +267,7 @@ class FilesystemTest extends TestCase
         $adapter = Filesystem::mount(Path::of('/tmp/'));
         $file = File::of(
             Name::of('foo'),
-            Lines::ofContent('foo'),
+            Content::ofString('foo'),
         );
 
         $this->assertNull($adapter->add($file));
@@ -291,16 +289,16 @@ class FilesystemTest extends TestCase
 
         $filesystem->add(Directory::of(
             Name::of(\str_repeat('a', 255)),
-            Set::of(
+            Sequence::of(
                 Directory::of(
                     Name::of(\str_repeat('a', 255)),
-                    Set::of(
+                    Sequence::of(
                         Directory::of(
                             Name::of(\str_repeat('a', 255)),
-                            Set::of(
+                            Sequence::of(
                                 File::of(
                                     Name::of(\str_repeat('a', 255)),
-                                    None::of(),
+                                    Content::none(),
                                 ),
                             ),
                         ),
@@ -314,11 +312,11 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                DataSet\Either::any(
-                    DataSet\Integers::between(1, 46),
-                    DataSet\Integers::between(48, 127),
+                Set\Either::any(
+                    Set\Integers::between(1, 46),
+                    Set\Integers::between(48, 127),
                 ),
-                DataSet\Strings::any(),
+                Set\Strings::any(),
             )
             ->then(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
@@ -328,10 +326,10 @@ class FilesystemTest extends TestCase
 
                 $this->assertNull($filesystem->add(Directory::of(
                     Name::of(\chr($ord).'a'),
-                    Set::of(
+                    Sequence::of(
                         File::of(
                             Name::of('a'),
-                            Lines::ofContent($content),
+                            Content::ofString($content),
                         ),
                     ),
                 )));
@@ -344,11 +342,11 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                DataSet\Either::any(
-                    DataSet\Integers::between(1, 46),
-                    DataSet\Integers::between(48, 127),
+                Set\Either::any(
+                    Set\Integers::between(1, 46),
+                    Set\Integers::between(48, 127),
                 ),
-                DataSet\Strings::any(),
+                Set\Strings::any(),
             )
             ->then(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
@@ -358,10 +356,10 @@ class FilesystemTest extends TestCase
 
                 $this->assertNull($filesystem->add(Directory::of(
                     Name::of('a'.\chr($ord).'a'),
-                    Set::of(
+                    Sequence::of(
                         File::of(
                             Name::of('a'),
-                            Lines::ofContent($content),
+                            Content::ofString($content),
                         ),
                     ),
                 )));
@@ -374,13 +372,13 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                DataSet\Either::any(
-                    DataSet\Integers::between(1, 8),
-                    DataSet\Integers::between(14, 31),
-                    DataSet\Integers::between(33, 45),
-                    DataSet\Integers::between(48, 127),
+                Set\Either::any(
+                    Set\Integers::between(1, 8),
+                    Set\Integers::between(14, 31),
+                    Set\Integers::between(33, 45),
+                    Set\Integers::between(48, 127),
                 ),
-                DataSet\Strings::any(),
+                Set\Strings::any(),
             )
             ->then(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
@@ -390,10 +388,10 @@ class FilesystemTest extends TestCase
 
                 $this->assertNull($filesystem->add(Directory::of(
                     Name::of(\chr($ord)),
-                    Set::of(
+                    Sequence::of(
                         File::of(
                             Name::of('a'),
-                            Lines::ofContent($content),
+                            Content::ofString($content),
                         ),
                     ),
                 )));
@@ -429,7 +427,7 @@ class FilesystemTest extends TestCase
         $this->expectException(LinksAreNotSupported::class);
         $this->expectExceptionMessage($path.'bar');
 
-        $filesystem->all()->toList();
+        $filesystem->root()->all()->toList();
     }
 
     public function testDotFilesAreListed()
@@ -444,7 +442,7 @@ class FilesystemTest extends TestCase
 
                 $filesystem = Filesystem::mount(Path::of($path));
 
-                $all = $filesystem->all()->toList();
+                $all = $filesystem->root()->all()->toList();
                 $this->assertCount(1, $all);
                 $this->assertSame($name, $all[0]->name()->toString());
             });

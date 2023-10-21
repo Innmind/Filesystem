@@ -13,20 +13,13 @@ use Innmind\Immutable\{
  */
 interface Adapter
 {
-    public function add(File $file): void;
+    public function add(File|Directory $file): void;
 
     /**
-     * @return Maybe<File>
+     * @return Maybe<File|Directory>
      */
     public function get(Name $file): Maybe;
     public function contains(Name $file): bool;
     public function remove(Name $file): void;
-
-    /**
-     * @deprecated Use self::root() instead
-     *
-     * @return Set<File>
-     */
-    public function all(): Set;
     public function root(): Directory;
 }

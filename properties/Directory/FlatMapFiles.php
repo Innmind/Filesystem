@@ -8,10 +8,10 @@ use Innmind\Filesystem\{
     Directory,
     Name,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\{
     Property,
-    Set as DataSet,
+    Set,
     Runner\Assert,
 };
 use Fixtures\Innmind\Filesystem\File as FFile;
@@ -31,26 +31,26 @@ final class FlatMapFiles implements Property
         $this->file2 = $file2;
     }
 
-    public static function any(): DataSet
+    public static function any(): Set
     {
-        return DataSet\Composite::immutable(
+        return Set\Composite::immutable(
             static fn(...$args) => new self(...$args),
-            DataSet\Randomize::of(FFile::any()),
-            DataSet\Randomize::of(FFile::any()),
+            Set\Randomize::of(FFile::any()),
+            Set\Randomize::of(FFile::any()),
         );
     }
 
     public function applicableTo(object $directory): bool
     {
-        return !$directory->files()->empty();
+        return !$directory->all()->empty();
     }
 
     public function ensureHeldBy(Assert $assert, object $directory): object
     {
         // we use uuids to avoid duplicates
-        $directory2 = $directory->flatMap(fn($file) => Directory\Directory::of(
+        $directory2 = $directory->flatMap(fn($file) => Directory::of(
             Name::of('doesntmatter'),
-            Set::of(
+            Sequence::of(
                 $this->file1->rename(Name::of(Uuid::uuid4()->toString())),
                 $this->file2->rename(Name::of(Uuid::uuid4()->toString())),
             ),
@@ -62,14 +62,14 @@ final class FlatMapFiles implements Property
             ->same($directory2);
         $assert->same($directory->name()->toString(), $directory2->name()->toString());
         $assert
-            ->expected($directory->files())
+            ->expected($directory->all())
             ->not()
-            ->same($directory2->files());
-        $assert->same($directory->files()->size() * 2, $directory2->files()->size());
+            ->same($directory2->all());
+        $assert->same($directory->all()->size() * 2, $directory2->all()->size());
         $assert->same(
             [$this->file1->content(), $this->file2->content()],
             $directory2
-                ->files()
+                ->all()
                 ->map(static fn($file) => $file->content())
                 ->distinct()
                 ->toList(),

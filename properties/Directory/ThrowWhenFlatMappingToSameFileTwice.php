@@ -9,10 +9,10 @@ use Innmind\Filesystem\{
     Name,
     Exception\DuplicatedFile,
 };
-use Innmind\Immutable\Set;
+use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\{
     Property,
-    Set as DataSet,
+    Set,
     Runner\Assert,
 };
 use Fixtures\Innmind\Filesystem\File as FFile;
@@ -31,40 +31,40 @@ final class ThrowWhenFlatMappingToSameFileTwice implements Property
         $this->file2 = $file2;
     }
 
-    public static function any(): DataSet
+    public static function any(): Set
     {
-        return DataSet\Composite::immutable(
+        return Set\Composite::immutable(
             static fn(...$args) => new self(...$args),
-            DataSet\Randomize::of(FFile::any()),
-            DataSet\Randomize::of(FFile::any()),
+            Set\Randomize::of(FFile::any()),
+            Set\Randomize::of(FFile::any()),
         );
     }
 
     public function applicableTo(object $directory): bool
     {
-        return $directory->files()->size() >= 2;
+        return $directory->all()->size() >= 2;
     }
 
     public function ensureHeldBy(Assert $assert, object $directory): object
     {
         try {
-            // calling toList in case it uses a lazy Set of files, so we need to
-            // unwrap the list to trigger the safeguard
+            // calling toList in case it uses a lazy Sequence of files, so we
+            // need to unwrap the list to trigger the safeguard
             $directory
-                ->flatMap(fn() => Directory\Directory::of(
+                ->flatMap(fn() => Directory::of(
                     Name::of('doesntmatter'),
-                    Set::of(
-                        File\File::of(
+                    Sequence::of(
+                        File::of(
                             $this->file1->name(),
                             $this->file1->content(),
                         ),
-                        File\File::of(
+                        File::of(
                             $this->file2->name(),
                             $this->file2->content(),
                         ),
                     ),
                 ))
-                ->files()
+                ->all()
                 ->toList();
 
             $assert->fail('It should throw');

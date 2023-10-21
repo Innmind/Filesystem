@@ -21,9 +21,9 @@ The whole model is structured around files, directories, contents and adapters. 
 Example:
 ```php
 use Innmind\Filesystem\{
-    File\File,
+    File,
     File\Content,
-    Directory\Directory,
+    Directory,
     Adapter\Filesystem,
 };
 use Innmind\Url\Path;
@@ -31,7 +31,7 @@ use Innmind\Url\Path;
 $directory = Directory::named('uploads')->add(
     File::named(
         $_FILES['my_upload']['name'],
-        Content\AtPath::of(Path::of($_FILES['my_upload']['tmp_name'])),
+        Content::ofString(\file_get_contents($_FILES['my_upload']['tmp_name'])),
     ),
 );
 $adapter = Filesystem::mount(Path::of('/var/www/web/'));

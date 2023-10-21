@@ -1,5 +1,34 @@
 # Changelog
 
+## 7.0.0 - 2023-10-21
+
+### Added
+
+- `Innmind\Filesystem\File\Content::chunks()`
+
+### Changed
+
+- `Innmind\Filesystem\Name` constructor is now private, use `::of()` named constructor instead
+- `Innmind\Filesystem\File\File` constructor is now private, use `::of()` named constructor instead
+- `Innmind\Filesystem\File\Content` is now a final class and its different implementations are declared internal, use the `Content` named constructors instead
+- `Innmind\Filesystem\Directory` no longer extends `File`, all previous function typed against `File` are now typed `File|Directory`
+- `Innmind\Filesystem\File` is now a final class instead of an interface
+- `Innmind\Filesystem\Directory` is now a final class instead of an interface
+- `Innmind\Filesystem\Directory::files()` has been renamed to `::all()`
+
+### Fixed
+
+- An inconsistency in `File\Content` that must contain at least one line but it wasn't applied after a `Content::filter()`
+
+### Removed
+
+- `Innmind\Filesystem\Adapter\HashedName`
+- `Innmind\Filesystem\Adapter::all()`
+- `Innmind\Filesystem\Chunk`
+- `Innmind\Filesystem\File\Content\Chunkable`
+- Possibility to use a `Innmind\Immutable\Set` of files inside a `Directory`
+- `Innmind\Filesystem\Stream\LazyStream`
+
 ## 6.6.0 - 2023-09-16
 
 ### Added

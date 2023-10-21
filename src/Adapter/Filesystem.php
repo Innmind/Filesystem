@@ -8,7 +8,6 @@ use Innmind\Filesystem\{
     File,
     Name,
     Directory,
-    Chunk,
     CaseSensitivity,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
@@ -16,6 +15,11 @@ use Innmind\Filesystem\{
     Exception\CannotPersistClosedStream,
     Exception\LinksAreNotSupported,
     Exception\FailedToWriteFile,
+};
+use Innmind\TimeContinuum\ElapsedPeriod;
+use Innmind\IO\{
+    IO,
+    Readable,
 };
 use Innmind\Stream\{
     Capabilities,
@@ -40,15 +44,16 @@ final class Filesystem implements Adapter
 {
     private const INVALID_FILES = ['.', '..'];
     private Capabilities $capabilities;
+    private Readable $io;
     private Path $path;
     private CaseSensitivity $case;
     private FS $filesystem;
-    private Chunk $chunk;
-    /** @var \WeakMap<File, Path> */
+    /** @var \WeakMap<File|Directory, Path> */
     private \WeakMap $loaded;
 
     private function __construct(
         Capabilities $capabilities,
+        Readable $io,
         Path $path,
         CaseSensitivity $case,
     ) {
@@ -57,11 +62,11 @@ final class Filesystem implements Adapter
         }
 
         $this->capabilities = $capabilities;
+        $this->io = $io;
         $this->path = $path;
         $this->case = $case;
         $this->filesystem = new FS;
-        $this->chunk = new Chunk;
-        /** @var \WeakMap<File, Path> */
+        /** @var \WeakMap<File|Directory, Path> */
         $this->loaded = new \WeakMap;
 
         if (!$this->filesystem->exists($this->path->toString())) {
@@ -69,10 +74,20 @@ final class Filesystem implements Adapter
         }
     }
 
-    public static function mount(Path $path, Capabilities $capabilities = null): self
-    {
+    public static function mount(
+        Path $path,
+        Capabilities $capabilities = null,
+        IO $io = null,
+    ): self {
+        $capabilities ??= Streams::fromAmbientAuthority();
+        $io ??= IO::of(static fn(?ElapsedPeriod $period) => match ($period) {
+            null => $capabilities->watch()->waitForever(),
+            default => $capabilities->watch()->timeoutAfter($period),
+        });
+
         return new self(
-            $capabilities ?? Streams::fromAmbientAuthority(),
+            $capabilities,
+            $io->readable(),
             $path,
             CaseSensitivity::sensitive,
         );
@@ -80,10 +95,10 @@ final class Filesystem implements Adapter
 
     public function withCaseSensitivity(CaseSensitivity $case): self
     {
-        return new self($this->capabilities, $this->path, $case);
+        return new self($this->capabilities, $this->io, $this->path, $case);
     }
 
-    public function add(File $file): void
+    public function add(File|Directory $file): void
     {
         $this->createFileAt($this->path, $file);
     }
@@ -91,7 +106,7 @@ final class Filesystem implements Adapter
     public function get(Name $file): Maybe
     {
         if (!$this->contains($file)) {
-            /** @var Maybe<File> */
+            /** @var Maybe<File|Directory> */
             return Maybe::nothing();
         }
 
@@ -108,14 +123,9 @@ final class Filesystem implements Adapter
         $this->filesystem->remove($this->path->toString().'/'.$file->toString());
     }
 
-    public function all(): Set
-    {
-        return Set::of(...$this->root()->files()->toList());
-    }
-
     public function root(): Directory
     {
-        return Directory\Directory::lazy(
+        return Directory::lazy(
             Name::of('root'),
             $this->list($this->path),
         );
@@ -124,7 +134,7 @@ final class Filesystem implements Adapter
     /**
      * Create the wished file at the given absolute path
      */
-    private function createFileAt(Path $path, File $file): void
+    private function createFileAt(Path $path, File|Directory $file): void
     {
         $name = $file->name()->toString();
 
@@ -144,7 +154,7 @@ final class Filesystem implements Adapter
         if ($file instanceof Directory) {
             $this->filesystem->mkdir($path->toString());
             $persisted = $file
-                ->files()
+                ->all()
                 ->map(function($file) use ($path) {
                     $this->createFileAt($path, $file);
 
@@ -170,7 +180,7 @@ final class Filesystem implements Adapter
             $this->filesystem->remove($path->toString());
         }
 
-        $chunks = ($this->chunk)($file->content());
+        $chunks = $file->content()->chunks();
 
         try {
             $this->filesystem->touch($path->toString());
@@ -208,7 +218,7 @@ final class Filesystem implements Adapter
     /**
      * Open the file in the given folder
      */
-    private function open(Path $folder, Name $file): File
+    private function open(Path $folder, Name $file): File|Directory
     {
         $path = $folder->resolve(Path::of($file->toString()));
 
@@ -216,7 +226,7 @@ final class Filesystem implements Adapter
             $directoryPath = $folder->resolve(Path::of($file->toString().'/'));
             $files = $this->list($directoryPath);
 
-            $directory = Directory\Directory::lazy($file, $files);
+            $directory = Directory::lazy($file, $files);
             $this->loaded[$directory] = $directoryPath;
 
             return $directory;
@@ -226,9 +236,13 @@ final class Filesystem implements Adapter
             throw new LinksAreNotSupported($path->toString());
         }
 
-        $file = File\File::of(
+        $file = File::of(
             $file,
-            File\Content\AtPath::of($path, $this->capabilities->readable()),
+            File\Content::atPath(
+                $this->capabilities->readable(),
+                $this->io,
+                $path,
+            ),
             MediaType::maybe(@\mime_content_type($path->toString()) ?: '')->match(
                 static fn($mediaType) => $mediaType,
                 static fn() => MediaType::null(),
@@ -240,7 +254,7 @@ final class Filesystem implements Adapter
     }
 
     /**
-     * @return Sequence<File>
+     * @return Sequence<File|Directory>
      */
     private function list(Path $path): Sequence
     {

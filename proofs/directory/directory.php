@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use Innmind\Filesystem\Directory\Directory;
+use Innmind\Filesystem\Directory;
 use Fixtures\Innmind\Filesystem\{
     Name,
     File,
@@ -17,7 +17,7 @@ return static function() {
         Name::any()->map(Directory::of(...)),
     );
     yield properties(
-        'Non EmptyDirectory properties',
+        'Non empty Directory properties',
         PDirectory::properties(),
         Set\Composite::immutable(
             Directory::of(...),

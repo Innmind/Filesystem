@@ -54,16 +54,22 @@ final class AddDirectory implements Property
         return $adapter;
     }
 
-    private function assertSame(Assert $assert, File $source, File $target): void
-    {
+    private function assertSame(
+        Assert $assert,
+        File|Directory $source,
+        File|Directory $target,
+    ): void {
         $assert->same(
             $source->name()->toString(),
             $target->name()->toString(),
         );
-        $assert->same(
-            $source->content()->toString(),
-            $target->content()->toString(),
-        );
+
+        if ($source instanceof File) {
+            $assert->same(
+                $source->content()->toString(),
+                $target->content()->toString(),
+            );
+        }
 
         if ($target instanceof Directory) {
             $target->foreach(function($file) use ($assert, $source) {

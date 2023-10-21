@@ -9,6 +9,7 @@ use Innmind\Filesystem\{
     Name,
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\Predicate\Instance;
 
 $print = static function(File $file): void {
     $file
@@ -21,6 +22,7 @@ $print = static function(File $file): void {
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
 $filesystem
     ->get(Name::of('some file'))
+    ->keep(Instance::of(File::class))
     ->match(
         static fn(File $file) => $print($file),
         static fn() => null, // the file doesn't exist

@@ -21,7 +21,9 @@
         "innmind/stream": "~4.1",
         "innmind/media-type": "~2.1",
         "innmind/url": "~4.2",
-        "psr/log": "~3.0"
+        "psr/log": "~3.0",
+        "innmind/io": "~2.2",
+        "innmind/time-continuum": "~3.4"
     },
     "autoload": {
         "psr-4": {

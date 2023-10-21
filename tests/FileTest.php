@@ -1,10 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Tests\File;
+namespace Innmind\Filesystem\Tests;
 
 use Innmind\Filesystem\{
-    File\File,
+    File,
     File\Content,
     File as FileInterface,
     Name,
@@ -21,7 +21,7 @@ class FileTest extends TestCase
 
     public function testInterface()
     {
-        $f = File::of($name = Name::of('foo'), $c = $this->createMock(Content::class));
+        $f = File::of($name = Name::of('foo'), $c = Content::none());
 
         $this->assertInstanceOf(FileInterface::class, $f);
         $this->assertSame($name, $f->name());
@@ -34,7 +34,7 @@ class FileTest extends TestCase
 
     public function testNamed()
     {
-        $file = File::named('foo', $this->createMock(Content::class));
+        $file = File::named('foo', Content::none());
 
         $this->assertInstanceOf(File::class, $file);
         $this->assertSame('foo', $file->name()->toString());
@@ -44,7 +44,7 @@ class FileTest extends TestCase
     {
         $f = File::of(
             Name::of('foo'),
-            $this->createMock(Content::class),
+            Content::none(),
             $mt = MediaType::of('application/json'),
         );
 
@@ -62,7 +62,7 @@ class FileTest extends TestCase
             ->then(function($name, $mediaType) {
                 $file = File::of(
                     $name,
-                    $content = $this->createMock(Content::class),
+                    $content = Content::none(),
                     $mediaType,
                 );
 
@@ -79,7 +79,7 @@ class FileTest extends TestCase
             ->then(function($name) {
                 $file = File::of(
                     $name,
-                    $this->createMock(Content::class),
+                    Content::none(),
                 );
 
                 $this->assertSame(
@@ -99,7 +99,7 @@ class FileTest extends TestCase
             ->then(function($name, $mediaType) {
                 $file = File::named(
                     $name->toString(),
-                    $content = $this->createMock(Content::class),
+                    $content = Content::none(),
                     $mediaType,
                 );
 
@@ -119,10 +119,10 @@ class FileTest extends TestCase
             ->then(function($name, $mediaType) {
                 $file = File::of(
                     $name,
-                    $content = $this->createMock(Content::class),
+                    $content = Content::none(),
                     $mediaType,
                 );
-                $file2 = $file->withContent($content2 = $this->createMock(Content::class));
+                $file2 = $file->withContent($content2 = Content::none());
 
                 $this->assertNotSame($file, $file2);
                 $this->assertNotSame($file->content(), $file2->content());
@@ -141,10 +141,10 @@ class FileTest extends TestCase
             ->then(function($name, $mediaType) {
                 $file = File::of(
                     $name,
-                    $this->createMock(Content::class),
+                    Content::none(),
                     $mediaType,
                 );
-                $file2 = $file->withContent($this->createMock(Content::class));
+                $file2 = $file->withContent(Content::none());
 
                 $this->assertNotSame($file, $file2);
                 $this->assertSame($file->mediaType(), $file2->mediaType());
@@ -161,7 +161,7 @@ class FileTest extends TestCase
             ->then(function($name1, $name2) {
                 $file1 = File::of(
                     $name1,
-                    $this->createMock(Content::class),
+                    Content::none(),
                 );
                 $file2 = $file1->rename($name2);
 

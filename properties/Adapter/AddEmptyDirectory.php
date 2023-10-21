@@ -5,7 +5,7 @@ namespace Properties\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter,
-    Directory\Directory,
+    Directory,
     Name,
 };
 use Innmind\BlackBox\{

@@ -1,15 +1,13 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Filesystem\Tests\Directory;
+namespace Innmind\Filesystem\Tests;
 
 use Innmind\Filesystem\{
-    Directory\Directory,
-    Directory as DirectoryInterface,
+    Directory,
     File,
     Name,
-    File\Content\None,
-    File\Content\Lines,
+    File\Content,
     Exception\DuplicatedFile,
 };
 use Innmind\Immutable\{
@@ -29,11 +27,7 @@ class DirectoryTest extends TestCase
     {
         $d = Directory::of(Name::of('foo'));
 
-        $this->assertInstanceOf(DirectoryInterface::class, $d);
         $this->assertSame('foo', $d->name()->toString());
-        $this->assertSame('', $d->content()->toString());
-        $this->assertSame('text/directory', $d->mediaType()->toString());
-        $this->assertEquals($d->mediaType(), $d->mediaType());
     }
 
     public function testNamed()
@@ -47,24 +41,28 @@ class DirectoryTest extends TestCase
     public function testAdd()
     {
         $d = Directory::of(Name::of('foo'));
-        $d->content(); //force generation of files list, to be sure it's not cloned
 
         $d2 = $d->add(
-            $file = File\File::of(Name::of('foo'), Lines::ofContent('bar')),
+            $file = File::of(Name::of('foo'), Content::ofString('bar')),
         );
 
-        $this->assertInstanceOf(DirectoryInterface::class, $d2);
+        $this->assertInstanceOf(Directory::class, $d2);
         $this->assertNotSame($d, $d2);
         $this->assertSame($d->name(), $d2->name());
-        $this->assertNotSame($d->content(), $d2->content());
         $this->assertSame(0, $d->removed()->count());
         $this->assertSame(0, $d2->removed()->count());
+        $this->assertFalse($d->contains($file->name()));
+        $this->assertTrue($d2->contains($file->name()));
+        $this->assertSame($file, $d2->get($file->name())->match(
+            static fn($file) => $file,
+            static fn() => null,
+        ));
     }
 
     public function testGet()
     {
         $d = Directory::of(Name::of('foo'))
-            ->add($f = File\File::of(Name::of('bar'), Lines::ofContent('baz')));
+            ->add($f = File::of(Name::of('bar'), Content::ofString('baz')));
 
         $this->assertSame(
             $f,
@@ -90,7 +88,7 @@ class DirectoryTest extends TestCase
     public function testContains()
     {
         $d = Directory::of(Name::of('foo'))
-            ->add(File\File::of(Name::of('bar'), Lines::ofContent('baz')));
+            ->add(File::of(Name::of('bar'), Content::ofString('baz')));
 
         $this->assertFalse($d->contains(Name::of('baz')));
         $this->assertTrue($d->contains(Name::of('bar')));
@@ -99,15 +97,13 @@ class DirectoryTest extends TestCase
     public function testRemove()
     {
         $d = Directory::of(Name::of('foo'))
-            ->add(File\File::of(Name::of('bar'), Lines::ofContent('baz')));
-        $d->content(); //force generation of files list, to be sure it's not cloned
+            ->add(File::of(Name::of('bar'), Content::ofString('baz')));
 
         $d2 = $d->remove(Name::of('bar'));
 
-        $this->assertInstanceOf(DirectoryInterface::class, $d2);
+        $this->assertInstanceOf(Directory::class, $d2);
         $this->assertNotSame($d, $d2);
         $this->assertSame($d->name(), $d2->name());
-        $this->assertNotSame($d->content(), $d2->content());
         $this->assertSame(0, $d->removed()->count());
         $this->assertSame(1, $d2->removed()->count());
         $this->assertSame(
@@ -127,9 +123,9 @@ class DirectoryTest extends TestCase
         $directory = Directory::of(
             Name::of('foo'),
             Sequence::lazy(static function() {
-                yield File\File::of(Name::of('foo'), Lines::ofContent('foo'));
-                yield File\File::of(Name::of('bar'), Lines::ofContent('bar'));
-                yield File\File::of(Name::of('foobar'), Lines::ofContent('foobar'));
+                yield File::of(Name::of('foo'), Content::ofString('foo'));
+                yield File::of(Name::of('bar'), Content::ofString('bar'));
+                yield File::of(Name::of('foobar'), Content::ofString('foobar'));
                 yield Directory::of(Name::of('sub'));
             }),
         );
@@ -149,9 +145,9 @@ class DirectoryTest extends TestCase
         $directory = Directory::of(
             Name::of('foo'),
             Sequence::lazy(static function() {
-                yield File\File::of(Name::of('foo'), Lines::ofContent('foo'));
-                yield File\File::of(Name::of('bar'), Lines::ofContent('bar'));
-                yield File\File::of(Name::of('foobar'), Lines::ofContent('foobar'));
+                yield File::of(Name::of('foo'), Content::ofString('foo'));
+                yield File::of(Name::of('bar'), Content::ofString('bar'));
+                yield File::of(Name::of('foobar'), Content::ofString('foobar'));
                 yield Directory::of(Name::of('sub'));
             }),
         );
@@ -169,9 +165,9 @@ class DirectoryTest extends TestCase
         $directory = Directory::of(
             Name::of('foo'),
             Sequence::lazy(static function() {
-                yield File\File::of(Name::of('foo'), Lines::ofContent('foo'));
-                yield File\File::of(Name::of('bar'), Lines::ofContent('bar'));
-                yield File\File::of(Name::of('foobar'), Lines::ofContent('foobar'));
+                yield File::of(Name::of('foo'), Content::ofString('foo'));
+                yield File::of(Name::of('bar'), Content::ofString('bar'));
+                yield File::of(Name::of('foobar'), Content::ofString('foobar'));
                 yield Directory::of(Name::of('sub'));
             }),
         );
@@ -180,7 +176,7 @@ class DirectoryTest extends TestCase
             static fn($file) => \strpos($file->name()->toString(), 'foo') === 0,
         );
 
-        $this->assertInstanceOf(DirectoryInterface::class, $filtered);
+        $this->assertInstanceOf(Directory::class, $filtered);
         $files = $filtered->reduce(
             Set::objects(),
             static fn($files, $file) => ($files)($file),
@@ -203,8 +199,8 @@ class DirectoryTest extends TestCase
                 Directory::of(
                     $directory,
                     Sequence::of(
-                        File\File::named($file->toString(), None::of()),
-                        File\File::named($file->toString(), None::of()),
+                        File::named($file->toString(), Content::none()),
+                        File::named($file->toString(), Content::none()),
                     ),
                 );
             });

@@ -24,7 +24,7 @@ final class InMemory implements Adapter
 
     private function __construct(Overwrite|Merge $behaviour)
     {
-        $this->root = Directory\Directory::named('root');
+        $this->root = Directory::named('root');
         $this->behaviour = $behaviour;
     }
 
@@ -38,7 +38,7 @@ final class InMemory implements Adapter
         return new self(new Merge);
     }
 
-    public function add(File $file): void
+    public function add(File|Directory $file): void
     {
         $this->root = ($this->behaviour)($this->root, $file);
     }
@@ -56,11 +56,6 @@ final class InMemory implements Adapter
     public function remove(Name $file): void
     {
         $this->root = $this->root->remove($file);
-    }
-
-    public function all(): Set
-    {
-        return $this->root()->files()->toSet();
     }
 
     public function root(): Directory

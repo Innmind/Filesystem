@@ -50,8 +50,8 @@ final class Rename implements Property
             ->same($directory->name());
         $assert->same($this->name, $directory2->name());
         $assert->same(
-            $directory->files(),
-            $directory2->files(),
+            $directory->all(),
+            $directory2->all(),
         );
         $assert->same(
             $directory->removed(),

@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 use Innmind\Filesystem\{
     Adapter\Filesystem,
-    Directory\Directory,
-    File\File,
-    File\Content\None,
+    Directory,
+    File,
+    File\Content,
     CaseSensitivity,
 };
 use Innmind\Url\Path;
@@ -48,9 +48,9 @@ return static function() {
         function($assert) {
             $property = new Adapter\AddRemoveAddModificationsStillAddTheFile(
                 Directory::named('0')
-                    ->add($file = File::named('L', None::of()))
+                    ->add($file = File::named('L', Content::none()))
                     ->remove($file->name()),
-                File::named('l', None::of()),
+                File::named('l', Content::none()),
             );
 
             $path = \sys_get_temp_dir().'/innmind/filesystem/';

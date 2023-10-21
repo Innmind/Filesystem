@@ -3,17 +3,14 @@ declare(strict_types = 1);
 
 namespace Fixtures\Innmind\Filesystem;
 
-use Innmind\Filesystem\{
-    Directory\Directory as Model,
-    File as FileInterface,
-};
+use Innmind\Filesystem\Directory as Model;
 use Properties\Innmind\Filesystem\Directory as Properties;
 use Innmind\BlackBox\{
     Set as DataSet,
     Runner\Assert,
     Runner\Stats,
 };
-use Fixtures\Innmind\Immutable\Set;
+use Fixtures\Innmind\Immutable\Sequence;
 
 final class Directory
 {
@@ -38,14 +35,14 @@ final class Directory
     private static function atDepth(int $depth, int $maxDepth): DataSet
     {
         if ($depth === $maxDepth) {
-            $files = Set::of(
+            $files = Sequence::of(
                 DataSet\Randomize::of(
                     File::any(),
                 ),
                 DataSet\Integers::between(0, 5),
             );
         } else {
-            $files = Set::of(
+            $files = Sequence::of(
                 DataSet\Either::any(
                     DataSet\Randomize::of(
                         File::any(),

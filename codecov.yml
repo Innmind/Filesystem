@@ -1,4 +1,7 @@
 ignore:
+    - proofs/*
     - fixtures/*
     - properties/*
     - properties/**/*
+    - .php-cs-fixer.dist.php
+    - blackbox.php

@@ -4,7 +4,7 @@ This example uses the [`innmind/operating-system`](https://packagist.org/package
 
 ```php
 use Innmind\Filesystem\{
-    File\File,
+    File,
     File\Content,
     Adapter\Filesystem,
 };
@@ -14,7 +14,7 @@ use Innmind\Url\Path;
 
 $os = Factory::build();
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
-$fileContent = Content\Chunks::of(
+$fileContent = Content::ofChunks(
     $os
         ->control()
         ->processes()

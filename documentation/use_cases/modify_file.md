@@ -11,7 +11,10 @@ use Innmind\Filesystem\{
     Name,
 };
 use Innmind\Url\Path;
-use Innmind\Immutable\Str;
+use Innmind\Immutable\{
+    Str,
+    Predicate\Instance,
+};
 
 // replace the "unreleased" title with the new version
 $insertRelease = static function(Str $line): Str {
@@ -33,7 +36,8 @@ $filesystem = Filesystem::mount(Path::of('some/repository/'));
 $tmp = Filesystem::mount(Path::of('/tmp/'));
 $filesystem
     ->get(Name::of('CHANGELOG.md'))
-    ->map(static fn($changelog) => $release($changelog))
+    ->keep(Instance::of(File::class))
+    ->map($release)
     ->flatMap(static function($changelog) use ($tmp) {
         // this operation is due to the fact that you cannot read and write to
         // the same file at once
@@ -63,18 +67,19 @@ use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
     Str,
+    Predicate\Instance,
 };
 
 // Insert "Jane Doe" after the user "John Doe"
 $updateUser = static function(Line $user): Content {
     if ($user->toString() === 'John Doe') {
-        return Content\Lines::of(Sequence::of(
+        return Content::ofLines(Sequence::of(
             $user,
             Line::of(Str::of('Jane Doe')),
         ));
     }
 
-    return Content\Lines::of(Sequence::of($user));
+    return Content::ofLines(Sequence::of($user));
 };
 $update = static function(File $users) use ($updateUser): File {
     return $users->withContent(
@@ -85,7 +90,8 @@ $filesystem = Filesystem::mount(Path::of('/var/data/'));
 $tmp = Filesystem::mount(Path::of('/tmp/'));
 $filesystem
     ->get(Name::of('users.csv'))
-    ->map(static fn($users) => $update($users))
+    ->keep(Instance::of(File::class))
+    ->map($update)
     ->flatMap(static function($users) use ($tmp) {
         // this operation is due to the fact that you cannot read and write to
         // the same file at once
@@ -111,19 +117,22 @@ use Innmind\Filesystem\{
     Name,
 };
 use Innmind\Url\Path;
-use Innmind\Immutable\Maybe;
+use Innmind\Immutable\{
+    Maybe,
+    Predicate\Instance,
+};
 
 $merge = static function(File $file1, File $file2): File {
-    return File\File::named(
+    return File::named(
         'all_users.csv',
-        Content\Lines::of(
+        Content::ofLines(
             $file1->content()->lines()->append($file2->content()->lines()),
         ),
     );
 };
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
-$users1 = $filesystem->get(Name::of('users1.csv'));
-$users2 = $filesystem->get(Name::of('users2.csv'));
+$users1 = $filesystem->get(Name::of('users1.csv'))->keep(Instance::of(File::class));
+$users2 = $filesystem->get(Name::of('users2.csv'))->keep(Instance::of(File::class));
 Maybe::all($users1, $users2)
     ->map(static fn($file1, $file2) => $merge($file1, $file2))
     ->match(

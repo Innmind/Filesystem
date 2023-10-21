@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\Filesystem\File\Content;
 use Innmind\Stream\Stream\Size;
 use Innmind\Immutable\{
     Sequence,
@@ -13,9 +12,10 @@ use Innmind\Immutable\{
 };
 
 /**
+ * @internal
  * @psalm-immutable
  */
-final class Lines implements Content
+final class Lines implements Implementation
 {
     /** @var Sequence<Line> */
     private Sequence $lines;
@@ -25,7 +25,7 @@ final class Lines implements Content
      */
     private function __construct(Sequence $lines)
     {
-        $this->lines = $lines;
+        $this->lines = $lines->pad(1, Line::of(Str::of('')));
     }
 
     /**
@@ -38,36 +38,24 @@ final class Lines implements Content
         return new self($lines);
     }
 
-    /**
-     * @psalm-pure
-     */
-    public static function ofContent(string $content): self
-    {
-        return new self(
-            Str::of($content)
-                ->split("\n")
-                ->map(static fn($line) => Line::fromStream($line)),
-        );
-    }
-
     public function foreach(callable $function): SideEffect
     {
         return $this->lines->foreach($function);
     }
 
-    public function map(callable $map): Content
+    public function map(callable $map): Implementation
     {
         return new self($this->lines->map($map));
     }
 
-    public function flatMap(callable $map): Content
+    public function flatMap(callable $map): Implementation
     {
         return new self($this->lines->flatMap(
             static fn($line) => $map($line)->lines(),
         ));
     }
 
-    public function filter(callable $filter): Content
+    public function filter(callable $filter): Implementation
     {
         return new self($this->lines->filter($filter));
     }
@@ -75,6 +63,21 @@ final class Lines implements Content
     public function lines(): Sequence
     {
         return $this->lines;
+    }
+
+    public function chunks(): Sequence
+    {
+        $firstLineRead = false;
+
+        return $this->lines->map(static function($line) use (&$firstLineRead) {
+            if (!$firstLineRead) {
+                $firstLineRead = true;
+
+                return $line->str();
+            }
+
+            return $line->str()->prepend("\n");
+        });
     }
 
     public function reduce($carry, callable $reducer)

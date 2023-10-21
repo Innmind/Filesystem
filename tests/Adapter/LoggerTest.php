@@ -8,10 +8,10 @@ use Innmind\Filesystem\{
     Adapter,
     File,
     Name,
-    Directory\Directory,
+    Directory,
 };
 use Innmind\Immutable\{
-    Set,
+    Sequence,
     Maybe,
 };
 use Psr\Log\LoggerInterface;
@@ -36,10 +36,7 @@ class LoggerTest extends TestCase
             $inner = $this->createMock(Adapter::class),
             $logger = $this->createMock(LoggerInterface::class),
         );
-        $file = $this->createMock(File::class);
-        $file
-            ->method('name')
-            ->willReturn(Name::of('foo'));
+        $file = $file = File::of(Name::of('foo'), File\Content::none());
         $logger
             ->expects($this->once())
             ->method('debug');
@@ -58,10 +55,7 @@ class LoggerTest extends TestCase
             $logger = $this->createMock(LoggerInterface::class),
         );
         $name = Name::of('foo');
-        $file = $this->createMock(File::class);
-        $file
-            ->method('name')
-            ->willReturn($name);
+        $file = File::of($name, File\Content::none());
         $logger
             ->expects($this->once())
             ->method('debug');
@@ -117,15 +111,15 @@ class LoggerTest extends TestCase
         $this->assertNull($adapter->remove($name));
     }
 
-    public function testAll()
+    public function testRoot()
     {
         $adapter = Logger::psr(
             $inner = $this->createMock(Adapter::class),
             $this->createMock(LoggerInterface::class),
         );
-        $all = Set::of($file = File\File::named(
+        $all = Sequence::of($file = File::named(
             'watev',
-            $this->createMock(File\Content::class),
+            File\Content::none(),
         ));
         $inner
             ->expects($this->once())
@@ -135,6 +129,6 @@ class LoggerTest extends TestCase
                 $all,
             ));
 
-        $this->assertSame([$file], $adapter->all()->toList());
+        $this->assertSame([$file], $adapter->root()->all()->toList());
     }
 }

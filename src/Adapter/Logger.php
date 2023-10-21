@@ -31,7 +31,7 @@ final class Logger implements Adapter
         return new self($filesystem, $logger);
     }
 
-    public function add(File $file): void
+    public function add(File|Directory $file): void
     {
         $this->logger->debug('Adding file {file}', ['file' => $file->name()->toString()]);
         $this->filesystem->add($file);
@@ -67,11 +67,6 @@ final class Logger implements Adapter
     {
         $this->logger->debug('Removing file {file}', ['file' => $file->toString()]);
         $this->filesystem->remove($file);
-    }
-
-    public function all(): Set
-    {
-        return Set::of(...$this->root()->files()->toList());
     }
 
     public function root(): Directory

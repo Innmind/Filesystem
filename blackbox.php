@@ -9,11 +9,8 @@ use Innmind\BlackBox\{
     Runner\CodeCoverage,
 };
 
-// because the generated trees can be quite large
-\ini_set('memory_limit', '-1');
-
 Application::new($argv)
-    ->disableMemoryLimit()
+    ->disableMemoryLimit() // because the generated trees can be quite large
     ->scenariiPerProof(20)
     ->when(
         \getenv('ENABLE_COVERAGE') !== false,
