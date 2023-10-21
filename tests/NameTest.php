@@ -112,10 +112,13 @@ class NameTest extends TestCase
         $this
             ->forAll(Set\Elements::of('.', '..'))
             ->then(function($name) {
-                $this->expectException(DomainException::class);
-                $this->expectExceptionMessage("'.' and '..' can't be used");
+                try {
+                    Name::of($name);
 
-                Name::of($name);
+                    $this->fail('it should throw');
+                } catch (DomainException $e) {
+                    $this->assertSame("'.' and '..' can't be used", $e->getMessage());
+                }
             });
     }
 
@@ -145,9 +148,13 @@ class NameTest extends TestCase
                 )->filter(static fn(string $name): bool => $name !== '.' && $name !== '..'),
             )
             ->then(function($name) {
-                $this->expectException(DomainException::class);
+                try {
+                    Name::of($name);
 
-                Name::of($name);
+                    $this->fail('it should throw');
+                } catch (\Throwable $e) {
+                    $this->assertInstanceOf(DomainException::class, $e);
+                }
             });
     }
 
