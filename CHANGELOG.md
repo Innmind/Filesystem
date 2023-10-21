@@ -27,6 +27,7 @@
 - `Innmind\Filesystem\Chunk`
 - `Innmind\Filesystem\File\Content\Chunkable`
 - Possibility to use a `Innmind\Immutable\Set` of files inside a `Directory`
+- `Innmind\Filesystem\Stream\LazyStream`
 
 ## 6.6.0 - 2023-09-16
 
