@@ -25,7 +25,7 @@ final class Chunks implements Implementation
      */
     private function __construct(Sequence $chunks)
     {
-        $this->chunks = $chunks;
+        $this->chunks = $chunks->pad(1, Str::of(''));
     }
 
     /**
