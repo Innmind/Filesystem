@@ -41,7 +41,7 @@ final class Content
         IO\Readable $io,
         Path $path,
     ): self {
-        return new self(Content\IO::of($capabilities, $io, $path));
+        return new self(Content\AtPath::of($capabilities, $io, $path));
     }
 
     /**

@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\File\Content;
 
 use Innmind\Filesystem\Exception\FailedToLoadFile;
-use Innmind\IO as IO_;
+use Innmind\IO;
 use Innmind\Stream\Capabilities;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
@@ -18,15 +18,15 @@ use Innmind\Immutable\{
  * @internal
  * @psalm-immutable
  */
-final class IO implements Implementation
+final class AtPath implements Implementation
 {
     private Capabilities\Readable $capabilities;
-    private IO_\Readable $io;
+    private IO\Readable $io;
     private Path $path;
 
     private function __construct(
         Capabilities\Readable $capabilities,
-        IO_\Readable $io,
+        IO\Readable $io,
         Path $path,
     ) {
         $this->capabilities = $capabilities;
@@ -39,7 +39,7 @@ final class IO implements Implementation
      */
     public static function of(
         Capabilities\Readable $capabilities,
-        IO_\Readable $io,
+        IO\Readable $io,
         Path $path,
     ): self {
         return new self($capabilities, $io, $path);
