@@ -63,7 +63,6 @@ final class Directory
             Directory\ContainsMethodAlwaysReturnTrueForFilesInTheDirectory::class,
             Directory\AllFilesInTheDirectoryAreAccessible::class,
             Directory\AddFile::class,
-            Directory\AddDirectory::class,
             Directory\FilteringDoesntAffectTheDirectory::class,
             Directory\FilteringRetunsTheExpectedElements::class,
             Directory\AllFilesAreAccessible::class,

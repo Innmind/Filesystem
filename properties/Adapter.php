@@ -66,6 +66,7 @@ final class Adapter
             Adapter\AllRootFilesAreAccessible::class,
             Adapter\ReAddingFilesHasNoSideEffect::class,
             Adapter\RootDirectoryIsNamedRoot::class,
+            Adapter\AddFileWithSameNameAsDirectoryDeleteTheDirectory::class,
         ];
     }
 }

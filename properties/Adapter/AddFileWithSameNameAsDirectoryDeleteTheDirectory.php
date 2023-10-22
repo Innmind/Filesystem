@@ -45,12 +45,12 @@ final class AddFileWithSameNameAsDirectoryDeleteTheDirectory implements Property
 
     public function applicableTo(object $adapter): bool
     {
-        return !$adapter->contains($this->file->name());
+        return true;
     }
 
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        $assert->false($adapter->contains($this->file->name()));
+        $adapter->remove($this->file->name());
         $assert->null($adapter->add($this->directory));
         $assert->null($adapter->add($this->file));
         $assert->true($adapter->contains($this->file->name()));

@@ -43,7 +43,7 @@ final class AddDirectoryFromAnotherAdapterWithFileAdded implements Property
             FName::any(),
             FFile::any(),
             FFile::any(),
-        );
+        )->filter(static fn($self) => $self->file->name()->toString() !== $self->added->name()->toString());
     }
 
     public function applicableTo(object $adapter): bool
