@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.1.0 - 2023-10-22
+
+### Added
+
+- `Innmind\Filesystem\File\Content::io()`
+
 ## 7.0.0 - 2023-10-21
 
 ### Added

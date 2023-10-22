@@ -38,6 +38,16 @@ return static function() {
                 )),
         ],
         [
+            'Content::io()',
+            Set\Elements::of('LICENSE', 'CHANGELOG.md', 'composer.json')
+                ->map(Path::of(...))
+                ->map(static fn($path) => Model::io(
+                    $io->wrap(
+                        $capabilities->readable()->open($path),
+                    ),
+                )),
+        ],
+        [
             'Content::none()',
             Set\Elements::of(Model::none()),
         ],
