@@ -144,7 +144,7 @@ class NameTest extends TestCase
                                 ...\range(48, 127),
                             ),
                         ),
-                    )->between(255, 1024), // upper limit at 1024 to avoid out of memory
+                    )->between(256, 1024), // upper limit at 1024 to avoid out of memory
                 )->filter(static fn(string $name): bool => $name !== '.' && $name !== '..'),
             )
             ->then(function($name) {
