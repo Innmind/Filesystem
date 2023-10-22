@@ -15,7 +15,7 @@ final class Directory
      */
     public static function properties(): Set
     {
-        return Set\Properties::any(...self::list());
+        return Set\Properties::any(...self::list())->atMost(50);
     }
 
     /**

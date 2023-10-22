@@ -46,6 +46,14 @@ final class Content
 
     /**
      * @psalm-pure
+     */
+    public static function io(IO\Readable\Stream $io): self
+    {
+        return new self(Content\IO::of($io));
+    }
+
+    /**
+     * @psalm-pure
      *
      * This method is to be used with sockets that can't be read twice
      */
