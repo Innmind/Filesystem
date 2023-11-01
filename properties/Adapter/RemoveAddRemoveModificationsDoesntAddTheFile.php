@@ -41,6 +41,11 @@ final class RemoveAddRemoveModificationsDoesntAddTheFile implements Property
         );
     }
 
+    public function directory(): Directory
+    {
+        return $this->directory;
+    }
+
     public function applicableTo(object $adapter): bool
     {
         return !$adapter->contains($this->directory->name());
