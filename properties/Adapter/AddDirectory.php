@@ -32,6 +32,11 @@ final class AddDirectory implements Property
         return FDirectory::any()->map(static fn($directory) => new self($directory));
     }
 
+    public function directory(): Directory
+    {
+        return $this->directory;
+    }
+
     public function applicableTo(object $adapter): bool
     {
         return !$adapter->contains($this->directory->name());

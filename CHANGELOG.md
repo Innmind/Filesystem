@@ -1,5 +1,12 @@
 # Changelog
 
+## 7.2.0- 2023-11-01
+
+### Added
+
+- `Properties\Innmind\Filesystem\Adapter\AddDirectory::directory()`
+- `Properties\Innmind\Filesystem\Adapter\RemoveAddRemoveModificationsDoesntAddTheFile::directory()`
+
 ## 7.1.0 - 2023-10-22
 
 ### Added
