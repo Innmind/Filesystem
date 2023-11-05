@@ -76,6 +76,7 @@ final class AtPath implements Implementation
             $io = $this->io->wrap($stream);
 
             yield $io
+                ->watch()
                 ->lines()
                 ->lazy()
                 ->sequence();
@@ -122,6 +123,7 @@ final class AtPath implements Implementation
             $io = $this->io->wrap($stream);
 
             yield $io
+                ->watch()
                 ->chunks(8192)
                 ->lazy()
                 ->sequence();

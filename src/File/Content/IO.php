@@ -57,6 +57,7 @@ final class IO implements Implementation
         /** @psalm-suppress ImpureMethodCall */
         return $this
             ->io
+            ->watch()
             ->lines()
             ->lazy()
             ->rewindable()
@@ -88,6 +89,7 @@ final class IO implements Implementation
         /** @psalm-suppress ImpureMethodCall */
         return $this
             ->io
+            ->watch()
             ->chunks(8192)
             ->lazy()
             ->rewindable()

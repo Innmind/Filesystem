@@ -61,6 +61,7 @@ final class OneShot implements Implementation
 
             yield $this
                 ->io
+                ->watch()
                 ->lines()
                 ->lazy()
                 ->sequence();
@@ -95,6 +96,7 @@ final class OneShot implements Implementation
 
             yield $this
                 ->io
+                ->watch()
                 ->chunks(8192)
                 ->lazy()
                 ->sequence();
