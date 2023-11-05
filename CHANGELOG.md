@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Watch the streams before reading from them (allows for an easy integration in `Fiber`s)
+
 ## 7.2.0- 2023-11-01
 
 ### Added
