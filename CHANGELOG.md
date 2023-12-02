@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Support for `symfony/filesystem:~7.0`
+
 ## 7.3.0 - 2023-11-05
 
 ### Added
