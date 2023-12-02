@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use Innmind\Filesystem\{
     Adapter\Filesystem,
@@ -17,7 +17,7 @@ return static function() {
     yield properties(
         'Filesystem properties',
         Adapter::properties(),
-        Set\Call::of(function() {
+        Set\Call::of(static function() {
             $path = \sys_get_temp_dir().'/innmind/filesystem/';
             (new FS)->remove($path);
 
@@ -31,7 +31,7 @@ return static function() {
     foreach (Adapter::alwaysApplicable() as $property) {
         yield property(
             $property,
-            Set\Call::of(function() {
+            Set\Call::of(static function() {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
 
@@ -45,7 +45,7 @@ return static function() {
 
     yield test(
         'Regression adding file in directory due to case sensitivity',
-        function($assert) {
+        static function($assert) {
             $property = new Adapter\AddRemoveAddModificationsStillAddTheFile(
                 Directory::named('0')
                     ->add($file = File::named('L', Content::none()))
@@ -63,6 +63,6 @@ return static function() {
             $property->ensureHeldBy($assert, $adapter);
 
             (new FS)->remove($path);
-        }
+        },
     );
 };
