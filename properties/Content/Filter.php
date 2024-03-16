@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Properties\Innmind\Filesystem\Content;
 
-use Innmind\Filesystem\File\{
-    Content,
-    Content\Line,
-};
+use Innmind\Filesystem\File\Content;
 use Innmind\BlackBox\{
     Set,
     Property,

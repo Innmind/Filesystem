@@ -9,10 +9,7 @@ use Innmind\Filesystem\{
     Name,
     Directory,
 };
-use Innmind\Immutable\{
-    Set,
-    Maybe,
-};
+use Innmind\Immutable\Maybe;
 use Psr\Log\LoggerInterface;
 
 final class Logger implements Adapter

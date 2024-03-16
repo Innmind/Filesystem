@@ -6,7 +6,6 @@ namespace Tests\Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     Adapter\Filesystem,
     Adapter,
-    CaseSensitivity,
     File,
     File\Content,
     Name,

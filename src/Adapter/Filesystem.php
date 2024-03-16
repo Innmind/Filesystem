@@ -12,7 +12,6 @@ use Innmind\Filesystem\{
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\RuntimeException,
-    Exception\CannotPersistClosedStream,
     Exception\LinksAreNotSupported,
     Exception\FailedToWriteFile,
 };
@@ -29,11 +28,9 @@ use Innmind\Stream\{
 use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Set,
     Sequence,
     Str,
     Maybe,
-    Either,
 };
 use Symfony\Component\{
     Filesystem\Filesystem as FS,

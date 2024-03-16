@@ -11,10 +11,7 @@ use Innmind\Filesystem\{
     File\Content,
     Name,
 };
-use Innmind\Immutable\{
-    Set,
-    Sequence,
-};
+use Innmind\Immutable\Sequence;
 use PHPUnit\Framework\TestCase;
 
 class InMemoryTest extends TestCase
