@@ -70,6 +70,7 @@ final class Lines implements Implementation
         $firstLineRead = false;
 
         return $this->lines->map(static function($line) use (&$firstLineRead) {
+            /** @psalm-suppress RedundantCondition */
             if (!$firstLineRead) {
                 $firstLineRead = true;
 
