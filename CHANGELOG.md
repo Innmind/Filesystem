@@ -5,6 +5,7 @@
 ### Changed
 
 - Special ASCII characters are no longer used in genarated names via `Fixtures\Innmind\Filesystem\Name::any()`
+- Emoticon characters are now used in genarated names via `Fixtures\Innmind\Filesystem\Name::any()`
 
 ## 7.4.0 - 2023-12-02
 

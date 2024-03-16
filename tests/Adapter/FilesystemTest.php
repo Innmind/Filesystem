@@ -437,7 +437,8 @@ class FilesystemTest extends TestCase
                 $name = ".$name";
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
-                (new FS)->dumpFile($path.$name, 'bar');
+                (new FS)->mkdir($path);
+                \file_put_contents($path.$name, 'bar');
 
                 $filesystem = Filesystem::mount(Path::of($path));
 
