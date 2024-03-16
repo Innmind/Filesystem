@@ -240,7 +240,10 @@ final class Filesystem implements Adapter
                 $this->io,
                 $path,
             ),
-            MediaType::maybe(@\mime_content_type($path->toString()) ?: '')->match(
+            MediaType::maybe(match ($mediaType = @\mime_content_type($path->toString())) {
+                false => '',
+                default => $mediaType,
+            })->match(
                 static fn($mediaType) => $mediaType,
                 static fn() => MediaType::null(),
             ),
