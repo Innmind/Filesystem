@@ -25,10 +25,12 @@ final class Name
     public static function strings(): Set
     {
         return Set\Strings::madeOf(
-            Set\Integers::between(1, 46)->map(\chr(...)),
-            Set\Integers::between(48, 127)->map(\chr(...)),
+            Set\Integers::between(32, 46)->map(\chr(...)),
+            Set\Integers::between(48, 126)->map(\chr(...)),
+            Set\Unicode::emoticons(),
         )
             ->between(1, 255)
+            ->filter(static fn($name) => \mb_strlen($name, 'ASCII') <= 255)
             ->filter(
                 static fn(string $name): bool => $name !== '.' &&
                     $name !== '..' &&

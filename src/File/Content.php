@@ -10,7 +10,6 @@ use Innmind\Filesystem\File\Content\{
 use Innmind\IO;
 use Innmind\Stream\{
     Stream\Size,
-    Readable as Stream,
     Capabilities,
 };
 use Innmind\Url\Path;

@@ -12,7 +12,6 @@ use Innmind\Filesystem\{
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
     Exception\RuntimeException,
-    Exception\CannotPersistClosedStream,
     Exception\LinksAreNotSupported,
     Exception\FailedToWriteFile,
 };
@@ -29,11 +28,9 @@ use Innmind\Stream\{
 use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Set,
     Sequence,
     Str,
     Maybe,
-    Either,
 };
 use Symfony\Component\{
     Filesystem\Filesystem as FS,
@@ -243,7 +240,10 @@ final class Filesystem implements Adapter
                 $this->io,
                 $path,
             ),
-            MediaType::maybe(@\mime_content_type($path->toString()) ?: '')->match(
+            MediaType::maybe(match ($mediaType = @\mime_content_type($path->toString())) {
+                false => '',
+                default => $mediaType,
+            })->match(
                 static fn($mediaType) => $mediaType,
                 static fn() => MediaType::null(),
             ),

@@ -1,8 +1,7 @@
 <?php
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use Innmind\Filesystem\Adapter\InMemory;
-use Innmind\Url\Path;
 use Properties\Innmind\Filesystem\Adapter;
 use Innmind\BlackBox\Set;
 

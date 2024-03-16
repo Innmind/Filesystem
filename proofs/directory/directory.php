@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use Innmind\Filesystem\Directory;
 use Fixtures\Innmind\Filesystem\{

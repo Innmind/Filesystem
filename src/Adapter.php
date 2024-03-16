@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Immutable\{
-    Set,
-    Maybe,
-};
+use Innmind\Immutable\Maybe;
 
 /**
  * Layer between value objects and concrete implementation

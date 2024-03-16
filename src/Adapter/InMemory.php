@@ -11,11 +11,7 @@ use Innmind\Filesystem\{
     Name,
     Directory,
 };
-use Innmind\Immutable\{
-    Map,
-    Set,
-    Maybe,
-};
+use Innmind\Immutable\Maybe;
 
 final class InMemory implements Adapter
 {
