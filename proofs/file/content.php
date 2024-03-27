@@ -246,7 +246,7 @@ return static function() {
             $atPath = Model::atPath(
                 $capabilities->readable(),
                 $io,
-                Path::of('fixtures/sample.pdf'),
+                Path::of('samples/sample.pdf'),
             );
             $content = Model::ofChunks($atPath->chunks());
 
