@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.5.1 - 2024-03-27
+
+### Fixed
+
+- `Innmind\Filesystem\File\Content::ofChunks()->size()` no longer load more than one chunk size in memory
+
 ## 7.5.0 - 2024-03-16
 
 ### Changed
