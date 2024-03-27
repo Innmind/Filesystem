@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
+use Innmind\Stream\Stream\Size;
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
@@ -81,7 +82,16 @@ final class Chunks implements Implementation
 
     public function size(): Maybe
     {
-        return $this->content()->size();
+        return Maybe::just(
+            $this
+                ->chunks
+                ->map(static fn($chunk) => $chunk->toEncoding(Str\Encoding::ascii))
+                ->map(static fn($chunk) => $chunk->length())
+                ->reduce(
+                    0,
+                    static fn(int $total, int $chunk) => $total + $chunk,
+                ),
+        )->map(static fn($size) => new Size($size));
     }
 
     public function toString(): string
