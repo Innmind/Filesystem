@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## 7.5.1 - 2024-03-27
 
 ### Fixed
 
