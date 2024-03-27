@@ -259,7 +259,7 @@ return static function() {
                     $assert->same(5951532, $size);
                 })
                 ->inLessThan()
-                ->kilobytes(600);
+                ->kilobytes(537);
         },
     );
 };
