@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+declare(ticks = 1);
 
 use Innmind\Filesystem\File\{
     Content as Model,
@@ -236,6 +237,29 @@ return static function() {
 
             $a($content);
             $assert->throws(static fn() => $b($content));
+        },
+    );
+
+    yield test(
+        'Content::ofChunks()->size() does not load the whole file in memory',
+        static function($assert) use ($io, $capabilities) {
+            $atPath = Model::atPath(
+                $capabilities->readable(),
+                $io,
+                Path::of('fixtures/sample.pdf'),
+            );
+            $content = Model::ofChunks($atPath->chunks());
+
+            $assert
+                ->memory(static function() use ($assert, $content) {
+                    $size = $content->size()->match(
+                        static fn($size) => $size->toInt(),
+                        static fn() => null,
+                    );
+                    $assert->same(5951532, $size);
+                })
+                ->inLessThan()
+                ->kilobytes(600);
         },
     );
 };
