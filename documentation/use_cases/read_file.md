@@ -54,12 +54,14 @@ $print = static function(File $file): void {
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
 $filesystem
     ->get(Name::of('some directory'))
-    ->keep(Instance::of(Directory::class)) // make sure "some directory" is not a file
+    ->keep(Instance::of(Directory::class)) //(1)
     ->flatMap(static fn($directory) => $directory->get(Name::of('some file')))
     ->match(
         static fn(File $file) => $print($file),
         static fn() => null, // the file doesn't exist
     );
 ```
+
+1. make sure "some directory" is not a file
 
 This example will print each line to the screen, or nothing if the file doesn't exist or if `some directory` is a file and not a directory or `some directory` doesn't exist.
