@@ -4,6 +4,19 @@ docs_dir: documentation
 
 nav:
   - Getting Started: index.md
+  - Use cases:
+    - Persist file: use_cases/persist_hand_file.md
+    - Persist uploaded file: use_cases/persist_uploaded_file.md
+    - Read file: use_cases/read_file.md
+    - Modify file: use_cases/modify_file.md
+    - Delete file: use_cases/delete_file.md
+    - Backup directory: use_cases/backup_directory.md
+    - Load FTP files: use_cases/load_ftp_files.md
+    - Case sensitivity: case_sensitivity.md
+    - Persist process output: use_cases/persist_process_output.md
+  - Testing:
+    - In your app: testing/in_app.md
+    - Your own adapter: testing/own_adapter.md
 
 theme:
   name: material
