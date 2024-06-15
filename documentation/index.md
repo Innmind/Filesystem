@@ -6,7 +6,7 @@ hide:
 
 # Getting started
 
-This project expose a set of interfaces allowing you to manipulate files and directories in a declarative way
+This project expose a set of APIs allowing you to manipulate files and directories in a declarative way.
 
 ## Installation
 
