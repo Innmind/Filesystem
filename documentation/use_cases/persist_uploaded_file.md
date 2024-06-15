@@ -6,25 +6,23 @@ use Innmind\Filesystem\{
     File\Content,
     Directory,
     Adapter\Filesystem,
+    Name,
 };
-use Innmind\IO\IO;
-use Innmind\Stream\Streams;
 use Innmind\Url\Path;
+use Innmind\Immutable\Predicate\Instance;
 
-$streams = Streams::fromAmbienAuthority();
-$io = IO::of($streams->watch()->waitForever(...))
-
+$tmp = Filesystem::mount(Path::of(\dirname($_FILES['my_upload']['tmp_name'])));
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
-$filesystem->add(
-    Directory::named('uploads')->add(
-        File::named(
-            $_FILES['my_upload']['name'],
-            Content::atPath(
-                $streams->readable(),
-                $io->readable(),
-                Path::of($_FILES['my_upload']['tmp_name']),
-            ),
-        ),
-    ),
-);
+
+$tmp
+    ->get(Name::of(\basename($_FILES['my_upload']['tmp_name'])))
+    ->keep(Instance::of(File::class))
+    ->map(static fn($file) => $file->rename(
+        Name::of($_FILES['my_upload']['name']),
+    ))
+    ->map(Directory::named('uploads')->add(...))
+    ->match(
+        $filesystem->add(...),
+        static fn() => null, // the file doesn't exist somehow
+    );
 ```

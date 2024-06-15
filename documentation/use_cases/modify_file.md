@@ -1,6 +1,7 @@
 # Modify a file
 
-**Important**: You can't modify a file _in place_, meaning you can't read and write to the same file at once. You need to write to a different file first.
+!!! warning ""
+    You can't modify a file _in place_, meaning you can't read and write to the same file at once. You need to write to a different file first.
 
 ## Replace a line
 
@@ -24,7 +25,8 @@ $insertRelease = static function(Str $line): Str {
 
     return $line;
 };
-// replace the old changelog with the new one containing the new release version
+// replace the old changelog with the new one containing
+// the new release version
 $release = static function(File $changelog) use ($insertRelease): File {
     return $changelog->withContent(
         $changelog->content()->map(
@@ -39,8 +41,8 @@ $filesystem
     ->keep(Instance::of(File::class))
     ->map($release)
     ->flatMap(static function($changelog) use ($tmp) {
-        // this operation is due to the fact that you cannot read and write to
-        // the same file at once
+        // this operation is due to the fact that you cannot read and
+        // write to the same file at once
         $tmp->add($changelog);
 
         return $tmp->get($changelog->name());
@@ -93,8 +95,8 @@ $filesystem
     ->keep(Instance::of(File::class))
     ->map($update)
     ->flatMap(static function($users) use ($tmp) {
-        // this operation is due to the fact that you cannot read and write to
-        // the same file at once
+        // this operation is due to the fact that you cannot read and
+        // write to the same file at once
         $tmp->add($users);
 
         return $tmp->get($users->name());
@@ -126,13 +128,19 @@ $merge = static function(File $file1, File $file2): File {
     return File::named(
         'all_users.csv',
         Content::ofLines(
-            $file1->content()->lines()->append($file2->content()->lines()),
+            $file1->content()->lines()->append(
+                $file2->content()->lines(),
+            ),
         ),
     );
 };
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
-$users1 = $filesystem->get(Name::of('users1.csv'))->keep(Instance::of(File::class));
-$users2 = $filesystem->get(Name::of('users2.csv'))->keep(Instance::of(File::class));
+$users1 = $filesystem
+    ->get(Name::of('users1.csv'))
+    ->keep(Instance::of(File::class));
+$users2 = $filesystem
+    ->get(Name::of('users2.csv'))
+    ->keep(Instance::of(File::class));
 Maybe::all($users1, $users2)
     ->map(static fn($file1, $file2) => $merge($file1, $file2))
     ->match(

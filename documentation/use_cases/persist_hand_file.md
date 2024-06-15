@@ -42,7 +42,7 @@ $filesystem->add(File::named(
 ));
 ```
 
-When the file is persisted the _end of line_ character will automatically added for you.
+When the file is persisted the _end of line_ character will be automatically added for you.
 
 ## Create a file inside a directory
 
@@ -57,7 +57,12 @@ use Innmind\Url\Path;
 
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
 $filesystem->add(
-    Directory::named('whatever')->add(File::named('some name'), Content::none()),
+    Directory::named('whatever')->add(
+        File::named(
+            'some name',
+            Content::none(),
+        ),
+    ),
 );
 ```
 

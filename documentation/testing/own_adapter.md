@@ -24,4 +24,4 @@ return static function() {
 };
 ```
 
-Then you can [run your proofs](https://github.com/Innmind/BlackBox/blob/develop/documentation/organize.md) via BlackBox.
+Then you can [run your proofs](https://innmind.github.io/BlackBox/organize/) via BlackBox.
