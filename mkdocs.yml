@@ -99,6 +99,6 @@ plugins:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/Innmind/immutable
+      link: https://github.com/Innmind/Filesystem
     - icon: fontawesome/brands/x-twitter
       link: https://twitter.com/Baptouuuu
