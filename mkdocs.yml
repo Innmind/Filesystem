@@ -4,6 +4,7 @@ docs_dir: documentation
 
 nav:
   - Getting Started: index.md
+  - Philosophy: philosophy.md
   - Use cases:
     - Persist file: use_cases/persist_hand_file.md
     - Persist uploaded file: use_cases/persist_uploaded_file.md
