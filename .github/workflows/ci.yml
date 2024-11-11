@@ -21,7 +21,7 @@ jobs:
           extensions: mbstring, intl
           coverage: none
       - name: Composer
-        uses: "ramsey/composer-install@v2"
+        uses: "ramsey/composer-install@v3"
         with:
           dependency-versions: ${{ matrix.dependencies }}
       - name: PHPUnit
@@ -47,7 +47,7 @@ jobs:
           extensions: mbstring, intl
           coverage: none
       - name: Composer
-        uses: "ramsey/composer-install@v2"
+        uses: "ramsey/composer-install@v3"
         with:
           dependency-versions: ${{ matrix.dependencies }}
       - name: BlackBox
@@ -70,14 +70,14 @@ jobs:
           extensions: mbstring, intl
           coverage: xdebug
       - name: Composer
-        uses: "ramsey/composer-install@v2"
+        uses: "ramsey/composer-install@v3"
         with:
           dependency-versions: ${{ matrix.dependencies }}
       - name: BlackBox
         run: php blackbox.php
         env:
           ENABLE_COVERAGE: 'true'
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
   coverage:
@@ -97,12 +97,12 @@ jobs:
           extensions: mbstring, intl
           coverage: xdebug
       - name: Composer
-        uses: "ramsey/composer-install@v2"
+        uses: "ramsey/composer-install@v3"
       - name: PHPUnit
         run: php -dmemory_limit=-1 vendor/bin/phpunit --coverage-clover=coverage.clover --exclude-group=properties
         env:
           BLACKBOX_SET_SIZE: 1
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
   psalm:
@@ -121,7 +121,7 @@ jobs:
           php-version: ${{ matrix.php-version }}
           extensions: mbstring, intl
       - name: Composer
-        uses: "ramsey/composer-install@v2"
+        uses: "ramsey/composer-install@v3"
         with:
           dependency-versions: ${{ matrix.dependencies }}
       - name: Psalm
@@ -141,6 +141,6 @@ jobs:
           php-version: ${{ matrix.php-version }}
           extensions: mbstring, intl
       - name: Composer
-        uses: "ramsey/composer-install@v2"
+        uses: "ramsey/composer-install@v3"
       - name: CS
         run: vendor/bin/php-cs-fixer fix --diff --dry-run
