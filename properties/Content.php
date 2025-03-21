@@ -13,9 +13,9 @@ use Innmind\BlackBox\{
 final class Content
 {
     /**
-     * @return Set<Properties>
+     * @return Set\Provider<Properties>|Set<Properties>
      */
-    public static function properties(): Set
+    public static function properties(): Set\Provider|Set
     {
         return Set\Properties::any(
             ...\array_map(
