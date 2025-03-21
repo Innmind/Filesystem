@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.6.0 - 2025-03-21
+
+### Added
+
+- Support for `innmind/black-box` `6`
+
 ## 7.5.1 - 2024-03-27
 
 ### Fixed

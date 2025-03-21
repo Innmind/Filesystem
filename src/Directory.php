@@ -40,7 +40,7 @@ final class Directory
      *
      * @throws DuplicatedFile
      */
-    public static function of(Name $name, Sequence $files = null): self
+    public static function of(Name $name, ?Sequence $files = null): self
     {
         return new self(
             $name,

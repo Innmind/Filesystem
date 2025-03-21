@@ -18,7 +18,7 @@ final class File
     private function __construct(
         Name $name,
         Content $content,
-        MediaType $mediaType = null,
+        ?MediaType $mediaType = null,
     ) {
         $this->name = $name;
         $this->content = $content;
@@ -31,7 +31,7 @@ final class File
     public static function of(
         Name $name,
         Content $content,
-        MediaType $mediaType = null,
+        ?MediaType $mediaType = null,
     ): self {
         return new self($name, $content, $mediaType);
     }
@@ -44,7 +44,7 @@ final class File
     public static function named(
         string $name,
         Content $content,
-        MediaType $mediaType = null,
+        ?MediaType $mediaType = null,
     ): self {
         return new self(Name::of($name), $content, $mediaType);
     }
@@ -69,7 +69,7 @@ final class File
         return new self($name, $this->content, $this->mediaType);
     }
 
-    public function withContent(Content $content, MediaType $mediaType = null): self
+    public function withContent(Content $content, ?MediaType $mediaType = null): self
     {
         return new self(
             $this->name,

@@ -73,8 +73,8 @@ final class Filesystem implements Adapter
 
     public static function mount(
         Path $path,
-        Capabilities $capabilities = null,
-        IO $io = null,
+        ?Capabilities $capabilities = null,
+        ?IO $io = null,
     ): self {
         $capabilities ??= Streams::fromAmbientAuthority();
         $io ??= IO::of(static fn(?ElapsedPeriod $period) => match ($period) {
