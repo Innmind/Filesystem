@@ -13,10 +13,7 @@ final class Name
      */
     public static function any(): Set
     {
-        return Set\Decorate::immutable(
-            static fn(string $name): Model => Model::of($name),
-            self::strings(),
-        );
+        return self::strings()->map(Model::of(...));
     }
 
     /**
@@ -24,10 +21,10 @@ final class Name
      */
     public static function strings(): Set
     {
-        return Set\Strings::madeOf(
-            Set\Integers::between(32, 46)->map(\chr(...)),
-            Set\Integers::between(48, 126)->map(\chr(...)),
-            Set\Unicode::emoticons(),
+        return Set::strings()->madeOf(
+            Set::integers()->between(32, 46)->map(\chr(...)),
+            Set::integers()->between(48, 126)->map(\chr(...)),
+            Set::strings()->unicode()->emoticons(),
         )
             ->between(1, 255)
             ->filter(static fn($name) => \mb_strlen($name, 'ASCII') <= 255)

@@ -34,9 +34,9 @@ final class AddDirectoryFromAnotherAdapter implements Property
         $this->file = $file;
     }
 
-    public static function any(): Set
+    public static function any(): Set\Provider
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             FName::any(),
             FFile::any(),

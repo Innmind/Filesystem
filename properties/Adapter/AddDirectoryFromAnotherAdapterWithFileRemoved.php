@@ -38,7 +38,7 @@ final class AddDirectoryFromAnotherAdapterWithFileRemoved implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             FName::any(),
             FFile::any(),

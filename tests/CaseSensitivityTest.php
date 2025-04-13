@@ -40,7 +40,7 @@ class CaseSensitivityTest extends TestCase
         $this
             ->forAll(
                 FName::strings(),
-                Set\Sequence::of(FName::strings()),
+                Set::sequence(FName::strings()),
             )
             ->filter(static fn($a, $b) => !\in_array($a, $b, true))
             ->then(function($a, $b) {

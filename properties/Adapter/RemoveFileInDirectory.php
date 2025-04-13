@@ -33,9 +33,9 @@ final class RemoveFileInDirectory implements Property
         $this->name = $name;
     }
 
-    public static function any(): Set
+    public static function any(): Set\Provider
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             FFile::any(),
             FName::any(),

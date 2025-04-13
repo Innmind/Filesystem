@@ -22,13 +22,13 @@ return static function() {
     $implementations = [
         [
             'Content::ofString()',
-            Set\Sequence::of(Set\Strings::any())->map(
+            Set::sequence(Set::strings())->map(
                 static fn($lines) => Model::ofString(\implode("\n", $lines)),
             ),
         ],
         [
             'Content::atPath()',
-            Set\Elements::of('LICENSE', 'CHANGELOG.md', 'composer.json')
+            Set::of('LICENSE', 'CHANGELOG.md', 'composer.json')
                 ->map(Path::of(...))
                 ->map(static fn($path) => Model::atPath(
                     $io,
@@ -37,7 +37,7 @@ return static function() {
         ],
         [
             'Content::io()',
-            Set\Elements::of('LICENSE', 'CHANGELOG.md', 'composer.json')
+            Set::of('LICENSE', 'CHANGELOG.md', 'composer.json')
                 ->map(static fn($path) => Model::io(
                     $io->streams()->acquire(
                         \fopen($path, 'r'),
@@ -46,14 +46,18 @@ return static function() {
         ],
         [
             'Content::none()',
-            Set\Elements::of(Model::none()),
+            Set::of(Model::none()),
         ],
         [
             'Content::ofLines()',
-            Set\Sequence::of(
-                Set\Strings::madeOf(
-                    Set\Unicode::any()->filter(static fn($char) => $char !== "\n"),
-                )
+            Set::sequence(
+                Set::strings()
+                    ->madeOf(
+                        Set::strings()
+                            ->unicode()
+                            ->char()
+                            ->filter(static fn($char) => $char !== "\n"),
+                    )
                     ->map(Str::of(...))
                     ->map(Line::of(...)),
             )
@@ -61,8 +65,10 @@ return static function() {
         ],
         [
             'Content::ofChunks()',
-            Set\Sequence::of(
-                Set\Strings::madeOf(Set\Unicode::any())->map(Str::of(...)),
+            Set::sequence(
+                Set::strings()
+                    ->madeOf(Set::strings()->unicode()->char())
+                    ->map(Str::of(...)),
             )
                 ->map(static fn($chunks) => Model::ofChunks(Sequence::of(...$chunks))),
         ],
@@ -102,9 +108,13 @@ return static function() {
     yield proof(
         'Content::oneShot()->map()',
         given(
-            Set\Strings::madeOf(
-                Set\Unicode::any()->filter(static fn($char) => $char !== "\n"),
-            )
+            Set::strings()
+                ->madeOf(
+                    Set::strings()
+                        ->unicode()
+                        ->char()
+                        ->filter(static fn($char) => $char !== "\n"),
+                )
                 ->map(Str::of(...))
                 ->map(Line::of(...)),
         ),
@@ -127,11 +137,17 @@ return static function() {
     yield proof(
         'Content::oneShot()->flatMap()',
         given(
-            Set\Strings::madeOf(
-                Set\Unicode::any()->filter(static fn($char) => $char !== "\n"),
+            Set::strings()->madeOf(
+                Set::strings()
+                    ->unicode()
+                    ->char()
+                    ->filter(static fn($char) => $char !== "\n"),
             ),
-            Set\Strings::madeOf(
-                Set\Unicode::any()->filter(static fn($char) => $char !== "\n"),
+            Set::strings()->madeOf(
+                Set::strings()
+                    ->unicode()
+                    ->char()
+                    ->filter(static fn($char) => $char !== "\n"),
             ),
         )->filter(static fn($a, $b) => $a !== $b),
         static function($assert, $replacement1, $replacement2) use ($io) {
@@ -210,7 +226,7 @@ return static function() {
         },
     );
 
-    $actions = Set\Elements::of(
+    $actions = Set::of(
         static fn($content) => $content->foreach(static fn() => null),
         static fn($content) => $content->toString(),
         static fn($content) => $content->chunks()->toList(),

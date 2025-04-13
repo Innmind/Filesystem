@@ -6,6 +6,7 @@
 
 - Require `innmind/io` `3`
 - `Innmind\Filesystem\File\Content::size()` now returns `Innmind\Immutable\Maybe<Innmind\IO\Stream\Size>`
+- Require `innmind/black-box` `6`
 
 ### Removed
 

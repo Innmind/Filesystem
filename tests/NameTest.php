@@ -110,7 +110,7 @@ class NameTest extends TestCase
     public function testDotFoldersAreNotAccepted()
     {
         $this
-            ->forAll(Set\Elements::of('.', '..'))
+            ->forAll(Set::of('.', '..'))
             ->then(function($name) {
                 try {
                     Name::of($name);
@@ -133,19 +133,16 @@ class NameTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Decorate::immutable(
-                    static fn(array $chrs): string => \implode('', $chrs),
-                    Set\Sequence::of(
-                        Set\Decorate::immutable(
-                            static fn(int $chr): string => \chr($chr),
-                            Set\Elements::of(
-                                ...\range(1, 46),
-                                // chr(47) alias '/' not accepted
-                                ...\range(48, 127),
-                            ),
-                        ),
-                    )->between(256, 1024), // upper limit at 1024 to avoid out of memory
-                )->filter(static fn(string $name): bool => $name !== '.' && $name !== '..'),
+                Set::sequence(
+                    Set::of(
+                        ...\range(1, 46),
+                        // chr(47) alias '/' not accepted
+                        ...\range(48, 127),
+                    )->map(static fn(int $chr): string => \chr($chr)),
+                )
+                    ->between(256, 1024) // upper limit at 1024 to avoid out of memory
+                    ->map(static fn(array $chrs): string => \implode('', $chrs))
+                    ->filter(static fn(string $name): bool => $name !== '.' && $name !== '..'),
             )
             ->then(function($name) {
                 try {
@@ -161,7 +158,7 @@ class NameTest extends TestCase
     public function testNameWithOnlyWhiteSpacesIsNotAccepted()
     {
         $this
-            ->forAll(Set\Elements::of(
+            ->forAll(Set::of(
                 32,
                 ...\range(9, 13),
             ))
@@ -179,7 +176,7 @@ class NameTest extends TestCase
     public function testAnySequenceOfNamesConstitutesAValidPath()
     {
         $this
-            ->forAll(Set\Sequence::of(
+            ->forAll(Set::sequence(
                 Fixture::any(),
             )->between(1, 10)) // enough to prove the behaviour
             ->then(function($names) {
@@ -199,7 +196,7 @@ class NameTest extends TestCase
     public function testUnicodeCharactersAreAccepted()
     {
         $this
-            ->forAll(Set\Unicode::latinExtendedA())
+            ->forAll(Set::strings()->unicode()->latinExtendedA())
             ->then(function(string $name) {
                 $this->assertInstanceOf(Name::class, Name::of($name));
             });
