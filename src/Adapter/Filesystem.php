@@ -13,18 +13,8 @@ use Innmind\Filesystem\{
     Exception\PathTooLong,
     Exception\RuntimeException,
     Exception\LinksAreNotSupported,
-    Exception\FailedToWriteFile,
 };
-use Innmind\TimeContinuum\ElapsedPeriod;
-use Innmind\IO\{
-    IO,
-    Readable,
-};
-use Innmind\Stream\{
-    Capabilities,
-    Streams,
-    Writable,
-};
+use Innmind\IO\IO;
 use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
@@ -40,8 +30,7 @@ use Symfony\Component\{
 final class Filesystem implements Adapter
 {
     private const INVALID_FILES = ['.', '..'];
-    private Capabilities $capabilities;
-    private Readable $io;
+    private IO $io;
     private Path $path;
     private CaseSensitivity $case;
     private FS $filesystem;
@@ -49,8 +38,7 @@ final class Filesystem implements Adapter
     private \WeakMap $loaded;
 
     private function __construct(
-        Capabilities $capabilities,
-        Readable $io,
+        IO $io,
         Path $path,
         CaseSensitivity $case,
     ) {
@@ -58,7 +46,6 @@ final class Filesystem implements Adapter
             throw new PathDoesntRepresentADirectory($path->toString());
         }
 
-        $this->capabilities = $capabilities;
         $this->io = $io;
         $this->path = $path;
         $this->case = $case;
@@ -73,18 +60,10 @@ final class Filesystem implements Adapter
 
     public static function mount(
         Path $path,
-        ?Capabilities $capabilities = null,
         ?IO $io = null,
     ): self {
-        $capabilities ??= Streams::fromAmbientAuthority();
-        $io ??= IO::of(static fn(?ElapsedPeriod $period) => match ($period) {
-            null => $capabilities->watch()->waitForever(),
-            default => $capabilities->watch()->timeoutAfter($period),
-        });
-
         return new self(
-            $capabilities,
-            $io->readable(),
+            $io ?? IO::fromAmbientAuthority(),
             $path,
             CaseSensitivity::sensitive,
         );
@@ -92,7 +71,7 @@ final class Filesystem implements Adapter
 
     public function withCaseSensitivity(CaseSensitivity $case): self
     {
-        return new self($this->capabilities, $this->io, $this->path, $case);
+        return new self($this->io, $this->path, $case);
     }
 
     public function add(File|Directory $file): void
@@ -193,23 +172,12 @@ final class Filesystem implements Adapter
             );
         }
 
-        $handle = $this->capabilities->writable()->open($path);
-
-        $_ = $chunks
-            ->reduce(
-                $handle,
-                static fn(Writable $handle, Str $chunk): Writable => $handle
-                    ->write($chunk->toEncoding(Str\Encoding::ascii))
-                    ->match(
-                        static fn($handle) => $handle,
-                        static fn() => throw new FailedToWriteFile,
-                    ),
-            )
-            ->close()
-            ->match(
-                static fn() => null,
-                static fn() => throw new FailedToWriteFile,
-            );
+        $_ = $this
+            ->io
+            ->files()
+            ->write($path)
+            ->sink($chunks)
+            ->unwrap();
     }
 
     /**
@@ -236,7 +204,6 @@ final class Filesystem implements Adapter
         $file = File::of(
             $file,
             File\Content::atPath(
-                $this->capabilities->readable(),
                 $this->io,
                 $path,
             ),

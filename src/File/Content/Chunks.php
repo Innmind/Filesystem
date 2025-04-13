@@ -3,7 +3,8 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\Stream\Stream\Size;
+use Innmind\IO\Stream\Size;
+use Innmind\Validation\Is;
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
@@ -91,7 +92,13 @@ final class Chunks implements Implementation
                     0,
                     static fn(int $total, int $chunk) => $total + $chunk,
                 ),
-        )->map(static fn($size) => new Size($size));
+        )
+            ->keep(
+                Is::value(0)
+                    ->or(Is::int()->positive())
+                    ->asPredicate(),
+            )
+            ->map(Size::of(...));
     }
 
     public function toString(): string

@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\IO\Readable\Stream;
+use Innmind\IO\{
+    Streams\Stream,
+    Frame,
+};
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
@@ -17,11 +20,9 @@ use Innmind\Immutable\{
  */
 final class IO implements Implementation
 {
-    private Stream $io;
-
-    private function __construct(Stream $io)
-    {
-        $this->io = $io;
+    private function __construct(
+        private Stream $io,
+    ) {
     }
 
     /**
@@ -57,12 +58,13 @@ final class IO implements Implementation
         /** @psalm-suppress ImpureMethodCall */
         return $this
             ->io
+            ->read()
             ->watch()
-            ->lines()
+            ->frames(Frame::line())
             ->lazy()
             ->rewindable()
             ->sequence()
-            ->map(static fn($line) => Line::fromStream($line));
+            ->map(Line::fromStream(...));
     }
 
     public function reduce($carry, callable $reducer)
@@ -73,7 +75,7 @@ final class IO implements Implementation
     public function size(): Maybe
     {
         /** @psalm-suppress ImpureMethodCall */
-        return $this->io->size();
+        return $this->io->read()->internal()->size();
     }
 
     public function toString(): string
@@ -89,8 +91,9 @@ final class IO implements Implementation
         /** @psalm-suppress ImpureMethodCall */
         return $this
             ->io
+            ->read()
             ->watch()
-            ->chunks(8192)
+            ->frames(Frame::chunk(8192)->loose())
             ->lazy()
             ->rewindable()
             ->sequence();

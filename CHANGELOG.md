@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Require `innmind/io` `3`
+- `Innmind\Filesystem\File\Content::size()` now returns `Innmind\Immutable\Maybe<Innmind\IO\Stream\Size>`
+
 ### Fixed
 
 - Support for PHP `8.4`

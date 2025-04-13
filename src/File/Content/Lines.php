@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\Stream\Stream\Size;
+use Innmind\IO\Stream\Size;
 use Innmind\Immutable\{
     Sequence,
     Str,
@@ -97,7 +97,7 @@ final class Lines implements Implementation
         // "end of line" character
         $size = \max(0, $size - 1);
 
-        return Maybe::just(new Size($size));
+        return Maybe::just(Size::of($size));
     }
 
     public function toString(): string
