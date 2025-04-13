@@ -21,7 +21,7 @@
         "innmind/media-type": "~2.1",
         "innmind/url": "~4.2",
         "psr/log": "~3.0",
-        "innmind/io": "~3.0",
+        "innmind/io": "^3.0.1",
         "innmind/validation": "~2.0"
     },
     "autoload": {
