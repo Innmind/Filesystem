@@ -276,7 +276,7 @@ class FilesystemTest extends TestCase
     public function testPathTooLongThrowAnException()
     {
         if (\PHP_OS !== 'Darwin') {
-            $this->markTestSkipped();
+            return;
         }
 
         $path = \sys_get_temp_dir().'/innmind/filesystem/';
