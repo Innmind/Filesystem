@@ -9,9 +9,9 @@ use Innmind\Filesystem\{
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\Str;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 use Fixtures\Innmind\Filesystem\Name as Fixture;

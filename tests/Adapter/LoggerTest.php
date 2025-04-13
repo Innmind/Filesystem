@@ -5,17 +5,13 @@ namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter\Logger,
-    Adapter,
+    Adapter\InMemory,
     File,
+    File\Content,
     Name,
-    Directory,
 };
-use Innmind\Immutable\{
-    Sequence,
-    Maybe,
-};
-use Psr\Log\LoggerInterface;
-use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class LoggerTest extends TestCase
 {
@@ -24,8 +20,8 @@ class LoggerTest extends TestCase
         $this->assertInstanceOf(
             Adapter::class,
             Logger::psr(
-                $this->createMock(Adapter::class),
-                $this->createMock(LoggerInterface::class),
+                InMemory::new(),
+                new NullLogger,
             ),
         );
     }
@@ -33,37 +29,24 @@ class LoggerTest extends TestCase
     public function testAdd()
     {
         $adapter = Logger::psr(
-            $inner = $this->createMock(Adapter::class),
-            $logger = $this->createMock(LoggerInterface::class),
+            $inner = InMemory::new(),
+            new NullLogger,
         );
-        $file = $file = File::of(Name::of('foo'), File\Content::none());
-        $logger
-            ->expects($this->once())
-            ->method('debug');
-        $inner
-            ->expects($this->once())
-            ->method('add')
-            ->with($file);
+        $file = File::of(Name::of('foo'), Content::none());
 
         $this->assertNull($adapter->add($file));
+        $this->assertTrue($inner->contains($file->name()));
     }
 
     public function testGet()
     {
         $adapter = Logger::psr(
-            $inner = $this->createMock(Adapter::class),
-            $logger = $this->createMock(LoggerInterface::class),
+            $inner = InMemory::new(),
+            new NullLogger,
         );
         $name = Name::of('foo');
-        $file = File::of($name, File\Content::none());
-        $logger
-            ->expects($this->once())
-            ->method('debug');
-        $inner
-            ->expects($this->once())
-            ->method('get')
-            ->with($name)
-            ->willReturn(Maybe::just($file));
+        $file = File::of($name, Content::none());
+        $inner->add($file);
 
         $this->assertSame(
             $file,
@@ -77,18 +60,11 @@ class LoggerTest extends TestCase
     public function testContains()
     {
         $adapter = Logger::psr(
-            $inner = $this->createMock(Adapter::class),
-            $logger = $this->createMock(LoggerInterface::class),
+            $inner = InMemory::new(),
+            new NullLogger,
         );
         $name = Name::of('foo');
-        $logger
-            ->expects($this->once())
-            ->method('debug');
-        $inner
-            ->expects($this->once())
-            ->method('contains')
-            ->with($name)
-            ->willReturn(true);
+        $inner->add(File::of($name, Content::none()));
 
         $this->assertTrue($adapter->contains($name));
     }
@@ -96,38 +72,27 @@ class LoggerTest extends TestCase
     public function testRemove()
     {
         $adapter = Logger::psr(
-            $inner = $this->createMock(Adapter::class),
-            $logger = $this->createMock(LoggerInterface::class),
+            $inner = InMemory::new(),
+            new NullLogger,
         );
         $name = Name::of('foo');
-        $logger
-            ->expects($this->once())
-            ->method('debug');
-        $inner
-            ->expects($this->once())
-            ->method('remove')
-            ->with($name);
+        $inner->add(File::of($name, Content::none()));
 
         $this->assertNull($adapter->remove($name));
+        $this->assertFalse($inner->contains($name));
     }
 
     public function testRoot()
     {
         $adapter = Logger::psr(
-            $inner = $this->createMock(Adapter::class),
-            $this->createMock(LoggerInterface::class),
+            $inner = InMemory::new(),
+            new NullLogger,
         );
-        $all = Sequence::of($file = File::named(
+        $file = File::named(
             'watev',
-            File\Content::none(),
-        ));
-        $inner
-            ->expects($this->once())
-            ->method('root')
-            ->willReturn(Directory::of(
-                Name::of('root'),
-                $all,
-            ));
+            Content::none(),
+        );
+        $inner->add($file);
 
         $this->assertSame([$file], $adapter->root()->all()->toList());
     }

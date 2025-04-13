@@ -12,7 +12,7 @@ use Innmind\Filesystem\{
     Name,
 };
 use Innmind\Immutable\Sequence;
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class InMemoryTest extends TestCase
 {

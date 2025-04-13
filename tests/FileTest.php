@@ -10,8 +10,10 @@ use Innmind\Filesystem\{
     Name,
 };
 use Innmind\MediaType\MediaType;
-use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
+};
 use Fixtures\Innmind\Filesystem\Name as FName;
 use Fixtures\Innmind\MediaType\MediaType as FMediaType;
 

@@ -21,9 +21,9 @@ use Innmind\Immutable\{
     Map,
 };
 use Symfony\Component\Filesystem\Filesystem as FS;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 use Fixtures\Innmind\Filesystem\Name as FName;
