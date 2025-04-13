@@ -21,9 +21,9 @@ use Innmind\Immutable\{
     Map,
 };
 use Symfony\Component\Filesystem\Filesystem as FS;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 use Fixtures\Innmind\Filesystem\Name as FName;
@@ -276,7 +276,7 @@ class FilesystemTest extends TestCase
     public function testPathTooLongThrowAnException()
     {
         if (\PHP_OS !== 'Darwin') {
-            $this->markTestSkipped();
+            return;
         }
 
         $path = \sys_get_temp_dir().'/innmind/filesystem/';

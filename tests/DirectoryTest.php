@@ -15,8 +15,10 @@ use Innmind\Immutable\{
     Sequence,
     SideEffect,
 };
-use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
+};
 use Fixtures\Innmind\Filesystem\Name as FName;
 
 class DirectoryTest extends TestCase

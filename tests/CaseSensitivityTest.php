@@ -8,9 +8,9 @@ use Innmind\Filesystem\{
     Name,
 };
 use Innmind\Immutable\Set as ISet;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 use Fixtures\Innmind\Filesystem\Name as FName;
