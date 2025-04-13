@@ -11,7 +11,11 @@ use Innmind\Filesystem\{
     Name,
     Directory,
 };
-use Innmind\Immutable\Maybe;
+use Innmind\Immutable\{
+    Maybe,
+    Attempt,
+    SideEffect,
+};
 
 final class InMemory implements Adapter
 {
@@ -35,9 +39,11 @@ final class InMemory implements Adapter
     }
 
     #[\Override]
-    public function add(File|Directory $file): void
+    public function add(File|Directory $file): Attempt
     {
         $this->root = ($this->behaviour)($this->root, $file);
+
+        return Attempt::result(SideEffect::identity());
     }
 
     #[\Override]
@@ -53,9 +59,11 @@ final class InMemory implements Adapter
     }
 
     #[\Override]
-    public function remove(Name $file): void
+    public function remove(Name $file): Attempt
     {
         $this->root = $this->root->remove($file);
+
+        return Attempt::result(SideEffect::identity());
     }
 
     #[\Override]

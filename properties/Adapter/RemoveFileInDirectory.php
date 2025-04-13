@@ -9,6 +9,7 @@ use Innmind\Filesystem\{
     Name,
     Directory,
 };
+use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -49,8 +50,20 @@ final class RemoveFileInDirectory implements Property
 
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        $assert->null($adapter->add(Directory::of($this->name)->add($this->file)));
-        $assert->null($adapter->add(Directory::of($this->name)->remove($this->file->name())));
+        $assert
+            ->object(
+                $adapter
+                    ->add(Directory::of($this->name)->add($this->file))
+                    ->unwrap(),
+            )
+            ->instance(SideEffect::class);
+        $assert
+            ->object(
+                $adapter
+                    ->add(Directory::of($this->name)->remove($this->file->name()))
+                    ->unwrap(),
+            )
+            ->instance(SideEffect::class);
         $assert->false(
             $adapter
                 ->get($this->name)

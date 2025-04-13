@@ -35,7 +35,9 @@ $directory = Directory::named('uploads')->add(
     ),
 );
 $adapter = Filesystem::mount(Path::of('/var/www/web/'));
-$adapter->add($directory);
+$_ = $adapter
+    ->add($directory)
+    ->unwrap();
 ```
 
 This example show you how you can create a new directory `uploads` in the folder `/var/www/web/` of your filesystem and create the uploaded file into it.

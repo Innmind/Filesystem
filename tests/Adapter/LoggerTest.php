@@ -11,6 +11,7 @@ use Innmind\Filesystem\{
     File\Content,
     Name,
 };
+use Innmind\Immutable\SideEffect;
 use Psr\Log\NullLogger;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
@@ -35,7 +36,12 @@ class LoggerTest extends TestCase
         );
         $file = File::of(Name::of('foo'), Content::none());
 
-        $this->assertNull($adapter->add($file));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $adapter
+                ->add($file)
+                ->unwrap(),
+        );
         $this->assertTrue($inner->contains($file->name()));
     }
 
@@ -47,7 +53,9 @@ class LoggerTest extends TestCase
         );
         $name = Name::of('foo');
         $file = File::of($name, Content::none());
-        $inner->add($file);
+        $inner
+            ->add($file)
+            ->unwrap();
 
         $this->assertSame(
             $file,
@@ -65,7 +73,9 @@ class LoggerTest extends TestCase
             new NullLogger,
         );
         $name = Name::of('foo');
-        $inner->add(File::of($name, Content::none()));
+        $inner
+            ->add(File::of($name, Content::none()))
+            ->unwrap();
 
         $this->assertTrue($adapter->contains($name));
     }
@@ -77,9 +87,16 @@ class LoggerTest extends TestCase
             new NullLogger,
         );
         $name = Name::of('foo');
-        $inner->add(File::of($name, Content::none()));
+        $inner
+            ->add(File::of($name, Content::none()))
+            ->unwrap();
 
-        $this->assertNull($adapter->remove($name));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $adapter
+                ->remove($name)
+                ->unwrap(),
+        );
         $this->assertFalse($inner->contains($name));
     }
 
@@ -93,7 +110,9 @@ class LoggerTest extends TestCase
             'watev',
             Content::none(),
         );
-        $inner->add($file);
+        $inner
+            ->add($file)
+            ->unwrap();
 
         $this->assertSame([$file], $adapter->root()->all()->toList());
     }

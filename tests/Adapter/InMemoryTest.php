@@ -11,7 +11,10 @@ use Innmind\Filesystem\{
     File\Content,
     Name,
 };
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    SideEffect,
+};
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class InMemoryTest extends TestCase
@@ -22,8 +25,11 @@ class InMemoryTest extends TestCase
 
         $this->assertInstanceOf(Adapter::class, $a);
         $this->assertFalse($a->contains(Name::of('foo')));
-        $this->assertNull(
-            $a->add($d = Directory::of(Name::of('foo'))),
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $a
+                ->add($d = Directory::of(Name::of('foo')))
+                ->unwrap(),
         );
         $this->assertTrue($a->contains(Name::of('foo')));
         $this->assertSame(
@@ -33,7 +39,12 @@ class InMemoryTest extends TestCase
                 static fn() => null,
             ),
         );
-        $this->assertNull($a->remove(Name::of('foo')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $a
+                ->remove(Name::of('foo'))
+                ->unwrap(),
+        );
         $this->assertFalse($a->contains(Name::of('foo')));
     }
 
@@ -47,20 +58,29 @@ class InMemoryTest extends TestCase
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $this->assertNull(InMemory::new()->remove(Name::of('foo')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            InMemory::new()
+                ->remove(Name::of('foo'))
+                ->unwrap(),
+        );
     }
 
     public function testRoot()
     {
         $adapter = InMemory::new();
-        $adapter->add($foo = File::of(
-            Name::of('foo'),
-            Content::ofString('foo'),
-        ));
-        $adapter->add($bar = File::of(
-            Name::of('bar'),
-            Content::ofString('bar'),
-        ));
+        $adapter
+            ->add($foo = File::of(
+                Name::of('foo'),
+                Content::ofString('foo'),
+            ))
+            ->unwrap();
+        $adapter
+            ->add($bar = File::of(
+                Name::of('bar'),
+                Content::ofString('bar'),
+            ))
+            ->unwrap();
 
         $all = $adapter->root()->all();
         $this->assertSame(
@@ -78,7 +98,7 @@ class InMemoryTest extends TestCase
                 Directory::named('bar'),
                 File::named('baz', Content::none()),
             ),
-        ));
+        ))->unwrap();
         $adapter->add(Directory::of(
             Name::of('foo'),
             Sequence::of(
@@ -91,7 +111,7 @@ class InMemoryTest extends TestCase
                     Sequence::of(File::named('foo', Content::none())),
                 ),
             ),
-        ));
+        ))->unwrap();
 
         $this->assertTrue(
             $adapter

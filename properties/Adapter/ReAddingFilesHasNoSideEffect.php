@@ -33,7 +33,7 @@ final class ReAddingFilesHasNoSideEffect implements Property
         $adapter
             ->root()
             ->foreach(static function($file) use ($assert, $adapter) {
-                $adapter->add($file);
+                $adapter->add($file)->unwrap();
                 $assert->true($adapter->contains($file->name()));
 
                 if ($file instanceof Directory) {

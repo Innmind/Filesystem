@@ -11,7 +11,9 @@ use Innmind\Filesystem\{
 use Innmind\Url\Path;
 
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
-$filesystem->add(File::named('some name'), Content::none());
+$_ = $filesystem
+    ->add(File::named('some name'), Content::none())
+    ->unwrap();
 ```
 
 This is equivalent of running the cli command `touch '/var/data/some name'`.
@@ -32,14 +34,16 @@ use Innmind\Immutable\{
 };
 
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
-$filesystem->add(File::named(
-    'some name',
-    Content::ofLines(Sequence::of(
-        Line::of(Str::of('first line')),
-        Line::of(Str::of('second line')),
-        Line::of(Str::of('etc...')),
+$_ = $filesystem
+    ->add(File::named(
+        'some name',
+        Content::ofLines(Sequence::of(
+            Line::of(Str::of('first line')),
+            Line::of(Str::of('second line')),
+            Line::of(Str::of('etc...')),
+        ))
     ))
-));
+    ->unwrap();
 ```
 
 When the file is persisted the _end of line_ character will be automatically added for you.
@@ -56,14 +60,16 @@ use Innmind\Filesystem\{
 use Innmind\Url\Path;
 
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
-$filesystem->add(
-    Directory::named('whatever')->add(
-        File::named(
-            'some name',
-            Content::none(),
+$_ = $filesystem
+    ->add(
+        Directory::named('whatever')->add(
+            File::named(
+                'some name',
+                Content::none(),
+            ),
         ),
-    ),
-);
+    )
+    ->unwrap();
 ```
 
 This is equivalent of running the cli command `touch '/var/data/whatever/some name'`.
