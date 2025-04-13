@@ -33,26 +33,31 @@ final class IO implements Implementation
         return new self($io);
     }
 
+    #[\Override]
     public function foreach(callable $function): SideEffect
     {
         return $this->lines()->foreach($function);
     }
 
+    #[\Override]
     public function map(callable $map): Implementation
     {
         return Lines::of($this->lines()->map($map));
     }
 
+    #[\Override]
     public function flatMap(callable $map): Implementation
     {
         return Lines::of($this->lines())->flatMap($map);
     }
 
+    #[\Override]
     public function filter(callable $filter): Implementation
     {
         return Lines::of($this->lines()->filter($filter));
     }
 
+    #[\Override]
     public function lines(): Sequence
     {
         /** @psalm-suppress ImpureMethodCall */
@@ -67,17 +72,20 @@ final class IO implements Implementation
             ->map(Line::fromStream(...));
     }
 
+    #[\Override]
     public function reduce($carry, callable $reducer)
     {
         return $this->lines()->reduce($carry, $reducer);
     }
 
+    #[\Override]
     public function size(): Maybe
     {
         /** @psalm-suppress ImpureMethodCall */
         return $this->io->read()->internal()->size();
     }
 
+    #[\Override]
     public function toString(): string
     {
         return $this
@@ -86,6 +94,7 @@ final class IO implements Implementation
             ->toString();
     }
 
+    #[\Override]
     public function chunks(): Sequence
     {
         /** @psalm-suppress ImpureMethodCall */
