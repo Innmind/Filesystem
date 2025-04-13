@@ -12,13 +12,13 @@ return static function() {
     yield properties(
         'YourAdapter',
         Adapter::properties(),
-        Set\Call::of(fn() => /* instanciate YourAdapter here */),
+        Set::call(fn() => /* instanciate YourAdapter here */),
     );
 
     foreach (Adapter::alwaysApplicable() as $property) {
         yield property(
             $property,
-            Set\Call::of(fn() => /* instanciate YourAdapter here */),
+            Set::call(fn() => /* instanciate YourAdapter here */),
         )->named('YourAdapter');
     }
 };

@@ -311,11 +311,11 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Either::any(
-                    Set\Integers::between(1, 46),
-                    Set\Integers::between(48, 127),
+                Set::either(
+                    Set::integers()->between(1, 46),
+                    Set::integers()->between(48, 127),
                 ),
-                Set\Strings::any(),
+                Set::strings(),
             )
             ->then(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
