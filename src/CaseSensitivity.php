@@ -17,14 +17,9 @@ enum CaseSensitivity
      */
     public function contains(Name $name, Set $in): bool
     {
-        return match ($this) {
-            self::sensitive => $in
-                ->map($this->normalize(...))
-                ->contains($this->normalize($name)),
-            self::insensitive => $in
-                ->map($this->normalize(...))
-                ->contains($this->normalize($name)),
-        };
+        return $in
+            ->map($this->normalize(...))
+            ->contains($this->normalize($name));
     }
 
     private function normalize(Name $name): string
