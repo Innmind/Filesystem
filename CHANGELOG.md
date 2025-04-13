@@ -7,6 +7,11 @@
 - Require `innmind/io` `3`
 - `Innmind\Filesystem\File\Content::size()` now returns `Innmind\Immutable\Maybe<Innmind\IO\Stream\Size>`
 
+### Removed
+
+- `Innmind\Filesystem\Exception\FailedToLoadFile`
+- `Innmind\Filesystem\Exception\FailedToWriteFile`
+
 ### Fixed
 
 - Support for PHP `8.4`
