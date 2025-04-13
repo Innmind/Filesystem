@@ -432,10 +432,8 @@ class FilesystemTest extends TestCase
     public function testDotFilesAreListed()
     {
         $this
-            ->forAll(FName::strings())
-            ->filter(static fn($name) => \mb_strlen($name, 'ASCII') < 255)
+            ->forAll(FName::strings()->prefixedBy('.'))
             ->then(function($name) {
-                $name = ".$name";
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
                 (new FS)->mkdir($path);
