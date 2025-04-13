@@ -74,11 +74,13 @@ final class Filesystem implements Adapter
         return new self($this->io, $this->path, $case);
     }
 
+    #[\Override]
     public function add(File|Directory $file): void
     {
         $this->createFileAt($this->path, $file);
     }
 
+    #[\Override]
     public function get(Name $file): Maybe
     {
         if (!$this->contains($file)) {
@@ -89,16 +91,19 @@ final class Filesystem implements Adapter
         return Maybe::just($this->open($this->path, $file));
     }
 
+    #[\Override]
     public function contains(Name $file): bool
     {
         return $this->filesystem->exists($this->path->toString().'/'.$file->toString());
     }
 
+    #[\Override]
     public function remove(Name $file): void
     {
         $this->filesystem->remove($this->path->toString().'/'.$file->toString());
     }
 
+    #[\Override]
     public function root(): Directory
     {
         return Directory::lazy(
@@ -120,6 +125,7 @@ final class Filesystem implements Adapter
 
         $path = $path->resolve(Path::of($name));
 
+        /** @psalm-suppress PossiblyNullReference */
         if ($this->loaded->offsetExists($file) && $this->loaded[$file]->equals($path)) {
             // no need to persist untouched file where it was loaded from
             return;

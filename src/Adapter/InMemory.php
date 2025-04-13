@@ -34,26 +34,31 @@ final class InMemory implements Adapter
         return new self(new Merge);
     }
 
+    #[\Override]
     public function add(File|Directory $file): void
     {
         $this->root = ($this->behaviour)($this->root, $file);
     }
 
+    #[\Override]
     public function get(Name $file): Maybe
     {
         return $this->root->get($file);
     }
 
+    #[\Override]
     public function contains(Name $file): bool
     {
         return $this->root->contains($file);
     }
 
+    #[\Override]
     public function remove(Name $file): void
     {
         $this->root = $this->root->remove($file);
     }
 
+    #[\Override]
     public function root(): Directory
     {
         return $this->root;

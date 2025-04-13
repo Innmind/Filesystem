@@ -3,6 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\Exception;
 
-class PathDoesntRepresentADirectory extends LogicException
+final class PathDoesntRepresentADirectory extends LogicException
 {
 }
