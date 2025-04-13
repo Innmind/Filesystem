@@ -7,10 +7,10 @@ use Innmind\Filesystem\File\Content\{
     Implementation,
     Line,
 };
-use Innmind\IO;
-use Innmind\Stream\{
+use Innmind\IO\{
+    IO,
+    Streams\Stream,
     Stream\Size,
-    Capabilities,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
@@ -36,17 +36,16 @@ final class Content
      * @psalm-pure
      */
     public static function atPath(
-        Capabilities\Readable $capabilities,
-        IO\Readable $io,
+        IO $io,
         Path $path,
     ): self {
-        return new self(Content\AtPath::of($capabilities, $io, $path));
+        return new self(Content\AtPath::of($io, $path));
     }
 
     /**
      * @psalm-pure
      */
-    public static function io(IO\Readable\Stream $io): self
+    public static function io(Stream $io): self
     {
         return new self(Content\IO::of($io));
     }
@@ -56,7 +55,7 @@ final class Content
      *
      * This method is to be used with sockets that can't be read twice
      */
-    public static function oneShot(IO\Readable\Stream $io): self
+    public static function oneShot(Stream $io): self
     {
         return new self(Content\OneShot::of($io));
     }
