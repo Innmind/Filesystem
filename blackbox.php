@@ -26,5 +26,9 @@ Application::new($argv)
             )
             ->scenariiPerProof(1),
     )
+    ->when(
+        \method_exists($app, 'allowProofsToNotMakeAnyAssertions'),
+        static fn($app) => $app->allowProofsToNotMakeAnyAssertions(),
+    )
     ->tryToProve(Load::everythingIn(__DIR__.'/proofs/'))
     ->exit();
