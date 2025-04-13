@@ -34,9 +34,9 @@ final class AddFileWithSameNameAsDirectoryDeleteTheDirectory implements Property
         $this->directory = Directory::of($file->name())->add($fileInDirectory);
     }
 
-    public static function any(): Set
+    public static function any(): Set\Provider
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             FFile::any(),
             FFile::any(),

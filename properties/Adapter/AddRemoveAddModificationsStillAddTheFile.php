@@ -32,9 +32,9 @@ final class AddRemoveAddModificationsStillAddTheFile implements Property
         $this->file = $file;
     }
 
-    public static function any(): Set
+    public static function any(): Set\Provider
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             FDirectory::any(),
             FFile::any(),

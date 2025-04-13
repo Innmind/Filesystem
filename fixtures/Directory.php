@@ -36,28 +36,25 @@ final class Directory
     {
         if ($depth === $maxDepth) {
             $files = Sequence::of(
-                DataSet\Randomize::of(
-                    File::any(),
-                ),
-                DataSet\Integers::between(0, 5),
+                File::any()->randomize(),
+                DataSet::integers()
+                    ->between(0, 5)
+                    ->toSet(),
             );
         } else {
             $files = Sequence::of(
-                DataSet\Either::any(
-                    DataSet\Randomize::of(
-                        File::any(),
-                    ),
+                DataSet::either(
+                    File::any()->randomize(),
                     self::atDepth($depth + 1, $maxDepth),
                 ),
-                DataSet\Integers::between(0, 5),
+                DataSet::integers()
+                    ->between(0, 5)
+                    ->toSet(),
             );
         }
 
-        $directory = DataSet\Composite::immutable(
-            static fn($name, $files): Model => Model::of(
-                $name,
-                $files,
-            ),
+        $directory = DataSet::compose(
+            Model::of(...),
             Name::any(),
             $files->filter(static function($files): bool {
                 if ($files->empty()) {
@@ -71,7 +68,7 @@ final class Directory
             }),
         );
 
-        $modified = DataSet\Composite::immutable(
+        $modified = DataSet::compose(
             static fn($directory, $properties): Model => $properties->ensureHeldBy(
                 // not ideal but no other simple way for now
                 Assert::of(Stats::new()),
@@ -84,7 +81,7 @@ final class Directory
             )->atMost(10),
         );
 
-        return DataSet\Either::any(
+        return DataSet::either(
             $directory,
             $modified,
         );

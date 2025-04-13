@@ -24,7 +24,8 @@ final class FlatMap implements Property
 
     public static function any(): Set
     {
-        return Set\Strings::madeOf(Set\Unicode::any())
+        return Set::strings()
+            ->madeOf(Set::strings()->unicode()->char())
             ->map(Content::ofString(...))
             ->map(static fn($line) => new self($line));
     }

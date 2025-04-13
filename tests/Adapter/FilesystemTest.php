@@ -341,11 +341,11 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Either::any(
-                    Set\Integers::between(1, 46),
-                    Set\Integers::between(48, 127),
+                Set::either(
+                    Set::integers()->between(1, 46),
+                    Set::integers()->between(48, 127),
                 ),
-                Set\Strings::any(),
+                Set::strings(),
             )
             ->then(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
@@ -371,13 +371,13 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Either::any(
-                    Set\Integers::between(1, 8),
-                    Set\Integers::between(14, 31),
-                    Set\Integers::between(33, 45),
-                    Set\Integers::between(48, 127),
+                Set::either(
+                    Set::integers()->between(1, 8),
+                    Set::integers()->between(14, 31),
+                    Set::integers()->between(33, 45),
+                    Set::integers()->between(48, 127),
                 ),
-                Set\Strings::any(),
+                Set::strings(),
             )
             ->then(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
@@ -433,6 +433,7 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(FName::strings())
+            ->filter(static fn($name) => \mb_strlen($name, 'ASCII') < 255)
             ->then(function($name) {
                 $name = ".$name";
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';

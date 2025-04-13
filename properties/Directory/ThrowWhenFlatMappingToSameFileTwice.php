@@ -31,12 +31,12 @@ final class ThrowWhenFlatMappingToSameFileTwice implements Property
         $this->file2 = $file2;
     }
 
-    public static function any(): Set
+    public static function any(): Set\Provider
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
-            Set\Randomize::of(FFile::any()),
-            Set\Randomize::of(FFile::any()),
+            FFile::any()->randomize(),
+            FFile::any()->randomize(),
         );
     }
 

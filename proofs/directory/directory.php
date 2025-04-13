@@ -19,12 +19,14 @@ return static function() {
     yield properties(
         'Non empty Directory properties',
         PDirectory::properties(),
-        Set\Composite::immutable(
+        Set::compose(
             Directory::of(...),
             Name::any(),
             Sequence::of(
-                Set\Randomize::of(File::any()),
-                Set\Integers::between(1, 5), // only to speed up tests
+                File::any()->randomize(),
+                Set::integers()
+                    ->between(1, 5) // only to speed up tests
+                    ->toSet(),
             )->filter(
                 static fn($files) => $files
                     ->groupBy(static fn($file) => $file->name()->toString())
@@ -40,12 +42,14 @@ return static function() {
         )->named('Empty Directory');
         yield property(
             $property,
-            Set\Composite::immutable(
+            Set::compose(
                 Directory::of(...),
                 Name::any(),
                 Sequence::of(
-                    Set\Randomize::of(File::any()),
-                    Set\Integers::between(1, 5), // only to speed up tests
+                    File::any()->randomize(),
+                    Set::integers()
+                        ->between(1, 5) // only to speed up tests
+                        ->toSet(),
                 )->filter(
                     static fn($files) => $files
                         ->groupBy(static fn($file) => $file->name()->toString())

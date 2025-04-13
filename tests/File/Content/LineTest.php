@@ -22,8 +22,8 @@ class LineTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Unicode::strings(),
-                Set\Unicode::strings(),
+                Set::strings()->unicode(),
+                Set::strings()->unicode(),
             )
             ->then(function($start, $end) {
                 try {
@@ -48,7 +48,7 @@ class LineTest extends TestCase
     public function testEndOfLineDelimiterIsRemovedAutomaticallyWhenReadingFromStream()
     {
         $this
-            ->forAll(Set\Unicode::strings())
+            ->forAll(Set::strings()->unicode())
             ->then(function($content) {
                 $this->assertStringEndsNotWith(
                     "\n",
@@ -97,9 +97,9 @@ class LineTest extends TestCase
 
     private function strings(): Set
     {
-        return Set\Decorate::immutable(
-            static fn($content) => \rtrim($content, "\n"),
-            Set\Unicode::strings(),
-        )->filter(static fn($content) => !\str_contains($content, "\n"));
+        return Set::strings()
+            ->unicode()
+            ->map(static fn($content) => \rtrim($content, "\n"))
+            ->filter(static fn($content) => !\str_contains($content, "\n"));
     }
 }

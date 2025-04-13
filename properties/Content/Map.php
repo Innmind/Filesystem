@@ -28,9 +28,13 @@ final class Map implements Property
 
     public static function any(): Set
     {
-        return Set\Strings::madeOf(
-            Set\Unicode::any()->filter(static fn($char) => $char !== "\n"),
-        )
+        return Set::strings()
+            ->madeOf(
+                Set::strings()
+                    ->unicode()
+                    ->char()
+                    ->filter(static fn($char) => $char !== "\n"),
+            )
             ->map(Str::of(...))
             ->map(Line::of(...))
             ->map(static fn($line) => new self($line));
