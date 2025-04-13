@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Support for PHP `8.4`
+
 ## 7.5.1 - 2024-03-27
 
 ### Fixed
