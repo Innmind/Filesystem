@@ -7,6 +7,7 @@ use Innmind\Filesystem\{
     Adapter,
     File,
 };
+use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -40,7 +41,9 @@ final class RemoveFile implements Property
     {
         $assert->null($adapter->add($this->file));
         $assert->true($adapter->contains($this->file->name()));
-        $assert->null($adapter->remove($this->file->name()));
+        $assert
+            ->object($adapter->remove($this->file->name())->unwrap())
+            ->instance(SideEffect::class);
         $assert->false($adapter->contains($this->file->name()));
 
         return $adapter;

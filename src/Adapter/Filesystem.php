@@ -21,6 +21,8 @@ use Innmind\Immutable\{
     Sequence,
     Str,
     Maybe,
+    Attempt,
+    SideEffect,
 };
 use Symfony\Component\{
     Filesystem\Filesystem as FS,
@@ -98,9 +100,13 @@ final class Filesystem implements Adapter
     }
 
     #[\Override]
-    public function remove(Name $file): void
+    public function remove(Name $file): Attempt
     {
-        $this->filesystem->remove($this->path->toString().'/'.$file->toString());
+        return Attempt::of(
+            fn() => $this->filesystem->remove(
+                $this->path->toString().'/'.$file->toString(),
+            ),
+        )->map(static fn() => SideEffect::identity());
     }
 
     #[\Override]

@@ -19,6 +19,7 @@ use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
     Map,
+    SideEffect,
 };
 use Symfony\Component\Filesystem\Filesystem as FS;
 use Innmind\BlackBox\{
@@ -47,7 +48,12 @@ class FilesystemTest extends TestCase
         $this->assertFalse($adapter->contains(Name::of('foo')));
         $this->assertNull($adapter->add(Directory::of(Name::of('foo'))));
         $this->assertTrue($adapter->contains(Name::of('foo')));
-        $this->assertNull($adapter->remove(Name::of('foo')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $adapter
+                ->remove(Name::of('foo'))
+                ->unwrap(),
+        );
         $this->assertFalse($adapter->contains(Name::of('foo')));
     }
 
@@ -73,7 +79,12 @@ class FilesystemTest extends TestCase
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $this->assertNull(Filesystem::mount(Path::of('/tmp/'))->remove(Name::of('foo')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            Filesystem::mount(Path::of('/tmp/'))
+                ->remove(Name::of('foo'))
+                ->unwrap(),
+        );
     }
 
     public function testCreateNestedStructure()
@@ -143,7 +154,9 @@ class FilesystemTest extends TestCase
                 ),
         );
 
-        $adapter->remove(Name::of('foo'));
+        $adapter
+            ->remove(Name::of('foo'))
+            ->unwrap();
     }
 
     public function testRemoveFileWhenRemovedFromFolder()
@@ -163,7 +176,9 @@ class FilesystemTest extends TestCase
                 static fn() => true,
             ),
         );
-        $a->remove(Name::of('foo'));
+        $a
+            ->remove(Name::of('foo'))
+            ->unwrap();
     }
 
     public function testDoesntFailWhenAddindSameDirectoryTwiceThatContainsARemovedFile()
@@ -184,7 +199,9 @@ class FilesystemTest extends TestCase
                 static fn() => true,
             ),
         );
-        $a->remove(Name::of('foo'));
+        $a
+            ->remove(Name::of('foo'))
+            ->unwrap();
     }
 
     public function testLoadWithMediaType()
@@ -205,7 +222,9 @@ class FilesystemTest extends TestCase
                     static fn() => null,
                 ),
         );
-        $a->remove(Name::of('some_content.html'));
+        $a
+            ->remove(Name::of('some_content.html'))
+            ->unwrap();
     }
 
     public function testRoot()
@@ -256,9 +275,15 @@ class FilesystemTest extends TestCase
                 static fn() => null,
             ),
         );
-        $adapter->remove(Name::of('foo'));
-        $adapter->remove(Name::of('bar'));
-        $adapter->remove(Name::of('baz'));
+        $adapter
+            ->remove(Name::of('foo'))
+            ->unwrap();
+        $adapter
+            ->remove(Name::of('bar'))
+            ->unwrap();
+        $adapter
+            ->remove(Name::of('baz'))
+            ->unwrap();
     }
 
     public function testAddingTheSameFileTwiceDoesNothing()

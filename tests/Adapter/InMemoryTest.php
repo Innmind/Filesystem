@@ -11,7 +11,10 @@ use Innmind\Filesystem\{
     File\Content,
     Name,
 };
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    SideEffect,
+};
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class InMemoryTest extends TestCase
@@ -33,7 +36,12 @@ class InMemoryTest extends TestCase
                 static fn() => null,
             ),
         );
-        $this->assertNull($a->remove(Name::of('foo')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $a
+                ->remove(Name::of('foo'))
+                ->unwrap(),
+        );
         $this->assertFalse($a->contains(Name::of('foo')));
     }
 
@@ -47,7 +55,12 @@ class InMemoryTest extends TestCase
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $this->assertNull(InMemory::new()->remove(Name::of('foo')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            InMemory::new()
+                ->remove(Name::of('foo'))
+                ->unwrap(),
+        );
     }
 
     public function testRoot()
