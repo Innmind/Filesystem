@@ -39,9 +39,11 @@ final class InMemory implements Adapter
     }
 
     #[\Override]
-    public function add(File|Directory $file): void
+    public function add(File|Directory $file): Attempt
     {
         $this->root = ($this->behaviour)($this->root, $file);
+
+        return Attempt::result(SideEffect::identity());
     }
 
     #[\Override]

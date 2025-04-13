@@ -7,6 +7,7 @@ use Innmind\Filesystem\{
     Adapter,
     File,
 };
+use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -39,7 +40,9 @@ final class AddFile implements Property
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
         $assert->false($adapter->contains($this->file->name()));
-        $assert->null($adapter->add($this->file));
+        $assert
+            ->object($adapter->add($this->file)->unwrap())
+            ->instance(SideEffect::class);
         $assert->true($adapter->contains($this->file->name()));
         $assert->same(
             $this->file->content()->toString(),

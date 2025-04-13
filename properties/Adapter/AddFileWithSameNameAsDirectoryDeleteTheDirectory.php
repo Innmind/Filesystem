@@ -8,6 +8,7 @@ use Innmind\Filesystem\{
     File,
     Directory,
 };
+use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -51,8 +52,12 @@ final class AddFileWithSameNameAsDirectoryDeleteTheDirectory implements Property
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
         $adapter->remove($this->file->name())->unwrap();
-        $assert->null($adapter->add($this->directory));
-        $assert->null($adapter->add($this->file));
+        $assert
+            ->object($adapter->add($this->directory)->unwrap())
+            ->instance(SideEffect::class);
+        $assert
+            ->object($adapter->add($this->file)->unwrap())
+            ->instance(SideEffect::class);
         $assert->true($adapter->contains($this->file->name()));
         $assert
             ->object($adapter->get($this->file->name())->match(

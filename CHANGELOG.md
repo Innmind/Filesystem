@@ -8,6 +8,7 @@
 - `Innmind\Filesystem\File\Content::size()` now returns `Innmind\Immutable\Maybe<Innmind\IO\Stream\Size>`
 - Require `innmind/black-box` `6`
 - `Innmind\Filesystem\Adapter::remove()` now returns `Innmind\Immutable\Attempt<Innmind\Immutable\SideEffect>`
+- `Innmind\Filesystem\Adapter::add()` now returns `Innmind\Immutable\Attempt<Innmind\Immutable\SideEffect>`
 
 ### Removed
 

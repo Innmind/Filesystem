@@ -14,7 +14,10 @@ use Innmind\Immutable\{
  */
 interface Adapter
 {
-    public function add(File|Directory $file): void;
+    /**
+     * @return Attempt<SideEffect>
+     */
+    public function add(File|Directory $file): Attempt;
 
     /**
      * @return Maybe<File|Directory>

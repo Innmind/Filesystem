@@ -25,8 +25,11 @@ class InMemoryTest extends TestCase
 
         $this->assertInstanceOf(Adapter::class, $a);
         $this->assertFalse($a->contains(Name::of('foo')));
-        $this->assertNull(
-            $a->add($d = Directory::of(Name::of('foo'))),
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $a
+                ->add($d = Directory::of(Name::of('foo')))
+                ->unwrap(),
         );
         $this->assertTrue($a->contains(Name::of('foo')));
         $this->assertSame(
@@ -66,14 +69,18 @@ class InMemoryTest extends TestCase
     public function testRoot()
     {
         $adapter = InMemory::new();
-        $adapter->add($foo = File::of(
-            Name::of('foo'),
-            Content::ofString('foo'),
-        ));
-        $adapter->add($bar = File::of(
-            Name::of('bar'),
-            Content::ofString('bar'),
-        ));
+        $adapter
+            ->add($foo = File::of(
+                Name::of('foo'),
+                Content::ofString('foo'),
+            ))
+            ->unwrap();
+        $adapter
+            ->add($bar = File::of(
+                Name::of('bar'),
+                Content::ofString('bar'),
+            ))
+            ->unwrap();
 
         $all = $adapter->root()->all();
         $this->assertSame(
@@ -91,7 +98,7 @@ class InMemoryTest extends TestCase
                 Directory::named('bar'),
                 File::named('baz', Content::none()),
             ),
-        ));
+        ))->unwrap();
         $adapter->add(Directory::of(
             Name::of('foo'),
             Sequence::of(
@@ -104,7 +111,7 @@ class InMemoryTest extends TestCase
                     Sequence::of(File::named('foo', Content::none())),
                 ),
             ),
-        ));
+        ))->unwrap();
 
         $this->assertTrue(
             $adapter

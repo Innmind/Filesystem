@@ -32,10 +32,11 @@ final class Logger implements Adapter
     }
 
     #[\Override]
-    public function add(File|Directory $file): void
+    public function add(File|Directory $file): Attempt
     {
         $this->logger->debug('Adding file {file}', ['file' => $file->name()->toString()]);
-        $this->filesystem->add($file);
+
+        return $this->filesystem->add($file);
     }
 
     #[\Override]
