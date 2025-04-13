@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
+    Adapter,
     Adapter\Logger,
     Adapter\InMemory,
     File,
