@@ -11,9 +11,9 @@ use Innmind\BlackBox\{
 final class Directory
 {
     /**
-     * @return Set<Property>
+     * @return Set\Provider<Property>|Set<Properties>
      */
-    public static function properties(): Set
+    public static function properties(): Set\Provider|Set
     {
         return Set\Properties::any(...self::list())->atMost(50);
     }

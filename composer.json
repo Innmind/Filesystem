@@ -37,14 +37,14 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "~10.2",
+        "phpunit/phpunit": "~10.2|~11.0|~12.0",
         "vimeo/psalm": "~5.13",
-        "innmind/black-box": "^5.5.1",
+        "innmind/black-box": "^5.5.1|^6.0.2",
         "innmind/coding-standard": "~2.0",
         "ramsey/uuid": "^4.6"
     },
     "conflict": {
-        "innmind/black-box": "<5.0|~6.0"
+        "innmind/black-box": "<5.0|~7.0"
     },
     "suggest": {
         "innmind/black-box": "For property based testing"
