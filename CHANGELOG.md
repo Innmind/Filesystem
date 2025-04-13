@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Require `innmind/io` `3`
+- `Innmind\Filesystem\File\Content::size()` now returns `Innmind\Immutable\Maybe<Innmind\IO\Stream\Size>`
+
+### Removed
+
+- `Innmind\Filesystem\Exception\FailedToLoadFile`
+- `Innmind\Filesystem\Exception\FailedToWriteFile`
+
 ## 7.6.0 - 2025-03-21
 
 ### Added

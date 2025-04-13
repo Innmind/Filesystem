@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\File\Content;
 
 use Innmind\Filesystem\File\Content;
-use Innmind\Stream\Stream\Size;
+use Innmind\IO\Stream\Size;
 use Innmind\Immutable\{
     Str,
     Sequence,

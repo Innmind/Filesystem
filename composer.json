@@ -18,12 +18,11 @@
         "php": "~8.2",
         "innmind/immutable": "~4.15|~5.0",
         "symfony/filesystem": "~6.0|~7.0",
-        "innmind/stream": "~4.1",
         "innmind/media-type": "~2.1",
         "innmind/url": "~4.2",
         "psr/log": "~3.0",
-        "innmind/io": "~2.2",
-        "innmind/time-continuum": "~3.4"
+        "innmind/io": "^3.0.1",
+        "innmind/validation": "~2.0"
     },
     "autoload": {
         "psr-4": {

@@ -4,7 +4,10 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\File\Content;
 
 use Innmind\Filesystem\Exception\LogicException;
-use Innmind\IO\Readable\Stream;
+use Innmind\IO\{
+    Streams\Stream,
+    Frame,
+};
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
@@ -61,13 +64,14 @@ final class OneShot implements Implementation
 
             yield $this
                 ->io
+                ->read()
                 ->watch()
-                ->lines()
+                ->frames(Frame::line())
                 ->lazy()
                 ->sequence();
         })
             ->flatMap(static fn($lines) => $lines)
-            ->map(static fn($line) => Line::fromStream($line));
+            ->map(Line::fromStream(...));
     }
 
     public function reduce($carry, callable $reducer)
@@ -78,7 +82,7 @@ final class OneShot implements Implementation
     public function size(): Maybe
     {
         /** @psalm-suppress ImpureMethodCall */
-        return $this->io->size();
+        return $this->io->read()->internal()->size();
     }
 
     public function toString(): string
@@ -96,8 +100,9 @@ final class OneShot implements Implementation
 
             yield $this
                 ->io
+                ->read()
                 ->watch()
-                ->chunks(8192)
+                ->frames(Frame::chunk(8192)->loose())
                 ->lazy()
                 ->sequence();
         })->flatMap(static fn($chunks) => $chunks);

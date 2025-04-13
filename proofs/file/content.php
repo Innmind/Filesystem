@@ -9,7 +9,6 @@ use Innmind\Filesystem\File\{
 use Properties\Innmind\Filesystem\Content;
 use Innmind\BlackBox\Set;
 use Innmind\IO\IO;
-use Innmind\Stream\Streams;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Str,
@@ -18,8 +17,7 @@ use Innmind\Immutable\{
 };
 
 return static function() {
-    $capabilities = Streams::fromAmbientAuthority();
-    $io = IO::of($capabilities->watch()->waitForever(...))->readable();
+    $io = IO::fromAmbientAuthority();
 
     $implementations = [
         [
@@ -33,7 +31,6 @@ return static function() {
             Set\Elements::of('LICENSE', 'CHANGELOG.md', 'composer.json')
                 ->map(Path::of(...))
                 ->map(static fn($path) => Model::atPath(
-                    $capabilities->readable(),
                     $io,
                     $path,
                 )),
@@ -41,10 +38,9 @@ return static function() {
         [
             'Content::io()',
             Set\Elements::of('LICENSE', 'CHANGELOG.md', 'composer.json')
-                ->map(Path::of(...))
                 ->map(static fn($path) => Model::io(
-                    $io->wrap(
-                        $capabilities->readable()->open($path),
+                    $io->streams()->acquire(
+                        \fopen($path, 'r'),
                     ),
                 )),
         ],
@@ -89,9 +85,9 @@ return static function() {
 
     yield test(
         'Content::oneShot()->foreach()',
-        static function($assert) use ($io, $capabilities) {
-            $content = Model::oneShot($io->wrap(
-                $capabilities->readable()->open(Path::of('LICENSE')),
+        static function($assert) use ($io) {
+            $content = Model::oneShot($io->streams()->acquire(
+                \fopen('LICENSE', 'r'),
             ));
 
             $count = 0;
@@ -112,9 +108,9 @@ return static function() {
                 ->map(Str::of(...))
                 ->map(Line::of(...)),
         ),
-        static function($assert, $replacement) use ($io, $capabilities) {
-            $content = Model::oneShot($io->wrap(
-                $capabilities->readable()->open(Path::of('LICENSE')),
+        static function($assert, $replacement) use ($io) {
+            $content = Model::oneShot($io->streams()->acquire(
+                \fopen('LICENSE', 'r'),
             ));
 
             $lines = $content
@@ -138,9 +134,9 @@ return static function() {
                 Set\Unicode::any()->filter(static fn($char) => $char !== "\n"),
             ),
         )->filter(static fn($a, $b) => $a !== $b),
-        static function($assert, $replacement1, $replacement2) use ($io, $capabilities) {
-            $content = Model::oneShot($io->wrap(
-                $capabilities->readable()->open(Path::of('LICENSE')),
+        static function($assert, $replacement1, $replacement2) use ($io) {
+            $content = Model::oneShot($io->streams()->acquire(
+                \fopen('LICENSE', 'r'),
             ));
 
             $lines = $content
@@ -156,9 +152,9 @@ return static function() {
 
     yield test(
         'Content::oneShot()->filter()',
-        static function($assert) use ($io, $capabilities) {
-            $content = Model::oneShot($io->wrap(
-                $capabilities->readable()->open(Path::of('LICENSE')),
+        static function($assert) use ($io) {
+            $content = Model::oneShot($io->streams()->acquire(
+                \fopen('LICENSE', 'r'),
             ));
 
             $size = $content
@@ -172,9 +168,9 @@ return static function() {
 
     yield test(
         'Content::oneShot()->reduce()',
-        static function($assert) use ($io, $capabilities) {
-            $content = Model::oneShot($io->wrap(
-                $capabilities->readable()->open(Path::of('LICENSE')),
+        static function($assert) use ($io) {
+            $content = Model::oneShot($io->streams()->acquire(
+                \fopen('LICENSE', 'r'),
             ));
 
             $size = $content->reduce(
@@ -188,9 +184,9 @@ return static function() {
 
     yield test(
         'Content::oneShot()->toString()',
-        static function($assert) use ($io, $capabilities) {
-            $content = Model::oneShot($io->wrap(
-                $capabilities->readable()->open(Path::of('LICENSE')),
+        static function($assert) use ($io) {
+            $content = Model::oneShot($io->streams()->acquire(
+                \fopen('LICENSE', 'r'),
             ));
 
             $assert->same(\file_get_contents('LICENSE'), $content->toString());
@@ -199,9 +195,9 @@ return static function() {
 
     yield test(
         'Content::oneShot()->chunks()',
-        static function($assert) use ($io, $capabilities) {
-            $content = Model::oneShot($io->wrap(
-                $capabilities->readable()->open(Path::of('LICENSE')),
+        static function($assert) use ($io) {
+            $content = Model::oneShot($io->streams()->acquire(
+                \fopen('LICENSE', 'r'),
             ));
 
             $assert->same(
@@ -230,9 +226,9 @@ return static function() {
     yield proof(
         'Content::oneShot() throws when loaded multiple times',
         given($actions, $actions),
-        static function($assert, $a, $b) use ($io, $capabilities) {
-            $content = Model::oneShot($io->wrap(
-                $capabilities->readable()->open(Path::of('LICENSE')),
+        static function($assert, $a, $b) use ($io) {
+            $content = Model::oneShot($io->streams()->acquire(
+                \fopen('LICENSE', 'r'),
             ));
 
             $a($content);
@@ -242,9 +238,8 @@ return static function() {
 
     yield test(
         'Content::ofChunks()->size() does not load the whole file in memory',
-        static function($assert) use ($io, $capabilities) {
+        static function($assert) use ($io) {
             $atPath = Model::atPath(
-                $capabilities->readable(),
                 $io,
                 Path::of('samples/sample.pdf'),
             );
