@@ -5,6 +5,7 @@
 ### Added
 
 - `Innmind\Filesystem\File::mapContent()`
+- `Innmind\Filesystem\Directory::named()` now accepts a `Sequence` of files/directories as second argument
 
 ### Changed
 

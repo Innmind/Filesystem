@@ -208,6 +208,27 @@ class DirectoryTest extends TestCase
             });
     }
 
+    public function testNamedDirectoryLoadedWithDifferentFilesWithTheSameNameThrows()
+    {
+        $this
+            ->forAll(
+                FName::any(),
+                FName::any(),
+            )
+            ->then(function($directory, $file) {
+                $this->expectException(DuplicatedFile::class);
+                $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
+
+                Directory::named(
+                    $directory->toString(),
+                    Sequence::of(
+                        File::named($file->toString(), Content::none()),
+                        File::named($file->toString(), Content::none()),
+                    ),
+                );
+            });
+    }
+
     public function testLazyLoadingADirectoryDoesntLoadFiles()
     {
         $this
