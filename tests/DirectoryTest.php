@@ -15,8 +15,10 @@ use Innmind\Immutable\{
     Sequence,
     SideEffect,
 };
-use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
+};
 use Fixtures\Innmind\Filesystem\Name as FName;
 
 class DirectoryTest extends TestCase
@@ -198,6 +200,27 @@ class DirectoryTest extends TestCase
 
                 Directory::of(
                     $directory,
+                    Sequence::of(
+                        File::named($file->toString(), Content::none()),
+                        File::named($file->toString(), Content::none()),
+                    ),
+                );
+            });
+    }
+
+    public function testNamedDirectoryLoadedWithDifferentFilesWithTheSameNameThrows()
+    {
+        $this
+            ->forAll(
+                FName::any(),
+                FName::any(),
+            )
+            ->then(function($directory, $file) {
+                $this->expectException(DuplicatedFile::class);
+                $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
+
+                Directory::named(
+                    $directory->toString(),
                     Sequence::of(
                         File::named($file->toString(), Content::none()),
                         File::named($file->toString(), Content::none()),

@@ -3,9 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\Filesystem\Exception\FailedToLoadFile;
-use Innmind\IO;
-use Innmind\Stream\Capabilities;
+use Innmind\IO\IO;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
@@ -20,90 +18,75 @@ use Innmind\Immutable\{
  */
 final class AtPath implements Implementation
 {
-    private Capabilities\Readable $capabilities;
-    private IO\Readable $io;
-    private Path $path;
-
     private function __construct(
-        Capabilities\Readable $capabilities,
-        IO\Readable $io,
-        Path $path,
+        private IO $io,
+        private Path $path,
     ) {
-        $this->capabilities = $capabilities;
-        $this->io = $io;
-        $this->path = $path;
     }
 
     /**
      * @psalm-pure
      */
-    public static function of(
-        Capabilities\Readable $capabilities,
-        IO\Readable $io,
-        Path $path,
-    ): self {
-        return new self($capabilities, $io, $path);
+    public static function of(IO $io, Path $path): self
+    {
+        return new self($io, $path);
     }
 
+    #[\Override]
     public function foreach(callable $function): SideEffect
     {
         return $this->lines()->foreach($function);
     }
 
+    #[\Override]
     public function map(callable $map): Implementation
     {
         return Lines::of($this->lines()->map($map));
     }
 
+    #[\Override]
     public function flatMap(callable $map): Implementation
     {
         return Lines::of($this->lines())->flatMap($map);
     }
 
+    #[\Override]
     public function filter(callable $filter): Implementation
     {
         return Lines::of($this->lines()->filter($filter));
     }
 
+    #[\Override]
     public function lines(): Sequence
     {
-        return Sequence::lazy(function($register) {
-            $stream = $this->capabilities->open($this->path);
-            $register(static fn() => $stream->close()->match(
-                static fn() => null,
-                static fn() => throw new FailedToLoadFile,
-            ));
-            $io = $this->io->wrap($stream);
-
-            yield $io
-                ->watch()
-                ->lines()
-                ->lazy()
-                ->sequence();
-
-            $stream->close()->match(
-                static fn() => null,
-                static fn() => throw new FailedToLoadFile,
-            );
-        })
-            ->flatMap(static fn($lines) => $lines)
-            ->map(static fn($line) => Line::fromStream($line));
+        /** @psalm-suppress ImpureMethodCall */
+        return $this
+            ->io
+            ->files()
+            ->read($this->path)
+            ->watch()
+            ->lines()
+            ->map(Line::fromStream(...));
     }
 
+    #[\Override]
     public function reduce($carry, callable $reducer)
     {
         return $this->lines()->reduce($carry, $reducer);
     }
 
+    #[\Override]
     public function size(): Maybe
     {
         /** @psalm-suppress ImpureMethodCall */
         return $this
-            ->capabilities
-            ->open($this->path)
+            ->io
+            ->files()
+            ->read($this->path)
             ->size();
     }
 
+    #[\Override]
     public function toString(): string
     {
         return $this
@@ -112,26 +95,15 @@ final class AtPath implements Implementation
             ->toString();
     }
 
+    #[\Override]
     public function chunks(): Sequence
     {
-        return Sequence::lazy(function($register) {
-            $stream = $this->capabilities->open($this->path);
-            $register(static fn() => $stream->close()->match(
-                static fn() => null,
-                static fn() => throw new FailedToLoadFile,
-            ));
-            $io = $this->io->wrap($stream);
-
-            yield $io
-                ->watch()
-                ->chunks(8192)
-                ->lazy()
-                ->sequence();
-
-            $stream->close()->match(
-                static fn() => null,
-                static fn() => throw new FailedToLoadFile,
-            );
-        })->flatMap(static fn($chunks) => $chunks);
+        /** @psalm-suppress ImpureMethodCall */
+        return $this
+            ->io
+            ->files()
+            ->read($this->path)
+            ->watch()
+            ->chunks(8192);
     }
 }

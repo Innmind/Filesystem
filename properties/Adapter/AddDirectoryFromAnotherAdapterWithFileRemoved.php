@@ -9,7 +9,10 @@ use Innmind\Filesystem\{
     File,
     Name,
 };
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    SideEffect,
+};
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -38,7 +41,7 @@ final class AddDirectoryFromAnotherAdapterWithFileRemoved implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             FName::any(),
             FFile::any(),
@@ -65,7 +68,9 @@ final class AddDirectoryFromAnotherAdapterWithFileRemoved implements Property
         $directory = $directory->remove($this->removed->name());
 
         $assert->false($adapter->contains($directory->name()));
-        $assert->null($adapter->add($directory));
+        $assert
+            ->object($adapter->add($directory)->unwrap())
+            ->instance(SideEffect::class);
         $assert->true($adapter->contains($directory->name()));
         $assert->true(
             $adapter

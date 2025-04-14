@@ -9,7 +9,10 @@ use Innmind\Filesystem\{
     Name,
     Directory,
 };
-use Innmind\Immutable\Maybe;
+use Innmind\Immutable\{
+    Maybe,
+    Attempt,
+};
 use Psr\Log\LoggerInterface;
 
 final class Logger implements Adapter
@@ -28,12 +31,15 @@ final class Logger implements Adapter
         return new self($filesystem, $logger);
     }
 
-    public function add(File|Directory $file): void
+    #[\Override]
+    public function add(File|Directory $file): Attempt
     {
         $this->logger->debug('Adding file {file}', ['file' => $file->name()->toString()]);
-        $this->filesystem->add($file);
+
+        return $this->filesystem->add($file);
     }
 
+    #[\Override]
     public function get(Name $file): Maybe
     {
         return $this
@@ -49,6 +55,7 @@ final class Logger implements Adapter
             });
     }
 
+    #[\Override]
     public function contains(Name $file): bool
     {
         $contains = $this->filesystem->contains($file);
@@ -60,12 +67,15 @@ final class Logger implements Adapter
         return $contains;
     }
 
-    public function remove(Name $file): void
+    #[\Override]
+    public function remove(Name $file): Attempt
     {
         $this->logger->debug('Removing file {file}', ['file' => $file->toString()]);
-        $this->filesystem->remove($file);
+
+        return $this->filesystem->remove($file);
     }
 
+    #[\Override]
     public function root(): Directory
     {
         return $this->filesystem->root();

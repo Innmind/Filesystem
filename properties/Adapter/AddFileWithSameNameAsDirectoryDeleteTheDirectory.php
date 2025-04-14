@@ -8,6 +8,7 @@ use Innmind\Filesystem\{
     File,
     Directory,
 };
+use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -34,9 +35,9 @@ final class AddFileWithSameNameAsDirectoryDeleteTheDirectory implements Property
         $this->directory = Directory::of($file->name())->add($fileInDirectory);
     }
 
-    public static function any(): Set
+    public static function any(): Set\Provider
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             FFile::any(),
             FFile::any(),
@@ -50,9 +51,13 @@ final class AddFileWithSameNameAsDirectoryDeleteTheDirectory implements Property
 
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        $adapter->remove($this->file->name());
-        $assert->null($adapter->add($this->directory));
-        $assert->null($adapter->add($this->file));
+        $adapter->remove($this->file->name())->unwrap();
+        $assert
+            ->object($adapter->add($this->directory)->unwrap())
+            ->instance(SideEffect::class);
+        $assert
+            ->object($adapter->add($this->file)->unwrap())
+            ->instance(SideEffect::class);
         $assert->true($adapter->contains($this->file->name()));
         $assert
             ->object($adapter->get($this->file->name())->match(

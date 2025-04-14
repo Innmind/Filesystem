@@ -5,7 +5,7 @@ In your application you'll use most of the time the `Filesystem` adapter but in 
 ```php
 use Innmind\Filesystem\Adapter\InMemory;
 
-$filesystem = InMemory::new();
+$filesystem = InMemory::emulateFilesystem();
 // use $filesystem as usual
 ```
 

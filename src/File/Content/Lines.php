@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\Stream\Stream\Size;
+use Innmind\IO\Stream\Size;
 use Innmind\Immutable\{
     Sequence,
     Str,
@@ -38,16 +38,19 @@ final class Lines implements Implementation
         return new self($lines);
     }
 
+    #[\Override]
     public function foreach(callable $function): SideEffect
     {
         return $this->lines->foreach($function);
     }
 
+    #[\Override]
     public function map(callable $map): Implementation
     {
         return new self($this->lines->map($map));
     }
 
+    #[\Override]
     public function flatMap(callable $map): Implementation
     {
         return new self($this->lines->flatMap(
@@ -55,16 +58,19 @@ final class Lines implements Implementation
         ));
     }
 
+    #[\Override]
     public function filter(callable $filter): Implementation
     {
         return new self($this->lines->filter($filter));
     }
 
+    #[\Override]
     public function lines(): Sequence
     {
         return $this->lines;
     }
 
+    #[\Override]
     public function chunks(): Sequence
     {
         $firstLineRead = false;
@@ -81,11 +87,13 @@ final class Lines implements Implementation
         });
     }
 
+    #[\Override]
     public function reduce($carry, callable $reducer)
     {
         return $this->lines->reduce($carry, $reducer);
     }
 
+    #[\Override]
     public function size(): Maybe
     {
         // we compute the size line by line to avoid loading the whole file in memory
@@ -97,9 +105,10 @@ final class Lines implements Implementation
         // "end of line" character
         $size = \max(0, $size - 1);
 
-        return Maybe::just(new Size($size));
+        return Maybe::just(Size::of($size));
     }
 
+    #[\Override]
     public function toString(): string
     {
         $lines = $this->lines->map(static fn($line) => $line->toString());

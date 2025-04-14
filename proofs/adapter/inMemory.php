@@ -9,22 +9,22 @@ return static function() {
     yield properties(
         'InMemory properties',
         Adapter::properties(),
-        Set\Call::of(InMemory::new(...)),
+        Set::call(InMemory::new(...)),
     );
     yield properties(
         'InMemory properties emulating filesystem',
         Adapter::properties(),
-        Set\Call::of(InMemory::emulateFilesystem(...)),
+        Set::call(InMemory::emulateFilesystem(...)),
     );
 
     foreach (Adapter::alwaysApplicable() as $property) {
         yield property(
             $property,
-            Set\Call::of(InMemory::new(...)),
+            Set::call(InMemory::new(...)),
         )->named('InMemory');
         yield property(
             $property,
-            Set\Call::of(InMemory::emulateFilesystem(...)),
+            Set::call(InMemory::emulateFilesystem(...)),
         )->named('InMemory emulating filesystem');
     }
 };

@@ -14,15 +14,15 @@ final class File
 {
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn($name, $content, $mediaType) => Model::of(
                 $name,
                 Content::ofString($content),
                 $mediaType,
             ),
             Name::any(),
-            Set\Strings::any(),
+            Set::strings(),
             MediaType::any(),
-        );
+        )->toSet();
     }
 }

@@ -3,7 +3,8 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\Stream\Stream\Size;
+use Innmind\IO\Stream\Size;
+use Innmind\Validation\Is;
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
@@ -39,26 +40,31 @@ final class Chunks implements Implementation
         return new self($chunks);
     }
 
+    #[\Override]
     public function foreach(callable $function): SideEffect
     {
         return $this->content()->foreach($function);
     }
 
+    #[\Override]
     public function map(callable $map): Implementation
     {
         return $this->content()->map($map);
     }
 
+    #[\Override]
     public function flatMap(callable $map): Implementation
     {
         return $this->content()->flatMap($map);
     }
 
+    #[\Override]
     public function filter(callable $filter): Implementation
     {
         return $this->content()->filter($filter);
     }
 
+    #[\Override]
     public function lines(): Sequence
     {
         // the flatMap is here in case there is only one chunk in which case the
@@ -70,16 +76,19 @@ final class Chunks implements Implementation
             ->map(Line::of(...));
     }
 
+    #[\Override]
     public function chunks(): Sequence
     {
         return $this->chunks;
     }
 
+    #[\Override]
     public function reduce($carry, callable $reducer)
     {
         return $this->lines()->reduce($carry, $reducer);
     }
 
+    #[\Override]
     public function size(): Maybe
     {
         return Maybe::just(
@@ -91,9 +100,16 @@ final class Chunks implements Implementation
                     0,
                     static fn(int $total, int $chunk) => $total + $chunk,
                 ),
-        )->map(static fn($size) => new Size($size));
+        )
+            ->keep(
+                Is::value(0)
+                    ->or(Is::int()->positive())
+                    ->asPredicate(),
+            )
+            ->map(Size::of(...));
     }
 
+    #[\Override]
     public function toString(): string
     {
         return $this

@@ -3,13 +3,11 @@ declare(strict_types = 1);
 
 namespace Fixtures\Innmind\Filesystem;
 
-use Innmind\Filesystem\Directory as Model;
-use Properties\Innmind\Filesystem\Directory as Properties;
-use Innmind\BlackBox\{
-    Set as DataSet,
-    Runner\Assert,
-    Runner\Stats,
+use Innmind\Filesystem\{
+    Directory as Model,
+    File as MFile,
 };
+use Innmind\BlackBox\Set;
 use Fixtures\Innmind\Immutable\Sequence;
 
 final class Directory
@@ -17,47 +15,44 @@ final class Directory
     /**
      * Will generate random directory tree with a maximum depth of 3 directories
      *
-     * @return DataSet<Model>
+     * @return Set<Model>
      */
-    public static function any(): DataSet
+    public static function any(): Set
     {
         return self::atDepth(0, 1);
     }
 
     /**
-     * @return DataSet<Model>
+     * @return Set<Model>
      */
-    public static function maxDepth(int $depth): DataSet
+    public static function maxDepth(int $depth): Set
     {
         return self::atDepth(0, $depth);
     }
 
-    private static function atDepth(int $depth, int $maxDepth): DataSet
+    private static function atDepth(int $depth, int $maxDepth): Set
     {
         if ($depth === $maxDepth) {
             $files = Sequence::of(
-                DataSet\Randomize::of(
-                    File::any(),
-                ),
-                DataSet\Integers::between(0, 5),
+                File::any()->randomize(),
+                Set::integers()
+                    ->between(0, 5)
+                    ->toSet(),
             );
         } else {
             $files = Sequence::of(
-                DataSet\Either::any(
-                    DataSet\Randomize::of(
-                        File::any(),
-                    ),
+                Set::either(
+                    File::any()->randomize(),
                     self::atDepth($depth + 1, $maxDepth),
                 ),
-                DataSet\Integers::between(0, 5),
+                Set::integers()
+                    ->between(0, 5)
+                    ->toSet(),
             );
         }
 
-        $directory = DataSet\Composite::immutable(
-            static fn($name, $files): Model => Model::of(
-                $name,
-                $files,
-            ),
+        $directory = Set::compose(
+            Model::of(...),
             Name::any(),
             $files->filter(static function($files): bool {
                 if ($files->empty()) {
@@ -71,20 +66,28 @@ final class Directory
             }),
         );
 
-        $modified = DataSet\Composite::immutable(
-            static fn($directory, $properties): Model => $properties->ensureHeldBy(
-                // not ideal but no other simple way for now
-                Assert::of(Stats::new()),
-                $directory,
+        $modified = Sequence::of(
+            Set::either(
+                File::any(),
+                Name::any(),
             ),
-            $directory,
-            DataSet\Properties::any(
-                Properties\RemoveFile::any(),
-                Properties\AddFile::any(),
-            )->atMost(10),
-        );
+            Set::integers()
+                ->between(0, 10)
+                ->toSet(),
+        )
+            ->flatMap(
+                static fn($modifications) => $directory->map(
+                    static fn($directory) => $modifications->unwrap()->reduce(
+                        $directory,
+                        static fn($directory, $modification) => match (true) {
+                            $modification instanceof MFile => $directory->add($modification),
+                            default => $directory->remove($modification),
+                        },
+                    ),
+                ),
+            );
 
-        return DataSet\Either::any(
+        return Set::either(
             $directory,
             $modified,
         );

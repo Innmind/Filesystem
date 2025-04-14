@@ -19,11 +19,12 @@ use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
     Map,
+    SideEffect,
 };
 use Symfony\Component\Filesystem\Filesystem as FS;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 use Fixtures\Innmind\Filesystem\Name as FName;
@@ -45,9 +46,19 @@ class FilesystemTest extends TestCase
 
         $this->assertInstanceOf(Adapter::class, $adapter);
         $this->assertFalse($adapter->contains(Name::of('foo')));
-        $this->assertNull($adapter->add(Directory::of(Name::of('foo'))));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $adapter
+                ->add(Directory::of(Name::of('foo')))
+                ->unwrap(),
+        );
         $this->assertTrue($adapter->contains(Name::of('foo')));
-        $this->assertNull($adapter->remove(Name::of('foo')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $adapter
+                ->remove(Name::of('foo'))
+                ->unwrap(),
+        );
         $this->assertFalse($adapter->contains(Name::of('foo')));
     }
 
@@ -73,7 +84,12 @@ class FilesystemTest extends TestCase
 
     public function testRemovingUnknownFileDoesntThrow()
     {
-        $this->assertNull(Filesystem::mount(Path::of('/tmp/'))->remove(Name::of('foo')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            Filesystem::mount(Path::of('/tmp/'))
+                ->remove(Name::of('foo'))
+                ->unwrap(),
+        );
     }
 
     public function testCreateNestedStructure()
@@ -86,7 +102,7 @@ class FilesystemTest extends TestCase
                 Directory::of(Name::of('bar'))
                     ->add(File::of(Name::of('bar.md'), Content::ofString('# Bar'))),
             );
-        $adapter->add($directory);
+        $adapter->add($directory)->unwrap();
         $this->assertSame(
             '# Foo',
             $adapter
@@ -143,7 +159,9 @@ class FilesystemTest extends TestCase
                 ),
         );
 
-        $adapter->remove(Name::of('foo'));
+        $adapter
+            ->remove(Name::of('foo'))
+            ->unwrap();
     }
 
     public function testRemoveFileWhenRemovedFromFolder()
@@ -152,9 +170,9 @@ class FilesystemTest extends TestCase
 
         $d = Directory::of(Name::of('foo'));
         $d = $d->add(File::of(Name::of('bar'), Content::ofString('some content')));
-        $a->add($d);
+        $a->add($d)->unwrap();
         $d = $d->remove(Name::of('bar'));
-        $a->add($d);
+        $a->add($d)->unwrap();
         $this->assertSame(1, $d->removed()->count());
         $a = Filesystem::mount(Path::of('/tmp/'));
         $this->assertFalse(
@@ -163,7 +181,9 @@ class FilesystemTest extends TestCase
                 static fn() => true,
             ),
         );
-        $a->remove(Name::of('foo'));
+        $a
+            ->remove(Name::of('foo'))
+            ->unwrap();
     }
 
     public function testDoesntFailWhenAddindSameDirectoryTwiceThatContainsARemovedFile()
@@ -172,10 +192,10 @@ class FilesystemTest extends TestCase
 
         $d = Directory::of(Name::of('foo'));
         $d = $d->add(File::of(Name::of('bar'), Content::ofString('some content')));
-        $a->add($d);
+        $a->add($d)->unwrap();
         $d = $d->remove(Name::of('bar'));
-        $a->add($d);
-        $a->add($d);
+        $a->add($d)->unwrap();
+        $a->add($d)->unwrap();
         $this->assertSame(1, $d->removed()->count());
         $a = Filesystem::mount(Path::of('/tmp/'));
         $this->assertFalse(
@@ -184,7 +204,9 @@ class FilesystemTest extends TestCase
                 static fn() => true,
             ),
         );
-        $a->remove(Name::of('foo'));
+        $a
+            ->remove(Name::of('foo'))
+            ->unwrap();
     }
 
     public function testLoadWithMediaType()
@@ -205,16 +227,20 @@ class FilesystemTest extends TestCase
                     static fn() => null,
                 ),
         );
-        $a->remove(Name::of('some_content.html'));
+        $a
+            ->remove(Name::of('some_content.html'))
+            ->unwrap();
     }
 
     public function testRoot()
     {
         $adapter = Filesystem::mount(Path::of('/tmp/test/'));
-        $adapter->add(File::of(
-            Name::of('foo'),
-            Content::ofString('foo'),
-        ));
+        $adapter
+            ->add(File::of(
+                Name::of('foo'),
+                Content::ofString('foo'),
+            ))
+            ->unwrap();
         \file_put_contents('/tmp/test/bar', 'bar');
         \mkdir('/tmp/test/baz');
         \file_put_contents('/tmp/test/baz/foobar', 'baz');
@@ -256,9 +282,15 @@ class FilesystemTest extends TestCase
                 static fn() => null,
             ),
         );
-        $adapter->remove(Name::of('foo'));
-        $adapter->remove(Name::of('bar'));
-        $adapter->remove(Name::of('baz'));
+        $adapter
+            ->remove(Name::of('foo'))
+            ->unwrap();
+        $adapter
+            ->remove(Name::of('bar'))
+            ->unwrap();
+        $adapter
+            ->remove(Name::of('baz'))
+            ->unwrap();
     }
 
     public function testAddingTheSameFileTwiceDoesNothing()
@@ -269,14 +301,24 @@ class FilesystemTest extends TestCase
             Content::ofString('foo'),
         );
 
-        $this->assertNull($adapter->add($file));
-        $this->assertNull($adapter->add($file));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $adapter
+                ->add($file)
+                ->unwrap(),
+        );
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $adapter
+                ->add($file)
+                ->unwrap(),
+        );
     }
 
     public function testPathTooLongThrowAnException()
     {
         if (\PHP_OS !== 'Darwin') {
-            $this->markTestSkipped();
+            return;
         }
 
         $path = \sys_get_temp_dir().'/innmind/filesystem/';
@@ -304,18 +346,18 @@ class FilesystemTest extends TestCase
                     ),
                 ),
             ),
-        ));
+        ))->unwrap();
     }
 
     public function testPersistedNameCanStartWithAnyAsciiCharacter()
     {
         $this
             ->forAll(
-                Set\Either::any(
-                    Set\Integers::between(1, 46),
-                    Set\Integers::between(48, 127),
+                Set::either(
+                    Set::integers()->between(1, 46),
+                    Set::integers()->between(48, 127),
                 ),
-                Set\Strings::any(),
+                Set::strings(),
             )
             ->then(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
@@ -323,15 +365,18 @@ class FilesystemTest extends TestCase
 
                 $filesystem = Filesystem::mount(Path::of($path));
 
-                $this->assertNull($filesystem->add(Directory::of(
-                    Name::of(\chr($ord).'a'),
-                    Sequence::of(
-                        File::of(
-                            Name::of('a'),
-                            Content::ofString($content),
+                $this->assertInstanceOf(
+                    SideEffect::class,
+                    $filesystem->add(Directory::of(
+                        Name::of(\chr($ord).'a'),
+                        Sequence::of(
+                            File::of(
+                                Name::of('a'),
+                                Content::ofString($content),
+                            ),
                         ),
-                    ),
-                )));
+                    ))->unwrap(),
+                );
 
                 (new FS)->remove($path);
             });
@@ -341,11 +386,11 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Either::any(
-                    Set\Integers::between(1, 46),
-                    Set\Integers::between(48, 127),
+                Set::either(
+                    Set::integers()->between(1, 46),
+                    Set::integers()->between(48, 127),
                 ),
-                Set\Strings::any(),
+                Set::strings(),
             )
             ->then(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
@@ -353,15 +398,18 @@ class FilesystemTest extends TestCase
 
                 $filesystem = Filesystem::mount(Path::of($path));
 
-                $this->assertNull($filesystem->add(Directory::of(
-                    Name::of('a'.\chr($ord).'a'),
-                    Sequence::of(
-                        File::of(
-                            Name::of('a'),
-                            Content::ofString($content),
+                $this->assertInstanceOf(
+                    SideEffect::class,
+                    $filesystem->add(Directory::of(
+                        Name::of('a'.\chr($ord).'a'),
+                        Sequence::of(
+                            File::of(
+                                Name::of('a'),
+                                Content::ofString($content),
+                            ),
                         ),
-                    ),
-                )));
+                    ))->unwrap(),
+                );
 
                 (new FS)->remove($path);
             });
@@ -371,13 +419,13 @@ class FilesystemTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Either::any(
-                    Set\Integers::between(1, 8),
-                    Set\Integers::between(14, 31),
-                    Set\Integers::between(33, 45),
-                    Set\Integers::between(48, 127),
+                Set::either(
+                    Set::integers()->between(1, 8),
+                    Set::integers()->between(14, 31),
+                    Set::integers()->between(33, 45),
+                    Set::integers()->between(48, 127),
                 ),
-                Set\Strings::any(),
+                Set::strings(),
             )
             ->then(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
@@ -385,15 +433,18 @@ class FilesystemTest extends TestCase
 
                 $filesystem = Filesystem::mount(Path::of($path));
 
-                $this->assertNull($filesystem->add(Directory::of(
-                    Name::of(\chr($ord)),
-                    Sequence::of(
-                        File::of(
-                            Name::of('a'),
-                            Content::ofString($content),
+                $this->assertInstanceOf(
+                    SideEffect::class,
+                    $filesystem->add(Directory::of(
+                        Name::of(\chr($ord)),
+                        Sequence::of(
+                            File::of(
+                                Name::of('a'),
+                                Content::ofString($content),
+                            ),
                         ),
-                    ),
-                )));
+                    ))->unwrap(),
+                );
 
                 (new FS)->remove($path);
             });
@@ -432,9 +483,8 @@ class FilesystemTest extends TestCase
     public function testDotFilesAreListed()
     {
         $this
-            ->forAll(FName::strings())
+            ->forAll(FName::strings()->prefixedBy('.'))
             ->then(function($name) {
-                $name = ".$name";
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
                 (new FS)->mkdir($path);

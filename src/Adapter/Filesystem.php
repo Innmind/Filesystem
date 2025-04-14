@@ -11,37 +11,25 @@ use Innmind\Filesystem\{
     CaseSensitivity,
     Exception\PathDoesntRepresentADirectory,
     Exception\PathTooLong,
-    Exception\RuntimeException,
     Exception\LinksAreNotSupported,
-    Exception\FailedToWriteFile,
 };
-use Innmind\TimeContinuum\ElapsedPeriod;
-use Innmind\IO\{
-    IO,
-    Readable,
-};
-use Innmind\Stream\{
-    Capabilities,
-    Streams,
-    Writable,
-};
+use Innmind\IO\IO;
 use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
     Str,
     Maybe,
+    Attempt,
+    SideEffect,
+    Set,
 };
-use Symfony\Component\{
-    Filesystem\Filesystem as FS,
-    Filesystem\Exception\IOException,
-};
+use Symfony\Component\Filesystem\Filesystem as FS;
 
 final class Filesystem implements Adapter
 {
     private const INVALID_FILES = ['.', '..'];
-    private Capabilities $capabilities;
-    private Readable $io;
+    private IO $io;
     private Path $path;
     private CaseSensitivity $case;
     private FS $filesystem;
@@ -49,8 +37,7 @@ final class Filesystem implements Adapter
     private \WeakMap $loaded;
 
     private function __construct(
-        Capabilities $capabilities,
-        Readable $io,
+        IO $io,
         Path $path,
         CaseSensitivity $case,
     ) {
@@ -58,7 +45,6 @@ final class Filesystem implements Adapter
             throw new PathDoesntRepresentADirectory($path->toString());
         }
 
-        $this->capabilities = $capabilities;
         $this->io = $io;
         $this->path = $path;
         $this->case = $case;
@@ -73,18 +59,10 @@ final class Filesystem implements Adapter
 
     public static function mount(
         Path $path,
-        ?Capabilities $capabilities = null,
         ?IO $io = null,
     ): self {
-        $capabilities ??= Streams::fromAmbientAuthority();
-        $io ??= IO::of(static fn(?ElapsedPeriod $period) => match ($period) {
-            null => $capabilities->watch()->waitForever(),
-            default => $capabilities->watch()->timeoutAfter($period),
-        });
-
         return new self(
-            $capabilities,
-            $io->readable(),
+            $io ?? IO::fromAmbientAuthority(),
             $path,
             CaseSensitivity::sensitive,
         );
@@ -92,14 +70,16 @@ final class Filesystem implements Adapter
 
     public function withCaseSensitivity(CaseSensitivity $case): self
     {
-        return new self($this->capabilities, $this->io, $this->path, $case);
+        return new self($this->io, $this->path, $case);
     }
 
-    public function add(File|Directory $file): void
+    #[\Override]
+    public function add(File|Directory $file): Attempt
     {
-        $this->createFileAt($this->path, $file);
+        return $this->createFileAt($this->path, $file);
     }
 
+    #[\Override]
     public function get(Name $file): Maybe
     {
         if (!$this->contains($file)) {
@@ -110,16 +90,23 @@ final class Filesystem implements Adapter
         return Maybe::just($this->open($this->path, $file));
     }
 
+    #[\Override]
     public function contains(Name $file): bool
     {
         return $this->filesystem->exists($this->path->toString().'/'.$file->toString());
     }
 
-    public function remove(Name $file): void
+    #[\Override]
+    public function remove(Name $file): Attempt
     {
-        $this->filesystem->remove($this->path->toString().'/'.$file->toString());
+        return Attempt::of(
+            fn() => $this->filesystem->remove(
+                $this->path->toString().'/'.$file->toString(),
+            ),
+        )->map(static fn() => SideEffect::identity());
     }
 
+    #[\Override]
     public function root(): Directory
     {
         return Directory::lazy(
@@ -130,8 +117,10 @@ final class Filesystem implements Adapter
 
     /**
      * Create the wished file at the given absolute path
+     *
+     * @return Attempt<SideEffect>
      */
-    private function createFileAt(Path $path, File|Directory $file): void
+    private function createFileAt(Path $path, File|Directory $file): Attempt
     {
         $name = $file->name()->toString();
 
@@ -141,75 +130,77 @@ final class Filesystem implements Adapter
 
         $path = $path->resolve(Path::of($name));
 
+        /** @psalm-suppress PossiblyNullReference */
         if ($this->loaded->offsetExists($file) && $this->loaded[$file]->equals($path)) {
             // no need to persist untouched file where it was loaded from
-            return;
+            return Attempt::result(SideEffect::identity());
         }
 
         $this->loaded[$file] = $path;
 
         if ($file instanceof Directory) {
-            $this->filesystem->mkdir($path->toString());
-            $persisted = $file
-                ->all()
-                ->map(function($file) use ($path) {
-                    $this->createFileAt($path, $file);
+            /** @var Set<Name> */
+            $names = Set::of();
 
-                    return $file;
-                })
-                ->map(static fn($file) => $file->name())
-                ->memoize()
-                ->toSet();
-            /**
-             * @psalm-suppress MissingClosureReturnType
-             */
-            $_ = $file
-                ->removed()
-                ->filter(fn($file): bool => !$this->case->contains($file, $persisted))
-                ->foreach(fn($file) => $this->filesystem->remove(
-                    $path->toString().$file->toString(),
-                ));
-
-            return;
+            return Attempt::of(
+                fn() => $this->filesystem->mkdir($path->toString()),
+            )
+                ->flatMap(
+                    fn() => $file
+                        ->all()
+                        ->sink($names)
+                        ->attempt(
+                            fn($persisted, $file) => $this
+                                ->createFileAt($path, $file)
+                                ->map(static fn() => ($persisted)($file->name())),
+                        ),
+                )
+                ->flatMap(
+                    fn($persisted) => $file
+                        ->removed()
+                        ->filter(fn($file): bool => !$this->case->contains(
+                            $file,
+                            $persisted,
+                        ))
+                        ->unsorted()
+                        ->sink(null)
+                        ->attempt(
+                            fn($_, $file) => Attempt::of(
+                                fn() => $this->filesystem->remove(
+                                    $path->toString().$file->toString(),
+                                ),
+                            ),
+                        )
+                        ->map(static fn() => SideEffect::identity()),
+                );
         }
 
         if (\is_dir($path->toString())) {
-            $this->filesystem->remove($path->toString());
+            try {
+                $this->filesystem->remove($path->toString());
+            } catch (\Throwable $e) {
+                return Attempt::error($e);
+            }
         }
 
         $chunks = $file->content()->chunks();
 
         try {
             $this->filesystem->touch($path->toString());
-        } catch (IOException $e) {
+        } catch (\Throwable $e) {
             if (\PHP_OS === 'Darwin' && Str::of($path->toString(), Str\Encoding::ascii)->length() > 1014) {
-                throw new PathTooLong($path->toString(), 0, $e);
+                return Attempt::error(new PathTooLong($path->toString(), 0, $e));
             }
 
-            throw new RuntimeException(
-                $e->getMessage(),
-                $e->getCode(),
-                $e,
-            );
+            return Attempt::error($e);
         }
 
-        $handle = $this->capabilities->writable()->open($path);
-
-        $_ = $chunks
-            ->reduce(
-                $handle,
-                static fn(Writable $handle, Str $chunk): Writable => $handle
-                    ->write($chunk->toEncoding(Str\Encoding::ascii))
-                    ->match(
-                        static fn($handle) => $handle,
-                        static fn() => throw new FailedToWriteFile,
-                    ),
-            )
-            ->close()
-            ->match(
-                static fn() => null,
-                static fn() => throw new FailedToWriteFile,
-            );
+        return $this
+            ->io
+            ->files()
+            ->write($path)
+            ->watch()
+            ->sink($chunks);
     }
 
     /**
@@ -236,7 +227,6 @@ final class Filesystem implements Adapter
         $file = File::of(
             $file,
             File\Content::atPath(
-                $this->capabilities->readable(),
                 $this->io,
                 $path,
             ),

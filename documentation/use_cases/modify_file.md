@@ -28,8 +28,8 @@ $insertRelease = static function(Str $line): Str {
 // replace the old changelog with the new one containing
 // the new release version
 $release = static function(File $changelog) use ($insertRelease): File {
-    return $changelog->withContent(
-        $changelog->content()->map(
+    return $changelog->mapContent(
+        static fn($content) => $content->map(
             static fn($line) => $line->map($insertRelease),
         ),
     );
@@ -43,12 +43,12 @@ $filesystem
     ->flatMap(static function($changelog) use ($tmp) {
         // this operation is due to the fact that you cannot read and
         // write to the same file at once
-        $tmp->add($changelog);
+        $tmp->add($changelog)->unwrap();
 
         return $tmp->get($changelog->name());
     })
     ->match(
-        static fn($changelog) => $filesystem->add($changelog),
+        static fn($changelog) => $filesystem->add($changelog)->unwrap(),
         static fn() => null, // the changelog doesn't exist
     );
 ```
@@ -84,8 +84,8 @@ $updateUser = static function(Line $user): Content {
     return Content::ofLines(Sequence::of($user));
 };
 $update = static function(File $users) use ($updateUser): File {
-    return $users->withContent(
-        $users->content()->flatMap(static fn($line) => $updateUser($line)),
+    return $users->mapContent(
+        static fn($content) => $content->flatMap(static fn($line) => $updateUser($line)),
     );
 };
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
@@ -97,12 +97,12 @@ $filesystem
     ->flatMap(static function($users) use ($tmp) {
         // this operation is due to the fact that you cannot read and
         // write to the same file at once
-        $tmp->add($users);
+        $tmp->add($users)->unwrap();
 
         return $tmp->get($users->name());
     })
     ->match(
-        static fn($users) => $filesystem->add($users),
+        static fn($users) => $filesystem->add($users)->unwrap(),
         static fn() => null, // the csv doesn't exist
     );
 ```
@@ -144,7 +144,7 @@ $users2 = $filesystem
 Maybe::all($users1, $users2)
     ->map(static fn($file1, $file2) => $merge($file1, $file2))
     ->match(
-        static fn($merged) => $filesystem->add($merged),
+        static fn($merged) => $filesystem->add($merged)->unwrap(),
         static fn() => null,
     );
 ```

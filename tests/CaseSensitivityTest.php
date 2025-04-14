@@ -8,9 +8,9 @@ use Innmind\Filesystem\{
     Name,
 };
 use Innmind\Immutable\Set as ISet;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 use Fixtures\Innmind\Filesystem\Name as FName;
@@ -40,7 +40,7 @@ class CaseSensitivityTest extends TestCase
         $this
             ->forAll(
                 FName::strings(),
-                Set\Sequence::of(FName::strings()),
+                Set::sequence(FName::strings()),
             )
             ->filter(static fn($a, $b) => !\in_array($a, $b, true))
             ->then(function($a, $b) {

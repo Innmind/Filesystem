@@ -32,9 +32,9 @@ final class RemoveAddRemoveModificationsDoesntAddTheFile implements Property
         $this->file = $file;
     }
 
-    public static function any(): Set
+    public static function any(): Set\Provider
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             FDirectory::any(),
             FFile::any(),
@@ -53,13 +53,15 @@ final class RemoveAddRemoveModificationsDoesntAddTheFile implements Property
 
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        $adapter->add(
-            $this
-                ->directory
-                ->remove($this->file->name())
-                ->add($this->file)
-                ->remove($this->file->name()),
-        );
+        $adapter
+            ->add(
+                $this
+                    ->directory
+                    ->remove($this->file->name())
+                    ->add($this->file)
+                    ->remove($this->file->name()),
+            )
+            ->unwrap();
         $assert->false(
             $adapter->get($this->directory->name())->match(
                 fn($dir) => $dir->contains($this->file->name()),

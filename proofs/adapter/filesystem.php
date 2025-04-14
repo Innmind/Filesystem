@@ -17,7 +17,7 @@ return static function() {
     yield properties(
         'Filesystem properties',
         Adapter::properties(),
-        Set\Call::of(static function() {
+        Set::call(static function() {
             $path = \sys_get_temp_dir().'/innmind/filesystem/';
             (new FS)->remove($path);
 
@@ -31,7 +31,7 @@ return static function() {
     foreach (Adapter::alwaysApplicable() as $property) {
         yield property(
             $property,
-            Set\Call::of(static function() {
+            Set::call(static function() {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
 

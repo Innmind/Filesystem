@@ -20,7 +20,7 @@ final class ReAddingFilesHasNoSideEffect implements Property
 {
     public static function any(): Set
     {
-        return Set\Elements::of(new self);
+        return Set::of(new self);
     }
 
     public function applicableTo(object $adapter): bool
@@ -33,7 +33,7 @@ final class ReAddingFilesHasNoSideEffect implements Property
         $adapter
             ->root()
             ->foreach(static function($file) use ($assert, $adapter) {
-                $adapter->add($file);
+                $adapter->add($file)->unwrap();
                 $assert->true($adapter->contains($file->name()));
 
                 if ($file instanceof Directory) {

@@ -4,7 +4,10 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\File\Content;
 
 use Innmind\Filesystem\Exception\LogicException;
-use Innmind\IO\Readable\Stream;
+use Innmind\IO\{
+    Streams\Stream,
+    Frame,
+};
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
@@ -34,26 +37,31 @@ final class OneShot implements Implementation
         return new self($io);
     }
 
+    #[\Override]
     public function foreach(callable $function): SideEffect
     {
         return $this->lines()->foreach($function);
     }
 
+    #[\Override]
     public function map(callable $map): Implementation
     {
         return Lines::of($this->lines()->map($map));
     }
 
+    #[\Override]
     public function flatMap(callable $map): Implementation
     {
         return Lines::of($this->lines())->flatMap($map);
     }
 
+    #[\Override]
     public function filter(callable $filter): Implementation
     {
         return Lines::of($this->lines()->filter($filter));
     }
 
+    #[\Override]
     public function lines(): Sequence
     {
         return Sequence::lazy(function() {
@@ -61,26 +69,30 @@ final class OneShot implements Implementation
 
             yield $this
                 ->io
+                ->read()
                 ->watch()
-                ->lines()
+                ->frames(Frame::line())
                 ->lazy()
                 ->sequence();
         })
             ->flatMap(static fn($lines) => $lines)
-            ->map(static fn($line) => Line::fromStream($line));
+            ->map(Line::fromStream(...));
     }
 
+    #[\Override]
     public function reduce($carry, callable $reducer)
     {
         return $this->lines()->reduce($carry, $reducer);
     }
 
+    #[\Override]
     public function size(): Maybe
     {
         /** @psalm-suppress ImpureMethodCall */
-        return $this->io->size();
+        return $this->io->read()->internal()->size();
     }
 
+    #[\Override]
     public function toString(): string
     {
         return $this
@@ -89,6 +101,7 @@ final class OneShot implements Implementation
             ->toString();
     }
 
+    #[\Override]
     public function chunks(): Sequence
     {
         return Sequence::lazy(function() {
@@ -96,8 +109,9 @@ final class OneShot implements Implementation
 
             yield $this
                 ->io
+                ->read()
                 ->watch()
-                ->chunks(8192)
+                ->frames(Frame::chunk(8192)->loose())
                 ->lazy()
                 ->sequence();
         })->flatMap(static fn($chunks) => $chunks);

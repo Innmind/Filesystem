@@ -18,12 +18,11 @@
         "php": "~8.2",
         "innmind/immutable": "~4.15|~5.0",
         "symfony/filesystem": "~6.0|~7.0",
-        "innmind/stream": "~4.1",
         "innmind/media-type": "~2.1",
         "innmind/url": "~4.2",
         "psr/log": "~3.0",
-        "innmind/io": "~2.2",
-        "innmind/time-continuum": "~3.4"
+        "innmind/io": "^3.0.1",
+        "innmind/validation": "~2.0"
     },
     "autoload": {
         "psr-4": {
@@ -38,19 +37,18 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "~10.2|~11.0|~12.0",
-        "vimeo/psalm": "~5.13",
-        "innmind/black-box": "^5.5.1|^6.0.2",
+        "innmind/static-analysis": "^1.2.1",
+        "innmind/black-box": "^6.0.2",
         "innmind/coding-standard": "~2.0",
         "ramsey/uuid": "^4.6"
     },
     "conflict": {
-        "innmind/black-box": "<5.0|~7.0"
+        "innmind/black-box": "<6.0|~7.0"
     },
     "suggest": {
         "innmind/black-box": "For property based testing"
     },
     "provide": {
-        "innmind/black-box-sets": "5.0"
+        "innmind/black-box-sets": "6.0"
     }
 }

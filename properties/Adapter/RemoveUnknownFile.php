@@ -7,6 +7,7 @@ use Innmind\Filesystem\{
     Adapter,
     Name,
 };
+use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -38,7 +39,9 @@ final class RemoveUnknownFile implements Property
 
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        $assert->null($adapter->remove($this->name));
+        $assert
+            ->object($adapter->remove($this->name)->unwrap())
+            ->instance(SideEffect::class);
         $assert->false($adapter->contains($this->name));
 
         return $adapter;

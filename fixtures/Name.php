@@ -6,30 +6,51 @@ namespace Fixtures\Innmind\Filesystem;
 use Innmind\Filesystem\Name as Model;
 use Innmind\BlackBox\Set;
 
-final class Name
+/**
+ * @implements Set\Prodiver<non-empty-string>
+ */
+final class Name implements Set\Provider
 {
+    private function __construct(
+        private string $prefix,
+    ) {
+    }
+
     /**
      * @return Set<Model>
      */
     public static function any(): Set
     {
-        return Set\Decorate::immutable(
-            static fn(string $name): Model => Model::of($name),
-            self::strings(),
-        );
+        return self::strings()
+            ->toSet()
+            ->map(Model::of(...));
+    }
+
+    public static function strings(): self
+    {
+        return new self('');
     }
 
     /**
-     * @return Set<string>
+     * @psalm-mutation-free
+     *
+     * @param non-empty-string $prefix
      */
-    public static function strings(): Set
+    public function prefixedBy(string $prefix): self
     {
-        return Set\Strings::madeOf(
-            Set\Integers::between(32, 46)->map(\chr(...)),
-            Set\Integers::between(48, 126)->map(\chr(...)),
-            Set\Unicode::emoticons(),
+        return new self($prefix);
+    }
+
+    #[\Override]
+    public function toSet(): Set
+    {
+        return Set::strings()->madeOf(
+            Set::integers()->between(32, 46)->map(\chr(...)),
+            Set::integers()->between(48, 126)->map(\chr(...)),
+            Set::strings()->unicode()->emoticons(),
         )
-            ->between(1, 255)
+            ->between(1, 255 - \mb_strlen($this->prefix, 'ASCII'))
+            ->map(fn($name) => $this->prefix.$name)
             ->filter(static fn($name) => \mb_strlen($name, 'ASCII') <= 255)
             ->filter(
                 static fn(string $name): bool => $name !== '.' &&

@@ -8,6 +8,7 @@ use Innmind\Filesystem\{
     Directory,
     Name,
 };
+use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -42,7 +43,9 @@ final class AddEmptyDirectory implements Property
         $directory = Directory::of($this->name);
 
         $assert->false($adapter->contains($directory->name()));
-        $assert->null($adapter->add($directory));
+        $assert
+            ->object($adapter->add($directory)->unwrap())
+            ->instance(SideEffect::class);
         $assert->true($adapter->contains($directory->name()));
         $assert->same(
             [],
