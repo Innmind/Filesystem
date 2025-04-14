@@ -53,12 +53,15 @@ final class Directory
      * @psalm-pure
      *
      * @param non-empty-string $name
+     * @param Sequence<File|self>|null $files
+     *
+     * @throws DuplicatedFile
      */
-    public static function named(string $name): self
+    public static function named(string $name, ?Sequence $files = null): self
     {
         return new self(
             Name::of($name),
-            Sequence::of(),
+            self::safeguard($files ?? Sequence::of()),
             Set::of(),
         );
     }
