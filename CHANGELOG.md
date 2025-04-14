@@ -10,6 +10,10 @@
 - `Innmind\Filesystem\Adapter::remove()` now returns `Innmind\Immutable\Attempt<Innmind\Immutable\SideEffect>`
 - `Innmind\Filesystem\Adapter::add()` now returns `Innmind\Immutable\Attempt<Innmind\Immutable\SideEffect>`
 
+### Deprecated
+
+- `Innmind\Filesystem\Adapter\InMemory::new()`, until removal this is a shortcut to `::emulateFilesystem()`
+
 ### Removed
 
 - `Innmind\Filesystem\Exception\FailedToLoadFile`
