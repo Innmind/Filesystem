@@ -199,6 +199,7 @@ final class Filesystem implements Adapter
             ->io
             ->files()
             ->write($path)
+            ->watch()
             ->sink($chunks);
     }
 
