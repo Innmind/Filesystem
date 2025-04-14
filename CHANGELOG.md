@@ -8,6 +8,10 @@
 - `Innmind\Filesystem\File\Content::size()` now returns `Innmind\Immutable\Maybe<Innmind\IO\Stream\Size>`
 - Require `innmind/black-box` `6`
 
+### Deprecated
+
+- `Innmind\Filesystem\Adapter\InMemory::new()`, until removal this is a shortcut to `::emulateFilesystem()`
+
 ### Removed
 
 - `Innmind\Filesystem\Exception\FailedToLoadFile`
