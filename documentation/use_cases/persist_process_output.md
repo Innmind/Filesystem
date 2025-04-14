@@ -31,10 +31,12 @@ $fileContent = Content::ofChunks(
             return $chunk;
         }),
 );
-$filesystem->add(
-    File::named(
-        'some-archive.txt',
-        $fileContent,
-    ),
-);
+$filesystem
+    ->add(
+        File::named(
+            'some-archive.txt',
+            $fileContent,
+        ),
+    )
+    ->unwrap();
 ```

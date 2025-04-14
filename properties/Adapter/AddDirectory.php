@@ -8,6 +8,7 @@ use Innmind\Filesystem\{
     Directory,
     File,
 };
+use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -45,7 +46,9 @@ final class AddDirectory implements Property
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
         $assert->false($adapter->contains($this->directory->name()));
-        $assert->null($adapter->add($this->directory));
+        $assert
+            ->object($adapter->add($this->directory)->unwrap())
+            ->instance(SideEffect::class);
         $assert->true($adapter->contains($this->directory->name()));
         $this->assertSame(
             $assert,

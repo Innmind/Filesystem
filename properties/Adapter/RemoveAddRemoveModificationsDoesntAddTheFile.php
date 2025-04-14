@@ -53,13 +53,15 @@ final class RemoveAddRemoveModificationsDoesntAddTheFile implements Property
 
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        $adapter->add(
-            $this
-                ->directory
-                ->remove($this->file->name())
-                ->add($this->file)
-                ->remove($this->file->name()),
-        );
+        $adapter
+            ->add(
+                $this
+                    ->directory
+                    ->remove($this->file->name())
+                    ->add($this->file)
+                    ->remove($this->file->name()),
+            )
+            ->unwrap();
         $assert->false(
             $adapter->get($this->directory->name())->match(
                 fn($dir) => $dir->contains($this->file->name()),
