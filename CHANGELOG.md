@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Innmind\Filesystem\File::mapContent()`
+
 ### Changed
 
 - Require `innmind/io` `3`

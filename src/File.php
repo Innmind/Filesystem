@@ -77,4 +77,17 @@ final class File
             $mediaType ?? $this->mediaType,
         );
     }
+
+    /**
+     * @param callable(Content): Content $map
+     */
+    public function mapContent(callable $map): self
+    {
+        /** @psalm-suppress ImpureFunctionCall */
+        return new self(
+            $this->name,
+            $map($this->content),
+            $this->mediaType,
+        );
+    }
 }

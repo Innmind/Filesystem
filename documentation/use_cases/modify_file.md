@@ -28,8 +28,8 @@ $insertRelease = static function(Str $line): Str {
 // replace the old changelog with the new one containing
 // the new release version
 $release = static function(File $changelog) use ($insertRelease): File {
-    return $changelog->withContent(
-        $changelog->content()->map(
+    return $changelog->mapContent(
+        static fn($content) => $content->map(
             static fn($line) => $line->map($insertRelease),
         ),
     );
@@ -84,8 +84,8 @@ $updateUser = static function(Line $user): Content {
     return Content::ofLines(Sequence::of($user));
 };
 $update = static function(File $users) use ($updateUser): File {
-    return $users->withContent(
-        $users->content()->flatMap(static fn($line) => $updateUser($line)),
+    return $users->mapContent(
+        static fn($content) => $content->flatMap(static fn($line) => $updateUser($line)),
     );
 };
 $filesystem = Filesystem::mount(Path::of('/var/data/'));
