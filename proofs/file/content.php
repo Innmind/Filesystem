@@ -45,6 +45,13 @@ return static function() {
                 )),
         ],
         [
+            'Content::io()',
+            Set::of('LICENSE', 'CHANGELOG.md', 'composer.json')
+                ->map(static fn($path) => Model::io(
+                    $io->files()->read(Path::of($path)),
+                )),
+        ],
+        [
             'Content::none()',
             Set::of(Model::none()),
         ],
