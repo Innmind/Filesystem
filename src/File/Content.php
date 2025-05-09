@@ -10,6 +10,7 @@ use Innmind\Filesystem\File\Content\{
 use Innmind\IO\{
     IO,
     Streams\Stream,
+    Files\Read,
     Stream\Size,
 };
 use Innmind\Url\Path;
@@ -45,7 +46,7 @@ final class Content
     /**
      * @psalm-pure
      */
-    public static function io(Stream $io): self
+    public static function io(Stream|Read $io): self
     {
         return new self(Content\IO::of($io));
     }

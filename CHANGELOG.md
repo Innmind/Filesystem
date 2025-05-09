@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `Innmind\Filesystem\File\Content::io()` now accepts an instance of `Innmind\IO\Files\Read`
+
 ## 8.0.0 - 2025-04-14
 
 ### Added
