@@ -5,6 +5,7 @@ namespace Innmind\Filesystem\File\Content;
 
 use Innmind\IO\{
     Streams\Stream,
+    Files\Read,
     Frame,
 };
 use Innmind\Immutable\{
@@ -21,14 +22,14 @@ use Innmind\Immutable\{
 final class IO implements Implementation
 {
     private function __construct(
-        private Stream $io,
+        private Stream|Read $io,
     ) {
     }
 
     /**
      * @psalm-pure
      */
-    public static function of(Stream $io): self
+    public static function of(Stream|Read $io): self
     {
         return new self($io);
     }
@@ -60,6 +61,15 @@ final class IO implements Implementation
     #[\Override]
     public function lines(): Sequence
     {
+        if ($this->io instanceof Read) {
+            /** @psalm-suppress ImpureMethodCall */
+            return $this
+                ->io
+                ->watch()
+                ->lines()
+                ->map(Line::fromStream(...));
+        }
+
         /** @psalm-suppress ImpureMethodCall */
         return $this
             ->io
@@ -81,6 +91,11 @@ final class IO implements Implementation
     #[\Override]
     public function size(): Maybe
     {
+        if ($this->io instanceof Read) {
+            /** @psalm-suppress ImpureMethodCall */
+            return $this->io->size();
+        }
+
         /** @psalm-suppress ImpureMethodCall */
         return $this->io->read()->internal()->size();
     }
@@ -97,6 +112,14 @@ final class IO implements Implementation
     #[\Override]
     public function chunks(): Sequence
     {
+        if ($this->io instanceof Read) {
+            /** @psalm-suppress ImpureMethodCall */
+            return $this
+                ->io
+                ->watch()
+                ->chunks(8192);
+        }
+
         /** @psalm-suppress ImpureMethodCall */
         return $this
             ->io
