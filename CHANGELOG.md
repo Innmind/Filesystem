@@ -5,6 +5,7 @@
 ### Changed
 
 - Requires PHP `8.4`
+- Links are not silently ignored when listing files/directories. An error is still returned when trying to remove a link.
 
 ## 8.1.0 - 2025-05-09
 

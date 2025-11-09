@@ -23,6 +23,7 @@ use Innmind\Immutable\{
     Attempt,
     SideEffect,
     Set,
+    Predicate\Instance,
 };
 
 final class Filesystem implements Adapter
@@ -84,7 +85,7 @@ final class Filesystem implements Adapter
             return Maybe::nothing();
         }
 
-        return Maybe::just($this->open($this->path, $file));
+        return Maybe::of($this->open($this->path, $file));
     }
 
     #[\Override]
@@ -179,7 +180,7 @@ final class Filesystem implements Adapter
     /**
      * Open the file in the given folder
      */
-    private function open(Path $folder, Name $file): File|Directory
+    private function open(Path $folder, Name $file): File|Directory|null
     {
         $path = $folder->resolve(Path::of($file->toString()));
 
@@ -194,7 +195,7 @@ final class Filesystem implements Adapter
         }
 
         if (\is_link($path->toString())) {
-            throw new LinksAreNotSupported($path->toString());
+            return null;
         }
 
         $file = File::of(
@@ -221,20 +222,19 @@ final class Filesystem implements Adapter
      */
     private function list(Path $path): Sequence
     {
-        /** @var Sequence<File> */
         return Sequence::lazy(function() use ($path): \Generator {
             $files = new \FilesystemIterator($path->toString());
 
             /** @var \SplFileInfo $file */
             foreach ($files as $file) {
-                if (\is_link($file->getPathname())) {
-                    throw new LinksAreNotSupported($file->getPathname());
-                }
-
                 /** @psalm-suppress ArgumentTypeCoercion */
                 yield $this->open($path, Name::of($file->getBasename()));
             }
-        });
+        })->keep(
+            Instance::of(File::class)->or(
+                Instance::of(Directory::class),
+            ),
+        );
     }
 
     /**
