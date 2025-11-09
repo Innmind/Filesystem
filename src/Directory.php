@@ -200,6 +200,8 @@ final class Directory
      * This method should only be used for implementations of the Adapter
      * interface, normal users should never have to use this method
      *
+     * @internal
+     *
      * @return Set<Name>
      */
     public function removed(): Set

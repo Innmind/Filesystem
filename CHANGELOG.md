@@ -7,6 +7,7 @@
 - Requires PHP `8.4`
 - Links are not silently ignored when listing files/directories. An error is still returned when trying to remove a link.
 - `Innmind\Filesystem\Adapter\Filesystem::mount()` now returns an `Innmind\Immutable\Attempt`
+- `Innmind\Filesystem\Directory::removed()` is now flagged as internal
 
 ### Removed
 
