@@ -10,12 +10,12 @@ use Innmind\Filesystem\{
     Directory,
     CaseSensitivity,
     Exception\PathDoesntRepresentADirectory,
-    Exception\PathTooLong,
     Exception\LinksAreNotSupported,
 };
 use Innmind\IO\IO;
 use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
+use Innmind\Validation\Is;
 use Innmind\Immutable\{
     Sequence,
     Str,
@@ -24,7 +24,6 @@ use Innmind\Immutable\{
     SideEffect,
     Set,
 };
-use Symfony\Component\Filesystem\Filesystem as FS;
 
 final class Filesystem implements Adapter
 {
@@ -32,7 +31,6 @@ final class Filesystem implements Adapter
     private IO $io;
     private Path $path;
     private CaseSensitivity $case;
-    private FS $filesystem;
     /** @var \WeakMap<File|Directory, Path> */
     private \WeakMap $loaded;
 
@@ -48,12 +46,11 @@ final class Filesystem implements Adapter
         $this->io = $io;
         $this->path = $path;
         $this->case = $case;
-        $this->filesystem = new FS;
         /** @var \WeakMap<File|Directory, Path> */
         $this->loaded = new \WeakMap;
 
-        if (!$this->filesystem->exists($this->path->toString())) {
-            $this->filesystem->mkdir($this->path->toString());
+        if (!self::doExist($this->path->toString())->unwrap()) {
+            self::mkdir($this->path->toString())->unwrap();
         }
     }
 
@@ -93,17 +90,13 @@ final class Filesystem implements Adapter
     #[\Override]
     public function contains(Name $file): bool
     {
-        return $this->filesystem->exists($this->path->toString().'/'.$file->toString());
+        return self::doExist($this->path->toString().$file->toString())->unwrap();
     }
 
     #[\Override]
     public function remove(Name $file): Attempt
     {
-        return Attempt::of(
-            fn() => $this->filesystem->remove(
-                $this->path->toString().'/'.$file->toString(),
-            ),
-        )->map(static fn() => SideEffect::identity());
+        return self::doRemove($this->path->toString().$file->toString());
     }
 
     #[\Override]
@@ -142,9 +135,7 @@ final class Filesystem implements Adapter
             /** @var Set<Name> */
             $names = Set::of();
 
-            return Attempt::of(
-                fn() => $this->filesystem->mkdir($path->toString()),
-            )
+            return self::mkdir($path->toString())
                 ->flatMap(
                     fn() => $file
                         ->all()
@@ -163,44 +154,26 @@ final class Filesystem implements Adapter
                             $persisted,
                         ))
                         ->unsorted()
-                        ->sink(null)
-                        ->attempt(
-                            fn($_, $file) => Attempt::of(
-                                fn() => $this->filesystem->remove(
-                                    $path->toString().$file->toString(),
-                                ),
-                            ),
-                        )
-                        ->map(static fn() => SideEffect::identity()),
+                        ->sink(SideEffect::identity)
+                        ->attempt(static fn($_, $file) => self::doRemove(
+                            $path->toString().$file->toString(),
+                        )),
                 );
         }
 
-        if (\is_dir($path->toString())) {
-            try {
-                $this->filesystem->remove($path->toString());
-            } catch (\Throwable $e) {
-                return Attempt::error($e);
-            }
-        }
-
-        $chunks = $file->content()->chunks();
-
-        try {
-            $this->filesystem->touch($path->toString());
-        } catch (\Throwable $e) {
-            if (\PHP_OS === 'Darwin' && Str::of($path->toString(), Str\Encoding::ascii)->length() > 1014) {
-                return Attempt::error(new PathTooLong($path->toString(), 0, $e));
-            }
-
-            return Attempt::error($e);
-        }
-
-        return $this
-            ->io
-            ->files()
-            ->write($path)
-            ->watch()
-            ->sink($chunks);
+        return self::doRemove($path->toString())
+            ->map(static fn() => $file->content()->chunks())
+            ->flatMap(static fn($chunks) => self::touch($path->toString())->map(
+                static fn() => $chunks,
+            ))
+            ->flatMap(
+                fn($chunks) => $this
+                    ->io
+                    ->files()
+                    ->write($path)
+                    ->watch()
+                    ->sink($chunks),
+            );
     }
 
     /**
@@ -262,5 +235,125 @@ final class Filesystem implements Adapter
                 yield $this->open($path, Name::of($file->getBasename()));
             }
         });
+    }
+
+    /**
+     * @return Attempt<bool>
+     */
+    private static function doExist(string $path): Attempt
+    {
+        if (Str::of($path)->length() > \PHP_MAXPATHLEN) {
+            return Attempt::error(new \RuntimeException('Path too long'));
+        }
+
+        return Attempt::result(@\file_exists($path));
+    }
+
+    /**
+     * @return Attempt<SideEffect>
+     */
+    private static function mkdir(string $path): Attempt
+    {
+        if (Str::of($path)->length() > \PHP_MAXPATHLEN) {
+            return Attempt::error(new \RuntimeException('Path too long'));
+        }
+
+        // We do not check the result of this function as it will return false
+        // if the path already exist. This can lead to race conditions where
+        // another process created the directory between the condition that
+        // checked if it existed and the call to this method. The only important
+        // part is to check wether the directory exists or not afterward.
+        @\mkdir($path, recursive: true);
+
+        if (!\is_dir($path)) {
+            return Attempt::error(new \RuntimeException(\sprintf(
+                "Failed to create directory '%s'",
+                $path,
+            )));
+        }
+
+        return Attempt::result(SideEffect::identity);
+    }
+
+    /**
+     * @return Attempt<SideEffect>
+     */
+    private static function touch(string $path): Attempt
+    {
+        if (Str::of($path)->length() > \PHP_MAXPATHLEN) {
+            return Attempt::error(new \RuntimeException('Path too long'));
+        }
+
+        if (!@\touch($path)) {
+            return Attempt::error(new \RuntimeException(\sprintf(
+                "Failed to create file '%s'",
+                $path,
+            )));
+        }
+
+        if (!\file_exists($path)) {
+            return Attempt::error(new \RuntimeException(\sprintf(
+                "Failed to create file '%s'",
+                $path,
+            )));
+        }
+
+        return Attempt::result(SideEffect::identity);
+    }
+
+    /**
+     * This method only relies on the returned boolean to know if the deletion
+     * was successful or not. It doesn't check afterward if the content is no
+     * longer there as it may lead to race conditions with other processes.
+     *
+     * Such race condition could be P1 removes a file, P2 creates the same file
+     * and then P1 check the file doesn't exist. This scenario would report a
+     * failure.
+     *
+     * This package doesn't want to bleed this global state between processes.
+     * If you end up here, know that you should design your app in a way that
+     * there is as little as possible race conditions like these.
+     *
+     * @return Attempt<SideEffect>
+     */
+    private static function doRemove(string $path): Attempt
+    {
+        if (!\file_exists($path)) {
+            return Attempt::result(SideEffect::identity);
+        }
+
+        if (\is_link($path)) {
+            return Attempt::error(new LinksAreNotSupported);
+        }
+
+        if (\is_dir($path)) {
+            $files = new \FilesystemIterator(
+                $path,
+                \FilesystemIterator::CURRENT_AS_PATHNAME | \FilesystemIterator::SKIP_DOTS,
+            );
+
+            return Sequence::lazy(static fn() => yield from $files)
+                ->keep(Is::string()->asPredicate())
+                ->sink(SideEffect::identity)
+                ->attempt(static fn($_, $file) => self::doRemove($file))
+                ->map(static fn() => @\rmdir($path))
+                ->flatMap(static fn($removed) => match ($removed) {
+                    true => Attempt::result(SideEffect::identity),
+                    false => Attempt::error(new \RuntimeException(\sprintf(
+                        "Failed to remove directory '%s'",
+                        $path,
+                    ))),
+                });
+        }
+
+        $removed = @\unlink($path);
+
+        return match ($removed) {
+            true => Attempt::result(SideEffect::identity),
+            false => Attempt::error(new \RuntimeException(\sprintf(
+                "Failed to remove file '%s'",
+                $path,
+            ))),
+        };
     }
 }

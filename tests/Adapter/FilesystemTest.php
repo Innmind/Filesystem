@@ -12,7 +12,6 @@ use Innmind\Filesystem\{
     Directory as DirectoryInterface,
     Directory,
     Exception\PathDoesntRepresentADirectory,
-    Exception\PathTooLong,
     Exception\LinksAreNotSupported,
 };
 use Innmind\Url\Path;
@@ -326,7 +325,8 @@ class FilesystemTest extends TestCase
 
         $filesystem = Filesystem::mount(Path::of($path));
 
-        $this->expectException(PathTooLong::class);
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Path too long');
 
         $filesystem->add(Directory::of(
             Name::of(\str_repeat('a', 255)),

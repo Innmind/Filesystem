@@ -17,7 +17,6 @@
     "require": {
         "php": "~8.4",
         "innmind/immutable": "dev-next",
-        "symfony/filesystem": "~6.0|~7.0",
         "innmind/media-type": "dev-next",
         "innmind/url": "dev-next",
         "psr/log": "~3.0",
@@ -42,6 +41,7 @@
         "innmind/static-analysis": "^1.2.1",
         "innmind/black-box": "^6.0.2",
         "innmind/coding-standard": "~2.0",
+        "symfony/filesystem": "~6.0|~7.0",
         "ramsey/uuid": "^4.6"
     },
     "conflict": {
