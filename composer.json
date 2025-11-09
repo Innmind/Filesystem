@@ -15,7 +15,7 @@
         "issues": "http://github.com/Innmind/filesystem/issues"
     },
     "require": {
-        "php": "~8.2",
+        "php": "~8.4",
         "innmind/immutable": "~4.15|~5.0",
         "symfony/filesystem": "~6.0|~7.0",
         "innmind/media-type": "~2.1",
