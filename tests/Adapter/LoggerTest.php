@@ -22,7 +22,7 @@ class LoggerTest extends TestCase
         $this->assertInstanceOf(
             Adapter::class,
             Logger::psr(
-                InMemory::new(),
+                InMemory::emulateFilesystem(),
                 new NullLogger,
             ),
         );
@@ -31,7 +31,7 @@ class LoggerTest extends TestCase
     public function testAdd()
     {
         $adapter = Logger::psr(
-            $inner = InMemory::new(),
+            $inner = InMemory::emulateFilesystem(),
             new NullLogger,
         );
         $file = File::of(Name::of('foo'), Content::none());
@@ -48,7 +48,7 @@ class LoggerTest extends TestCase
     public function testGet()
     {
         $adapter = Logger::psr(
-            $inner = InMemory::new(),
+            $inner = InMemory::emulateFilesystem(),
             new NullLogger,
         );
         $name = Name::of('foo');
@@ -69,7 +69,7 @@ class LoggerTest extends TestCase
     public function testContains()
     {
         $adapter = Logger::psr(
-            $inner = InMemory::new(),
+            $inner = InMemory::emulateFilesystem(),
             new NullLogger,
         );
         $name = Name::of('foo');
@@ -83,7 +83,7 @@ class LoggerTest extends TestCase
     public function testRemove()
     {
         $adapter = Logger::psr(
-            $inner = InMemory::new(),
+            $inner = InMemory::emulateFilesystem(),
             new NullLogger,
         );
         $name = Name::of('foo');
@@ -103,7 +103,7 @@ class LoggerTest extends TestCase
     public function testRoot()
     {
         $adapter = Logger::psr(
-            $inner = InMemory::new(),
+            $inner = InMemory::emulateFilesystem(),
             new NullLogger,
         );
         $file = File::named(

@@ -21,7 +21,7 @@ class InMemoryTest extends TestCase
 {
     public function testInterface()
     {
-        $a = InMemory::new();
+        $a = InMemory::emulateFilesystem();
 
         $this->assertInstanceOf(Adapter::class, $a);
         $this->assertFalse($a->contains(Name::of('foo')));
@@ -50,7 +50,7 @@ class InMemoryTest extends TestCase
 
     public function testReturnNothingWhenGettingUnknownFile()
     {
-        $this->assertNull(InMemory::new()->get(Name::of('foo'))->match(
+        $this->assertNull(InMemory::emulateFilesystem()->get(Name::of('foo'))->match(
             static fn($file) => $file,
             static fn() => null,
         ));
@@ -60,7 +60,7 @@ class InMemoryTest extends TestCase
     {
         $this->assertInstanceOf(
             SideEffect::class,
-            InMemory::new()
+            InMemory::emulateFilesystem()
                 ->remove(Name::of('foo'))
                 ->unwrap(),
         );
@@ -68,7 +68,7 @@ class InMemoryTest extends TestCase
 
     public function testRoot()
     {
-        $adapter = InMemory::new();
+        $adapter = InMemory::emulateFilesystem();
         $adapter
             ->add($foo = File::of(
                 Name::of('foo'),

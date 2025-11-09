@@ -25,14 +25,6 @@ final class InMemory implements Adapter
         $this->root = Directory::named('root');
     }
 
-    /**
-     * @deprecated Use self::emulateFilesystem()
-     */
-    public static function new(): self
-    {
-        return self::emulateFilesystem();
-    }
-
     public static function emulateFilesystem(): self
     {
         return new self;

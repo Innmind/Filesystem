@@ -8,6 +8,10 @@
 - Links are not silently ignored when listing files/directories. An error is still returned when trying to remove a link.
 - `Innmind\Filesystem\Adapter\Filesystem::mount()` now returns an `Innmind\Immutable\Attempt`
 
+### Removed
+
+- `Innmind\Filesystem\Adapter\InMemory::new()`
+
 ## 8.1.0 - 2025-05-09
 
 ### Added
