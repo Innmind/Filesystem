@@ -88,7 +88,10 @@ final class Filesystem implements Adapter
     #[\Override]
     public function contains(Name $file): bool
     {
-        return self::doExist($this->path->toString().$file->toString())->unwrap();
+        return self::doExist($this->path->toString().$file->toString())->match(
+            static fn($exists) => $exists,
+            static fn() => false,
+        );
     }
 
     #[\Override]
