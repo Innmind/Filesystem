@@ -16,13 +16,15 @@
     },
     "require": {
         "php": "~8.4",
-        "innmind/immutable": "~4.15|~5.0",
+        "innmind/immutable": "dev-next",
         "symfony/filesystem": "~6.0|~7.0",
-        "innmind/media-type": "~2.1",
-        "innmind/url": "~4.2",
+        "innmind/media-type": "dev-next",
+        "innmind/url": "dev-next",
         "psr/log": "~3.0",
-        "innmind/io": "^3.0.1",
-        "innmind/validation": "~2.0"
+        "innmind/io": "dev-next",
+        "innmind/validation": "dev-next",
+        "innmind/time-continuum": "dev-next",
+        "innmind/ip": "dev-next"
     },
     "autoload": {
         "psr-4": {

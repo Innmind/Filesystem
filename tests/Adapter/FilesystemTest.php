@@ -173,7 +173,7 @@ class FilesystemTest extends TestCase
         $a->add($d)->unwrap();
         $d = $d->remove(Name::of('bar'));
         $a->add($d)->unwrap();
-        $this->assertSame(1, $d->removed()->count());
+        $this->assertSame(1, $d->removed()->size());
         $a = Filesystem::mount(Path::of('/tmp/'));
         $this->assertFalse(
             $a->get(Name::of('foo'))->match(
@@ -196,7 +196,7 @@ class FilesystemTest extends TestCase
         $d = $d->remove(Name::of('bar'));
         $a->add($d)->unwrap();
         $a->add($d)->unwrap();
-        $this->assertSame(1, $d->removed()->count());
+        $this->assertSame(1, $d->removed()->size());
         $a = Filesystem::mount(Path::of('/tmp/'));
         $this->assertFalse(
             $a->get(Name::of('foo'))->match(
@@ -246,7 +246,7 @@ class FilesystemTest extends TestCase
         \file_put_contents('/tmp/test/baz/foobar', 'baz');
 
         $all = $adapter->root()->all();
-        $this->assertCount(3, $all);
+        $this->assertSame(3, $all->size());
         $all = Map::of(
             ...$all
                 ->map(static fn($file) => [$file->name()->toString(), $file])
