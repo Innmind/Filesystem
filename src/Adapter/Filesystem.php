@@ -318,6 +318,10 @@ final class Filesystem implements Adapter
      */
     private static function doRemove(string $path): Attempt
     {
+        if (Str::of($path)->length() > \PHP_MAXPATHLEN) {
+            return Attempt::error(new \RuntimeException('Path too long'));
+        }
+
         if (!\file_exists($path)) {
             return Attempt::result(SideEffect::identity);
         }
