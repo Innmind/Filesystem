@@ -85,7 +85,7 @@ final class InMemory implements Adapter
     ): Directory {
         $existing = $new
             ->removed()
-            ->filter(static fn($name) => !$new->contains($name))
+            ->exclude($new->contains(...))
             ->reduce(
                 $existing,
                 static fn(Directory $existing, $name) => $existing->remove($name),

@@ -96,7 +96,7 @@ final class Directory
             $this->name,
             $this
                 ->files
-                ->filter(static fn(File|self $known): bool => !$known->name()->equals($file->name()))
+                ->exclude(static fn(File|self $known): bool => $known->name()->equals($file->name()))
                 ->add($file),
             $this->removed,
         );
@@ -122,7 +122,7 @@ final class Directory
     {
         return new self(
             $this->name,
-            $this->files->filter(static fn(File|self $file) => !$file->name()->equals($name)),
+            $this->files->exclude(static fn(File|self $file) => $file->name()->equals($name)),
             ($this->removed)($name),
         );
     }

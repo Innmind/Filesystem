@@ -147,7 +147,7 @@ final class Filesystem implements Adapter
                 ->flatMap(
                     fn($persisted) => $file
                         ->removed()
-                        ->filter(fn($file): bool => !$this->case->contains(
+                        ->exclude(fn($file): bool => $this->case->contains(
                             $file,
                             $persisted,
                         ))
