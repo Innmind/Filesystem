@@ -39,30 +39,34 @@ final class Filesystem implements Adapter
         Path $path,
         CaseSensitivity $case,
     ) {
-        if (!$path->directory()) {
-            throw new PathDoesntRepresentADirectory($path->toString());
-        }
-
         $this->io = $io;
         $this->path = $path;
         $this->case = $case;
         /** @var \WeakMap<File|Directory, Path> */
         $this->loaded = new \WeakMap;
-
-        if (!self::doExist($this->path->toString())->unwrap()) {
-            self::mkdir($this->path->toString())->unwrap();
-        }
     }
 
+    /**
+     * @return Attempt<self>
+     */
     public static function mount(
         Path $path,
         ?IO $io = null,
-    ): self {
-        return new self(
-            $io ?? IO::fromAmbientAuthority(),
-            $path,
-            CaseSensitivity::sensitive,
-        );
+    ): Attempt {
+        if (!$path->directory()) {
+            return Attempt::error(new PathDoesntRepresentADirectory($path->toString()));
+        }
+
+        return self::doExist($path->toString())
+            ->flatMap(static fn($exist) => match ($exist) {
+                false => self::mkdir($path->toString()),
+                default => Attempt::result(SideEffect::identity),
+            })
+            ->map(static fn() => new self(
+                $io ?? IO::fromAmbientAuthority(),
+                $path,
+                CaseSensitivity::sensitive,
+            ));
     }
 
     public function withCaseSensitivity(CaseSensitivity $case): self
