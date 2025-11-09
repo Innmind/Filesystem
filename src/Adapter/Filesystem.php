@@ -28,7 +28,6 @@ use Innmind\Immutable\{
 
 final class Filesystem implements Adapter
 {
-    private const INVALID_FILES = ['.', '..'];
     private IO $io;
     private Path $path;
     private CaseSensitivity $case;
