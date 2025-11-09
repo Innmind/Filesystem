@@ -18,16 +18,14 @@ use Innmind\Immutable\{
 
 final class InMemory implements Adapter
 {
-    private Directory $root;
-
-    private function __construct()
-    {
-        $this->root = Directory::named('root');
+    private function __construct(
+        private Directory $root,
+    ) {
     }
 
     public static function emulateFilesystem(): self
     {
-        return new self;
+        return new self(Directory::named('root'));
     }
 
     #[\Override]

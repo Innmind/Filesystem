@@ -28,20 +28,14 @@ use Innmind\Immutable\{
 
 final class Filesystem implements Adapter
 {
-    private IO $io;
-    private Path $path;
-    private CaseSensitivity $case;
     /** @var \WeakMap<File|Directory, Path> */
     private \WeakMap $loaded;
 
     private function __construct(
-        IO $io,
-        Path $path,
-        CaseSensitivity $case,
+        private IO $io,
+        private Path $path,
+        private CaseSensitivity $case,
     ) {
-        $this->io = $io;
-        $this->path = $path;
-        $this->case = $case;
         /** @var \WeakMap<File|Directory, Path> */
         $this->loaded = new \WeakMap;
     }

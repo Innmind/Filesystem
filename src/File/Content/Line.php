@@ -11,11 +11,8 @@ use Innmind\Immutable\Str;
  */
 final class Line
 {
-    private Str $content;
-
-    private function __construct(Str $content)
+    private function __construct(private Str $content)
     {
-        $this->content = $content;
     }
 
     /**

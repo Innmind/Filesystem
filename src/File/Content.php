@@ -26,11 +26,8 @@ use Innmind\Immutable\{
  */
 final class Content
 {
-    private Implementation $implementation;
-
-    private function __construct(Implementation $implementation)
+    private function __construct(private Implementation $implementation)
     {
-        $this->implementation = $implementation;
     }
 
     /**

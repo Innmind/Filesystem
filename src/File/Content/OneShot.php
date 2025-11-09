@@ -21,12 +21,10 @@ use Innmind\Immutable\{
  */
 final class OneShot implements Implementation
 {
-    private Stream $io;
     private bool $loaded = false;
 
-    private function __construct(Stream $io)
+    private function __construct(private Stream $io)
     {
-        $this->io = $io;
     }
 
     /**

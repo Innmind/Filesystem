@@ -16,21 +16,15 @@ use Innmind\Immutable\{
  */
 final class Directory
 {
-    private Name $name;
-    /** @var Sequence<File|self> */
-    private Sequence $files;
-    /** @var Set<Name> */
-    private Set $removed;
-
     /**
      * @param Sequence<File|self> $files
      * @param Set<Name> $removed
      */
-    private function __construct(Name $name, Sequence $files, Set $removed)
-    {
-        $this->name = $name;
-        $this->files = $files;
-        $this->removed = $removed;
+    private function __construct(
+        private Name $name,
+        private Sequence $files,
+        private Set $removed,
+    ) {
     }
 
     /**

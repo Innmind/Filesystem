@@ -17,13 +17,10 @@ use Psr\Log\LoggerInterface;
 
 final class Logger implements Adapter
 {
-    private Adapter $filesystem;
-    private LoggerInterface $logger;
-
-    private function __construct(Adapter $filesystem, LoggerInterface $logger)
-    {
-        $this->filesystem = $filesystem;
-        $this->logger = $logger;
+    private function __construct(
+        private Adapter $filesystem,
+        private LoggerInterface $logger,
+    ) {
     }
 
     public static function psr(Adapter $filesystem, LoggerInterface $logger): self
