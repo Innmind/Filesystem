@@ -10,6 +10,7 @@ use Innmind\Filesystem\{
 use Innmind\Immutable\{
     Attempt,
     Sequence,
+    SideEffect,
 };
 
 /**
@@ -31,4 +32,9 @@ interface Implementation
      * @return Sequence<TreePath> The paths must be relative
      */
     public function list(TreePath $parent): Sequence;
+
+    /**
+     * @return Attempt<SideEffect>
+     */
+    public function remove(TreePath $path): Attempt;
 }

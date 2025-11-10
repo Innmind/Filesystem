@@ -54,7 +54,7 @@ final class Bridge implements Adapter
     #[\Override]
     public function remove(Name $file): Attempt
     {
-        return $this->adapter->remove($file);
+        return $this->adapter->remove(TreePath::of($file));
     }
 
     #[\Override]
