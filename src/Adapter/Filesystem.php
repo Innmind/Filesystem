@@ -52,9 +52,9 @@ final class Filesystem implements Adapter
             return Attempt::error(new PathDoesntRepresentADirectory($path->toString()));
         }
 
-        return self::doExist($path->toString())
+        return self::doExist($path)
             ->flatMap(static fn($exist) => match ($exist) {
-                false => self::mkdir($path->toString()),
+                false => self::mkdir($path),
                 default => Attempt::result(SideEffect::identity),
             })
             ->map(static fn() => new self(
@@ -67,7 +67,7 @@ final class Filesystem implements Adapter
     #[\Override]
     public function add(File|Directory $file): Attempt
     {
-        return $this->createFileAt($this->path, $file);
+        return $this->createFileAt(TreePath::root(), $file);
     }
 
     #[\Override]
@@ -78,13 +78,13 @@ final class Filesystem implements Adapter
             return Maybe::nothing();
         }
 
-        return Maybe::of($this->open($this->path, $file));
+        return Maybe::of($this->open(TreePath::root(), $file));
     }
 
     #[\Override]
     public function contains(Name $file): bool
     {
-        return self::doExist($this->path->toString().$file->toString())->match(
+        return self::doExist(TreePath::of($file)->asPath($this->path))->match(
             static fn($exists) => $exists,
             static fn() => false,
         );
@@ -93,7 +93,7 @@ final class Filesystem implements Adapter
     #[\Override]
     public function remove(Name $file): Attempt
     {
-        return self::doRemove($this->path->toString().$file->toString());
+        return self::doRemove(TreePath::of($file)->asPath($this->path));
     }
 
     #[\Override]
@@ -101,7 +101,7 @@ final class Filesystem implements Adapter
     {
         return Directory::lazy(
             Name::of('root'),
-            $this->list($this->path),
+            $this->list(TreePath::root()),
         );
     }
 
@@ -110,15 +110,11 @@ final class Filesystem implements Adapter
      *
      * @return Attempt<SideEffect>
      */
-    private function createFileAt(Path $path, File|Directory $file): Attempt
+    private function createFileAt(TreePath $parent, File|Directory $file): Attempt
     {
-        $name = $file->name()->toString();
-
-        if ($file instanceof Directory) {
-            $name .= '/';
-        }
-
-        $path = $path->resolve(Path::of($name));
+        $path = TreePath::of($file)
+            ->under($parent)
+            ->asPath($this->path);
 
         /** @psalm-suppress PossiblyNullReference */
         if ($this->loaded->offsetExists($file) && $this->loaded[$file]->equals($path)) {
@@ -131,15 +127,16 @@ final class Filesystem implements Adapter
         if ($file instanceof Directory) {
             /** @var Set<Name> */
             $names = Set::of();
+            $parent = TreePath::of($file)->under($parent);
 
-            return self::mkdir($path->toString())
+            return self::mkdir($path)
                 ->flatMap(
                     fn() => $file
                         ->all()
                         ->sink($names)
                         ->attempt(
                             fn($persisted, $file) => $this
-                                ->createFileAt($path, $file)
+                                ->createFileAt($parent, $file)
                                 ->map(static fn() => ($persisted)($file->name())),
                         ),
                 )
@@ -151,16 +148,17 @@ final class Filesystem implements Adapter
                             $persisted,
                         ))
                         ->unsorted()
+                        ->map(TreePath::of(...))
                         ->sink(SideEffect::identity)
                         ->attempt(static fn($_, $file) => self::doRemove(
-                            $path->toString().$file->toString(),
+                            $file->asPath($path),
                         )),
                 );
         }
 
-        return self::doRemove($path->toString())
+        return self::doRemove($path)
             ->map(static fn() => $file->content()->chunks())
-            ->flatMap(static fn($chunks) => self::touch($path->toString())->map(
+            ->flatMap(static fn($chunks) => self::touch($path)->map(
                 static fn() => $chunks,
             ))
             ->flatMap(
@@ -176,16 +174,18 @@ final class Filesystem implements Adapter
     /**
      * Open the file in the given folder
      */
-    private function open(Path $folder, Name $file): File|Directory|null
+    private function open(TreePath $parent, Name $file): File|Directory|null
     {
-        $path = $folder->resolve(Path::of($file->toString()));
+        $path = TreePath::of($file)
+            ->under($parent)
+            ->asPath($this->path);
 
         if (\is_dir($path->toString())) {
-            $directoryPath = $folder->resolve(Path::of($file->toString().'/'));
+            $directoryPath = TreePath::directory($file)->under($parent);
             $files = $this->list($directoryPath);
 
             $directory = Directory::lazy($file, $files);
-            $this->loaded[$directory] = $directoryPath;
+            $this->loaded[$directory] = $directoryPath->asPath($this->path);
 
             return $directory;
         }
@@ -216,15 +216,15 @@ final class Filesystem implements Adapter
     /**
      * @return Sequence<File|Directory>
      */
-    private function list(Path $path): Sequence
+    private function list(TreePath $parent): Sequence
     {
-        return Sequence::lazy(function() use ($path): \Generator {
-            $files = new \FilesystemIterator($path->toString());
+        return Sequence::lazy(function() use ($parent): \Generator {
+            $files = new \FilesystemIterator($parent->asPath($this->path)->toString());
 
             /** @var \SplFileInfo $file */
             foreach ($files as $file) {
                 /** @psalm-suppress ArgumentTypeCoercion */
-                yield $this->open($path, Name::of($file->getBasename()));
+                yield $this->open($parent, Name::of($file->getBasename()));
             }
         })->keep(
             Instance::of(File::class)->or(
@@ -236,8 +236,10 @@ final class Filesystem implements Adapter
     /**
      * @return Attempt<bool>
      */
-    private static function doExist(string $path): Attempt
+    private static function doExist(Path $path): Attempt
     {
+        $path = $path->toString();
+
         if (Str::of($path)->length() > \PHP_MAXPATHLEN) {
             return Attempt::error(new \RuntimeException('Path too long'));
         }
@@ -248,8 +250,10 @@ final class Filesystem implements Adapter
     /**
      * @return Attempt<SideEffect>
      */
-    private static function mkdir(string $path): Attempt
+    private static function mkdir(Path $path): Attempt
     {
+        $path = $path->toString();
+
         if (Str::of($path)->length() > \PHP_MAXPATHLEN) {
             return Attempt::error(new \RuntimeException('Path too long'));
         }
@@ -274,8 +278,10 @@ final class Filesystem implements Adapter
     /**
      * @return Attempt<SideEffect>
      */
-    private static function touch(string $path): Attempt
+    private static function touch(Path $path): Attempt
     {
+        $path = $path->toString();
+
         if (Str::of($path)->length() > \PHP_MAXPATHLEN) {
             return Attempt::error(new \RuntimeException('Path too long'));
         }
@@ -312,8 +318,10 @@ final class Filesystem implements Adapter
      *
      * @return Attempt<SideEffect>
      */
-    private static function doRemove(string $path): Attempt
+    private static function doRemove(Path $path): Attempt
     {
+        $path = $path->toString();
+
         if (Str::of($path)->length() > \PHP_MAXPATHLEN) {
             return Attempt::error(new \RuntimeException('Path too long'));
         }
@@ -334,6 +342,7 @@ final class Filesystem implements Adapter
 
             return Sequence::lazy(static fn() => yield from $files)
                 ->keep(Is::string()->asPredicate())
+                ->map(Path::of(...))
                 ->sink(SideEffect::identity)
                 ->attempt(static fn($_, $file) => self::doRemove($file))
                 ->map(static fn() => @\rmdir($path))
