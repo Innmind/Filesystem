@@ -26,7 +26,7 @@ use Innmind\Immutable\{
     Predicate\Instance,
 };
 
-final class Filesystem implements Adapter, Implementation
+final class Filesystem implements Implementation
 {
     /** @var \WeakMap<File|Directory, Path> */
     private \WeakMap $loaded;
@@ -65,13 +65,17 @@ final class Filesystem implements Adapter, Implementation
             ->map(Bridge::of(...));
     }
 
-    #[\Override]
+    /**
+     * @return Attempt<SideEffect>
+     */
     public function add(File|Directory $file): Attempt
     {
         return $this->createFileAt(TreePath::root(), $file);
     }
 
-    #[\Override]
+    /**
+     * @return Maybe<File|Directory>
+     */
     public function get(Name $file): Maybe
     {
         if (!$this->contains($file)) {
@@ -82,7 +86,6 @@ final class Filesystem implements Adapter, Implementation
         return Maybe::of($this->open(TreePath::root(), $file));
     }
 
-    #[\Override]
     public function contains(Name $file): bool
     {
         return self::doExist(TreePath::of($file)->asPath($this->path))->match(
@@ -91,13 +94,14 @@ final class Filesystem implements Adapter, Implementation
         );
     }
 
-    #[\Override]
+    /**
+     * @return Attempt<SideEffect>
+     */
     public function remove(Name $file): Attempt
     {
         return $this->doRemove(TreePath::of($file));
     }
 
-    #[\Override]
     public function root(): Directory
     {
         return Directory::lazy(
