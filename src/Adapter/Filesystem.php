@@ -45,6 +45,7 @@ final class Filesystem implements Adapter
      */
     public static function mount(
         Path $path,
+        CaseSensitivity $case = CaseSensitivity::sensitive,
         ?IO $io = null,
     ): Attempt {
         if (!$path->directory()) {
@@ -59,13 +60,8 @@ final class Filesystem implements Adapter
             ->map(static fn() => new self(
                 $io ?? IO::fromAmbientAuthority(),
                 $path,
-                CaseSensitivity::sensitive,
+                $case,
             ));
-    }
-
-    public function withCaseSensitivity(CaseSensitivity $case): self
-    {
-        return new self($this->io, $this->path, $case);
     }
 
     #[\Override]

@@ -12,6 +12,7 @@
 ### Removed
 
 - `Innmind\Filesystem\Adapter\InMemory::new()`
+- `Innmind\Filesystem\Adapter\Filesystem::withCaseSensitivity()`, case sensitivity can be specified as the second argument of `::mount()`
 
 ## 8.1.0 - 2025-05-09
 
