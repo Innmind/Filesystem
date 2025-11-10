@@ -41,7 +41,7 @@ final class Filesystem implements Adapter
     }
 
     /**
-     * @return Attempt<self>
+     * @return Attempt<Adapter>
      */
     public static function mount(
         Path $path,
@@ -61,7 +61,8 @@ final class Filesystem implements Adapter
                 $io ?? IO::fromAmbientAuthority(),
                 $path,
                 $case,
-            ));
+            ))
+            ->map(Bridge::of(...));
     }
 
     #[\Override]
