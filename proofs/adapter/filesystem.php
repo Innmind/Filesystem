@@ -14,11 +14,12 @@ use Innmind\BlackBox\Set;
 use Symfony\Component\Filesystem\Filesystem as FS;
 
 return static function() {
+    $path = \rtrim(\sys_get_temp_dir(), '/').'/innmind/filesystem/';
+
     yield properties(
         'Filesystem properties',
         Adapter::properties(),
-        Set::call(static function() {
-            $path = \sys_get_temp_dir().'/innmind/filesystem/';
+        Set::call(static function() use ($path) {
             (new FS)->remove($path);
 
             return Filesystem::mount(
@@ -34,8 +35,7 @@ return static function() {
     foreach (Adapter::alwaysApplicable() as $property) {
         yield property(
             $property,
-            Set::call(static function() {
-                $path = \sys_get_temp_dir().'/innmind/filesystem/';
+            Set::call(static function() use ($path) {
                 (new FS)->remove($path);
 
                 return Filesystem::mount(
@@ -51,7 +51,7 @@ return static function() {
 
     yield test(
         'Regression adding file in directory due to case sensitivity',
-        static function($assert) {
+        static function($assert) use ($path) {
             $property = new Adapter\AddRemoveAddModificationsStillAddTheFile(
                 Directory::named('0')
                     ->add($file = File::named('L', Content::none()))
@@ -59,7 +59,6 @@ return static function() {
                 File::named('l', Content::none()),
             );
 
-            $path = \sys_get_temp_dir().'/innmind/filesystem/';
             (new FS)->remove($path);
             $adapter = Filesystem::mount(
                 Path::of($path),
