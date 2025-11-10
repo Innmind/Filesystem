@@ -93,7 +93,7 @@ final class Filesystem implements Adapter
     #[\Override]
     public function remove(Name $file): Attempt
     {
-        return self::doRemove(TreePath::of($file)->asPath($this->path));
+        return $this->doRemove(TreePath::of($file));
     }
 
     #[\Override]
@@ -149,14 +149,14 @@ final class Filesystem implements Adapter
                         ))
                         ->unsorted()
                         ->map(TreePath::of(...))
+                        ->map(static fn($file) => $file->under($parent))
                         ->sink(SideEffect::identity)
-                        ->attempt(static fn($_, $file) => self::doRemove(
-                            $file->asPath($path),
-                        )),
+                        ->attempt(fn($_, $file) => $this->doRemove($file)),
                 );
         }
 
-        return self::doRemove($path)
+        return $this
+            ->doRemove(TreePath::of($file)->under($parent))
             ->map(static fn() => $file->content()->chunks())
             ->flatMap(static fn($chunks) => self::touch($path)->map(
                 static fn() => $chunks,
@@ -234,6 +234,69 @@ final class Filesystem implements Adapter
     }
 
     /**
+     * This method only relies on the returned boolean to know if the deletion
+     * was successful or not. It doesn't check afterward if the content is no
+     * longer there as it may lead to race conditions with other processes.
+     *
+     * Such race condition could be P1 removes a file, P2 creates the same file
+     * and then P1 check the file doesn't exist. This scenario would report a
+     * failure.
+     *
+     * This package doesn't want to bleed this global state between processes.
+     * If you end up here, know that you should design your app in a way that
+     * there is as little as possible race conditions like these.
+     *
+     * @return Attempt<SideEffect>
+     */
+    private function doRemove(TreePath $path): Attempt
+    {
+        $absolutePath = $path->asPath($this->path)->toString();
+
+        if (Str::of($absolutePath)->length() > \PHP_MAXPATHLEN) {
+            return Attempt::error(new \RuntimeException('Path too long'));
+        }
+
+        if (!\file_exists($absolutePath)) {
+            return Attempt::result(SideEffect::identity);
+        }
+
+        if (\is_link($absolutePath)) {
+            return Attempt::error(new LinksAreNotSupported);
+        }
+
+        if (\is_dir($absolutePath)) {
+            $files = new \FilesystemIterator($absolutePath);
+
+            return Sequence::lazy(static fn() => yield from $files)
+                ->map(static fn($file) => $file->getBasename())
+                ->keep(Is::string()->nonEmpty()->asPredicate())
+                ->map(Name::of(...))
+                ->map(TreePath::of(...))
+                ->map(static fn($file) => $file->under($path))
+                ->sink(SideEffect::identity)
+                ->attempt(fn($_, $file) => $this->doRemove($file))
+                ->map(static fn() => @\rmdir($absolutePath))
+                ->flatMap(static fn($removed) => match ($removed) {
+                    true => Attempt::result(SideEffect::identity),
+                    false => Attempt::error(new \RuntimeException(\sprintf(
+                        "Failed to remove directory '%s'",
+                        $absolutePath,
+                    ))),
+                });
+        }
+
+        $removed = @\unlink($absolutePath);
+
+        return match ($removed) {
+            true => Attempt::result(SideEffect::identity),
+            false => Attempt::error(new \RuntimeException(\sprintf(
+                "Failed to remove file '%s'",
+                $absolutePath,
+            ))),
+        };
+    }
+
+    /**
      * @return Attempt<bool>
      */
     private static function doExist(Path $path): Attempt
@@ -301,68 +364,5 @@ final class Filesystem implements Adapter
         }
 
         return Attempt::result(SideEffect::identity);
-    }
-
-    /**
-     * This method only relies on the returned boolean to know if the deletion
-     * was successful or not. It doesn't check afterward if the content is no
-     * longer there as it may lead to race conditions with other processes.
-     *
-     * Such race condition could be P1 removes a file, P2 creates the same file
-     * and then P1 check the file doesn't exist. This scenario would report a
-     * failure.
-     *
-     * This package doesn't want to bleed this global state between processes.
-     * If you end up here, know that you should design your app in a way that
-     * there is as little as possible race conditions like these.
-     *
-     * @return Attempt<SideEffect>
-     */
-    private static function doRemove(Path $path): Attempt
-    {
-        $path = $path->toString();
-
-        if (Str::of($path)->length() > \PHP_MAXPATHLEN) {
-            return Attempt::error(new \RuntimeException('Path too long'));
-        }
-
-        if (!\file_exists($path)) {
-            return Attempt::result(SideEffect::identity);
-        }
-
-        if (\is_link($path)) {
-            return Attempt::error(new LinksAreNotSupported);
-        }
-
-        if (\is_dir($path)) {
-            $files = new \FilesystemIterator(
-                $path,
-                \FilesystemIterator::CURRENT_AS_PATHNAME | \FilesystemIterator::SKIP_DOTS,
-            );
-
-            return Sequence::lazy(static fn() => yield from $files)
-                ->keep(Is::string()->asPredicate())
-                ->map(Path::of(...))
-                ->sink(SideEffect::identity)
-                ->attempt(static fn($_, $file) => self::doRemove($file))
-                ->map(static fn() => @\rmdir($path))
-                ->flatMap(static fn($removed) => match ($removed) {
-                    true => Attempt::result(SideEffect::identity),
-                    false => Attempt::error(new \RuntimeException(\sprintf(
-                        "Failed to remove directory '%s'",
-                        $path,
-                    ))),
-                });
-        }
-
-        $removed = @\unlink($path);
-
-        return match ($removed) {
-            true => Attempt::result(SideEffect::identity),
-            false => Attempt::error(new \RuntimeException(\sprintf(
-                "Failed to remove file '%s'",
-                $path,
-            ))),
-        };
     }
 }
