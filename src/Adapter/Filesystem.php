@@ -106,6 +106,12 @@ final class Filesystem implements Adapter, Implementation
         );
     }
 
+    #[\Override]
+    public function exists(TreePath $path): Attempt
+    {
+        return self::doExist($path->asPath($this->path));
+    }
+
     /**
      * Create the wished file at the given absolute path
      *

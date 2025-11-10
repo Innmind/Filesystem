@@ -45,7 +45,10 @@ final class Bridge implements Adapter
     #[\Override]
     public function contains(Name $file): bool
     {
-        return $this->adapter->contains($file);
+        return $this->adapter->exists(TreePath::of($file))->match(
+            static fn($exists) => $exists,
+            static fn() => false,
+        );
     }
 
     #[\Override]
