@@ -106,7 +106,7 @@ final class Filesystem implements Implementation
     {
         return Directory::lazy(
             Name::of('root'),
-            $this->list(TreePath::root()),
+            $this->doList(TreePath::root()),
         );
     }
 
@@ -135,11 +135,25 @@ final class Filesystem implements Implementation
                         ->attempt(static fn() => new \RuntimeException('File not found')),
                     fn() => Attempt::result(
                         $this
-                            ->list(TreePath::root())
+                            ->doList(TreePath::root())
                             ->map(TreePath::of(...)),
                     ),
                 ),
             );
+    }
+
+    #[\Override]
+    public function list(TreePath $parent): Sequence
+    {
+        return Sequence::lazy(function() use ($parent): \Generator {
+            $files = new \FilesystemIterator($parent->asPath($this->path)->toString());
+
+            /** @var \SplFileInfo $file */
+            foreach ($files as $file) {
+                /** @psalm-suppress ArgumentTypeCoercion */
+                yield TreePath::of(Name::of($file->getBasename()));
+            }
+        });
     }
 
     /**
@@ -219,7 +233,7 @@ final class Filesystem implements Implementation
 
         if (\is_dir($path->toString())) {
             $directoryPath = TreePath::directory($file)->under($parent);
-            $files = $this->list($directoryPath);
+            $files = $this->doList($directoryPath);
 
             $directory = Directory::lazy($file, $files);
             $this->loaded[$directory] = $directoryPath->asPath($this->path);
@@ -253,7 +267,7 @@ final class Filesystem implements Implementation
     /**
      * @return Sequence<File|Directory>
      */
-    private function list(TreePath $parent): Sequence
+    private function doList(TreePath $parent): Sequence
     {
         return Sequence::lazy(function() use ($parent): \Generator {
             $files = new \FilesystemIterator($parent->asPath($this->path)->toString());

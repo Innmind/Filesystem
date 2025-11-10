@@ -25,4 +25,9 @@ interface Implementation
      * @return Attempt<File|Sequence<TreePath>>
      */
     public function read(TreePath $path): Attempt;
+
+    /**
+     * @return Sequence<TreePath>
+     */
+    public function list(TreePath $parent): Sequence;
 }

@@ -60,7 +60,14 @@ final class Bridge implements Adapter
     #[\Override]
     public function root(): Directory
     {
-        return $this->adapter->root()->rename(Name::of('root'));
+        return Directory::named(
+            'root',
+            $this
+                ->adapter
+                ->list(TreePath::root())
+                ->map($this->read(...))
+                ->flatMap(static fn($read) => $read->toSequence()),
+        );
     }
 
     /**
