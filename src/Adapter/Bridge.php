@@ -81,12 +81,14 @@ final class Bridge implements Adapter
             ->maybe()
             ->flatMap(fn($file) => match (true) {
                 $file instanceof File => Maybe::just($file),
-                default => $path
+                default => $file
                     ->name()
                     ->map(fn($name) => Directory::of(
                         $name,
-                        $file
-                            ->map(static fn($file) => $file->under($path))
+                        $this
+                            ->adapter
+                            ->list($path)
+                            ->map(static fn($found) => $found->under($path))
                             ->map($this->read(...))
                             ->flatMap(static fn($read) => $read->toSequence()),
                     )),

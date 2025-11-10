@@ -101,14 +101,10 @@ final class Filesystem implements Implementation
                     fn($name, $parent) => Maybe::of($this->open($parent, $name))
                         ->map(static fn($file) => match (true) {
                             $file instanceof File => $file,
-                            default => $file->all()->map(TreePath::of(...)),
+                            default => TreePath::of($file),
                         })
                         ->attempt(static fn() => new \RuntimeException('File not found')),
-                    fn() => Attempt::result(
-                        $this
-                            ->doList(TreePath::root())
-                            ->map(TreePath::of(...)),
-                    ),
+                    static fn() => Attempt::error(new \RuntimeException('Root folder is not accessible')),
                 ),
             );
     }

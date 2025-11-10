@@ -22,7 +22,7 @@ interface Implementation
     public function exists(TreePath $path): Attempt;
 
     /**
-     * @return Attempt<File|Sequence<TreePath>>
+     * @return Attempt<File|TreePath>
      */
     public function read(TreePath $path): Attempt;
 
