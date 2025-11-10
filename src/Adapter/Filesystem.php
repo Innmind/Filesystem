@@ -74,40 +74,11 @@ final class Filesystem implements Implementation
     }
 
     /**
-     * @return Maybe<File|Directory>
-     */
-    public function get(Name $file): Maybe
-    {
-        if (!$this->contains($file)) {
-            /** @var Maybe<File|Directory> */
-            return Maybe::nothing();
-        }
-
-        return Maybe::of($this->open(TreePath::root(), $file));
-    }
-
-    public function contains(Name $file): bool
-    {
-        return self::doExist(TreePath::of($file)->asPath($this->path))->match(
-            static fn($exists) => $exists,
-            static fn() => false,
-        );
-    }
-
-    /**
      * @return Attempt<SideEffect>
      */
     public function remove(Name $file): Attempt
     {
         return $this->doRemove(TreePath::of($file));
-    }
-
-    public function root(): Directory
-    {
-        return Directory::lazy(
-            Name::of('root'),
-            $this->doList(TreePath::root()),
-        );
     }
 
     #[\Override]
