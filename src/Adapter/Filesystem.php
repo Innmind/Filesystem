@@ -19,11 +19,9 @@ use Innmind\Validation\Is;
 use Innmind\Immutable\{
     Sequence,
     Str,
-    Maybe,
     Attempt,
     SideEffect,
     Set,
-    Predicate\Instance,
 };
 
 final class Filesystem implements Implementation
@@ -98,12 +96,7 @@ final class Filesystem implements Implementation
             })
             ->flatMap(
                 fn() => $path->match(
-                    fn($name, $parent) => Maybe::of($this->open($parent, $name))
-                        ->map(static fn($file) => match (true) {
-                            $file instanceof File => $file,
-                            default => $file->name(),
-                        })
-                        ->attempt(static fn() => new \RuntimeException('File not found')),
+                    fn($name, $parent) => $this->open($parent, $name),
                     static fn() => Attempt::error(new \RuntimeException('Root folder is not accessible')),
                 ),
             );
@@ -191,25 +184,29 @@ final class Filesystem implements Implementation
 
     /**
      * Open the file in the given folder
+     *
+     * @return Attempt<File|Name> A Name represent a directory
      */
-    private function open(TreePath $parent, Name $file): File|Directory|null
+    private function open(TreePath $parent, Name $file): Attempt
     {
         $path = TreePath::of($file)
             ->under($parent)
             ->asPath($this->path);
 
+        if (Str::of($path->toString())->length() > \PHP_MAXPATHLEN) {
+            return Attempt::error(new \RuntimeException('Path too long'));
+        }
+
+        if (!\file_exists($path->toString())) {
+            return Attempt::error(new \RuntimeException('File not found'));
+        }
+
         if (\is_dir($path->toString())) {
-            $directoryPath = TreePath::directory($file)->under($parent);
-            $files = $this->doList($directoryPath);
-
-            $directory = Directory::lazy($file, $files);
-            $this->loaded[$directory] = $directoryPath->asPath($this->path);
-
-            return $directory;
+            return Attempt::result($file);
         }
 
         if (\is_link($path->toString())) {
-            return null;
+            return Attempt::error(new LinksAreNotSupported);
         }
 
         $file = File::of(
@@ -228,27 +225,7 @@ final class Filesystem implements Implementation
         );
         $this->loaded[$file] = $path;
 
-        return $file;
-    }
-
-    /**
-     * @return Sequence<File|Directory>
-     */
-    private function doList(TreePath $parent): Sequence
-    {
-        return Sequence::lazy(function() use ($parent): \Generator {
-            $files = new \FilesystemIterator($parent->asPath($this->path)->toString());
-
-            /** @var \SplFileInfo $file */
-            foreach ($files as $file) {
-                /** @psalm-suppress ArgumentTypeCoercion */
-                yield $this->open($parent, Name::of($file->getBasename()));
-            }
-        })->keep(
-            Instance::of(File::class)->or(
-                Instance::of(Directory::class),
-            ),
-        );
+        return Attempt::result($file);
     }
 
     /**
