@@ -5,6 +5,7 @@ namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     File,
+    Name,
 };
 use Innmind\Immutable\{
     Attempt,
@@ -22,12 +23,12 @@ interface Implementation
     public function exists(TreePath $path): Attempt;
 
     /**
-     * @return Attempt<File|TreePath>
+     * @return Attempt<File|Name>
      */
     public function read(TreePath $path): Attempt;
 
     /**
-     * @return Sequence<TreePath>
+     * @return Sequence<TreePath> The paths must be relative
      */
     public function list(TreePath $parent): Sequence;
 }
