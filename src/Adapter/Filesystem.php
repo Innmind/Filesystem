@@ -116,6 +116,32 @@ final class Filesystem implements Implementation
         return self::doExist($path->asPath($this->path));
     }
 
+    #[\Override]
+    public function read(TreePath $path): Attempt
+    {
+        return $this
+            ->exists($path)
+            ->flatMap(static fn($exists) => match ($exists) {
+                true => Attempt::result(true),
+                false => Attempt::error(new \RuntimeException('File not found')),
+            })
+            ->flatMap(
+                fn() => $path->match(
+                    fn($name, $parent) => Maybe::of($this->open($parent, $name))
+                        ->map(static fn($file) => match (true) {
+                            $file instanceof File => $file,
+                            default => $file->all()->map(TreePath::of(...)),
+                        })
+                        ->attempt(static fn() => new \RuntimeException('File not found')),
+                    fn() => Attempt::result(
+                        $this
+                            ->list(TreePath::root())
+                            ->map(TreePath::of(...)),
+                    ),
+                ),
+            );
+    }
+
     /**
      * Create the wished file at the given absolute path
      *

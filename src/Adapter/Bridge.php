@@ -39,7 +39,7 @@ final class Bridge implements Adapter
     #[\Override]
     public function get(Name $file): Maybe
     {
-        return $this->adapter->get($file);
+        return $this->read(TreePath::of($file));
     }
 
     #[\Override]
@@ -61,5 +61,28 @@ final class Bridge implements Adapter
     public function root(): Directory
     {
         return $this->adapter->root()->rename(Name::of('root'));
+    }
+
+    /**
+     * @return Maybe<File|Directory>
+     */
+    private function read(TreePath $path): Maybe
+    {
+        return $this
+            ->adapter
+            ->read($path)
+            ->maybe()
+            ->flatMap(fn($file) => match (true) {
+                $file instanceof File => Maybe::just($file),
+                default => $path
+                    ->name()
+                    ->map(fn($name) => Directory::of(
+                        $name,
+                        $file
+                            ->map(static fn($file) => $file->under($path))
+                            ->map($this->read(...))
+                            ->flatMap(static fn($read) => $read->toSequence()),
+                    )),
+            });
     }
 }

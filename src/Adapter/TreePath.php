@@ -11,6 +11,7 @@ use Innmind\Filesystem\{
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
+    Maybe,
     Monoid\Concat,
 };
 
@@ -90,5 +91,38 @@ final class TreePath
         }
 
         return $root->resolve(Path::of($path->toString()));
+    }
+
+    /**
+     * Name of the file the path points to. If no name it means the path
+     * represent the root directory.
+     *
+     * @return Maybe<Name>
+     */
+    public function name(): Maybe
+    {
+        return $this->path->first();
+    }
+
+    /**
+     * @template R
+     *
+     * @param callable(Name, self, bool): R $file
+     * @param callable(): R $root
+     *
+     * @return R
+     */
+    public function match(
+        callable $file,
+        callable $root,
+    ): mixed {
+        return $this->path->match(
+            fn($name, $parent) => $file(
+                $name,
+                new self($parent, true), // since there's a child the parent is necessarily a directory
+                $this->directory,
+            ),
+            $root,
+        );
     }
 }
