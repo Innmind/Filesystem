@@ -19,39 +19,31 @@ class CaseSensitivityTest extends TestCase
 {
     use BlackBox;
 
-    public function testContains()
+    public function testContainsSensitive(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 FName::strings(),
-                FName::strings(),
+                Set::sequence(FName::strings()),
             )
-            ->filter(static fn($a, $b) => $a !== $b)
-            ->then(function($a, $b) {
+            ->filter(static fn($a, $b) => !\in_array($a, $b, true))
+            ->prove(function($a, $b) {
                 $this->assertTrue(CaseSensitivity::sensitive->contains(
                     Name::of($a),
                     ISet::of(Name::of($a)),
                 ));
                 $this->assertFalse(CaseSensitivity::sensitive->contains(
                     Name::of($a),
-                    ISet::of(Name::of($b)),
-                ));
-            });
-        $this
-            ->forAll(
-                FName::strings(),
-                Set::sequence(FName::strings()),
-            )
-            ->filter(static fn($a, $b) => !\in_array($a, $b, true))
-            ->then(function($a, $b) {
-                $this->assertFalse(CaseSensitivity::sensitive->contains(
-                    Name::of($a),
                     ISet::of(...$b)->map(Name::of(...)),
                 ));
             });
-        $this
+    }
+
+    public function testContainsInsensitive(): BlackBox\Proof
+    {
+        return $this
             ->forAll(FName::strings())
-            ->then(function($a) {
+            ->prove(function($a) {
                 $this->assertTrue(CaseSensitivity::insensitive->contains(
                     Name::of($a),
                     ISet::of($a)->map(\strtolower(...))->map(Name::of(...)),
