@@ -26,7 +26,7 @@ use Innmind\Immutable\{
     Predicate\Instance,
 };
 
-final class Filesystem implements Adapter
+final class Filesystem implements Adapter, Implementation
 {
     /** @var \WeakMap<File|Directory, Path> */
     private \WeakMap $loaded;

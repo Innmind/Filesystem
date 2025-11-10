@@ -21,11 +21,11 @@ use Innmind\Immutable\{
 final class Bridge implements Adapter
 {
     private function __construct(
-        private Adapter $adapter,
+        private Adapter&Implementation $adapter,
     ) {
     }
 
-    public static function of(Adapter $adapter): self
+    public static function of(Adapter&Implementation $adapter): self
     {
         return new self($adapter);
     }
