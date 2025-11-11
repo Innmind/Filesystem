@@ -88,7 +88,6 @@ class InMemoryTest extends TestCase
         );
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('wip')]
     public function testEmulateFilesystem()
     {
         $adapter = Adapter::inMemory();
