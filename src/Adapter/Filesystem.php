@@ -80,18 +80,10 @@ final class Filesystem implements Implementation
     #[\Override]
     public function read(TreePath $path): Attempt
     {
-        return $this
-            ->exists($path)
-            ->flatMap(static fn($exists) => match ($exists) {
-                true => Attempt::result(true),
-                false => Attempt::error(new \RuntimeException('File not found')),
-            })
-            ->flatMap(
-                fn() => $path->match(
-                    fn($name, $parent) => $this->open($parent, $name),
-                    static fn() => Attempt::error(new \RuntimeException('Root folder is not accessible')),
-                ),
-            );
+        return $path->match(
+            fn($name, $parent) => $this->open($parent, $name),
+            static fn() => Attempt::error(new \RuntimeException('Root folder is not accessible')),
+        );
     }
 
     #[\Override]
