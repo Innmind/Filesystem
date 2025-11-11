@@ -22,21 +22,14 @@ use Innmind\Immutable\{
     Str,
     Attempt,
     SideEffect,
-    Set,
 };
 
 final class Filesystem implements Implementation
 {
-    /** @var \WeakMap<File|Directory, Path> */
-    private \WeakMap $loaded;
-
     private function __construct(
         private IO $io,
         private Path $path,
-        private CaseSensitivity $case,
     ) {
-        /** @var \WeakMap<File|Directory, Path> */
-        $this->loaded = new \WeakMap;
     }
 
     /**
@@ -59,17 +52,8 @@ final class Filesystem implements Implementation
             ->map(static fn() => new self(
                 $io ?? IO::fromAmbientAuthority(),
                 $path,
-                $case,
             ))
             ->map(static fn($self) => Bridge::of($self, $case));
-    }
-
-    /**
-     * @return Attempt<SideEffect>
-     */
-    public function add(File|Directory $file): Attempt
-    {
-        return $this->createFileAt(TreePath::root(), $file);
     }
 
     #[\Override]
@@ -202,72 +186,6 @@ final class Filesystem implements Implementation
     }
 
     /**
-     * Create the wished file at the given absolute path
-     *
-     * @return Attempt<SideEffect>
-     */
-    private function createFileAt(TreePath $parent, File|Directory $file): Attempt
-    {
-        $path = TreePath::of($file)
-            ->under($parent)
-            ->asPath($this->path);
-
-        /** @psalm-suppress PossiblyNullReference */
-        if ($this->loaded->offsetExists($file) && $this->loaded[$file]->equals($path)) {
-            // no need to persist untouched file where it was loaded from
-            return Attempt::result(SideEffect::identity());
-        }
-
-        $this->loaded[$file] = $path;
-
-        if ($file instanceof Directory) {
-            /** @var Set<Name> */
-            $names = Set::of();
-            $parent = TreePath::of($file)->under($parent);
-
-            return self::mkdir($path)
-                ->flatMap(
-                    fn() => $file
-                        ->all()
-                        ->sink($names)
-                        ->attempt(
-                            fn($persisted, $file) => $this
-                                ->createFileAt($parent, $file)
-                                ->map(static fn() => ($persisted)($file->name())),
-                        ),
-                )
-                ->flatMap(
-                    fn($persisted) => $file
-                        ->removed()
-                        ->exclude(fn($file): bool => $this->case->contains(
-                            $file,
-                            $persisted,
-                        ))
-                        ->unsorted()
-                        ->map(TreePath::of(...))
-                        ->map(static fn($file) => $file->under($parent))
-                        ->sink(SideEffect::identity)
-                        ->attempt(fn($_, $file) => $this->remove($file)),
-                );
-        }
-
-        return $this
-            ->remove(TreePath::of($file)->under($parent))
-            ->map(static fn() => $file->content()->chunks())
-            ->flatMap(static fn($chunks) => self::touch($path)->map(
-                static fn() => $chunks,
-            ))
-            ->flatMap(
-                fn($chunks) => $this
-                    ->io
-                    ->files()
-                    ->write($path)
-                    ->watch()
-                    ->sink($chunks),
-            );
-    }
-
-    /**
      * Open the file in the given folder
      *
      * @return Attempt<File|Name> A Name represent a directory
@@ -308,7 +226,6 @@ final class Filesystem implements Implementation
                 static fn() => MediaType::null(),
             ),
         );
-        $this->loaded[$file] = $path;
 
         return Attempt::result($file);
     }
