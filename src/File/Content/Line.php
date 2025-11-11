@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\Filesystem\Exception\DomainException;
 use Innmind\Immutable\Str;
 
 /**
@@ -21,7 +20,7 @@ final class Line
     public static function of(Str $content): self
     {
         if ($content->contains("\n")) {
-            throw new DomainException('New line delimiter should not appear in the line content');
+            throw new \DomainException('New line delimiter should not appear in the line content');
         }
 
         return new self($content);

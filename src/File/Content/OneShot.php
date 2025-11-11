@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\Filesystem\Exception\LogicException;
 use Innmind\IO\{
     Streams\Stream,
     Frame,
@@ -118,7 +117,7 @@ final class OneShot implements Implementation
     private function guard(): void
     {
         if ($this->loaded) {
-            throw new LogicException("Content can't be loaded twice");
+            throw new \LogicException("Content can't be loaded twice");
         }
 
         /** @psalm-suppress InaccessibleProperty */

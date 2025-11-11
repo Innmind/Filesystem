@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Filesystem\File\Content;
 
-use Innmind\Filesystem\{
-    File\Content\Line,
-    Exception\DomainException,
-};
+use Innmind\Filesystem\File\Content\Line;
 use Innmind\Immutable\Str;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -31,7 +28,7 @@ class LineTest extends TestCase
 
                     $this->fail('it should throw');
                 } catch (\Exception $e) {
-                    $this->assertInstanceOf(DomainException::class, $e);
+                    $this->assertInstanceOf(\DomainException::class, $e);
                 }
             });
     }
@@ -90,7 +87,7 @@ class LineTest extends TestCase
 
                     $this->fail('it should throw');
                 } catch (\Exception $e) {
-                    $this->assertInstanceOf(DomainException::class, $e);
+                    $this->assertInstanceOf(\DomainException::class, $e);
                 }
             });
     }

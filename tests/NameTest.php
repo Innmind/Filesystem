@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\Tests;
 
-use Innmind\Filesystem\{
-    Name,
-    Exception\DomainException,
-};
+use Innmind\Filesystem\Name;
 use Innmind\Url\Path;
 use Innmind\Immutable\Str;
 use Innmind\BlackBox\{
@@ -29,7 +26,7 @@ class NameTest extends TestCase
 
     public function testThrowWhenABuildingNameWithASlash()
     {
-        $this->expectException(DomainException::class);
+        $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('A file name can\'t contain a slash, foo/bar given');
 
         Name::of('foo/bar');
@@ -43,7 +40,7 @@ class NameTest extends TestCase
 
     public function testEmptyNameIsNotAllowed()
     {
-        $this->expectException(DomainException::class);
+        $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('A file name can\'t be empty');
 
         Name::of('');
@@ -70,7 +67,7 @@ class NameTest extends TestCase
                 Fixture::strings(),
             )
             ->then(function($a, $b) {
-                $this->expectException(DomainException::class);
+                $this->expectException(\DomainException::class);
 
                 Name::of("$a/$b");
             });
@@ -116,7 +113,7 @@ class NameTest extends TestCase
                     Name::of($name);
 
                     $this->fail('it should throw');
-                } catch (DomainException $e) {
+                } catch (\DomainException $e) {
                     $this->assertSame("'.' and '..' can't be used", $e->getMessage());
                 }
             });
@@ -124,7 +121,7 @@ class NameTest extends TestCase
 
     public function testChr0IsNotAccepted()
     {
-        $this->expectException(DomainException::class);
+        $this->expectException(\DomainException::class);
 
         Name::of('a'.\chr(0).'a');
     }
@@ -150,7 +147,7 @@ class NameTest extends TestCase
 
                     $this->fail('it should throw');
                 } catch (\Throwable $e) {
-                    $this->assertInstanceOf(DomainException::class, $e);
+                    $this->assertInstanceOf(\DomainException::class, $e);
                 }
             });
     }
@@ -167,7 +164,7 @@ class NameTest extends TestCase
                     Name::of(\chr($ord));
 
                     $this->fail('it should throw');
-                } catch (DomainException $e) {
+                } catch (\DomainException $e) {
                     $this->assertTrue(true);
                 }
             });

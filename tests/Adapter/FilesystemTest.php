@@ -10,8 +10,6 @@ use Innmind\Filesystem\{
     Name,
     Directory as DirectoryInterface,
     Directory,
-    Exception\PathDoesntRepresentADirectory,
-    Exception\LinksAreNotSupported,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
@@ -62,8 +60,8 @@ class FilesystemTest extends TestCase
 
     public function testThrowWhenPathToMountIsNotADirectory()
     {
-        $this->expectException(PathDoesntRepresentADirectory::class);
-        $this->expectExceptionMessage('path/to/somewhere');
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage("Path doesn't represent a directory 'path/to/somewhere'");
 
         Adapter::mount(Path::of('path/to/somewhere'))->unwrap();
     }
@@ -460,10 +458,12 @@ class FilesystemTest extends TestCase
 
         $filesystem = Adapter::mount(Path::of($path))->unwrap();
 
-        $this->expectException(LinksAreNotSupported::class);
-        $this->expectExceptionMessage($path.'bar');
-
-        $filesystem->get(Name::of('bar'));
+        $this->assertNull(
+            $filesystem->get(Name::of('bar'))->match(
+                static fn($file) => $file,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testThrowsWhenListContainsALink()
@@ -475,10 +475,14 @@ class FilesystemTest extends TestCase
 
         $filesystem = Adapter::mount(Path::of($path))->unwrap();
 
-        $this->expectException(LinksAreNotSupported::class);
-        $this->expectExceptionMessage($path.'bar');
-
-        $filesystem->root()->all()->toList();
+        $this->assertSame(
+            ['foo'],
+            $filesystem
+                ->root()
+                ->all()
+                ->map(static fn($file) => $file->name()->toString())
+                ->toList(),
+        );
     }
 
     public function testDotFilesAreListed()

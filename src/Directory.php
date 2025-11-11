@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Filesystem\Exception\DuplicatedFile;
 use Innmind\Immutable\{
     Set,
     Sequence,
@@ -31,8 +30,6 @@ final class Directory
      * @psalm-pure
      *
      * @param Sequence<File|self>|null $files
-     *
-     * @throws DuplicatedFile
      */
     public static function of(Name $name, ?Sequence $files = null): self
     {
@@ -48,8 +45,6 @@ final class Directory
      *
      * @param non-empty-string $name
      * @param Sequence<File|self>|null $files
-     *
-     * @throws DuplicatedFile
      */
     public static function named(string $name, ?Sequence $files = null): self
     {
@@ -154,8 +149,6 @@ final class Directory
 
     /**
      * @param callable(File|self): File $map
-     *
-     * @throws DuplicatedFile
      */
     public function map(callable $map): self
     {
@@ -168,8 +161,6 @@ final class Directory
 
     /**
      * @param callable(File|self): self $map
-     *
-     * @throws DuplicatedFile
      */
     public function flatMap(callable $map): self
     {
@@ -222,8 +213,6 @@ final class Directory
      *
      * @param Sequence<File|self> $files
      *
-     * @throws DuplicatedFile
-     *
      * @return Sequence<File|self>
      */
     private static function safeguard(Sequence $files): Sequence
@@ -231,7 +220,10 @@ final class Directory
         return $files->safeguard(
             Set::strings(),
             static fn(Set $names, $file) => match ($names->contains($file->name()->toString())) {
-                true => throw new DuplicatedFile($file->name()),
+                true => throw new \LogicException(\sprintf(
+                    "Same file '%s' found multiple times",
+                    $file->name()->toString(),
+                )),
                 false => ($names)($file->name()->toString()),
             },
         );

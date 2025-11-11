@@ -7,7 +7,6 @@ use Innmind\Filesystem\{
     File,
     Directory,
     Name,
-    Exception\DuplicatedFile,
 };
 use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\{
@@ -71,7 +70,7 @@ final class ThrowWhenFlatMappingToSameFileTwice implements Property
         } catch (\Exception $e) {
             $assert
                 ->object($e)
-                ->instance(DuplicatedFile::class);
+                ->instance(\LogicException::class);
         }
 
         return $directory;

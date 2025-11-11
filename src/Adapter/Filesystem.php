@@ -9,8 +9,6 @@ use Innmind\Filesystem\{
     File\Content,
     Name,
     Directory,
-    Exception\PathDoesntRepresentADirectory,
-    Exception\LinksAreNotSupported,
 };
 use Innmind\IO\IO;
 use Innmind\MediaType\MediaType;
@@ -39,7 +37,10 @@ final class Filesystem implements Implementation
         ?IO $io = null,
     ): Attempt {
         if (!$path->directory()) {
-            return Attempt::error(new PathDoesntRepresentADirectory($path->toString()));
+            return Attempt::error(new \LogicException(\sprintf(
+                "Path doesn't represent a directory '%s'",
+                $path->toString(),
+            )));
         }
 
         return self::doExist($path)
@@ -86,7 +87,7 @@ final class Filesystem implements Implementation
         }
 
         if (\is_link($path->toString())) {
-            return Attempt::error(new LinksAreNotSupported);
+            return Attempt::error(new \RuntimeException('Links are not supported'));
         }
 
         $file = File::of(
@@ -154,7 +155,7 @@ final class Filesystem implements Implementation
         }
 
         if (\is_link($absolutePath)) {
-            return Attempt::error(new LinksAreNotSupported);
+            return Attempt::error(new \RuntimeException('Links are not supported'));
         }
 
         if (\is_dir($absolutePath)) {

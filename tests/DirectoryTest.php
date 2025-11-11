@@ -8,7 +8,6 @@ use Innmind\Filesystem\{
     File,
     Name,
     File\Content,
-    Exception\DuplicatedFile,
 };
 use Innmind\Immutable\{
     Set,
@@ -195,7 +194,7 @@ class DirectoryTest extends TestCase
                 FName::any(),
             )
             ->then(function($directory, $file) {
-                $this->expectException(DuplicatedFile::class);
+                $this->expectException(\LogicException::class);
                 $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
 
                 Directory::of(
@@ -216,7 +215,7 @@ class DirectoryTest extends TestCase
                 FName::any(),
             )
             ->then(function($directory, $file) {
-                $this->expectException(DuplicatedFile::class);
+                $this->expectException(\LogicException::class);
                 $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
 
                 Directory::named(
