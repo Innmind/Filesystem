@@ -28,7 +28,7 @@ final class Bridge implements Adapter
     private \WeakMap $loaded;
 
     private function __construct(
-        private Filesystem&Implementation $adapter,
+        private Implementation $adapter,
         private CaseSensitivity $case,
     ) {
         /** @var \WeakMap<File|Directory, TreePath> */
@@ -36,7 +36,7 @@ final class Bridge implements Adapter
     }
 
     public static function of(
-        Filesystem&Implementation $adapter,
+        Implementation $adapter,
         CaseSensitivity $case,
     ): self {
         return new self($adapter, $case);
