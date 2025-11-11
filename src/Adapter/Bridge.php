@@ -106,7 +106,7 @@ final class Bridge implements Adapter
                     $file->unwrap(),
                     $this
                         ->adapter
-                        ->list($fullPath)
+                        ->list(TreePath::directory($name->unwrap())->under($path))
                         ->map(fn($file) => $this->read(
                             $fullPath,
                             $file,

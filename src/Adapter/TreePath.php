@@ -61,7 +61,7 @@ final class TreePath
     {
         return new self(
             Sequence::of(),
-            false,
+            true,
         );
     }
 
