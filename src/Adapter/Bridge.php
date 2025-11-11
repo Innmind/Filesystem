@@ -50,7 +50,7 @@ final class Bridge implements Adapter
     #[\Override]
     public function get(Name $file): Maybe
     {
-        return $this->read(TreePath::of($file));
+        return $this->read(TreePath::root(), $file);
     }
 
     #[\Override]
@@ -71,12 +71,14 @@ final class Bridge implements Adapter
     #[\Override]
     public function root(): Directory
     {
+        $root = TreePath::root();
+
         return Directory::named(
             'root',
             $this
                 ->adapter
-                ->list(TreePath::root())
-                ->map($this->read(...))
+                ->list($root)
+                ->map(fn($name) => $this->read($root, $name))
                 ->flatMap(static fn($read) => $read->toSequence()),
         );
     }
@@ -84,11 +86,13 @@ final class Bridge implements Adapter
     /**
      * @return Maybe<File|Directory>
      */
-    private function read(TreePath $path): Maybe
+    private function read(TreePath $path, Name $name): Maybe
     {
+        $fullPath = TreePath::of($name)->under($path);
+
         return $this
             ->adapter
-            ->read($path)
+            ->read($path, $name)
             ->maybe()
             ->map(fn($file) => match (true) {
                 $file instanceof File => $file,
@@ -96,14 +100,16 @@ final class Bridge implements Adapter
                     $file,
                     $this
                         ->adapter
-                        ->list($path)
-                        ->map(static fn($found) => $found->under($path))
-                        ->map($this->read(...))
+                        ->list($fullPath)
+                        ->map(fn($file) => $this->read(
+                            $fullPath,
+                            $file,
+                        ))
                         ->flatMap(static fn($read) => $read->toSequence()),
                 ),
             })
-            ->map(function($file) use ($path) {
-                $this->loaded[$file] = TreePath::of($file)->under($path);
+            ->map(function($file) use ($fullPath) {
+                $this->loaded[$file] = $fullPath;
 
                 return $file;
             });

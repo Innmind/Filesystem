@@ -63,12 +63,44 @@ final class Filesystem implements Implementation
     }
 
     #[\Override]
-    public function read(TreePath $path): Attempt
+    public function read(TreePath $parent, Name $name): Attempt
     {
-        return $path->match(
-            fn($name, $parent) => $this->open($parent, $name),
-            static fn() => Attempt::error(new \RuntimeException('Root folder is not accessible')),
+        $path = TreePath::of($name)
+            ->under($parent)
+            ->asPath($this->path);
+
+        if (Str::of($path->toString())->length() > \PHP_MAXPATHLEN) {
+            return Attempt::error(new \RuntimeException('Path too long'));
+        }
+
+        if (!\file_exists($path->toString())) {
+            return Attempt::error(new \RuntimeException('File not found'));
+        }
+
+        if (\is_dir($path->toString())) {
+            return Attempt::result($name);
+        }
+
+        if (\is_link($path->toString())) {
+            return Attempt::error(new LinksAreNotSupported);
+        }
+
+        $file = File::of(
+            $name,
+            Content::atPath(
+                $this->io,
+                $path,
+            ),
+            MediaType::maybe(match ($mediaType = @\mime_content_type($path->toString())) {
+                false => '',
+                default => $mediaType,
+            })->match(
+                static fn($mediaType) => $mediaType,
+                static fn() => MediaType::null(),
+            ),
         );
+
+        return Attempt::result($file);
     }
 
     #[\Override]
@@ -80,7 +112,7 @@ final class Filesystem implements Implementation
             /** @var \SplFileInfo $file */
             foreach ($files as $file) {
                 /** @psalm-suppress ArgumentTypeCoercion */
-                yield TreePath::of(Name::of($file->getBasename()));
+                yield Name::of($file->getBasename());
             }
         });
     }
@@ -183,51 +215,6 @@ final class Filesystem implements Implementation
                 ->watch()
                 ->sink($chunks),
         );
-    }
-
-    /**
-     * Open the file in the given folder
-     *
-     * @return Attempt<File|Name> A Name represent a directory
-     */
-    private function open(TreePath $parent, Name $file): Attempt
-    {
-        $path = TreePath::of($file)
-            ->under($parent)
-            ->asPath($this->path);
-
-        if (Str::of($path->toString())->length() > \PHP_MAXPATHLEN) {
-            return Attempt::error(new \RuntimeException('Path too long'));
-        }
-
-        if (!\file_exists($path->toString())) {
-            return Attempt::error(new \RuntimeException('File not found'));
-        }
-
-        if (\is_dir($path->toString())) {
-            return Attempt::result($file);
-        }
-
-        if (\is_link($path->toString())) {
-            return Attempt::error(new LinksAreNotSupported);
-        }
-
-        $file = File::of(
-            $file,
-            Content::atPath(
-                $this->io,
-                $path,
-            ),
-            MediaType::maybe(match ($mediaType = @\mime_content_type($path->toString())) {
-                false => '',
-                default => $mediaType,
-            })->match(
-                static fn($mediaType) => $mediaType,
-                static fn() => MediaType::null(),
-            ),
-        );
-
-        return Attempt::result($file);
     }
 
     /**

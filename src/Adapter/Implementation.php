@@ -25,12 +25,12 @@ interface Implementation
     public function exists(TreePath $path): Attempt;
 
     /**
-     * @return Attempt<File|Name>
+     * @return Attempt<File|Name> A Name represent a directory
      */
-    public function read(TreePath $path): Attempt;
+    public function read(TreePath $parent, Name $name): Attempt;
 
     /**
-     * @return Sequence<TreePath> The paths must be relative
+     * @return Sequence<Name> Todo encapsulate if the name represent a file/directory/unknown
      */
     public function list(TreePath $parent): Sequence;
 
