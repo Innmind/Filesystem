@@ -5,6 +5,7 @@ namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter,
+    Adapter\Name as Name_,
     File,
     Directory,
     Name,
@@ -50,7 +51,10 @@ final class Bridge implements Adapter
     #[\Override]
     public function get(Name $file): Maybe
     {
-        return $this->read(TreePath::root(), $file);
+        return $this->read(
+            TreePath::root(),
+            Name_\Unknown::of($file),
+        );
     }
 
     #[\Override]
@@ -86,9 +90,11 @@ final class Bridge implements Adapter
     /**
      * @return Maybe<File|Directory>
      */
-    private function read(TreePath $path, Name $name): Maybe
-    {
-        $fullPath = TreePath::of($name)->under($path);
+    private function read(
+        TreePath $path,
+        Name_\File|Name_\Directory|Name_\Unknown $name,
+    ): Maybe {
+        $fullPath = TreePath::of($name->unwrap())->under($path);
 
         return $this
             ->adapter
@@ -97,7 +103,7 @@ final class Bridge implements Adapter
             ->map(fn($file) => match (true) {
                 $file instanceof File => $file,
                 default => Directory::of(
-                    $file,
+                    $file->unwrap(),
                     $this
                         ->adapter
                         ->list($fullPath)

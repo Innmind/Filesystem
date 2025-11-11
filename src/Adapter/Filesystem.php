@@ -5,6 +5,7 @@ namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter,
+    Adapter\Name as Name_,
     File,
     File\Content,
     Name,
@@ -63,8 +64,15 @@ final class Filesystem implements Implementation
     }
 
     #[\Override]
-    public function read(TreePath $parent, Name $name): Attempt
-    {
+    public function read(
+        TreePath $parent,
+        Name_\File|Name_\Directory|Name_\Unknown $name,
+    ): Attempt {
+        if ($name instanceof Name_\Directory) {
+            return Attempt::result($name);
+        }
+
+        $name = $name->unwrap();
         $path = TreePath::of($name)
             ->under($parent)
             ->asPath($this->path);
@@ -78,7 +86,7 @@ final class Filesystem implements Implementation
         }
 
         if (\is_dir($path->toString())) {
-            return Attempt::result($name);
+            return Attempt::result(Name_\Directory::of($name));
         }
 
         if (\is_link($path->toString())) {
@@ -112,7 +120,12 @@ final class Filesystem implements Implementation
             /** @var \SplFileInfo $file */
             foreach ($files as $file) {
                 /** @psalm-suppress ArgumentTypeCoercion */
-                yield Name::of($file->getBasename());
+                $name = Name::of($file->getBasename());
+
+                yield match ($file->isDir()) {
+                    true => Name_\Directory::of($name),
+                    false => Name_\File::of($name),
+                };
             }
         });
     }

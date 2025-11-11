@@ -6,7 +6,6 @@ namespace Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     File,
     File\Content,
-    Name,
 };
 use Innmind\Immutable\{
     Attempt,
@@ -25,12 +24,15 @@ interface Implementation
     public function exists(TreePath $path): Attempt;
 
     /**
-     * @return Attempt<File|Name> A Name represent a directory
+     * @return Attempt<File|Name\Directory>
      */
-    public function read(TreePath $parent, Name $name): Attempt;
+    public function read(
+        TreePath $parent,
+        Name\File|Name\Directory|Name\Unknown $name,
+    ): Attempt;
 
     /**
-     * @return Sequence<Name> Todo encapsulate if the name represent a file/directory/unknown
+     * @return Sequence<Name\File|Name\Directory>
      */
     public function list(TreePath $parent): Sequence;
 
