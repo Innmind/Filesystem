@@ -144,8 +144,9 @@ final class Filesystem implements Implementation
      * there is as little as possible race conditions like these.
      */
     #[\Override]
-    public function remove(TreePath $path): Attempt
+    public function remove(TreePath $parent, Name $name): Attempt
     {
+        $path = TreePath::of($name)->under($parent);
         $absolutePath = $path->asPath($this->path)->toString();
 
         if (Str::of($absolutePath)->length() > \PHP_MAXPATHLEN) {
@@ -167,10 +168,8 @@ final class Filesystem implements Implementation
                 ->map(static fn($file) => $file->getBasename())
                 ->keep(Is::string()->nonEmpty()->asPredicate())
                 ->map(Name::of(...))
-                ->map(TreePath::of(...))
-                ->map(static fn($file) => $file->under($path))
                 ->sink(SideEffect::identity)
-                ->attempt(fn($_, $file) => $this->remove($file))
+                ->attempt(fn($_, $file) => $this->remove($path, $file))
                 ->map(static fn() => @\rmdir($absolutePath))
                 ->flatMap(static fn($removed) => match ($removed) {
                     true => Attempt::result(SideEffect::identity),
@@ -200,14 +199,14 @@ final class Filesystem implements Implementation
 
         return $this
             ->exists($path)
-            ->flatMap(function($exists) use ($path, $absolutePath) {
+            ->flatMap(function($exists) use ($parent, $name, $absolutePath) {
                 if ($exists && \is_dir($absolutePath->toString())) {
                     return Attempt::result(SideEffect::identity);
                 }
 
                 if ($exists) {
                     return $this
-                        ->remove($path)
+                        ->remove($parent, $name)
                         ->flatMap(static fn() => self::mkdir($absolutePath));
                 }
 

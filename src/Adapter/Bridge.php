@@ -69,7 +69,7 @@ final class Bridge implements Adapter
     #[\Override]
     public function remove(Name $file): Attempt
     {
-        return $this->adapter->remove(TreePath::of($file));
+        return $this->adapter->remove(TreePath::root(), $file);
     }
 
     #[\Override]
@@ -164,16 +164,14 @@ final class Bridge implements Adapter
                             $persisted,
                         ))
                         ->unsorted()
-                        ->map(TreePath::of(...))
-                        ->map(static fn($file) => $file->under($fullPath))
                         ->sink(SideEffect::identity)
-                        ->attempt(fn($_, $path) => $this->adapter->remove($path)),
+                        ->attempt(fn($_, $file) => $this->adapter->remove($fullPath, $file)),
                 );
         }
 
         return $this
             ->adapter
-            ->remove($fullPath)
+            ->remove($path, $file->name())
             ->flatMap(fn() => $this->adapter->write(
                 $path,
                 $file,

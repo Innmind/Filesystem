@@ -40,7 +40,7 @@ interface Implementation
     /**
      * @return Attempt<SideEffect>
      */
-    public function remove(TreePath $path): Attempt;
+    public function remove(TreePath $parent, Name $name): Attempt;
 
     /**
      * @return Attempt<SideEffect>
