@@ -8,6 +8,7 @@ use Innmind\Filesystem\{
     File,
     Directory,
     Name,
+    CaseSensitivity,
 };
 use Innmind\Immutable\{
     Attempt,
@@ -24,12 +25,15 @@ final class Bridge implements Adapter
 {
     private function __construct(
         private Filesystem&Implementation $adapter,
+        private CaseSensitivity $case,
     ) {
     }
 
-    public static function of(Filesystem&Implementation $adapter): self
-    {
-        return new self($adapter);
+    public static function of(
+        Filesystem&Implementation $adapter,
+        CaseSensitivity $case,
+    ): self {
+        return new self($adapter, $case);
     }
 
     #[\Override]
@@ -121,12 +125,10 @@ final class Bridge implements Adapter
                 ->flatMap(
                     fn($persisted) => $file
                         ->removed()
-                        // todo handle case sensitivity somehow
-                        ->exclude(
-                            static fn($file) => $persisted
-                                ->map(static fn($name) => $name->toString())
-                                ->contains($file->toString()),
-                        )
+                        ->exclude(fn($file): bool => $this->case->contains(
+                            $file,
+                            $persisted,
+                        ))
                         ->unsorted()
                         ->map(TreePath::of(...))
                         ->map(static fn($file) => $file->under($parent))

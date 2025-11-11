@@ -61,7 +61,7 @@ final class Filesystem implements Implementation
                 $path,
                 $case,
             ))
-            ->map(Bridge::of(...));
+            ->map(static fn($self) => Bridge::of($self, $case));
     }
 
     /**
