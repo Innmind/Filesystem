@@ -23,10 +23,15 @@ use Innmind\Immutable\{
  */
 final class Bridge implements Adapter
 {
+    /** @var \WeakMap<File|Directory, TreePath> */
+    private \WeakMap $loaded;
+
     private function __construct(
         private Filesystem&Implementation $adapter,
         private CaseSensitivity $case,
     ) {
+        /** @var \WeakMap<File|Directory, TreePath> */
+        $this->loaded = new \WeakMap;
     }
 
     public static function of(
@@ -96,6 +101,11 @@ final class Bridge implements Adapter
                         ->map($this->read(...))
                         ->flatMap(static fn($read) => $read->toSequence()),
                 ),
+            })
+            ->map(function($file) use ($path) {
+                $this->loaded[$file] = TreePath::of($file)->under($path);
+
+                return $file;
             });
     }
 
@@ -104,21 +114,33 @@ final class Bridge implements Adapter
      */
     private function write(TreePath $path, File|Directory $file): Attempt
     {
+        $path = TreePath::of($file)->under($path);
+
+        /** @psalm-suppress PossiblyNullReference */
+        if (
+            $this->loaded->offsetExists($file) &&
+            $this->loaded[$file]->equals($path)
+        ) {
+            // no need to persist untouched file where it was loaded from
+            return Attempt::result(SideEffect::identity);
+        }
+
+        $this->loaded[$file] = $path;
+
         if ($file instanceof Directory) {
             /** @var Set<Name> */
             $names = Set::of();
-            $parent = TreePath::of($file)->under($path);
 
             return $this
                 ->adapter
-                ->createDirectory($parent)
+                ->createDirectory($path)
                 ->flatMap(
                     fn() => $file
                         ->all()
                         ->sink($names)
                         ->attempt(
                             fn($persisted, $file) => $this
-                                ->write($parent, $file)
+                                ->write($path, $file)
                                 ->map(static fn() => ($persisted)($file->name())),
                         ),
                 )
@@ -131,13 +153,11 @@ final class Bridge implements Adapter
                         ))
                         ->unsorted()
                         ->map(TreePath::of(...))
-                        ->map(static fn($file) => $file->under($parent))
+                        ->map(static fn($file) => $file->under($path))
                         ->sink(SideEffect::identity)
                         ->attempt(fn($_, $path) => $this->adapter->remove($path)),
                 );
         }
-
-        $path = TreePath::of($file)->under($path);
 
         return $this
             ->adapter

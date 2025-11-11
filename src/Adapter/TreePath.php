@@ -73,6 +73,13 @@ final class TreePath
         );
     }
 
+    public function equals(self $other): bool
+    {
+        $root = Path::of('/');
+
+        return $this->asPath($root)->equals($other->asPath($root));
+    }
+
     public function asPath(Path $root): Path
     {
         if ($this->path->empty()) {
