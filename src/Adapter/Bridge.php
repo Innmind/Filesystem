@@ -145,7 +145,7 @@ final class Bridge implements Adapter
 
             return $this
                 ->adapter
-                ->createDirectory($fullPath)
+                ->createDirectory($path, $file->name())
                 ->flatMap(
                     fn() => $file
                         ->all()

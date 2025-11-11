@@ -3,7 +3,11 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\Adapter;
 
-use Innmind\Filesystem\File;
+use Innmind\Filesystem\{
+    File,
+    Name,
+    Adapter\Name as Name_,
+};
 use Innmind\Immutable\{
     Attempt,
     Sequence,
@@ -21,15 +25,15 @@ interface Implementation
     public function exists(TreePath $path): Attempt;
 
     /**
-     * @return Attempt<File|Name\Directory>
+     * @return Attempt<File|Name_\Directory>
      */
     public function read(
         TreePath $parent,
-        Name\File|Name\Directory|Name\Unknown $name,
+        Name_\File|Name_\Directory|Name_\Unknown $name,
     ): Attempt;
 
     /**
-     * @return Sequence<Name\File|Name\Directory>
+     * @return Sequence<Name_\File|Name_\Directory>
      */
     public function list(TreePath $parent): Sequence;
 
@@ -41,7 +45,7 @@ interface Implementation
     /**
      * @return Attempt<SideEffect>
      */
-    public function createDirectory(TreePath $path): Attempt;
+    public function createDirectory(TreePath $parent, Name $name): Attempt;
 
     /**
      * @return Attempt<SideEffect>

@@ -193,8 +193,9 @@ final class Filesystem implements Implementation
     }
 
     #[\Override]
-    public function createDirectory(TreePath $path): Attempt
+    public function createDirectory(TreePath $parent, Name $name): Attempt
     {
+        $path = TreePath::directory($name)->under($parent);
         $absolutePath = $path->asPath($this->path);
 
         return $this
