@@ -39,7 +39,7 @@
     },
     "require-dev": {
         "innmind/static-analysis": "^1.2.1",
-        "innmind/black-box": "^6.0.2",
+        "innmind/black-box": "~6.5",
         "innmind/coding-standard": "~2.0",
         "symfony/filesystem": "~6.0|~7.0",
         "ramsey/uuid": "^4.6"
