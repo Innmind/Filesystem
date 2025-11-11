@@ -96,7 +96,7 @@ final class Filesystem implements Implementation
                 default => $mediaType,
             })->match(
                 static fn($mediaType) => $mediaType,
-                static fn() => MediaType::null(),
+                static fn() => null,
             ),
         );
 
