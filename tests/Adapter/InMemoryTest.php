@@ -32,8 +32,8 @@ class InMemoryTest extends TestCase
                 ->unwrap(),
         );
         $this->assertTrue($a->contains(Name::of('foo')));
-        $this->assertSame(
-            $d,
+        $this->assertInstanceOf(
+            Directory::class,
             $a->get(Name::of('foo'))->match(
                 static fn($file) => $file,
                 static fn() => null,

@@ -5,95 +5,175 @@ namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter,
+    Adapter\Name as Name_,
     File,
     Name,
-    Directory,
+    CaseSensitivity,
 };
+use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Maybe,
+    Str,
+    Map,
     Attempt,
+    Sequence,
     SideEffect,
-    Predicate\Instance,
 };
 
-final class InMemory implements Adapter
+/**
+ * @internal
+ */
+final class InMemory implements Implementation
 {
+    /**
+     * @param Map<string, File> $files
+     * @param Map<string, Sequence<string>> $directories
+     */
     private function __construct(
-        private Directory $root,
+        private Map $files,
+        private Map $directories,
     ) {
     }
 
-    public static function emulateFilesystem(): self
+    public static function emulateFilesystem(): Adapter
     {
-        return new self(Directory::named('root'));
+        return Bridge::of(
+            new self(
+                Map::of(),
+                Map::of(),
+            ),
+            CaseSensitivity::sensitive,
+        );
     }
 
     #[\Override]
-    public function add(File|Directory $file): Attempt
+    public function exists(TreePath $path): Attempt
     {
-        $this->root = $this->merge($this->root, $file);
+        $path = $this->path($path);
 
-        return Attempt::result(SideEffect::identity());
+        return Attempt::result($this->files->contains($path) || $this->directories->contains("$path/"));
     }
 
     #[\Override]
-    public function get(Name $file): Maybe
-    {
-        return $this->root->get($file);
-    }
-
-    #[\Override]
-    public function contains(Name $file): bool
-    {
-        return $this->root->contains($file);
-    }
-
-    #[\Override]
-    public function remove(Name $file): Attempt
-    {
-        $this->root = $this->root->remove($file);
-
-        return Attempt::result(SideEffect::identity());
-    }
-
-    #[\Override]
-    public function root(): Directory
-    {
-        return $this->root;
-    }
-
-    private function merge(Directory $parent, File|Directory $file): Directory
-    {
-        if (!$file instanceof Directory) {
-            return $parent->add($file);
+    public function read(
+        TreePath $parent,
+        Name_\File|Name_\Directory|Name_\Unknown $name,
+    ): Attempt {
+        if ($name instanceof Name_\Directory) {
+            return $this
+                ->directories
+                ->get($this->path(TreePath::directory($name->unwrap())->under($parent)))
+                ->map(static fn() => $name)
+                ->attempt(static fn() => new \RuntimeException('Directory not found'));
         }
 
-        $file = $parent
-            ->get($file->name())
-            ->keep(Instance::of(Directory::class))
-            ->match(
-                fn($existing) => $this->mergeDirectories($existing, $file),
-                static fn() => $file,
-            );
+        if ($name instanceof Name_\File) {
+            return $this
+                ->files
+                ->get($this->path(TreePath::of($name->unwrap())->under($parent)))
+                ->attempt(static fn() => new \RuntimeException('File not found'));
+        }
 
-        return $parent->add($file);
+        return $this
+            ->read($parent, Name_\Directory::of($name->unwrap()))
+            ->recover(fn() => $this->read(
+                $parent,
+                Name_\File::of($name->unwrap()),
+            ));
     }
 
-    private function mergeDirectories(
-        Directory $existing,
-        Directory $new,
-    ): Directory {
-        $existing = $new
-            ->removed()
-            ->exclude($new->contains(...))
-            ->reduce(
-                $existing,
-                static fn(Directory $existing, $name) => $existing->remove($name),
-            );
+    #[\Override]
+    public function list(TreePath $parent): Sequence
+    {
+        $path = $this->path($parent);
 
-        return $new->reduce(
-            $existing,
-            fn(Directory $directory, $file) => $this->merge($directory, $file),
+        /** @psalm-suppress ArgumentTypeCoercion Due to Name::of() */
+        return $this
+            ->directories
+            ->get($path)
+            ->toSequence()
+            ->flatMap(static fn($files) => $files)
+            ->map(fn($file) => match ($this->directories->contains("$path$file/")) {
+                true => Name_\Directory::of(Name::of($file)),
+                false => Name_\File::of(Name::of($file)),
+            });
+    }
+
+    #[\Override]
+    public function remove(TreePath $parent, Name $name): Attempt
+    {
+        $asDirectory = $this->path(TreePath::of($name)->under($parent));
+        $this->files = $this
+            ->files
+            ->remove($this->path(TreePath::of($name)->under($parent)))
+            ->exclude(static fn($path) => Str::of($path)->startsWith($asDirectory));
+        $parent = $this->path($parent);
+        $directories = $this
+            ->directories
+            ->exclude(static fn($path) => Str::of($path)->startsWith($asDirectory));
+        $files = $directories
+            ->get($parent)
+            ->toSequence()
+            ->flatMap(static fn($files) => $files)
+            ->exclude(static fn($file) => $file === $name->toString());
+        $this->directories = ($directories)(
+            $parent,
+            $files,
         );
+
+        return Attempt::result(SideEffect::identity);
+    }
+
+    #[\Override]
+    public function createDirectory(TreePath $parent, Name $name): Attempt
+    {
+        $path = $this->path(TreePath::directory($name)->under($parent));
+        $asFile = Str::of($path)
+            ->dropEnd(1) // trailing /
+            ->toString();
+
+        $this->files = $this->files->remove($asFile);
+
+        if (!$this->directories->contains($path)) {
+            $this->directories = ($this->directories)(
+                $path,
+                Sequence::strings(),
+            );
+            $parent = $this->path($parent);
+            $files = $this
+                ->directories
+                ->get($parent)
+                ->toSequence()
+                ->flatMap(static fn($files) => $files)
+                ->add($name->toString());
+            $this->directories = ($this->directories)(
+                $parent,
+                $files,
+            );
+        }
+
+        return Attempt::result(SideEffect::identity);
+    }
+
+    #[\Override]
+    public function write(TreePath $parent, File $file): Attempt
+    {
+        $fullPath = $this->path(TreePath::of($file)->under($parent));
+        $parent = $this->path($parent);
+
+        $this->files = ($this->files)($fullPath, $file);
+        $files = $this
+            ->directories
+            ->get($parent)
+            ->toSequence()
+            ->flatMap(static fn($files) => $files)
+            ->add($file->name()->toString());
+        $this->directories = ($this->directories)($parent, $files);
+
+        return Attempt::result(SideEffect::identity);
+    }
+
+    private function path(TreePath $path): string
+    {
+        return $path->asPath(Path::of('/'))->toString();
     }
 }
