@@ -4,11 +4,9 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    Adapter,
     Adapter\Name as Name_,
     File,
     Name,
-    CaseSensitivity,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
@@ -34,14 +32,11 @@ final class InMemory implements Implementation
     ) {
     }
 
-    public static function emulateFilesystem(): Adapter
+    public static function emulateFilesystem(): self
     {
-        return Bridge::of(
-            new self(
-                Map::of(),
-                Map::of(),
-            ),
-            CaseSensitivity::sensitive,
+        return new self(
+            Map::of(),
+            Map::of(),
         );
     }
 

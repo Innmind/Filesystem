@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    Adapter\InMemory,
     Adapter,
     Directory,
     File,
@@ -21,7 +20,7 @@ class InMemoryTest extends TestCase
 {
     public function testInterface()
     {
-        $a = InMemory::emulateFilesystem();
+        $a = Adapter::inMemory();
 
         $this->assertInstanceOf(Adapter::class, $a);
         $this->assertFalse($a->contains(Name::of('foo')));
@@ -50,7 +49,7 @@ class InMemoryTest extends TestCase
 
     public function testReturnNothingWhenGettingUnknownFile()
     {
-        $this->assertNull(InMemory::emulateFilesystem()->get(Name::of('foo'))->match(
+        $this->assertNull(Adapter::inMemory()->get(Name::of('foo'))->match(
             static fn($file) => $file,
             static fn() => null,
         ));
@@ -60,7 +59,7 @@ class InMemoryTest extends TestCase
     {
         $this->assertInstanceOf(
             SideEffect::class,
-            InMemory::emulateFilesystem()
+            Adapter::inMemory()
                 ->remove(Name::of('foo'))
                 ->unwrap(),
         );
@@ -68,7 +67,7 @@ class InMemoryTest extends TestCase
 
     public function testRoot()
     {
-        $adapter = InMemory::emulateFilesystem();
+        $adapter = Adapter::inMemory();
         $adapter
             ->add($foo = File::of(
                 Name::of('foo'),
@@ -89,9 +88,10 @@ class InMemoryTest extends TestCase
         );
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('wip')]
     public function testEmulateFilesystem()
     {
-        $adapter = InMemory::emulateFilesystem();
+        $adapter = Adapter::inMemory();
         $adapter->add(Directory::of(
             Name::of('foo'),
             Sequence::of(

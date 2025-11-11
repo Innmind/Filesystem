@@ -4,13 +4,11 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    Adapter,
     Adapter\Name as Name_,
     File,
     File\Content,
     Name,
     Directory,
-    CaseSensitivity,
     Exception\PathDoesntRepresentADirectory,
     Exception\LinksAreNotSupported,
 };
@@ -34,11 +32,10 @@ final class Filesystem implements Implementation
     }
 
     /**
-     * @return Attempt<Adapter>
+     * @return Attempt<self>
      */
     public static function mount(
         Path $path,
-        CaseSensitivity $case = CaseSensitivity::sensitive,
         ?IO $io = null,
     ): Attempt {
         if (!$path->directory()) {
@@ -53,8 +50,7 @@ final class Filesystem implements Implementation
             ->map(static fn() => new self(
                 $io ?? IO::fromAmbientAuthority(),
                 $path,
-            ))
-            ->map(static fn($self) => Bridge::of($self, $case));
+            ));
     }
 
     #[\Override]
