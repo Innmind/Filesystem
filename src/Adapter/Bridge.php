@@ -12,6 +12,8 @@ use Innmind\Filesystem\{
 use Innmind\Immutable\{
     Attempt,
     Maybe,
+    Set,
+    SideEffect,
 };
 
 /**
@@ -33,7 +35,7 @@ final class Bridge implements Adapter
     #[\Override]
     public function add(File|Directory $file): Attempt
     {
-        return $this->adapter->add($file);
+        return $this->write(TreePath::root(), $file);
     }
 
     #[\Override]
@@ -91,5 +93,56 @@ final class Bridge implements Adapter
                         ->flatMap(static fn($read) => $read->toSequence()),
                 ),
             });
+    }
+
+    /**
+     * @return Attempt<SideEffect>
+     */
+    private function write(TreePath $path, File|Directory $file): Attempt
+    {
+        if ($file instanceof Directory) {
+            /** @var Set<Name> */
+            $names = Set::of();
+            $parent = TreePath::of($file)->under($path);
+
+            return $this
+                ->adapter
+                ->createDirectory($parent)
+                ->flatMap(
+                    fn() => $file
+                        ->all()
+                        ->sink($names)
+                        ->attempt(
+                            fn($persisted, $file) => $this
+                                ->write($parent, $file)
+                                ->map(static fn() => ($persisted)($file->name())),
+                        ),
+                )
+                ->flatMap(
+                    fn($persisted) => $file
+                        ->removed()
+                        // todo handle case sensitivity somehow
+                        ->exclude(
+                            static fn($file) => $persisted
+                                ->map(static fn($name) => $name->toString())
+                                ->contains($file->toString()),
+                        )
+                        ->unsorted()
+                        ->map(TreePath::of(...))
+                        ->map(static fn($file) => $file->under($parent))
+                        ->sink(SideEffect::identity)
+                        ->attempt(fn($_, $path) => $this->adapter->remove($path)),
+                );
+        }
+
+        $path = TreePath::of($file)->under($path);
+
+        return $this
+            ->adapter
+            ->remove($path)
+            ->flatMap(fn() => $this->adapter->write(
+                $path,
+                $file->content(),
+            ));
     }
 }

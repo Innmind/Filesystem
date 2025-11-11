@@ -6,6 +6,7 @@ namespace Innmind\Filesystem\Adapter;
 use Innmind\Filesystem\{
     Adapter,
     File,
+    File\Content,
     Name,
     Directory,
     CaseSensitivity,
@@ -162,6 +163,44 @@ final class Filesystem implements Implementation
         };
     }
 
+    #[\Override]
+    public function createDirectory(TreePath $path): Attempt
+    {
+        $absolutePath = $path->asPath($this->path);
+
+        return $this
+            ->exists($path)
+            ->flatMap(function($exists) use ($path, $absolutePath) {
+                if ($exists && \is_dir($absolutePath->toString())) {
+                    return Attempt::result(SideEffect::identity);
+                }
+
+                if ($exists) {
+                    return $this
+                        ->remove($path)
+                        ->flatMap(static fn() => self::mkdir($absolutePath));
+                }
+
+                return self::mkdir($absolutePath);
+            });
+    }
+
+    #[\Override]
+    public function write(TreePath $path, Content $content): Attempt
+    {
+        $absolutePath = $path->asPath($this->path);
+        $chunks = $content->chunks();
+
+        return self::touch($absolutePath)->flatMap(
+            fn() => $this
+                ->io
+                ->files()
+                ->write($absolutePath)
+                ->watch()
+                ->sink($chunks),
+        );
+    }
+
     /**
      * Create the wished file at the given absolute path
      *
@@ -257,7 +296,7 @@ final class Filesystem implements Implementation
 
         $file = File::of(
             $file,
-            File\Content::atPath(
+            Content::atPath(
                 $this->io,
                 $path,
             ),

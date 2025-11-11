@@ -5,6 +5,7 @@ namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     File,
+    File\Content,
     Name,
 };
 use Innmind\Immutable\{
@@ -37,4 +38,14 @@ interface Implementation
      * @return Attempt<SideEffect>
      */
     public function remove(TreePath $path): Attempt;
+
+    /**
+     * @return Attempt<SideEffect>
+     */
+    public function createDirectory(TreePath $path): Attempt;
+
+    /**
+     * @return Attempt<SideEffect>
+     */
+    public function write(TreePath $path, Content $content): Attempt;
 }
