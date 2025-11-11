@@ -126,18 +126,18 @@ final class Bridge implements Adapter
      */
     private function write(TreePath $path, File|Directory $file): Attempt
     {
-        $path = TreePath::of($file)->under($path);
+        $fullPath = TreePath::of($file)->under($path);
 
         /** @psalm-suppress PossiblyNullReference */
         if (
             $this->loaded->offsetExists($file) &&
-            $this->loaded[$file]->equals($path)
+            $this->loaded[$file]->equals($fullPath)
         ) {
             // no need to persist untouched file where it was loaded from
             return Attempt::result(SideEffect::identity);
         }
 
-        $this->loaded[$file] = $path;
+        $this->loaded[$file] = $fullPath;
 
         if ($file instanceof Directory) {
             /** @var Set<Name> */
@@ -145,14 +145,14 @@ final class Bridge implements Adapter
 
             return $this
                 ->adapter
-                ->createDirectory($path)
+                ->createDirectory($fullPath)
                 ->flatMap(
                     fn() => $file
                         ->all()
                         ->sink($names)
                         ->attempt(
                             fn($persisted, $file) => $this
-                                ->write($path, $file)
+                                ->write($fullPath, $file)
                                 ->map(static fn() => ($persisted)($file->name())),
                         ),
                 )
@@ -165,7 +165,7 @@ final class Bridge implements Adapter
                         ))
                         ->unsorted()
                         ->map(TreePath::of(...))
-                        ->map(static fn($file) => $file->under($path))
+                        ->map(static fn($file) => $file->under($fullPath))
                         ->sink(SideEffect::identity)
                         ->attempt(fn($_, $path) => $this->adapter->remove($path)),
                 );
@@ -173,10 +173,10 @@ final class Bridge implements Adapter
 
         return $this
             ->adapter
-            ->remove($path)
+            ->remove($fullPath)
             ->flatMap(fn() => $this->adapter->write(
                 $path,
-                $file->content(),
+                $file,
             ));
     }
 }

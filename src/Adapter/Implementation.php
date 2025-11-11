@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\Adapter;
 
-use Innmind\Filesystem\{
-    File,
-    File\Content,
-};
+use Innmind\Filesystem\File;
 use Innmind\Immutable\{
     Attempt,
     Sequence,
@@ -49,5 +46,5 @@ interface Implementation
     /**
      * @return Attempt<SideEffect>
      */
-    public function write(TreePath $path, Content $content): Attempt;
+    public function write(TreePath $parent, File $file): Attempt;
 }

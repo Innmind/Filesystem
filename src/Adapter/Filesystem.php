@@ -215,10 +215,10 @@ final class Filesystem implements Implementation
     }
 
     #[\Override]
-    public function write(TreePath $path, Content $content): Attempt
+    public function write(TreePath $parent, File $file): Attempt
     {
-        $absolutePath = $path->asPath($this->path);
-        $chunks = $content->chunks();
+        $absolutePath = TreePath::of($file)->under($parent)->asPath($this->path);
+        $chunks = $file->content()->chunks();
 
         return self::touch($absolutePath)->flatMap(
             fn() => $this
