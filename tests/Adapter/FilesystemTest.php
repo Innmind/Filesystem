@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
     Adapter,
     File,
     File\Content,
@@ -41,7 +40,7 @@ class FilesystemTest extends TestCase
 
     public function testInterface()
     {
-        $adapter = Filesystem::mount(Path::of('/tmp/'))->unwrap();
+        $adapter = Adapter::mount(Path::of('/tmp/'))->unwrap();
 
         $this->assertInstanceOf(Adapter::class, $adapter);
         $this->assertFalse($adapter->contains(Name::of('foo')));
@@ -66,13 +65,13 @@ class FilesystemTest extends TestCase
         $this->expectException(PathDoesntRepresentADirectory::class);
         $this->expectExceptionMessage('path/to/somewhere');
 
-        Filesystem::mount(Path::of('path/to/somewhere'))->unwrap();
+        Adapter::mount(Path::of('path/to/somewhere'))->unwrap();
     }
 
     public function testReturnNothingWhenGettingUnknownFile()
     {
         $this->assertNull(
-            Filesystem::mount(Path::of('/tmp/'))
+            Adapter::mount(Path::of('/tmp/'))
                 ->unwrap()
                 ->get(Name::of('foo'))
                 ->match(
@@ -86,7 +85,7 @@ class FilesystemTest extends TestCase
     {
         $this->assertInstanceOf(
             SideEffect::class,
-            Filesystem::mount(Path::of('/tmp/'))
+            Adapter::mount(Path::of('/tmp/'))
                 ->unwrap()
                 ->remove(Name::of('foo'))
                 ->unwrap(),
@@ -95,7 +94,7 @@ class FilesystemTest extends TestCase
 
     public function testCreateNestedStructure()
     {
-        $adapter = Filesystem::mount(Path::of('/tmp/'))->unwrap();
+        $adapter = Adapter::mount(Path::of('/tmp/'))->unwrap();
 
         $directory = Directory::of(Name::of('foo'))
             ->add(File::of(Name::of('foo.md'), Content::ofString('# Foo')))
@@ -128,7 +127,7 @@ class FilesystemTest extends TestCase
                 ),
         );
 
-        $adapter = Filesystem::mount(Path::of('/tmp/'))->unwrap();
+        $adapter = Adapter::mount(Path::of('/tmp/'))->unwrap();
         $this->assertTrue($adapter->contains(Name::of('foo')));
         $this->assertSame(
             '# Foo',
@@ -167,7 +166,7 @@ class FilesystemTest extends TestCase
 
     public function testRemoveFileWhenRemovedFromFolder()
     {
-        $a = Filesystem::mount(Path::of('/tmp/'))->unwrap();
+        $a = Adapter::mount(Path::of('/tmp/'))->unwrap();
 
         $d = Directory::of(Name::of('foo'));
         $d = $d->add(File::of(Name::of('bar'), Content::ofString('some content')));
@@ -175,7 +174,7 @@ class FilesystemTest extends TestCase
         $d = $d->remove(Name::of('bar'));
         $a->add($d)->unwrap();
         $this->assertSame(1, $d->removed()->size());
-        $a = Filesystem::mount(Path::of('/tmp/'))->unwrap();
+        $a = Adapter::mount(Path::of('/tmp/'))->unwrap();
         $this->assertFalse(
             $a->get(Name::of('foo'))->match(
                 static fn($dir) => $dir->contains(Name::of('bar')),
@@ -189,7 +188,7 @@ class FilesystemTest extends TestCase
 
     public function testDoesntFailWhenAddindSameDirectoryTwiceThatContainsARemovedFile()
     {
-        $a = Filesystem::mount(Path::of('/tmp/'))->unwrap();
+        $a = Adapter::mount(Path::of('/tmp/'))->unwrap();
 
         $d = Directory::of(Name::of('foo'));
         $d = $d->add(File::of(Name::of('bar'), Content::ofString('some content')));
@@ -198,7 +197,7 @@ class FilesystemTest extends TestCase
         $a->add($d)->unwrap();
         $a->add($d)->unwrap();
         $this->assertSame(1, $d->removed()->size());
-        $a = Filesystem::mount(Path::of('/tmp/'))->unwrap();
+        $a = Adapter::mount(Path::of('/tmp/'))->unwrap();
         $this->assertFalse(
             $a->get(Name::of('foo'))->match(
                 static fn($dir) => $dir->contains(Name::of('bar')),
@@ -212,7 +211,7 @@ class FilesystemTest extends TestCase
 
     public function testLoadWithMediaType()
     {
-        $a = Filesystem::mount(Path::of('/tmp/'))->unwrap();
+        $a = Adapter::mount(Path::of('/tmp/'))->unwrap();
         \file_put_contents(
             '/tmp/some_content.html',
             '<!DOCTYPE html><html><body><answer value="42"/></body></html>',
@@ -235,7 +234,7 @@ class FilesystemTest extends TestCase
 
     public function testRoot()
     {
-        $adapter = Filesystem::mount(Path::of('/tmp/test/'))->unwrap();
+        $adapter = Adapter::mount(Path::of('/tmp/test/'))->unwrap();
         $adapter
             ->add(File::of(
                 Name::of('foo'),
@@ -296,7 +295,7 @@ class FilesystemTest extends TestCase
 
     public function testAddingTheSameFileTwiceDoesNothing()
     {
-        $adapter = Filesystem::mount(Path::of('/tmp/'))->unwrap();
+        $adapter = Adapter::mount(Path::of('/tmp/'))->unwrap();
         $file = File::of(
             Name::of('foo'),
             Content::ofString('foo'),
@@ -325,7 +324,7 @@ class FilesystemTest extends TestCase
         $path = \sys_get_temp_dir().'/innmind/filesystem/';
         (new FS)->remove($path);
 
-        $filesystem = Filesystem::mount(Path::of($path))->unwrap();
+        $filesystem = Adapter::mount(Path::of($path))->unwrap();
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Path too long');
@@ -365,7 +364,7 @@ class FilesystemTest extends TestCase
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
 
-                $filesystem = Filesystem::mount(Path::of($path))->unwrap();
+                $filesystem = Adapter::mount(Path::of($path))->unwrap();
 
                 $this->assertInstanceOf(
                     SideEffect::class,
@@ -398,7 +397,7 @@ class FilesystemTest extends TestCase
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
 
-                $filesystem = Filesystem::mount(Path::of($path))->unwrap();
+                $filesystem = Adapter::mount(Path::of($path))->unwrap();
 
                 $this->assertInstanceOf(
                     SideEffect::class,
@@ -433,7 +432,7 @@ class FilesystemTest extends TestCase
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
 
-                $filesystem = Filesystem::mount(Path::of($path))->unwrap();
+                $filesystem = Adapter::mount(Path::of($path))->unwrap();
 
                 $this->assertInstanceOf(
                     SideEffect::class,
@@ -459,7 +458,7 @@ class FilesystemTest extends TestCase
         (new FS)->dumpFile($path.'foo', 'bar');
         \symlink($path.'foo', $path.'bar');
 
-        $filesystem = Filesystem::mount(Path::of($path))->unwrap();
+        $filesystem = Adapter::mount(Path::of($path))->unwrap();
 
         $this->expectException(LinksAreNotSupported::class);
         $this->expectExceptionMessage($path.'bar');
@@ -474,7 +473,7 @@ class FilesystemTest extends TestCase
         (new FS)->dumpFile($path.'foo', 'bar');
         \symlink($path.'foo', $path.'bar');
 
-        $filesystem = Filesystem::mount(Path::of($path))->unwrap();
+        $filesystem = Adapter::mount(Path::of($path))->unwrap();
 
         $this->expectException(LinksAreNotSupported::class);
         $this->expectExceptionMessage($path.'bar');
@@ -492,7 +491,7 @@ class FilesystemTest extends TestCase
                 (new FS)->mkdir($path);
                 \file_put_contents($path.$name, 'bar');
 
-                $filesystem = Filesystem::mount(Path::of($path))->unwrap();
+                $filesystem = Adapter::mount(Path::of($path))->unwrap();
 
                 $all = $filesystem->root()->all()->toList();
                 $this->assertCount(1, $all);

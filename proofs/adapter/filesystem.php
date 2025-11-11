@@ -2,14 +2,14 @@
 declare(strict_types = 1);
 
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
+    Adapter,
     Directory,
     File,
     File\Content,
     CaseSensitivity,
 };
 use Innmind\Url\Path;
-use Properties\Innmind\Filesystem\Adapter;
+use Properties\Innmind\Filesystem\Adapter as PAdapter;
 use Innmind\BlackBox\Set;
 use Symfony\Component\Filesystem\Filesystem as FS;
 
@@ -18,11 +18,11 @@ return static function() {
 
     yield properties(
         'Filesystem properties',
-        Adapter::properties(),
+        PAdapter::properties(),
         Set::call(static function() use ($path) {
             (new FS)->remove($path);
 
-            return Filesystem::mount(
+            return Adapter::mount(
                 Path::of($path),
                 match (\PHP_OS) {
                     'Darwin' => CaseSensitivity::insensitive,
@@ -32,13 +32,13 @@ return static function() {
         }),
     );
 
-    foreach (Adapter::alwaysApplicable() as $property) {
+    foreach (PAdapter::alwaysApplicable() as $property) {
         yield property(
             $property,
             Set::call(static function() use ($path) {
                 (new FS)->remove($path);
 
-                return Filesystem::mount(
+                return Adapter::mount(
                     Path::of($path),
                     match (\PHP_OS) {
                         'Darwin' => CaseSensitivity::insensitive,
@@ -52,7 +52,7 @@ return static function() {
     yield test(
         'Regression adding file in directory due to case sensitivity',
         static function($assert) use ($path) {
-            $property = new Adapter\AddRemoveAddModificationsStillAddTheFile(
+            $property = new PAdapter\AddRemoveAddModificationsStillAddTheFile(
                 Directory::named('0')
                     ->add($file = File::named('L', Content::none()))
                     ->remove($file->name()),
@@ -60,7 +60,7 @@ return static function() {
             );
 
             (new FS)->remove($path);
-            $adapter = Filesystem::mount(
+            $adapter = Adapter::mount(
                 Path::of($path),
                 match (\PHP_OS) {
                     'Darwin' => CaseSensitivity::insensitive,

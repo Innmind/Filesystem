@@ -61,7 +61,7 @@ final class TreePath
     {
         return new self(
             Sequence::of(),
-            false,
+            true,
         );
     }
 
@@ -71,6 +71,13 @@ final class TreePath
             $this->path->append($parent->path),
             $this->directory,
         );
+    }
+
+    public function equals(self $other): bool
+    {
+        $root = Path::of('/');
+
+        return $this->asPath($root)->equals($other->asPath($root));
     }
 
     public function asPath(Path $root): Path
@@ -90,5 +97,27 @@ final class TreePath
         }
 
         return $root->resolve(Path::of($path->toString()));
+    }
+
+    /**
+     * @template R
+     *
+     * @param callable(Name, self, bool): R $file
+     * @param callable(): R $root
+     *
+     * @return R
+     */
+    public function match(
+        callable $file,
+        callable $root,
+    ): mixed {
+        return $this->path->match(
+            fn($name, $parent) => $file(
+                $name,
+                new self($parent, true), // since there's a child the parent is necessarily a directory
+                $this->directory,
+            ),
+            $root,
+        );
     }
 }

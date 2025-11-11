@@ -4,11 +4,11 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    Adapter,
+    Adapter\Name as Name_,
     File,
+    File\Content,
     Name,
     Directory,
-    CaseSensitivity,
     Exception\PathDoesntRepresentADirectory,
     Exception\LinksAreNotSupported,
 };
@@ -19,25 +19,16 @@ use Innmind\Validation\Is;
 use Innmind\Immutable\{
     Sequence,
     Str,
-    Maybe,
     Attempt,
     SideEffect,
-    Set,
-    Predicate\Instance,
 };
 
-final class Filesystem implements Adapter
+final class Filesystem implements Implementation
 {
-    /** @var \WeakMap<File|Directory, Path> */
-    private \WeakMap $loaded;
-
     private function __construct(
         private IO $io,
         private Path $path,
-        private CaseSensitivity $case,
     ) {
-        /** @var \WeakMap<File|Directory, Path> */
-        $this->loaded = new \WeakMap;
     }
 
     /**
@@ -45,7 +36,6 @@ final class Filesystem implements Adapter
      */
     public static function mount(
         Path $path,
-        CaseSensitivity $case = CaseSensitivity::sensitive,
         ?IO $io = null,
     ): Attempt {
         if (!$path->directory()) {
@@ -60,143 +50,48 @@ final class Filesystem implements Adapter
             ->map(static fn() => new self(
                 $io ?? IO::fromAmbientAuthority(),
                 $path,
-                $case,
             ));
     }
 
     #[\Override]
-    public function add(File|Directory $file): Attempt
+    public function exists(TreePath $path): Attempt
     {
-        return $this->createFileAt(TreePath::root(), $file);
+        return self::doExist($path->asPath($this->path));
     }
 
     #[\Override]
-    public function get(Name $file): Maybe
-    {
-        if (!$this->contains($file)) {
-            /** @var Maybe<File|Directory> */
-            return Maybe::nothing();
+    public function read(
+        TreePath $parent,
+        Name_\File|Name_\Directory|Name_\Unknown $name,
+    ): Attempt {
+        if ($name instanceof Name_\Directory) {
+            return Attempt::result($name);
         }
 
-        return Maybe::of($this->open(TreePath::root(), $file));
-    }
-
-    #[\Override]
-    public function contains(Name $file): bool
-    {
-        return self::doExist(TreePath::of($file)->asPath($this->path))->match(
-            static fn($exists) => $exists,
-            static fn() => false,
-        );
-    }
-
-    #[\Override]
-    public function remove(Name $file): Attempt
-    {
-        return $this->doRemove(TreePath::of($file));
-    }
-
-    #[\Override]
-    public function root(): Directory
-    {
-        return Directory::lazy(
-            Name::of('root'),
-            $this->list(TreePath::root()),
-        );
-    }
-
-    /**
-     * Create the wished file at the given absolute path
-     *
-     * @return Attempt<SideEffect>
-     */
-    private function createFileAt(TreePath $parent, File|Directory $file): Attempt
-    {
-        $path = TreePath::of($file)
+        $name = $name->unwrap();
+        $path = TreePath::of($name)
             ->under($parent)
             ->asPath($this->path);
 
-        /** @psalm-suppress PossiblyNullReference */
-        if ($this->loaded->offsetExists($file) && $this->loaded[$file]->equals($path)) {
-            // no need to persist untouched file where it was loaded from
-            return Attempt::result(SideEffect::identity());
+        if (Str::of($path->toString())->length() > \PHP_MAXPATHLEN) {
+            return Attempt::error(new \RuntimeException('Path too long'));
         }
 
-        $this->loaded[$file] = $path;
-
-        if ($file instanceof Directory) {
-            /** @var Set<Name> */
-            $names = Set::of();
-            $parent = TreePath::of($file)->under($parent);
-
-            return self::mkdir($path)
-                ->flatMap(
-                    fn() => $file
-                        ->all()
-                        ->sink($names)
-                        ->attempt(
-                            fn($persisted, $file) => $this
-                                ->createFileAt($parent, $file)
-                                ->map(static fn() => ($persisted)($file->name())),
-                        ),
-                )
-                ->flatMap(
-                    fn($persisted) => $file
-                        ->removed()
-                        ->exclude(fn($file): bool => $this->case->contains(
-                            $file,
-                            $persisted,
-                        ))
-                        ->unsorted()
-                        ->map(TreePath::of(...))
-                        ->map(static fn($file) => $file->under($parent))
-                        ->sink(SideEffect::identity)
-                        ->attempt(fn($_, $file) => $this->doRemove($file)),
-                );
+        if (!\file_exists($path->toString())) {
+            return Attempt::error(new \RuntimeException('File not found'));
         }
-
-        return $this
-            ->doRemove(TreePath::of($file)->under($parent))
-            ->map(static fn() => $file->content()->chunks())
-            ->flatMap(static fn($chunks) => self::touch($path)->map(
-                static fn() => $chunks,
-            ))
-            ->flatMap(
-                fn($chunks) => $this
-                    ->io
-                    ->files()
-                    ->write($path)
-                    ->watch()
-                    ->sink($chunks),
-            );
-    }
-
-    /**
-     * Open the file in the given folder
-     */
-    private function open(TreePath $parent, Name $file): File|Directory|null
-    {
-        $path = TreePath::of($file)
-            ->under($parent)
-            ->asPath($this->path);
 
         if (\is_dir($path->toString())) {
-            $directoryPath = TreePath::directory($file)->under($parent);
-            $files = $this->list($directoryPath);
-
-            $directory = Directory::lazy($file, $files);
-            $this->loaded[$directory] = $directoryPath->asPath($this->path);
-
-            return $directory;
+            return Attempt::result(Name_\Directory::of($name));
         }
 
         if (\is_link($path->toString())) {
-            return null;
+            return Attempt::error(new LinksAreNotSupported);
         }
 
         $file = File::of(
-            $file,
-            File\Content::atPath(
+            $name,
+            Content::atPath(
                 $this->io,
                 $path,
             ),
@@ -205,18 +100,15 @@ final class Filesystem implements Adapter
                 default => $mediaType,
             })->match(
                 static fn($mediaType) => $mediaType,
-                static fn() => MediaType::null(),
+                static fn() => null,
             ),
         );
-        $this->loaded[$file] = $path;
 
-        return $file;
+        return Attempt::result($file);
     }
 
-    /**
-     * @return Sequence<File|Directory>
-     */
-    private function list(TreePath $parent): Sequence
+    #[\Override]
+    public function list(TreePath $parent): Sequence
     {
         return Sequence::lazy(function() use ($parent): \Generator {
             $files = new \FilesystemIterator($parent->asPath($this->path)->toString());
@@ -224,13 +116,14 @@ final class Filesystem implements Adapter
             /** @var \SplFileInfo $file */
             foreach ($files as $file) {
                 /** @psalm-suppress ArgumentTypeCoercion */
-                yield $this->open($parent, Name::of($file->getBasename()));
+                $name = Name::of($file->getBasename());
+
+                yield match ($file->isDir()) {
+                    true => Name_\Directory::of($name),
+                    false => Name_\File::of($name),
+                };
             }
-        })->keep(
-            Instance::of(File::class)->or(
-                Instance::of(Directory::class),
-            ),
-        );
+        });
     }
 
     /**
@@ -245,11 +138,11 @@ final class Filesystem implements Adapter
      * This package doesn't want to bleed this global state between processes.
      * If you end up here, know that you should design your app in a way that
      * there is as little as possible race conditions like these.
-     *
-     * @return Attempt<SideEffect>
      */
-    private function doRemove(TreePath $path): Attempt
+    #[\Override]
+    public function remove(TreePath $parent, Name $name): Attempt
     {
+        $path = TreePath::of($name)->under($parent);
         $absolutePath = $path->asPath($this->path)->toString();
 
         if (Str::of($absolutePath)->length() > \PHP_MAXPATHLEN) {
@@ -271,10 +164,8 @@ final class Filesystem implements Adapter
                 ->map(static fn($file) => $file->getBasename())
                 ->keep(Is::string()->nonEmpty()->asPredicate())
                 ->map(Name::of(...))
-                ->map(TreePath::of(...))
-                ->map(static fn($file) => $file->under($path))
                 ->sink(SideEffect::identity)
-                ->attempt(fn($_, $file) => $this->doRemove($file))
+                ->attempt(fn($_, $file) => $this->remove($path, $file))
                 ->map(static fn() => @\rmdir($absolutePath))
                 ->flatMap(static fn($removed) => match ($removed) {
                     true => Attempt::result(SideEffect::identity),
@@ -294,6 +185,45 @@ final class Filesystem implements Adapter
                 $absolutePath,
             ))),
         };
+    }
+
+    #[\Override]
+    public function createDirectory(TreePath $parent, Name $name): Attempt
+    {
+        $path = TreePath::directory($name)->under($parent);
+        $absolutePath = $path->asPath($this->path);
+
+        return $this
+            ->exists($path)
+            ->flatMap(function($exists) use ($parent, $name, $absolutePath) {
+                if ($exists && \is_dir($absolutePath->toString())) {
+                    return Attempt::result(SideEffect::identity);
+                }
+
+                if ($exists) {
+                    return $this
+                        ->remove($parent, $name)
+                        ->flatMap(static fn() => self::mkdir($absolutePath));
+                }
+
+                return self::mkdir($absolutePath);
+            });
+    }
+
+    #[\Override]
+    public function write(TreePath $parent, File $file): Attempt
+    {
+        $absolutePath = TreePath::of($file)->under($parent)->asPath($this->path);
+        $chunks = $file->content()->chunks();
+
+        return self::touch($absolutePath)->flatMap(
+            fn() => $this
+                ->io
+                ->files()
+                ->write($absolutePath)
+                ->watch()
+                ->sink($chunks),
+        );
     }
 
     /**

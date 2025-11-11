@@ -1,21 +1,21 @@
 <?php
 declare(strict_types = 1);
 
-use Innmind\Filesystem\Adapter\InMemory;
-use Properties\Innmind\Filesystem\Adapter;
+use Innmind\Filesystem\Adapter;
+use Properties\Innmind\Filesystem\Adapter as PAdapter;
 use Innmind\BlackBox\Set;
 
 return static function() {
     yield properties(
         'InMemory properties emulating filesystem',
-        Adapter::properties(),
-        Set::call(InMemory::emulateFilesystem(...)),
+        PAdapter::properties(),
+        Set::call(Adapter::inMemory(...)),
     );
 
-    foreach (Adapter::alwaysApplicable() as $property) {
+    foreach (PAdapter::alwaysApplicable() as $property) {
         yield property(
             $property,
-            Set::call(InMemory::emulateFilesystem(...)),
+            Set::call(Adapter::inMemory(...)),
         )->named('InMemory emulating filesystem');
     }
 };
