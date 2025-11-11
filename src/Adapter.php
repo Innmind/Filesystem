@@ -30,7 +30,7 @@ final class Adapter
     private \WeakMap $loaded;
 
     private function __construct(
-        private Implementation $adapter,
+        private Implementation $implementation,
         private CaseSensitivity $case,
     ) {
         /** @var \WeakMap<File|Directory, TreePath> */
@@ -61,7 +61,7 @@ final class Adapter
         LoggerInterface $logger,
     ): self {
         return new self(
-            Logger::psr($adapter->adapter, $logger),
+            Logger::psr($adapter->implementation, $logger),
             $adapter->case,
         );
     }
@@ -87,7 +87,7 @@ final class Adapter
 
     public function contains(Name $file): bool
     {
-        return $this->adapter->exists(TreePath::of($file))->match(
+        return $this->implementation->exists(TreePath::of($file))->match(
             static fn($exists) => $exists,
             static fn() => false,
         );
@@ -98,7 +98,7 @@ final class Adapter
      */
     public function remove(Name $file): Attempt
     {
-        return $this->adapter->remove(TreePath::root(), $file);
+        return $this->implementation->remove(TreePath::root(), $file);
     }
 
     public function root(): Directory
@@ -108,7 +108,7 @@ final class Adapter
         return Directory::named(
             'root',
             $this
-                ->adapter
+                ->implementation
                 ->list($root)
                 ->map(fn($name) => $this->read($root, $name))
                 ->flatMap(static fn($read) => $read->toSequence()),
@@ -125,7 +125,7 @@ final class Adapter
         $fullPath = TreePath::of($name->unwrap())->under($path);
 
         return $this
-            ->adapter
+            ->implementation
             ->read($path, $name)
             ->maybe()
             ->map(fn($file) => match (true) {
@@ -133,7 +133,7 @@ final class Adapter
                 default => Directory::of(
                     $file->unwrap(),
                     $this
-                        ->adapter
+                        ->implementation
                         ->list(TreePath::directory($name->unwrap())->under($path))
                         ->map(fn($file) => $this->read(
                             $fullPath,
@@ -172,7 +172,7 @@ final class Adapter
             $names = Set::of();
 
             return $this
-                ->adapter
+                ->implementation
                 ->createDirectory($path, $file->name())
                 ->flatMap(
                     fn() => $file
@@ -193,14 +193,14 @@ final class Adapter
                         ))
                         ->unsorted()
                         ->sink(SideEffect::identity)
-                        ->attempt(fn($_, $file) => $this->adapter->remove($fullPath, $file)),
+                        ->attempt(fn($_, $file) => $this->implementation->remove($fullPath, $file)),
                 );
         }
 
         return $this
-            ->adapter
+            ->implementation
             ->remove($path, $file->name())
-            ->flatMap(fn() => $this->adapter->write(
+            ->flatMap(fn() => $this->implementation->write(
                 $path,
                 $file,
             ));

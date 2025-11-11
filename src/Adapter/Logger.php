@@ -21,21 +21,21 @@ use Psr\Log\LoggerInterface;
 final class Logger implements Implementation
 {
     private function __construct(
-        private Implementation $filesystem,
+        private Implementation $implementation,
         private LoggerInterface $logger,
     ) {
     }
 
-    public static function psr(Implementation $filesystem, LoggerInterface $logger): self
+    public static function psr(Implementation $implementation, LoggerInterface $logger): self
     {
-        return new self($filesystem, $logger);
+        return new self($implementation, $logger);
     }
 
     #[\Override]
     public function exists(TreePath $path): Attempt
     {
         return $this
-            ->filesystem
+            ->implementation
             ->exists($path)
             ->map(function($exists) use ($path) {
                 $this->logger->debug('Cheking if filesystem contains {file}', [
@@ -53,7 +53,7 @@ final class Logger implements Implementation
         Name_\File|Name_\Directory|Name_\Unknown $name,
     ): Attempt {
         return $this
-            ->filesystem
+            ->implementation
             ->read($parent, $name)
             ->map(function($file) use ($parent, $name) {
                 $this->logger->debug('Accessing file {file}', [
@@ -71,14 +71,14 @@ final class Logger implements Implementation
             'directory' => self::path($parent),
         ]);
 
-        return $this->filesystem->list($parent);
+        return $this->implementation->list($parent);
     }
 
     #[\Override]
     public function remove(TreePath $parent, Name $name): Attempt
     {
         return $this
-            ->filesystem
+            ->implementation
             ->remove($parent, $name)
             ->map(function($_) use ($parent, $name) {
                 $this->logger->debug('File removed {file}', [
@@ -93,7 +93,7 @@ final class Logger implements Implementation
     public function createDirectory(TreePath $parent, Name $name): Attempt
     {
         return $this
-            ->filesystem
+            ->implementation
             ->createDirectory($parent, $name)
             ->map(function($_) use ($parent, $name) {
                 $this->logger->debug('Directory created {directory}', [
@@ -108,7 +108,7 @@ final class Logger implements Implementation
     public function write(TreePath $parent, File $file): Attempt
     {
         return $this
-            ->filesystem
+            ->implementation
             ->write($parent, $file)
             ->map(function($_) use ($parent, $file) {
                 $this->logger->debug('File written {file}', [
