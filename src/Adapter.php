@@ -37,6 +37,9 @@ final class Adapter
         $this->loaded = new \WeakMap;
     }
 
+    /**
+     * @return Attempt<self>
+     */
     public static function mount(
         Path $path,
         CaseSensitivity $case = CaseSensitivity::sensitive,
