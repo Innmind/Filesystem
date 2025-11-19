@@ -7,6 +7,7 @@ use Innmind\Filesystem\{
     File,
     File\Content,
     CaseSensitivity,
+    Recover,
 };
 use Innmind\Url\Path;
 use Properties\Innmind\Filesystem\Adapter as PAdapter;
@@ -28,7 +29,9 @@ return static function() {
                     'Darwin' => CaseSensitivity::insensitive,
                     default => CaseSensitivity::sensitive,
                 },
-            )->unwrap();
+            )
+                ->recover(Recover::mount(...))
+                ->unwrap();
         }),
     );
 
@@ -44,7 +47,9 @@ return static function() {
                         'Darwin' => CaseSensitivity::insensitive,
                         default => CaseSensitivity::sensitive,
                     },
-                )->unwrap();
+                )
+                    ->recover(Recover::mount(...))
+                    ->unwrap();
             }),
         )->named('Filesystem');
     }
@@ -66,7 +71,9 @@ return static function() {
                     'Darwin' => CaseSensitivity::insensitive,
                     default => CaseSensitivity::sensitive,
                 },
-            )->unwrap();
+            )
+                ->recover(Recover::mount(...))
+                ->unwrap();
 
             $property->ensureHeldBy($assert, $adapter);
 

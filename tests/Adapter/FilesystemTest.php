@@ -10,6 +10,7 @@ use Innmind\Filesystem\{
     Name,
     Directory as DirectoryInterface,
     Directory,
+    Recover,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
@@ -232,7 +233,9 @@ class FilesystemTest extends TestCase
 
     public function testRoot()
     {
-        $adapter = Adapter::mount(Path::of('/tmp/test/'))->unwrap();
+        $adapter = Adapter::mount(Path::of('/tmp/test/'))
+            ->recover(Recover::mount(...))
+            ->unwrap();
         $adapter
             ->add(File::of(
                 Name::of('foo'),
@@ -293,7 +296,9 @@ class FilesystemTest extends TestCase
 
     public function testAddingTheSameFileTwiceDoesNothing()
     {
-        $adapter = Adapter::mount(Path::of('/tmp/'))->unwrap();
+        $adapter = Adapter::mount(Path::of('/tmp/'))
+            ->recover(Recover::mount(...))
+            ->unwrap();
         $file = File::of(
             Name::of('foo'),
             Content::ofString('foo'),
@@ -322,7 +327,9 @@ class FilesystemTest extends TestCase
         $path = \sys_get_temp_dir().'/innmind/filesystem/';
         (new FS)->remove($path);
 
-        $filesystem = Adapter::mount(Path::of($path))->unwrap();
+        $filesystem = Adapter::mount(Path::of($path))
+            ->recover(Recover::mount(...))
+            ->unwrap();
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Path too long');
@@ -362,7 +369,9 @@ class FilesystemTest extends TestCase
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
 
-                $filesystem = Adapter::mount(Path::of($path))->unwrap();
+                $filesystem = Adapter::mount(Path::of($path))
+                    ->recover(Recover::mount(...))
+                    ->unwrap();
 
                 $this->assertInstanceOf(
                     SideEffect::class,
@@ -395,7 +404,9 @@ class FilesystemTest extends TestCase
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
 
-                $filesystem = Adapter::mount(Path::of($path))->unwrap();
+                $filesystem = Adapter::mount(Path::of($path))
+                    ->recover(Recover::mount(...))
+                    ->unwrap();
 
                 $this->assertInstanceOf(
                     SideEffect::class,
@@ -430,7 +441,9 @@ class FilesystemTest extends TestCase
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
 
-                $filesystem = Adapter::mount(Path::of($path))->unwrap();
+                $filesystem = Adapter::mount(Path::of($path))
+                    ->recover(Recover::mount(...))
+                    ->unwrap();
 
                 $this->assertInstanceOf(
                     SideEffect::class,
@@ -456,7 +469,9 @@ class FilesystemTest extends TestCase
         (new FS)->dumpFile($path.'foo', 'bar');
         \symlink($path.'foo', $path.'bar');
 
-        $filesystem = Adapter::mount(Path::of($path))->unwrap();
+        $filesystem = Adapter::mount(Path::of($path))
+            ->recover(Recover::mount(...))
+            ->unwrap();
 
         $this->assertNull(
             $filesystem->get(Name::of('bar'))->match(
@@ -473,7 +488,9 @@ class FilesystemTest extends TestCase
         (new FS)->dumpFile($path.'foo', 'bar');
         \symlink($path.'foo', $path.'bar');
 
-        $filesystem = Adapter::mount(Path::of($path))->unwrap();
+        $filesystem = Adapter::mount(Path::of($path))
+            ->recover(Recover::mount(...))
+            ->unwrap();
 
         $this->assertSame(
             ['foo'],
@@ -495,7 +512,9 @@ class FilesystemTest extends TestCase
                 (new FS)->mkdir($path);
                 \file_put_contents($path.$name, 'bar');
 
-                $filesystem = Adapter::mount(Path::of($path))->unwrap();
+                $filesystem = Adapter::mount(Path::of($path))
+                    ->recover(Recover::mount(...))
+                    ->unwrap();
 
                 $all = $filesystem->root()->all()->toList();
                 $this->assertCount(1, $all);

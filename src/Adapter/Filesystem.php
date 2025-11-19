@@ -9,6 +9,7 @@ use Innmind\Filesystem\{
     File\Content,
     Name,
     Directory,
+    Exception\MountPathDoesntExist,
 };
 use Innmind\IO\IO;
 use Innmind\MediaType\MediaType;
@@ -43,13 +44,20 @@ final class Filesystem implements Implementation
             )));
         }
 
+        $io ??= IO::fromAmbientAuthority();
+
         return self::doExist($path)
             ->flatMap(static fn($exist) => match ($exist) {
-                false => self::mkdir($path),
+                false => Attempt::error(new MountPathDoesntExist(
+                    static fn() => self::mkdir($path)->map(static fn() => new self(
+                        $io,
+                        $path,
+                    )),
+                )),
                 default => Attempt::result(SideEffect::identity),
             })
             ->map(static fn() => new self(
-                $io ?? IO::fromAmbientAuthority(),
+                $io,
                 $path,
             ));
     }

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Innmind\Filesystem\Recover`
+
 ### Changed
 
 - Requires PHP `8.4`
@@ -12,6 +16,7 @@
 - `Innmind\Filesystem\Adapter\Filesystem` is now flagged as internal
 - `Innmind\Filesystem\Adapter\InMemory` is now flagged as internal
 - `Innmind\Filesystem\Adapter\Logger` is now flagged as internal
+- `Innmind\Filesystem\Adapter::mount()` no longer automatically create the directory if it doesn't exist
 
 ### Removed
 

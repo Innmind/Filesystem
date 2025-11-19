@@ -10,6 +10,8 @@ use Innmind\Filesystem\{
     Adapter\Filesystem,
     Adapter\InMemory,
     Adapter\Logger,
+    Exception\MountPathDoesntExist,
+    Exception\RecoverMount,
 };
 use Innmind\IO\IO;
 use Innmind\Url\Path;
@@ -45,10 +47,22 @@ final class Adapter
         CaseSensitivity $case = CaseSensitivity::sensitive,
         ?IO $io = null,
     ): Attempt {
-        return Filesystem::mount($path, $io)->map(static fn($implementation) => new self(
-            $implementation,
-            $case,
-        ));
+        return Filesystem::mount($path, $io)
+            ->map(static fn($implementation) => new self(
+                $implementation,
+                $case,
+            ))
+            ->mapError(static fn($e) => match (true) {
+                $e instanceof MountPathDoesntExist => new RecoverMount(
+                    static fn() => $e
+                        ->recover()
+                        ->map(static fn($implementation) => new self(
+                            $implementation,
+                            $case,
+                        )),
+                ),
+                default => $e,
+            });
     }
 
     public static function inMemory(): self
