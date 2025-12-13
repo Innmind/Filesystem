@@ -14,7 +14,6 @@ use Innmind\Filesystem\{
 use Innmind\IO\IO;
 use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
-use Innmind\Validation\Is;
 use Innmind\Immutable\{
     Sequence,
     Str,
@@ -122,20 +121,14 @@ final class Filesystem implements Implementation
     #[\Override]
     public function list(TreePath $parent): Sequence
     {
-        return Sequence::lazy(function() use ($parent): \Generator {
-            $files = new \FilesystemIterator($parent->asPath($this->path)->toString());
-
-            /** @var \SplFileInfo $file */
-            foreach ($files as $file) {
-                /** @psalm-suppress ArgumentTypeCoercion */
-                $name = Name::of($file->getBasename());
-
-                yield match ($file->isDir()) {
-                    true => Name_\Directory::of($name),
-                    false => Name_\File::of($name),
-                };
-            }
-        });
+        return $this
+            ->io
+            ->files()
+            ->list($parent->asPath($this->path))
+            ->map(static fn($name) => match ($name->directory()) {
+                true => Name_\Directory::of(Name::of($name->toString())),
+                false => Name_\File::of(Name::of($name->toString())),
+            });
     }
 
     /**
@@ -170,11 +163,11 @@ final class Filesystem implements Implementation
         }
 
         if (\is_dir($absolutePath)) {
-            $files = new \FilesystemIterator($absolutePath);
-
-            return Sequence::lazy(static fn() => yield from $files)
-                ->map(static fn($file) => $file->getBasename())
-                ->keep(Is::string()->nonEmpty()->asPredicate())
+            return $this
+                ->io
+                ->files()
+                ->list($path->asPath($this->path))
+                ->map(static fn($name) => $name->toString())
                 ->map(Name::of(...))
                 ->sink(SideEffect::identity)
                 ->attempt(fn($_, $file) => $this->remove($path, $file))
