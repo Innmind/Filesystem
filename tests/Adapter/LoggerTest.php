@@ -51,7 +51,7 @@ class LoggerTest extends TestCase
         );
         $name = Name::of('foo');
         $file = File::of($name, Content::none());
-        $inner
+        $_ = $inner
             ->add($file)
             ->unwrap();
 
@@ -71,7 +71,7 @@ class LoggerTest extends TestCase
             new NullLogger,
         );
         $name = Name::of('foo');
-        $inner
+        $_ = $inner
             ->add(File::of($name, Content::none()))
             ->unwrap();
 
@@ -85,7 +85,7 @@ class LoggerTest extends TestCase
             new NullLogger,
         );
         $name = Name::of('foo');
-        $inner
+        $_ = $inner
             ->add(File::of($name, Content::none()))
             ->unwrap();
 
@@ -108,7 +108,7 @@ class LoggerTest extends TestCase
             'watev',
             Content::none(),
         );
-        $inner
+        $_ = $inner
             ->add($file)
             ->unwrap();
 

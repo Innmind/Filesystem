@@ -68,13 +68,13 @@ class InMemoryTest extends TestCase
     public function testRoot()
     {
         $adapter = Adapter::inMemory();
-        $adapter
+        $_ = $adapter
             ->add($foo = File::of(
                 Name::of('foo'),
                 Content::ofString('foo'),
             ))
             ->unwrap();
-        $adapter
+        $_ = $adapter
             ->add($bar = File::of(
                 Name::of('bar'),
                 Content::ofString('bar'),
@@ -91,14 +91,14 @@ class InMemoryTest extends TestCase
     public function testEmulateFilesystem()
     {
         $adapter = Adapter::inMemory();
-        $adapter->add(Directory::of(
+        $_ = $adapter->add(Directory::of(
             Name::of('foo'),
             Sequence::of(
                 Directory::named('bar'),
                 File::named('baz', Content::none()),
             ),
         ))->unwrap();
-        $adapter->add(Directory::of(
+        $_ = $adapter->add(Directory::of(
             Name::of('foo'),
             Sequence::of(
                 Directory::of(

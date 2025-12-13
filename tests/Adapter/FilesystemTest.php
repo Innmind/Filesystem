@@ -64,7 +64,7 @@ class FilesystemTest extends TestCase
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage("Path doesn't represent a directory 'path/to/somewhere'");
 
-        Adapter::mount(Path::of('path/to/somewhere'))->unwrap();
+        $_ = Adapter::mount(Path::of('path/to/somewhere'))->unwrap();
     }
 
     public function testReturnNothingWhenGettingUnknownFile()
@@ -101,7 +101,7 @@ class FilesystemTest extends TestCase
                 Directory::of(Name::of('bar'))
                     ->add(File::of(Name::of('bar.md'), Content::ofString('# Bar'))),
             );
-        $adapter->add($directory)->unwrap();
+        $_ = $adapter->add($directory)->unwrap();
         $this->assertSame(
             '# Foo',
             $adapter
@@ -158,7 +158,7 @@ class FilesystemTest extends TestCase
                 ),
         );
 
-        $adapter
+        $_ = $adapter
             ->remove(Name::of('foo'))
             ->unwrap();
     }
@@ -169,9 +169,9 @@ class FilesystemTest extends TestCase
 
         $d = Directory::of(Name::of('foo'));
         $d = $d->add(File::of(Name::of('bar'), Content::ofString('some content')));
-        $a->add($d)->unwrap();
+        $_ = $a->add($d)->unwrap();
         $d = $d->remove(Name::of('bar'));
-        $a->add($d)->unwrap();
+        $_ = $a->add($d)->unwrap();
         $this->assertSame(1, $d->removed()->size());
         $a = Adapter::mount(Path::of('/tmp/'))->unwrap();
         $this->assertFalse(
@@ -180,7 +180,7 @@ class FilesystemTest extends TestCase
                 static fn() => true,
             ),
         );
-        $a
+        $_ = $a
             ->remove(Name::of('foo'))
             ->unwrap();
     }
@@ -191,10 +191,10 @@ class FilesystemTest extends TestCase
 
         $d = Directory::of(Name::of('foo'));
         $d = $d->add(File::of(Name::of('bar'), Content::ofString('some content')));
-        $a->add($d)->unwrap();
+        $_ = $a->add($d)->unwrap();
         $d = $d->remove(Name::of('bar'));
-        $a->add($d)->unwrap();
-        $a->add($d)->unwrap();
+        $_ = $a->add($d)->unwrap();
+        $_ = $a->add($d)->unwrap();
         $this->assertSame(1, $d->removed()->size());
         $a = Adapter::mount(Path::of('/tmp/'))->unwrap();
         $this->assertFalse(
@@ -203,7 +203,7 @@ class FilesystemTest extends TestCase
                 static fn() => true,
             ),
         );
-        $a
+        $_ = $a
             ->remove(Name::of('foo'))
             ->unwrap();
     }
@@ -226,7 +226,7 @@ class FilesystemTest extends TestCase
                     static fn() => null,
                 ),
         );
-        $a
+        $_ = $a
             ->remove(Name::of('some_content.html'))
             ->unwrap();
     }
@@ -236,7 +236,7 @@ class FilesystemTest extends TestCase
         $adapter = Adapter::mount(Path::of('/tmp/test/'))
             ->recover(Recover::mount(...))
             ->unwrap();
-        $adapter
+        $_ = $adapter
             ->add(File::of(
                 Name::of('foo'),
                 Content::ofString('foo'),
@@ -283,13 +283,13 @@ class FilesystemTest extends TestCase
                 static fn() => null,
             ),
         );
-        $adapter
+        $_ = $adapter
             ->remove(Name::of('foo'))
             ->unwrap();
-        $adapter
+        $_ = $adapter
             ->remove(Name::of('bar'))
             ->unwrap();
-        $adapter
+        $_ = $adapter
             ->remove(Name::of('baz'))
             ->unwrap();
     }
@@ -334,7 +334,7 @@ class FilesystemTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Path too long');
 
-        $filesystem->add(Directory::of(
+        $_ = $filesystem->add(Directory::of(
             Name::of(\str_repeat('a', 255)),
             Sequence::of(
                 Directory::of(

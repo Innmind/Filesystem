@@ -30,7 +30,7 @@ final class AllRootFilesAreAccessible implements Property
 
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        $adapter
+        $_ = $adapter
             ->root()
             ->foreach(static function($file) use ($assert, $adapter) {
                 $assert->true($adapter->contains($file->name()));
