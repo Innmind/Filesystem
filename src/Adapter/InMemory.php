@@ -96,7 +96,7 @@ final class InMemory implements Implementation
     #[\Override]
     public function remove(TreePath $parent, Name $name): Attempt
     {
-        $asDirectory = $this->path(TreePath::of($name)->under($parent));
+        $asDirectory = $this->path(TreePath::directory($name)->under($parent));
         $this->files = $this
             ->files
             ->remove($this->path(TreePath::of($name)->under($parent)))
