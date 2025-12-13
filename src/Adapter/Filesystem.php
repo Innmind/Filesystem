@@ -104,13 +104,16 @@ final class Filesystem implements Implementation
                 $this->io,
                 $path,
             ),
-            MediaType::maybe(match ($mediaType = @\mime_content_type($path->toString())) {
-                false => '',
-                default => $mediaType,
-            })->match(
-                static fn($mediaType) => $mediaType,
-                static fn() => null,
-            ),
+            $this
+                ->io
+                ->files()
+                ->mediaType($path)
+                ->maybe()
+                ->flatMap(MediaType::maybe(...))
+                ->match(
+                    static fn($mediaType) => $mediaType,
+                    static fn() => null,
+                ),
         );
 
         return Attempt::result($file);
