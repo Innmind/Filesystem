@@ -45,7 +45,7 @@ final class Filesystem implements Implementation
 
         $io ??= IO::fromAmbientAuthority();
 
-        return self::doExist($path)
+        return self::doExist($io, $path)
             ->flatMap(static fn($exist) => match ($exist) {
                 false => Attempt::error(new MountPathDoesntExist(
                     static fn() => self::mkdir($path)->map(static fn() => new self(
@@ -64,7 +64,7 @@ final class Filesystem implements Implementation
     #[\Override]
     public function exists(TreePath $path): Attempt
     {
-        return self::doExist($path->asPath($this->path));
+        return self::doExist($this->io, $path->asPath($this->path));
     }
 
     #[\Override]
@@ -80,21 +80,20 @@ final class Filesystem implements Implementation
         $path = TreePath::of($name)
             ->under($parent)
             ->asPath($this->path);
+        $directory = TreePath::directory($name)
+            ->under($parent)
+            ->asPath($this->path);
 
         if (Str::of($path->toString())->length() > \PHP_MAXPATHLEN) {
             return Attempt::error(new \RuntimeException('Path too long'));
         }
 
-        if (!\file_exists($path->toString())) {
-            return Attempt::error(new \RuntimeException('File not found'));
-        }
-
-        if (\is_dir($path->toString())) {
+        if ($this->io->files()->exists($directory)) {
             return Attempt::result(Name_\Directory::of($name));
         }
 
-        if (\is_link($path->toString())) {
-            return Attempt::error(new \RuntimeException('Links are not supported'));
+        if (!$this->io->files()->exists($path)) {
+            return Attempt::error(new \RuntimeException('File not found'));
         }
 
         $file = File::of(
@@ -154,15 +153,11 @@ final class Filesystem implements Implementation
             return Attempt::error(new \RuntimeException('Path too long'));
         }
 
-        if (!\file_exists($absolutePath)) {
+        if (!$this->io->files()->exists($path->asPath($this->path))) {
             return Attempt::result(SideEffect::identity);
         }
 
-        if (\is_link($absolutePath)) {
-            return Attempt::error(new \RuntimeException('Links are not supported'));
-        }
-
-        if (\is_dir($absolutePath)) {
+        if ($this->io->files()->exists(TreePath::directory($name)->under($parent)->asPath($this->path))) {
             return $this
                 ->io
                 ->files()
@@ -221,28 +216,30 @@ final class Filesystem implements Implementation
         $absolutePath = TreePath::of($file)->under($parent)->asPath($this->path);
         $chunks = $file->content()->chunks();
 
-        return self::touch($absolutePath)->flatMap(
-            fn() => $this
-                ->io
-                ->files()
-                ->write($absolutePath)
-                ->watch()
-                ->sink($chunks),
-        );
+        return $this
+            ->touch($absolutePath)
+            ->flatMap(
+                fn() => $this
+                    ->io
+                    ->files()
+                    ->write($absolutePath)
+                    ->watch()
+                    ->sink($chunks),
+            );
     }
 
     /**
      * @return Attempt<bool>
      */
-    private static function doExist(Path $path): Attempt
+    private static function doExist(IO $io, Path $path): Attempt
     {
-        $path = $path->toString();
-
-        if (Str::of($path)->length() > \PHP_MAXPATHLEN) {
+        if (Str::of($path->toString())->length() > \PHP_MAXPATHLEN) {
             return Attempt::error(new \RuntimeException('Path too long'));
         }
 
-        return Attempt::result(@\file_exists($path));
+        return Attempt::result(
+            $io->files()->exists($path),
+        );
     }
 
     /**
@@ -276,25 +273,23 @@ final class Filesystem implements Implementation
     /**
      * @return Attempt<SideEffect>
      */
-    private static function touch(Path $path): Attempt
+    private function touch(Path $path): Attempt
     {
-        $path = $path->toString();
-
-        if (Str::of($path)->length() > \PHP_MAXPATHLEN) {
+        if (Str::of($path->toString())->length() > \PHP_MAXPATHLEN) {
             return Attempt::error(new \RuntimeException('Path too long'));
         }
 
-        if (!@\touch($path)) {
+        if (!@\touch($path->toString())) {
             return Attempt::error(new \RuntimeException(\sprintf(
                 "Failed to create file '%s'",
-                $path,
+                $path->toString(),
             )));
         }
 
-        if (!\file_exists($path)) {
+        if (!$this->io->files()->exists($path)) {
             return Attempt::error(new \RuntimeException(\sprintf(
                 "Failed to create file '%s'",
-                $path,
+                $path->toString(),
             )));
         }
 
