@@ -151,48 +151,13 @@ final class Filesystem implements Implementation
     #[\Override]
     public function remove(TreePath $parent, Name $name): Attempt
     {
-        $path = TreePath::of($name)->under($parent);
-        $absolutePath = $path->asPath($this->path);
-        $asDirectory = TreePath::directory($name)
+        $path = TreePath::of($name)
             ->under($parent)
             ->asPath($this->path);
 
-        if (Str::of($absolutePath->toString())->length() > \PHP_MAXPATHLEN) {
-            return Attempt::error(new \RuntimeException('Path too long'));
-        }
-
-        if (!$this->io->files()->exists($absolutePath)) {
-            return Attempt::result(SideEffect::identity);
-        }
-
-        if ($this->io->files()->exists($asDirectory)) {
-            return $this
-                ->io
-                ->files()
-                ->list($absolutePath)
-                ->map(static fn($name) => $name->toString())
-                ->map(Name::of(...))
-                ->sink(SideEffect::identity)
-                ->attempt(fn($_, $file) => $this->remove($path, $file))
-                ->map(static fn() => @\rmdir($absolutePath->toString()))
-                ->flatMap(static fn($removed) => match ($removed) {
-                    true => Attempt::result(SideEffect::identity),
-                    false => Attempt::error(new \RuntimeException(\sprintf(
-                        "Failed to remove directory '%s'",
-                        $absolutePath->toString(),
-                    ))),
-                });
-        }
-
-        $removed = @\unlink($absolutePath->toString());
-
-        return match ($removed) {
-            true => Attempt::result(SideEffect::identity),
-            false => Attempt::error(new \RuntimeException(\sprintf(
-                "Failed to remove file '%s'",
-                $absolutePath->toString(),
-            ))),
-        };
+        return self::assert($path)->flatMap(
+            $this->io->files()->remove(...),
+        );
     }
 
     #[\Override]
