@@ -23,7 +23,8 @@
         "innmind/io": "dev-next",
         "innmind/validation": "dev-next",
         "innmind/time-continuum": "dev-next",
-        "innmind/ip": "dev-next"
+        "innmind/ip": "dev-next",
+        "innmind/mutable": "dev-next"
     },
     "autoload": {
         "psr-4": {
