@@ -48,10 +48,12 @@ final class Filesystem implements Implementation
         return self::doExist($io, $path)
             ->flatMap(static fn($exist) => match ($exist) {
                 false => Attempt::error(new MountPathDoesntExist(
-                    static fn() => self::mkdir($path)->map(static fn() => new self(
-                        $io,
-                        $path,
-                    )),
+                    static fn() => self::assert($path)
+                        ->flatMap($io->files()->create(...))
+                        ->map(static fn() => new self(
+                            $io,
+                            $path,
+                        )),
                 )),
                 default => Attempt::result(SideEffect::identity),
             })
@@ -203,10 +205,14 @@ final class Filesystem implements Implementation
                 if ($exists) {
                     return $this
                         ->remove($parent, $name)
-                        ->flatMap(static fn() => self::mkdir($absolutePath));
+                        ->flatMap(fn() => self::assert($absolutePath)->flatMap(
+                            $this->io->files()->create(...),
+                        ));
                 }
 
-                return self::mkdir($absolutePath);
+                return self::assert($absolutePath)->flatMap(
+                    $this->io->files()->create(...),
+                );
             });
     }
 
@@ -216,8 +222,8 @@ final class Filesystem implements Implementation
         $absolutePath = TreePath::of($file)->under($parent)->asPath($this->path);
         $chunks = $file->content()->chunks();
 
-        return $this
-            ->touch($absolutePath)
+        return self::assert($absolutePath)
+            ->flatMap($this->io->files()->create(...))
             ->flatMap(
                 fn() => $this
                     ->io
@@ -243,56 +249,14 @@ final class Filesystem implements Implementation
     }
 
     /**
-     * @return Attempt<SideEffect>
+     * @return Attempt<Path>
      */
-    private static function mkdir(Path $path): Attempt
-    {
-        $path = $path->toString();
-
-        if (Str::of($path)->length() > \PHP_MAXPATHLEN) {
-            return Attempt::error(new \RuntimeException('Path too long'));
-        }
-
-        // We do not check the result of this function as it will return false
-        // if the path already exist. This can lead to race conditions where
-        // another process created the directory between the condition that
-        // checked if it existed and the call to this method. The only important
-        // part is to check wether the directory exists or not afterward.
-        @\mkdir($path, recursive: true);
-
-        if (!\is_dir($path)) {
-            return Attempt::error(new \RuntimeException(\sprintf(
-                "Failed to create directory '%s'",
-                $path,
-            )));
-        }
-
-        return Attempt::result(SideEffect::identity);
-    }
-
-    /**
-     * @return Attempt<SideEffect>
-     */
-    private function touch(Path $path): Attempt
+    private static function assert(Path $path): Attempt
     {
         if (Str::of($path->toString())->length() > \PHP_MAXPATHLEN) {
             return Attempt::error(new \RuntimeException('Path too long'));
         }
 
-        if (!@\touch($path->toString())) {
-            return Attempt::error(new \RuntimeException(\sprintf(
-                "Failed to create file '%s'",
-                $path->toString(),
-            )));
-        }
-
-        if (!$this->io->files()->exists($path)) {
-            return Attempt::error(new \RuntimeException(\sprintf(
-                "Failed to create file '%s'",
-                $path->toString(),
-            )));
-        }
-
-        return Attempt::result(SideEffect::identity);
+        return Attempt::result($path);
     }
 }
