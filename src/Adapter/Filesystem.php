@@ -151,9 +151,15 @@ final class Filesystem implements Implementation
             ->under($parent)
             ->asPath($this->path);
 
-        return self::assert($path)->flatMap(
-            $this->io->files()->remove(...),
-        );
+        return self::assert($path)
+            ->map($this->io->files()->access(...))
+            ->flatMap(static fn($file) => $file->eitherWay(
+                static fn($file) => match (true) {
+                    $file instanceof Files\Link => Attempt::error(new \RuntimeException('Links are not supported')),
+                    default => $file->remove(),
+                },
+                static fn() => Attempt::result(SideEffect::identity),
+            ));
     }
 
     #[\Override]
