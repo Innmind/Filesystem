@@ -45,7 +45,8 @@ final class Filesystem implements Implementation
 
         $io ??= IO::fromAmbientAuthority();
 
-        return self::doExist($io, $path)
+        return self::assert($path)
+            ->map($io->files()->exists(...))
             ->flatMap(static fn($exist) => match ($exist) {
                 false => Attempt::error(new MountPathDoesntExist(
                     static fn() => self::assert($path)
@@ -66,7 +67,9 @@ final class Filesystem implements Implementation
     #[\Override]
     public function exists(TreePath $path): Attempt
     {
-        return self::doExist($this->io, $path->asPath($this->path));
+        return self::assert($path->asPath($this->path))->map(
+            $this->io->files()->exists(...),
+        );
     }
 
     #[\Override]
@@ -149,42 +152,45 @@ final class Filesystem implements Implementation
     public function remove(TreePath $parent, Name $name): Attempt
     {
         $path = TreePath::of($name)->under($parent);
-        $absolutePath = $path->asPath($this->path)->toString();
+        $absolutePath = $path->asPath($this->path);
+        $asDirectory = TreePath::directory($name)
+            ->under($parent)
+            ->asPath($this->path);
 
-        if (Str::of($absolutePath)->length() > \PHP_MAXPATHLEN) {
+        if (Str::of($absolutePath->toString())->length() > \PHP_MAXPATHLEN) {
             return Attempt::error(new \RuntimeException('Path too long'));
         }
 
-        if (!$this->io->files()->exists($path->asPath($this->path))) {
+        if (!$this->io->files()->exists($absolutePath)) {
             return Attempt::result(SideEffect::identity);
         }
 
-        if ($this->io->files()->exists(TreePath::directory($name)->under($parent)->asPath($this->path))) {
+        if ($this->io->files()->exists($asDirectory)) {
             return $this
                 ->io
                 ->files()
-                ->list($path->asPath($this->path))
+                ->list($absolutePath)
                 ->map(static fn($name) => $name->toString())
                 ->map(Name::of(...))
                 ->sink(SideEffect::identity)
                 ->attempt(fn($_, $file) => $this->remove($path, $file))
-                ->map(static fn() => @\rmdir($absolutePath))
+                ->map(static fn() => @\rmdir($absolutePath->toString()))
                 ->flatMap(static fn($removed) => match ($removed) {
                     true => Attempt::result(SideEffect::identity),
                     false => Attempt::error(new \RuntimeException(\sprintf(
                         "Failed to remove directory '%s'",
-                        $absolutePath,
+                        $absolutePath->toString(),
                     ))),
                 });
         }
 
-        $removed = @\unlink($absolutePath);
+        $removed = @\unlink($absolutePath->toString());
 
         return match ($removed) {
             true => Attempt::result(SideEffect::identity),
             false => Attempt::error(new \RuntimeException(\sprintf(
                 "Failed to remove file '%s'",
-                $absolutePath,
+                $absolutePath->toString(),
             ))),
         };
     }
@@ -232,20 +238,6 @@ final class Filesystem implements Implementation
                     ->watch()
                     ->sink($chunks),
             );
-    }
-
-    /**
-     * @return Attempt<bool>
-     */
-    private static function doExist(IO $io, Path $path): Attempt
-    {
-        if (Str::of($path->toString())->length() > \PHP_MAXPATHLEN) {
-            return Attempt::error(new \RuntimeException('Path too long'));
-        }
-
-        return Attempt::result(
-            $io->files()->exists($path),
-        );
     }
 
     /**
