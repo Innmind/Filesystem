@@ -125,9 +125,9 @@ final class Filesystem implements Implementation
             })
             ->unwrap() // todo silently return an empty sequence ?
             ->list()
-            ->map(static fn($name) => match ($name->directory()) {
-                true => Name_\Directory::of(Name::of($name->toString())),
-                false => Name_\File::of(Name::of($name->toString())),
+            ->map(static fn($name) => match ($name->kind()) {
+                Files\Kind::directory => Name_\Directory::of(Name::of($name->toString())),
+                default => Name_\File::of(Name::of($name->toString())), // let the read function handle the links
             });
     }
 
