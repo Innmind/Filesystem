@@ -8,10 +8,12 @@ use Innmind\Filesystem\{
     File,
     File\Content,
     Name,
-    Directory,
     Exception\MountPathDoesntExist,
 };
-use Innmind\IO\IO;
+use Innmind\IO\{
+    IO,
+    Files,
+};
 use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
@@ -90,37 +92,27 @@ final class Filesystem implements Implementation
             ->under($parent)
             ->asPath($this->path);
 
-        if (Str::of($path->toString())->length() > \PHP_MAXPATHLEN) {
-            return Attempt::error(new \RuntimeException('Path too long'));
-        }
-
-        if ($this->io->files()->exists($directory)) {
-            return Attempt::result(Name_\Directory::of($name));
-        }
-
-        if (!$this->io->files()->exists($path)) {
-            return Attempt::error(new \RuntimeException('File not found'));
-        }
-
-        $file = File::of(
-            $name,
-            Content::atPath(
-                $this->io,
-                $path,
-            ),
-            $this
-                ->io
-                ->files()
-                ->mediaType($path)
-                ->maybe()
-                ->flatMap(MediaType::maybe(...))
-                ->match(
-                    static fn($mediaType) => $mediaType,
-                    static fn() => null,
+        return self::assert($path)
+            ->flatMap($this->io->files()->access(...))
+            ->flatMap(static fn($file) => match (true) {
+                $file instanceof Files\Link => Attempt::error(new \RuntimeException('Links are not supported')),
+                default => Attempt::result($file),
+            })
+            ->map(static fn($file) => match (true) {
+                $file instanceof Files\Directory => Name_\Directory::of($name),
+                default => File::of(
+                    $name,
+                    Content::io($file->read()),
+                    $file
+                        ->mediaType()
+                        ->maybe()
+                        ->flatMap(MediaType::maybe(...))
+                        ->match(
+                            static fn($mediaType) => $mediaType,
+                            static fn() => null,
+                        ),
                 ),
-        );
-
-        return Attempt::result($file);
+            });
     }
 
     #[\Override]
@@ -129,7 +121,13 @@ final class Filesystem implements Implementation
         return $this
             ->io
             ->files()
-            ->list($parent->asPath($this->path))
+            ->access($parent->asPath($this->path))
+            ->flatMap(static fn($file) => match (true) {
+                $file instanceof Files\Directory => Attempt::result($file),
+                default => Attempt::error(new \RuntimeException('Path is not a directory')),
+            })
+            ->unwrap() // todo silently return an empty sequence ?
+            ->list()
             ->map(static fn($name) => match ($name->directory()) {
                 true => Name_\Directory::of(Name::of($name->toString())),
                 false => Name_\File::of(Name::of($name->toString())),
