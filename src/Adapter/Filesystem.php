@@ -88,9 +88,6 @@ final class Filesystem implements Implementation
         $path = TreePath::of($name)
             ->under($parent)
             ->asPath($this->path);
-        $directory = TreePath::directory($name)
-            ->under($parent)
-            ->asPath($this->path);
 
         return self::assert($path)
             ->flatMap($this->io->files()->access(...))
@@ -167,27 +164,28 @@ final class Filesystem implements Implementation
             ->asPath($this->path);
 
         return self::assert($path)
-            ->map($this->io->files()->exists(...))
-            ->flatMap(function($exists) use ($parent, $name, $path) {
-                if ($exists && \is_dir($path->toString())) {
-                    return Attempt::result(SideEffect::identity);
-                }
-
-                if ($exists) {
-                    return $this
+            ->map($this->io->files()->access(...))
+            ->flatMap(fn($file) => $file->eitherWay(
+                fn($file) => match (true) {
+                    $file instanceof Files\Link => Attempt::error(new \RuntimeException('Links are not supported')),
+                    $file instanceof Files\Directory => Attempt::result($file),
+                    default => $this
                         ->remove($parent, $name)
                         ->flatMap(
                             fn() => $this
                                 ->io
                                 ->files()
                                 ->create($path),
-                        );
-                }
-
-                return $this
+                        ),
+                },
+                fn() => $this
                     ->io
                     ->files()
-                    ->create($path);
+                    ->create($path),
+            ))
+            ->flatMap(static fn($file) => match (true) {
+                $file instanceof Files\Directory => Attempt::result(SideEffect::identity),
+                default => Attempt::error(new \RuntimeException('File created instead of a directory')),
             });
     }
 
@@ -199,14 +197,13 @@ final class Filesystem implements Implementation
 
         return self::assert($absolutePath)
             ->flatMap($this->io->files()->create(...))
-            ->flatMap(
-                fn() => $this
-                    ->io
-                    ->files()
-                    ->write($absolutePath)
+            ->flatMap(static fn($file) => match (true) {
+                $file instanceof Files\Directory => Attempt::error(new \RuntimeException('Directory created instead of a file')),
+                default => $file
+                    ->write()
                     ->watch()
                     ->sink($chunks),
-            );
+            });
     }
 
     /**
