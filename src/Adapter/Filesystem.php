@@ -49,8 +49,9 @@ final class Filesystem implements Implementation
             ->map($io->files()->exists(...))
             ->flatMap(static fn($exist) => match ($exist) {
                 false => Attempt::error(new MountPathDoesntExist(
-                    static fn() => self::assert($path)
-                        ->flatMap($io->files()->create(...))
+                    static fn() => $io
+                        ->files()
+                        ->create($path)
                         ->map(static fn() => new self(
                             $io,
                             $path,
@@ -163,27 +164,32 @@ final class Filesystem implements Implementation
     #[\Override]
     public function createDirectory(TreePath $parent, Name $name): Attempt
     {
-        $path = TreePath::directory($name)->under($parent);
-        $absolutePath = $path->asPath($this->path);
+        $path = TreePath::directory($name)
+            ->under($parent)
+            ->asPath($this->path);
 
-        return $this
-            ->exists($path)
-            ->flatMap(function($exists) use ($parent, $name, $absolutePath) {
-                if ($exists && \is_dir($absolutePath->toString())) {
+        return self::assert($path)
+            ->map($this->io->files()->exists(...))
+            ->flatMap(function($exists) use ($parent, $name, $path) {
+                if ($exists && \is_dir($path->toString())) {
                     return Attempt::result(SideEffect::identity);
                 }
 
                 if ($exists) {
                     return $this
                         ->remove($parent, $name)
-                        ->flatMap(fn() => self::assert($absolutePath)->flatMap(
-                            $this->io->files()->create(...),
-                        ));
+                        ->flatMap(
+                            fn() => $this
+                                ->io
+                                ->files()
+                                ->create($path),
+                        );
                 }
 
-                return self::assert($absolutePath)->flatMap(
-                    $this->io->files()->create(...),
-                );
+                return $this
+                    ->io
+                    ->files()
+                    ->create($path);
             });
     }
 
