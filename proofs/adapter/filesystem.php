@@ -9,6 +9,10 @@ use Innmind\Filesystem\{
     CaseSensitivity,
     Recover,
 };
+use Innmind\IO\{
+    IO,
+    Simulation\Disk,
+};
 use Innmind\Url\Path;
 use Properties\Innmind\Filesystem\Adapter as PAdapter;
 use Innmind\BlackBox\Set;
@@ -80,4 +84,31 @@ return static function() {
             (new FS)->remove($path);
         },
     );
+
+    yield properties(
+        'Filesystem properties on simulated disk',
+        PAdapter::properties(),
+        Set::call(static fn() => Adapter::mount(
+            Path::of('/'),
+            CaseSensitivity::sensitive,
+            IO::simulation(
+                IO::fromAmbientAuthority(),
+                Disk::new(),
+            ),
+        )->unwrap()),
+    );
+
+    foreach (PAdapter::alwaysApplicable() as $property) {
+        yield property(
+            $property,
+            Set::call(static fn() => Adapter::mount(
+                Path::of('/'),
+                CaseSensitivity::sensitive,
+                IO::simulation(
+                    IO::fromAmbientAuthority(),
+                    Disk::new(),
+                ),
+            )->unwrap()),
+        )->named('Filesystem on simulated disk');
+    }
 };
