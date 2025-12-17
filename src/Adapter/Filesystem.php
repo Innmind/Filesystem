@@ -76,7 +76,7 @@ final class Filesystem implements Implementation
     }
 
     #[\Override]
-    public function read(
+    public function access(
         TreePath $parent,
         Name_\File|Name_\Directory|Name_\Unknown $name,
     ): Attempt {

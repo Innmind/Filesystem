@@ -49,7 +49,7 @@ final class InMemory implements Implementation
     }
 
     #[\Override]
-    public function read(
+    public function access(
         TreePath $parent,
         Name_\File|Name_\Directory|Name_\Unknown $name,
     ): Attempt {
@@ -69,8 +69,8 @@ final class InMemory implements Implementation
         }
 
         return $this
-            ->read($parent, Name_\Directory::of($name->unwrap()))
-            ->recover(fn() => $this->read(
+            ->access($parent, Name_\Directory::of($name->unwrap()))
+            ->recover(fn() => $this->access(
                 $parent,
                 Name_\File::of($name->unwrap()),
             ));

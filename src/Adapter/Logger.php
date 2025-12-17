@@ -48,13 +48,13 @@ final class Logger implements Implementation
     }
 
     #[\Override]
-    public function read(
+    public function access(
         TreePath $parent,
         Name_\File|Name_\Directory|Name_\Unknown $name,
     ): Attempt {
         return $this
             ->implementation
-            ->read($parent, $name)
+            ->access($parent, $name)
             ->map(function($file) use ($parent, $name) {
                 $this->logger->debug('Accessing file {file}', [
                     'file' => self::path(TreePath::of($name->unwrap())->under($parent)),

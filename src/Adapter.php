@@ -96,7 +96,7 @@ final class Adapter
      */
     public function get(Name $file): Maybe
     {
-        return $this->read(
+        return $this->access(
             TreePath::root(),
             Name_\Unknown::of($file),
         );
@@ -127,7 +127,7 @@ final class Adapter
             $this
                 ->implementation
                 ->list($root)
-                ->map(fn($name) => $this->read($root, $name))
+                ->map(fn($name) => $this->access($root, $name))
                 ->flatMap(static fn($read) => $read->toSequence()),
         );
     }
@@ -135,7 +135,7 @@ final class Adapter
     /**
      * @return Maybe<File|Directory>
      */
-    private function read(
+    private function access(
         TreePath $path,
         Name_\File|Name_\Directory|Name_\Unknown $name,
     ): Maybe {
@@ -143,7 +143,7 @@ final class Adapter
 
         return $this
             ->implementation
-            ->read($path, $name)
+            ->access($path, $name)
             ->maybe()
             ->map(fn($file) => match (true) {
                 $file instanceof File => $file,
@@ -152,7 +152,7 @@ final class Adapter
                     $this
                         ->implementation
                         ->list(TreePath::directory($name->unwrap())->under($path))
-                        ->map(fn($file) => $this->read(
+                        ->map(fn($file) => $this->access(
                             $fullPath,
                             $file,
                         ))
