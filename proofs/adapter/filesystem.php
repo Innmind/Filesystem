@@ -85,30 +85,32 @@ return static function() {
         },
     );
 
-    yield properties(
-        'Filesystem properties on simulated disk',
-        PAdapter::properties(),
-        Set::call(static fn() => Adapter::mount(
-            Path::of('/'),
-            CaseSensitivity::sensitive,
-            IO::simulation(
-                IO::fromAmbientAuthority(),
-                Disk::new(),
-            ),
-        )->unwrap()),
-    );
-
-    foreach (PAdapter::alwaysApplicable() as $property) {
-        yield property(
-            $property,
+    foreach (CaseSensitivity::cases() as $case) {
+        yield properties(
+            'Filesystem properties on simulated disk',
+            PAdapter::properties(),
             Set::call(static fn() => Adapter::mount(
                 Path::of('/'),
-                CaseSensitivity::sensitive,
+                $case,
                 IO::simulation(
                     IO::fromAmbientAuthority(),
                     Disk::new(),
                 ),
             )->unwrap()),
-        )->named('Filesystem on simulated disk');
+        );
+
+        foreach (PAdapter::alwaysApplicable() as $property) {
+            yield property(
+                $property,
+                Set::call(static fn() => Adapter::mount(
+                    Path::of('/'),
+                    $case,
+                    IO::simulation(
+                        IO::fromAmbientAuthority(),
+                        Disk::new(),
+                    ),
+                )->unwrap()),
+            )->named('Filesystem on simulated disk');
+        }
     }
 };
