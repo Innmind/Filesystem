@@ -4,12 +4,12 @@
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
+    Adapter,
     Name,
 };
 use Innmind\Url\Path;
 
-$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$filesystem = Adapter::mount(Path::of('/var/data/'))->unwrap();
 $_ = $filesystem
     ->remove(Name::of('some file'))
     ->unwrap();
@@ -21,14 +21,14 @@ If the file doesn't exist it will do nothing and if the name corresponds to a di
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
+    Adapter,
     Name,
     Directory,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\Predicate\Instance;
 
-$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$filesystem = Adapter::mount(Path::of('/var/data/'))->unwrap();
 $filesystem
     ->get(Name::of('some directory'))
     ->keep(Instance::of(Directory::class)) //(1)

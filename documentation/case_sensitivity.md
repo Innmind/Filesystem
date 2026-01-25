@@ -12,14 +12,16 @@ If you're dealing with a case insensitive filesystem then you need to specify it
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
+    Adapter,
     CaseSensitivity,
 };
 use Innmind\Url\Path;
 
-$adapter = Filesystem::mount(Path::of('somewhere/'))
-    ->withCaseSensitivity(CaseSensitivity::insensitive);
-$adapter instanceof Filesystem; // true, use $adapter as usual
+$adapter = Adapter::mount(
+    Path::of('somewhere/'),
+    CaseSensitivity::insensitive,
+)->unwrap()
+$adapter instanceof Adapter; // true, use $adapter as usual
 ```
 
 !!! tip ""

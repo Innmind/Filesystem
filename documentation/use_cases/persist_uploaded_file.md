@@ -5,14 +5,14 @@ use Innmind\Filesystem\{
     File,
     File\Content,
     Directory,
-    Adapter\Filesystem,
+    Adapter,
     Name,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\Predicate\Instance;
 
-$tmp = Filesystem::mount(Path::of(\dirname($_FILES['my_upload']['tmp_name'])));
-$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$tmp = Adapter::mount(Path::of(\dirname($_FILES['my_upload']['tmp_name'])))->unwrap();
+$filesystem = Adapter::mount(Path::of('/var/data/'))->unwrap();
 
 $_ = $tmp
     ->get(Name::of(\basename($_FILES['my_upload']['tmp_name'])))
