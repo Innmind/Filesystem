@@ -110,7 +110,7 @@ final class Chunks implements Implementation
     {
         return $this
             ->chunks
-            ->fold(new Concat)
+            ->fold(Concat::monoid)
             ->toString();
     }
 

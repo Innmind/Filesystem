@@ -90,7 +90,7 @@ final class TreePath
             ->path
             ->reverse()
             ->map(static fn($name) => $name->str()->append('/'))
-            ->fold(new Concat);
+            ->fold(Concat::monoid);
 
         if (!$this->directory) {
             $path = $path->dropEnd(1); // remove trailing '/'
