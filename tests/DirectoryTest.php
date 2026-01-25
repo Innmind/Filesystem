@@ -186,14 +186,14 @@ class DirectoryTest extends TestCase
         $this->assertSame('foobar', $files->toList()[1]->name()->toString());
     }
 
-    public function testDirectoryLoadedWithDifferentFilesWithTheSameNameThrows()
+    public function testDirectoryLoadedWithDifferentFilesWithTheSameNameThrows(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 FName::any(),
                 FName::any(),
             )
-            ->then(function($directory, $file) {
+            ->prove(function($directory, $file) {
                 $this->expectException(\LogicException::class);
                 $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
 
@@ -207,14 +207,14 @@ class DirectoryTest extends TestCase
             });
     }
 
-    public function testNamedDirectoryLoadedWithDifferentFilesWithTheSameNameThrows()
+    public function testNamedDirectoryLoadedWithDifferentFilesWithTheSameNameThrows(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 FName::any(),
                 FName::any(),
             )
-            ->then(function($directory, $file) {
+            ->prove(function($directory, $file) {
                 $this->expectException(\LogicException::class);
                 $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
 
@@ -228,11 +228,11 @@ class DirectoryTest extends TestCase
             });
     }
 
-    public function testLazyLoadingADirectoryDoesntLoadFiles()
+    public function testLazyLoadingADirectoryDoesntLoadFiles(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(FName::any())
-            ->then(function($name) {
+            ->prove(function($name) {
                 $this->assertInstanceOf(
                     Directory::class,
                     Directory::lazy(

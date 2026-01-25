@@ -355,9 +355,9 @@ class FilesystemTest extends TestCase
         ))->unwrap();
     }
 
-    public function testPersistedNameCanStartWithAnyAsciiCharacter()
+    public function testPersistedNameCanStartWithAnyAsciiCharacter(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Set::either(
                     Set::integers()->between(1, 46),
@@ -365,7 +365,7 @@ class FilesystemTest extends TestCase
                 ),
                 Set::strings(),
             )
-            ->then(function($ord, $content) {
+            ->prove(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
 
@@ -390,9 +390,9 @@ class FilesystemTest extends TestCase
             });
     }
 
-    public function testPersistedNameCanContainWithAnyAsciiCharacter()
+    public function testPersistedNameCanContainWithAnyAsciiCharacter(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Set::either(
                     Set::integers()->between(1, 46),
@@ -400,7 +400,7 @@ class FilesystemTest extends TestCase
                 ),
                 Set::strings(),
             )
-            ->then(function($ord, $content) {
+            ->prove(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
 
@@ -425,9 +425,9 @@ class FilesystemTest extends TestCase
             });
     }
 
-    public function testPersistedNameCanContainOnlyOneAsciiCharacter()
+    public function testPersistedNameCanContainOnlyOneAsciiCharacter(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Set::either(
                     Set::integers()->between(1, 8),
@@ -437,7 +437,7 @@ class FilesystemTest extends TestCase
                 ),
                 Set::strings(),
             )
-            ->then(function($ord, $content) {
+            ->prove(function($ord, $content) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
 
@@ -502,11 +502,11 @@ class FilesystemTest extends TestCase
         );
     }
 
-    public function testDotFilesAreListed()
+    public function testDotFilesAreListed(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(FName::strings()->prefixedBy('.'))
-            ->then(function($name) {
+            ->prove(function($name) {
                 $path = \sys_get_temp_dir().'/innmind/filesystem/';
                 (new FS)->remove($path);
                 (new FS)->mkdir($path);
