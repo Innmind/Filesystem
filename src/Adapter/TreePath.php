@@ -98,26 +98,4 @@ final class TreePath
 
         return $root->resolve(Path::of($path->toString()));
     }
-
-    /**
-     * @template R
-     *
-     * @param callable(Name, self, bool): R $file
-     * @param callable(): R $root
-     *
-     * @return R
-     */
-    public function match(
-        callable $file,
-        callable $root,
-    ): mixed {
-        return $this->path->match(
-            fn($name, $parent) => $file(
-                $name,
-                new self($parent, true), // since there's a child the parent is necessarily a directory
-                $this->directory,
-            ),
-            $root,
-        );
-    }
 }
