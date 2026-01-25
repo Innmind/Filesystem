@@ -15,6 +15,7 @@ final class Recover
     /**
      * @return Attempt<Adapter>
      */
+    #[\NoDiscard]
     public static function mount(\Throwable $e): Attempt
     {
         return match (true) {

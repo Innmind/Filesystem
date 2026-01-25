@@ -22,6 +22,7 @@ final class RecoverMount extends \RuntimeException
     /**
      * @return Attempt<Adapter>
      */
+    #[\NoDiscard]
     public function recover(): Attempt
     {
         return ($this->recover)();

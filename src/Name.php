@@ -54,16 +54,19 @@ final class Name
      *
      * @throws \DomainException
      */
+    #[\NoDiscard]
     public static function of(string $value): self
     {
         return new self($value);
     }
 
+    #[\NoDiscard]
     public function equals(self $name): bool
     {
         return $this->value === $name->value;
     }
 
+    #[\NoDiscard]
     public function str(): Str
     {
         return Str::of($this->value);
@@ -72,6 +75,7 @@ final class Name
     /**
      * @return non-empty-string
      */
+    #[\NoDiscard]
     public function toString(): string
     {
         return $this->value;

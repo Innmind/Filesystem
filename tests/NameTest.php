@@ -29,7 +29,7 @@ class NameTest extends TestCase
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('A file name can\'t contain a slash, foo/bar given');
 
-        Name::of('foo/bar');
+        $_ = Name::of('foo/bar');
     }
 
     public function testEquals()
@@ -43,7 +43,7 @@ class NameTest extends TestCase
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('A file name can\'t be empty');
 
-        Name::of('');
+        $_ = Name::of('');
     }
 
     public function testAcceptsAnyValueNotContainingASlash()
@@ -69,7 +69,7 @@ class NameTest extends TestCase
             ->then(function($a, $b) {
                 $this->expectException(\DomainException::class);
 
-                Name::of("$a/$b");
+                $_ = Name::of("$a/$b");
             });
     }
 
@@ -110,7 +110,7 @@ class NameTest extends TestCase
             ->forAll(Set::of('.', '..'))
             ->then(function($name) {
                 try {
-                    Name::of($name);
+                    $_ = Name::of($name);
 
                     $this->fail('it should throw');
                 } catch (\DomainException $e) {
@@ -123,7 +123,7 @@ class NameTest extends TestCase
     {
         $this->expectException(\DomainException::class);
 
-        Name::of('a'.\chr(0).'a');
+        $_ = Name::of('a'.\chr(0).'a');
     }
 
     public function testNamesLongerThan255AreNotAccepted()
@@ -143,7 +143,7 @@ class NameTest extends TestCase
             )
             ->then(function($name) {
                 try {
-                    Name::of($name);
+                    $_ = Name::of($name);
 
                     $this->fail('it should throw');
                 } catch (\Throwable $e) {
@@ -161,7 +161,7 @@ class NameTest extends TestCase
             ))
             ->then(function($ord) {
                 try {
-                    Name::of(\chr($ord));
+                    $_ = Name::of(\chr($ord));
 
                     $this->fail('it should throw');
                 } catch (\DomainException $e) {

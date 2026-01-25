@@ -31,7 +31,7 @@ final class ForeachExposeAllLines implements Property
     public function ensureHeldBy(Assert $assert, object $systemUnderTest): object
     {
         $count = 0;
-        $systemUnderTest->foreach(static function($line) use ($assert, &$count) {
+        $_ = $systemUnderTest->foreach(static function($line) use ($assert, &$count) {
             $assert->object($line)->instance(Line::class);
             $count++;
         });

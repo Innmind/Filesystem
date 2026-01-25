@@ -27,7 +27,7 @@ final class ContainsMethodAlwaysReturnTrueForFilesInTheDirectory implements Prop
 
     public function ensureHeldBy(Assert $assert, object $directory): object
     {
-        $directory->foreach(static function($file) use ($assert, $directory) {
+        $_ = $directory->foreach(static function($file) use ($assert, $directory) {
             $assert->true($directory->contains($file->name()));
         });
 

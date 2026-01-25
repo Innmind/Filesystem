@@ -95,7 +95,7 @@ return static function() {
             ));
 
             $count = 0;
-            $content->foreach(static function() use (&$count) {
+            $_ = $content->foreach(static function() use (&$count) {
                 $count++;
             });
 

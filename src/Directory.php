@@ -31,6 +31,7 @@ final class Directory
      *
      * @param Sequence<File|self>|null $files
      */
+    #[\NoDiscard]
     public static function of(Name $name, ?Sequence $files = null): self
     {
         return new self(
@@ -46,6 +47,7 @@ final class Directory
      * @param non-empty-string $name
      * @param Sequence<File|self>|null $files
      */
+    #[\NoDiscard]
     public static function named(string $name, ?Sequence $files = null): self
     {
         return new self(
@@ -61,6 +63,7 @@ final class Directory
      *
      * @param Sequence<File|self> $files
      */
+    #[\NoDiscard]
     public static function lazy(Name $name, Sequence $files): self
     {
         // we prevent the contrusctor from checking for duplicates when
@@ -71,11 +74,13 @@ final class Directory
         return new self($name, $files, Set::of());
     }
 
+    #[\NoDiscard]
     public function name(): Name
     {
         return $this->name;
     }
 
+    #[\NoDiscard]
     public function rename(Name $name): self
     {
         return new self(
@@ -85,6 +90,7 @@ final class Directory
         );
     }
 
+    #[\NoDiscard]
     public function add(File|self $file): self
     {
         return new self(
@@ -100,11 +106,13 @@ final class Directory
     /**
      * @return Maybe<File|self>
      */
+    #[\NoDiscard]
     public function get(Name $name): Maybe
     {
         return $this->files->find(static fn($file) => $file->name()->equals($name));
     }
 
+    #[\NoDiscard]
     public function contains(Name $name): bool
     {
         return $this->get($name)->match(
@@ -113,6 +121,7 @@ final class Directory
         );
     }
 
+    #[\NoDiscard]
     public function remove(Name $name): self
     {
         return new self(
@@ -125,6 +134,7 @@ final class Directory
     /**
      * @param callable(File|self): void $function
      */
+    #[\NoDiscard]
     public function foreach(callable $function): SideEffect
     {
         return $this->files->foreach($function);
@@ -133,6 +143,7 @@ final class Directory
     /**
      * @param callable(File|self): bool $predicate
      */
+    #[\NoDiscard]
     public function filter(callable $predicate): self
     {
         // it is safe to not check for duplicates here as either the current
@@ -150,6 +161,7 @@ final class Directory
     /**
      * @param callable(File|self): File $map
      */
+    #[\NoDiscard]
     public function map(callable $map): self
     {
         return new self(
@@ -162,6 +174,7 @@ final class Directory
     /**
      * @param callable(File|self): self $map
      */
+    #[\NoDiscard]
     public function flatMap(callable $map): self
     {
         /** @var callable(File|self): Sequence<File|self> */
@@ -182,6 +195,7 @@ final class Directory
      *
      * @return R
      */
+    #[\NoDiscard]
     public function reduce($carry, callable $reducer)
     {
         return $this->files->reduce($carry, $reducer);
@@ -195,6 +209,7 @@ final class Directory
      *
      * @return Set<Name>
      */
+    #[\NoDiscard]
     public function removed(): Set
     {
         return $this->removed;
@@ -203,6 +218,7 @@ final class Directory
     /**
      * @return Sequence<File|self>
      */
+    #[\NoDiscard]
     public function all(): Sequence
     {
         return $this->files;

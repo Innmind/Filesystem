@@ -31,6 +31,7 @@ final class Content
     /**
      * @psalm-pure
      */
+    #[\NoDiscard]
     public static function io(Stream|Read $io): self
     {
         return new self(Content\IO::of($io));
@@ -41,6 +42,7 @@ final class Content
      *
      * This method is to be used with sockets that can't be read twice
      */
+    #[\NoDiscard]
     public static function oneShot(Stream $io): self
     {
         return new self(Content\OneShot::of($io));
@@ -51,6 +53,7 @@ final class Content
      *
      * @param Sequence<Str> $chunks
      */
+    #[\NoDiscard]
     public static function ofChunks(Sequence $chunks): self
     {
         return new self(Content\Chunks::of($chunks));
@@ -61,6 +64,7 @@ final class Content
      *
      * @param Sequence<Line> $lines
      */
+    #[\NoDiscard]
     public static function ofLines(Sequence $lines): self
     {
         return new self(Content\Lines::of($lines));
@@ -69,6 +73,7 @@ final class Content
     /**
      * @psalm-pure
      */
+    #[\NoDiscard]
     public static function ofString(string $content): self
     {
         return self::ofLines(
@@ -81,6 +86,7 @@ final class Content
     /**
      * @psalm-pure
      */
+    #[\NoDiscard]
     public static function none(): self
     {
         return new self(Content\Lines::of(Sequence::of(Line::of(Str::of('')))));
@@ -89,6 +95,7 @@ final class Content
     /**
      * @param callable(Line): void $function
      */
+    #[\NoDiscard]
     public function foreach(callable $function): SideEffect
     {
         return $this->implementation->foreach($function);
@@ -97,6 +104,7 @@ final class Content
     /**
      * @param callable(Line): Line $map
      */
+    #[\NoDiscard]
     public function map(callable $map): self
     {
         return new self($this->implementation->map($map));
@@ -105,6 +113,7 @@ final class Content
     /**
      * @param callable(Line): self $map
      */
+    #[\NoDiscard]
     public function flatMap(callable $map): self
     {
         return new self($this->implementation->flatMap($map));
@@ -113,6 +122,7 @@ final class Content
     /**
      * @param callable(Line): bool $filter
      */
+    #[\NoDiscard]
     public function filter(callable $filter): self
     {
         return new self($this->implementation->filter($filter));
@@ -121,6 +131,7 @@ final class Content
     /**
      * @return Sequence<Line>
      */
+    #[\NoDiscard]
     public function lines(): Sequence
     {
         return $this->implementation->lines();
@@ -129,6 +140,7 @@ final class Content
     /**
      * @return Sequence<Str>
      */
+    #[\NoDiscard]
     public function chunks(): Sequence
     {
         return $this->implementation->chunks();
@@ -142,6 +154,7 @@ final class Content
      *
      * @return T
      */
+    #[\NoDiscard]
     public function reduce($carry, callable $reducer)
     {
         return $this->implementation->reduce($carry, $reducer);
@@ -150,11 +163,13 @@ final class Content
     /**
      * @return Maybe<Size>
      */
+    #[\NoDiscard]
     public function size(): Maybe
     {
         return $this->implementation->size();
     }
 
+    #[\NoDiscard]
     public function toString(): string
     {
         return $this->implementation->toString();

@@ -42,6 +42,7 @@ final class Adapter
     /**
      * @return Attempt<self>
      */
+    #[\NoDiscard]
     public static function mount(
         Path $path,
         CaseSensitivity $case = CaseSensitivity::sensitive,
@@ -65,6 +66,7 @@ final class Adapter
             });
     }
 
+    #[\NoDiscard]
     public static function inMemory(): self
     {
         return new self(
@@ -73,6 +75,7 @@ final class Adapter
         );
     }
 
+    #[\NoDiscard]
     public static function logger(
         self $adapter,
         LoggerInterface $logger,
@@ -86,6 +89,7 @@ final class Adapter
     /**
      * @return Attempt<SideEffect>
      */
+    #[\NoDiscard]
     public function add(File|Directory $file): Attempt
     {
         return $this->write(TreePath::root(), $file);
@@ -94,6 +98,7 @@ final class Adapter
     /**
      * @return Maybe<File|Directory>
      */
+    #[\NoDiscard]
     public function get(Name $file): Maybe
     {
         return $this->access(
@@ -102,6 +107,7 @@ final class Adapter
         );
     }
 
+    #[\NoDiscard]
     public function contains(Name $file): bool
     {
         return $this->implementation->exists(TreePath::of($file))->match(
@@ -113,11 +119,13 @@ final class Adapter
     /**
      * @return Attempt<SideEffect>
      */
+    #[\NoDiscard]
     public function remove(Name $file): Attempt
     {
         return $this->implementation->remove(TreePath::root(), $file);
     }
 
+    #[\NoDiscard]
     public function root(): Directory
     {
         $root = TreePath::root();
