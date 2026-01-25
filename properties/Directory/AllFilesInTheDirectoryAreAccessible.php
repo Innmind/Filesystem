@@ -27,7 +27,7 @@ final class AllFilesInTheDirectoryAreAccessible implements Property
 
     public function ensureHeldBy(Assert $assert, object $directory): object
     {
-        $directory->foreach(static function($file) use ($assert, $directory) {
+        $_ = $directory->foreach(static function($file) use ($assert, $directory) {
             $assert->same(
                 $file->name(),
                 $directory->get($file->name())->match(

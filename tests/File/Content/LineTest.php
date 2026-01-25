@@ -24,7 +24,7 @@ class LineTest extends TestCase
             )
             ->then(function($start, $end) {
                 try {
-                    Line::of(Str::of($start."\n".$end));
+                    $_ = Line::of(Str::of($start."\n".$end));
 
                     $this->fail('it should throw');
                 } catch (\Exception $e) {
@@ -83,7 +83,7 @@ class LineTest extends TestCase
                 $line = Line::of(Str::of($content));
 
                 try {
-                    $line->map(static fn($line) => $line->append("\n"));
+                    $_ = $line->map(static fn($line) => $line->append("\n"));
 
                     $this->fail('it should throw');
                 } catch (\Exception $e) {

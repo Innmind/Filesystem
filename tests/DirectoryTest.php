@@ -197,7 +197,7 @@ class DirectoryTest extends TestCase
                 $this->expectException(\LogicException::class);
                 $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
 
-                Directory::of(
+                $_ = Directory::of(
                     $directory,
                     Sequence::of(
                         File::named($file->toString(), Content::none()),
@@ -218,7 +218,7 @@ class DirectoryTest extends TestCase
                 $this->expectException(\LogicException::class);
                 $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
 
-                Directory::named(
+                $_ = Directory::named(
                     $directory->toString(),
                     Sequence::of(
                         File::named($file->toString(), Content::none()),
