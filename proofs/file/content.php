@@ -218,7 +218,7 @@ return static function() {
                 \file_get_contents('LICENSE'),
                 $content
                     ->chunks()
-                    ->fold(new Concat)
+                    ->fold(Concat::monoid)
                     ->toString(),
             );
         },
