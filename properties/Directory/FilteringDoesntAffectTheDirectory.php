@@ -30,9 +30,9 @@ final class FilteringDoesntAffectTheDirectory implements Property
         $all = $directory->filter(static fn(): bool => true);
         $none = $directory->filter(static fn(): bool => false);
 
-        $directory->foreach(static fn($file) => $assert->false($none->contains($file->name())));
-        $directory->foreach(static fn($file) => $assert->true($all->contains($file->name())));
-        $all->foreach(static fn($file) => $assert->true($directory->contains($file->name())));
+        $_ = $directory->foreach(static fn($file) => $assert->false($none->contains($file->name())));
+        $_ = $directory->foreach(static fn($file) => $assert->true($all->contains($file->name())));
+        $_ = $all->foreach(static fn($file) => $assert->true($directory->contains($file->name())));
         $assert->same($directory->removed(), $all->removed());
         $assert->same($directory->removed(), $none->removed());
 

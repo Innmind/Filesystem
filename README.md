@@ -24,7 +24,7 @@ use Innmind\Filesystem\{
     File,
     File\Content,
     Directory,
-    Adapter\Filesystem,
+    Adapter,
 };
 use Innmind\Url\Path;
 
@@ -34,7 +34,7 @@ $directory = Directory::named('uploads')->add(
         Content::ofString(\file_get_contents($_FILES['my_upload']['tmp_name'])),
     ),
 );
-$adapter = Filesystem::mount(Path::of('/var/www/web/'));
+$adapter = Adapter::mount(Path::of('/var/www/web/'))->unwrap();
 $_ = $adapter
     ->add($directory)
     ->unwrap();
@@ -42,6 +42,5 @@ $_ = $adapter
 
 This example show you how you can create a new directory `uploads` in the folder `/var/www/web/` of your filesystem and create the uploaded file into it.
 
-**Note**: For performance reasons the filesystem adapter only persist to disk the files that have changed (achievable via the immutable nature of file objects).
-
-All adapters implements [`Adapter`](src/Adapter.php), so you can easily replace them; especially for unit tests, that's why the library comes with an [`InMemory`](src/Adapter/InMemory.php) adapter that only keeps the files into memory so you won't mess up your file system.
+> [!NOTE]
+> For performance reasons the filesystem adapter only persist to disk the files that have changed (achievable via the immutable nature of file objects).

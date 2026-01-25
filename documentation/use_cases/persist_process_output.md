@@ -6,14 +6,14 @@ This example uses the [`innmind/operating-system`](https://packagist.org/package
 use Innmind\Filesystem\{
     File,
     File\Content,
-    Adapter\Filesystem,
+    Adapter,
 };
 use Innmind\OperatingSystem\Factory;
 use Innmind\Server\Control\Server\Command;
 use Innmind\Url\Path;
 
 $os = Factory::build();
-$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$filesystem = Adapter::mount(Path::of('/var/data/'))->unwrap();
 $fileContent = Content::ofChunks(
     $os
         ->control()

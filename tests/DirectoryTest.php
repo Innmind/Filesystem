@@ -8,7 +8,6 @@ use Innmind\Filesystem\{
     File,
     Name,
     File\Content,
-    Exception\DuplicatedFile,
 };
 use Innmind\Immutable\{
     Set,
@@ -51,8 +50,8 @@ class DirectoryTest extends TestCase
         $this->assertInstanceOf(Directory::class, $d2);
         $this->assertNotSame($d, $d2);
         $this->assertSame($d->name(), $d2->name());
-        $this->assertSame(0, $d->removed()->count());
-        $this->assertSame(0, $d2->removed()->count());
+        $this->assertSame(0, $d->removed()->size());
+        $this->assertSame(0, $d2->removed()->size());
         $this->assertFalse($d->contains($file->name()));
         $this->assertTrue($d2->contains($file->name()));
         $this->assertSame($file, $d2->get($file->name())->match(
@@ -106,8 +105,8 @@ class DirectoryTest extends TestCase
         $this->assertInstanceOf(Directory::class, $d2);
         $this->assertNotSame($d, $d2);
         $this->assertSame($d->name(), $d2->name());
-        $this->assertSame(0, $d->removed()->count());
-        $this->assertSame(1, $d2->removed()->count());
+        $this->assertSame(0, $d->removed()->size());
+        $this->assertSame(1, $d2->removed()->size());
         $this->assertSame(
             'bar',
             $d2
@@ -187,18 +186,18 @@ class DirectoryTest extends TestCase
         $this->assertSame('foobar', $files->toList()[1]->name()->toString());
     }
 
-    public function testDirectoryLoadedWithDifferentFilesWithTheSameNameThrows()
+    public function testDirectoryLoadedWithDifferentFilesWithTheSameNameThrows(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 FName::any(),
                 FName::any(),
             )
-            ->then(function($directory, $file) {
-                $this->expectException(DuplicatedFile::class);
+            ->prove(function($directory, $file) {
+                $this->expectException(\LogicException::class);
                 $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
 
-                Directory::of(
+                $_ = Directory::of(
                     $directory,
                     Sequence::of(
                         File::named($file->toString(), Content::none()),
@@ -208,18 +207,18 @@ class DirectoryTest extends TestCase
             });
     }
 
-    public function testNamedDirectoryLoadedWithDifferentFilesWithTheSameNameThrows()
+    public function testNamedDirectoryLoadedWithDifferentFilesWithTheSameNameThrows(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 FName::any(),
                 FName::any(),
             )
-            ->then(function($directory, $file) {
-                $this->expectException(DuplicatedFile::class);
+            ->prove(function($directory, $file) {
+                $this->expectException(\LogicException::class);
                 $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
 
-                Directory::named(
+                $_ = Directory::named(
                     $directory->toString(),
                     Sequence::of(
                         File::named($file->toString(), Content::none()),
@@ -229,11 +228,11 @@ class DirectoryTest extends TestCase
             });
     }
 
-    public function testLazyLoadingADirectoryDoesntLoadFiles()
+    public function testLazyLoadingADirectoryDoesntLoadFiles(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(FName::any())
-            ->then(function($name) {
+            ->prove(function($name) {
                 $this->assertInstanceOf(
                     Directory::class,
                     Directory::lazy(

@@ -17,7 +17,6 @@ nav:
   - Case sensitivity: case_sensitivity.md
   - Testing:
     - In your app: testing/in_app.md
-    - Your own adapter: testing/own_adapter.md
 
 theme:
   name: material

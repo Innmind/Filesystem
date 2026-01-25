@@ -27,15 +27,6 @@ return static function() {
             ),
         ],
         [
-            'Content::atPath()',
-            Set::of('LICENSE', 'CHANGELOG.md', 'composer.json')
-                ->map(Path::of(...))
-                ->map(static fn($path) => Model::atPath(
-                    $io,
-                    $path,
-                )),
-        ],
-        [
             'Content::io()',
             Set::of('LICENSE', 'CHANGELOG.md', 'composer.json')
                 ->map(static fn($path) => Model::io(
@@ -104,7 +95,7 @@ return static function() {
             ));
 
             $count = 0;
-            $content->foreach(static function() use (&$count) {
+            $_ = $content->foreach(static function() use (&$count) {
                 $count++;
             });
 
@@ -227,7 +218,7 @@ return static function() {
                 \file_get_contents('LICENSE'),
                 $content
                     ->chunks()
-                    ->fold(new Concat)
+                    ->fold(Concat::monoid)
                     ->toString(),
             );
         },
@@ -262,10 +253,12 @@ return static function() {
     yield test(
         'Content::ofChunks()->size() does not load the whole file in memory',
         static function($assert) use ($io) {
-            $atPath = Model::atPath(
-                $io,
-                Path::of('samples/sample.pdf'),
-            );
+            $atPath = $io
+                ->files()
+                ->access(Path::of('samples/sample.pdf'))
+                ->map(static fn($file) => $file->read())
+                ->map(Model::io(...))
+                ->unwrap();
             $content = Model::ofChunks($atPath->chunks());
 
             $assert

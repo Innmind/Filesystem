@@ -5,8 +5,6 @@ namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
     Adapter,
-    Adapter\Logger,
-    Adapter\InMemory,
     File,
     File\Content,
     Name,
@@ -21,8 +19,8 @@ class LoggerTest extends TestCase
     {
         $this->assertInstanceOf(
             Adapter::class,
-            Logger::psr(
-                InMemory::new(),
+            Adapter::logger(
+                Adapter::inMemory(),
                 new NullLogger,
             ),
         );
@@ -30,8 +28,8 @@ class LoggerTest extends TestCase
 
     public function testAdd()
     {
-        $adapter = Logger::psr(
-            $inner = InMemory::new(),
+        $adapter = Adapter::logger(
+            $inner = Adapter::inMemory(),
             new NullLogger,
         );
         $file = File::of(Name::of('foo'), Content::none());
@@ -47,13 +45,13 @@ class LoggerTest extends TestCase
 
     public function testGet()
     {
-        $adapter = Logger::psr(
-            $inner = InMemory::new(),
+        $adapter = Adapter::logger(
+            $inner = Adapter::inMemory(),
             new NullLogger,
         );
         $name = Name::of('foo');
         $file = File::of($name, Content::none());
-        $inner
+        $_ = $inner
             ->add($file)
             ->unwrap();
 
@@ -68,12 +66,12 @@ class LoggerTest extends TestCase
 
     public function testContains()
     {
-        $adapter = Logger::psr(
-            $inner = InMemory::new(),
+        $adapter = Adapter::logger(
+            $inner = Adapter::inMemory(),
             new NullLogger,
         );
         $name = Name::of('foo');
-        $inner
+        $_ = $inner
             ->add(File::of($name, Content::none()))
             ->unwrap();
 
@@ -82,12 +80,12 @@ class LoggerTest extends TestCase
 
     public function testRemove()
     {
-        $adapter = Logger::psr(
-            $inner = InMemory::new(),
+        $adapter = Adapter::logger(
+            $inner = Adapter::inMemory(),
             new NullLogger,
         );
         $name = Name::of('foo');
-        $inner
+        $_ = $inner
             ->add(File::of($name, Content::none()))
             ->unwrap();
 
@@ -102,15 +100,15 @@ class LoggerTest extends TestCase
 
     public function testRoot()
     {
-        $adapter = Logger::psr(
-            $inner = InMemory::new(),
+        $adapter = Adapter::logger(
+            $inner = Adapter::inMemory(),
             new NullLogger,
         );
         $file = File::named(
             'watev',
             Content::none(),
         );
-        $inner
+        $_ = $inner
             ->add($file)
             ->unwrap();
 

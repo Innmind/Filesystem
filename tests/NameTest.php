@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\Tests;
 
-use Innmind\Filesystem\{
-    Name,
-    Exception\DomainException,
-};
+use Innmind\Filesystem\Name;
 use Innmind\Url\Path;
 use Innmind\Immutable\Str;
 use Innmind\BlackBox\{
@@ -29,10 +26,10 @@ class NameTest extends TestCase
 
     public function testThrowWhenABuildingNameWithASlash()
     {
-        $this->expectException(DomainException::class);
+        $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('A file name can\'t contain a slash, foo/bar given');
 
-        Name::of('foo/bar');
+        $_ = Name::of('foo/bar');
     }
 
     public function testEquals()
@@ -43,46 +40,46 @@ class NameTest extends TestCase
 
     public function testEmptyNameIsNotAllowed()
     {
-        $this->expectException(DomainException::class);
+        $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('A file name can\'t be empty');
 
-        Name::of('');
+        $_ = Name::of('');
     }
 
-    public function testAcceptsAnyValueNotContainingASlash()
+    public function testAcceptsAnyValueNotContainingASlash(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Fixture::strings(),
             )
-            ->then(function($value) {
+            ->prove(function($value) {
                 $name = Name::of($value);
 
                 $this->assertSame($value, $name->toString());
             });
     }
 
-    public function testNameContainingASlashIsNotAccepted()
+    public function testNameContainingASlashIsNotAccepted(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Fixture::strings(),
                 Fixture::strings(),
             )
-            ->then(function($a, $b) {
-                $this->expectException(DomainException::class);
+            ->prove(function($a, $b) {
+                $this->expectException(\DomainException::class);
 
-                Name::of("$a/$b");
+                $_ = Name::of("$a/$b");
             });
     }
 
-    public function testNameEqualsItself()
+    public function testNameEqualsItself(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Fixture::strings(),
             )
-            ->then(function($value) {
+            ->prove(function($value) {
                 $name1 = Name::of($value);
                 $name2 = Name::of($value);
 
@@ -91,14 +88,14 @@ class NameTest extends TestCase
             });
     }
 
-    public function testNameDoesntEqualDifferentName()
+    public function testNameDoesntEqualDifferentName(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Fixture::strings(),
                 Fixture::strings(),
             )
-            ->then(function($a, $b) {
+            ->prove(function($a, $b) {
                 $name1 = Name::of($a);
                 $name2 = Name::of($b);
 
@@ -107,16 +104,16 @@ class NameTest extends TestCase
             });
     }
 
-    public function testDotFoldersAreNotAccepted()
+    public function testDotFoldersAreNotAccepted(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set::of('.', '..'))
-            ->then(function($name) {
+            ->prove(function($name) {
                 try {
-                    Name::of($name);
+                    $_ = Name::of($name);
 
                     $this->fail('it should throw');
-                } catch (DomainException $e) {
+                } catch (\DomainException $e) {
                     $this->assertSame("'.' and '..' can't be used", $e->getMessage());
                 }
             });
@@ -124,14 +121,14 @@ class NameTest extends TestCase
 
     public function testChr0IsNotAccepted()
     {
-        $this->expectException(DomainException::class);
+        $this->expectException(\DomainException::class);
 
-        Name::of('a'.\chr(0).'a');
+        $_ = Name::of('a'.\chr(0).'a');
     }
 
-    public function testNamesLongerThan255AreNotAccepted()
+    public function testNamesLongerThan255AreNotAccepted(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Set::sequence(
                     Set::of(
@@ -144,42 +141,42 @@ class NameTest extends TestCase
                     ->map(static fn(array $chrs): string => \implode('', $chrs))
                     ->filter(static fn(string $name): bool => $name !== '.' && $name !== '..'),
             )
-            ->then(function($name) {
+            ->prove(function($name) {
                 try {
-                    Name::of($name);
+                    $_ = Name::of($name);
 
                     $this->fail('it should throw');
                 } catch (\Throwable $e) {
-                    $this->assertInstanceOf(DomainException::class, $e);
+                    $this->assertInstanceOf(\DomainException::class, $e);
                 }
             });
     }
 
-    public function testNameWithOnlyWhiteSpacesIsNotAccepted()
+    public function testNameWithOnlyWhiteSpacesIsNotAccepted(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set::of(
                 32,
                 ...\range(9, 13),
             ))
-            ->then(function($ord) {
+            ->prove(function($ord) {
                 try {
-                    Name::of(\chr($ord));
+                    $_ = Name::of(\chr($ord));
 
                     $this->fail('it should throw');
-                } catch (DomainException $e) {
+                } catch (\DomainException $e) {
                     $this->assertTrue(true);
                 }
             });
     }
 
-    public function testAnySequenceOfNamesConstitutesAValidPath()
+    public function testAnySequenceOfNamesConstitutesAValidPath(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set::sequence(
                 Fixture::any(),
             )->between(1, 10)) // enough to prove the behaviour
-            ->then(function($names) {
+            ->prove(function($names) {
                 $strings = \array_map(
                     static fn($name) => $name->toString(),
                     $names,
@@ -193,20 +190,20 @@ class NameTest extends TestCase
             });
     }
 
-    public function testUnicodeCharactersAreAccepted()
+    public function testUnicodeCharactersAreAccepted(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set::strings()->unicode()->latinExtendedA())
-            ->then(function(string $name) {
+            ->prove(function(string $name) {
                 $this->assertInstanceOf(Name::class, Name::of($name));
             });
     }
 
-    public function testStr()
+    public function testStr(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Fixture::strings())
-            ->then(function($value) {
+            ->prove(function($value) {
                 $this->assertInstanceOf(Str::class, Name::of($value)->str());
                 $this->assertSame(
                     $value,

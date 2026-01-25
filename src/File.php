@@ -11,29 +11,23 @@ use Innmind\MediaType\MediaType;
  */
 final class File
 {
-    private Name $name;
-    private Content $content;
-    private MediaType $mediaType;
-
     private function __construct(
-        Name $name,
-        Content $content,
-        ?MediaType $mediaType = null,
+        private Name $name,
+        private Content $content,
+        private MediaType $mediaType,
     ) {
-        $this->name = $name;
-        $this->content = $content;
-        $this->mediaType = $mediaType ?? MediaType::null();
     }
 
     /**
      * @psalm-pure
      */
+    #[\NoDiscard]
     public static function of(
         Name $name,
         Content $content,
         ?MediaType $mediaType = null,
     ): self {
-        return new self($name, $content, $mediaType);
+        return new self($name, $content, $mediaType ?? MediaType::null());
     }
 
     /**
@@ -41,34 +35,40 @@ final class File
      *
      * @param non-empty-string $name
      */
+    #[\NoDiscard]
     public static function named(
         string $name,
         Content $content,
         ?MediaType $mediaType = null,
     ): self {
-        return new self(Name::of($name), $content, $mediaType);
+        return self::of(Name::of($name), $content, $mediaType);
     }
 
+    #[\NoDiscard]
     public function name(): Name
     {
         return $this->name;
     }
 
+    #[\NoDiscard]
     public function content(): Content
     {
         return $this->content;
     }
 
+    #[\NoDiscard]
     public function mediaType(): MediaType
     {
         return $this->mediaType;
     }
 
+    #[\NoDiscard]
     public function rename(Name $name): self
     {
         return new self($name, $this->content, $this->mediaType);
     }
 
+    #[\NoDiscard]
     public function withContent(Content $content, ?MediaType $mediaType = null): self
     {
         return new self(
@@ -81,6 +81,7 @@ final class File
     /**
      * @param callable(Content): Content $map
      */
+    #[\NoDiscard]
     public function mapContent(callable $map): self
     {
         /** @psalm-suppress ImpureFunctionCall */

@@ -4,7 +4,7 @@ Say you have a client that push csv files in an unstructured manner inside a FTP
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
+    Adapter,
     File,
     Directory,
 };
@@ -24,11 +24,12 @@ function flatten(File|Directory $file): Sequence
     return Sequence::of($file);
 }
 
-Filesystem::mount(Path::of('/path/to/ftp/directory/'))
+Adapter::mount(Path::of('/path/to/ftp/directory/'))
+    ->unwrap()
     ->root()
     ->all()
     ->flatMap(flatten(...))
     ->foreach(static fn(File $csv) => doYourStuff($csv));
 ```
 
-The advantage of this approach is that you can easily test the whole program behaviour by replacing the `Filesystem` adapter by a `InMemory` one.
+The advantage of this approach is that you can easily test the whole program behaviour by replacing the `Adapter::mount()` adapter by `Adapter::inMemory()`.

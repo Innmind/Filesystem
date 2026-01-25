@@ -4,13 +4,13 @@
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
+    Adapter,
     File,
     File\Content,
 };
 use Innmind\Url\Path;
 
-$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$filesystem = Adapter::mount(Path::of('/var/data/'))->unwrap();
 $_ = $filesystem
     ->add(File::named('some name'), Content::none())
     ->unwrap();
@@ -22,7 +22,7 @@ This is equivalent of running the cli command `touch '/var/data/some name'`.
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
+    Adapter,
     File,
     File\Content,
     File\Content\Line,
@@ -33,7 +33,7 @@ use Innmind\Immutable\{
     Str,
 };
 
-$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$filesystem = Adapter::mount(Path::of('/var/data/'))->unwrap();
 $_ = $filesystem
     ->add(File::named(
         'some name',
@@ -52,14 +52,14 @@ When the file is persisted the _end of line_ character will be automatically add
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
+    Adapter,
     File,
     File\Content,
     Directory,
 };
 use Innmind\Url\Path;
 
-$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$filesystem = Adapter::mount(Path::of('/var/data/'))->unwrap();
 $_ = $filesystem
     ->add(
         Directory::named('whatever')->add(

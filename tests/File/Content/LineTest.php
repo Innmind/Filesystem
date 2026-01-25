@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Filesystem\File\Content;
 
-use Innmind\Filesystem\{
-    File\Content\Line,
-    Exception\DomainException,
-};
+use Innmind\Filesystem\File\Content\Line;
 use Innmind\Immutable\Str;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -18,38 +15,38 @@ class LineTest extends TestCase
 {
     use BlackBox;
 
-    public function testDoesntAcceptNewLineDelimiter()
+    public function testDoesntAcceptNewLineDelimiter(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Set::strings()->unicode(),
                 Set::strings()->unicode(),
             )
-            ->then(function($start, $end) {
+            ->prove(function($start, $end) {
                 try {
-                    Line::of(Str::of($start."\n".$end));
+                    $_ = Line::of(Str::of($start."\n".$end));
 
                     $this->fail('it should throw');
                 } catch (\Exception $e) {
-                    $this->assertInstanceOf(DomainException::class, $e);
+                    $this->assertInstanceOf(\DomainException::class, $e);
                 }
             });
     }
 
-    public function testLineIsNotAltered()
+    public function testLineIsNotAltered(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll($this->strings())
-            ->then(function($content) {
+            ->prove(function($content) {
                 $this->assertSame($content, Line::of(Str::of($content))->toString());
             });
     }
 
-    public function testEndOfLineDelimiterIsRemovedAutomaticallyWhenReadingFromStream()
+    public function testEndOfLineDelimiterIsRemovedAutomaticallyWhenReadingFromStream(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set::strings()->unicode())
-            ->then(function($content) {
+            ->prove(function($content) {
                 $this->assertStringEndsNotWith(
                     "\n",
                     Line::fromStream(Str::of($content))->toString(),
@@ -57,14 +54,14 @@ class LineTest extends TestCase
             });
     }
 
-    public function testMap()
+    public function testMap(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 $this->strings(),
                 $this->strings(),
             )
-            ->then(function($original, $replacement) {
+            ->prove(function($original, $replacement) {
                 $line = Line::of(Str::of($original));
                 $mapped = $line->map(function($content) use ($original, $replacement) {
                     $this->assertSame($original, $content->toString());
@@ -78,19 +75,19 @@ class LineTest extends TestCase
             });
     }
 
-    public function testMappedLineCannotContainEndOfLineDelimiter()
+    public function testMappedLineCannotContainEndOfLineDelimiter(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll($this->strings())
-            ->then(function($content) {
+            ->prove(function($content) {
                 $line = Line::of(Str::of($content));
 
                 try {
-                    $line->map(static fn($line) => $line->append("\n"));
+                    $_ = $line->map(static fn($line) => $line->append("\n"));
 
                     $this->fail('it should throw');
                 } catch (\Exception $e) {
-                    $this->assertInstanceOf(DomainException::class, $e);
+                    $this->assertInstanceOf(\DomainException::class, $e);
                 }
             });
     }

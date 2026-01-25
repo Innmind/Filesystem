@@ -54,14 +54,14 @@ class FileTest extends TestCase
         $this->assertSame($mt, $f->mediaType());
     }
 
-    public function testContentIsNeverAltered()
+    public function testContentIsNeverAltered(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 FName::any(),
                 FMediaType::any(),
             )
-            ->then(function($name, $mediaType) {
+            ->prove(function($name, $mediaType) {
                 $file = File::of(
                     $name,
                     $content = Content::none(),
@@ -74,11 +74,11 @@ class FileTest extends TestCase
             });
     }
 
-    public function testByDefaultTheMediaTypeIsOctetStream()
+    public function testByDefaultTheMediaTypeIsOctetStream(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(FName::any())
-            ->then(function($name) {
+            ->prove(function($name) {
                 $file = File::of(
                     $name,
                     Content::none(),
@@ -91,14 +91,14 @@ class FileTest extends TestCase
             });
     }
 
-    public function testNamedConstructorNeverAltersTheContent()
+    public function testNamedConstructorNeverAltersTheContent(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 FName::any(),
                 FMediaType::any(),
             )
-            ->then(function($name, $mediaType) {
+            ->prove(function($name, $mediaType) {
                 $file = File::named(
                     $name->toString(),
                     $content = Content::none(),
@@ -111,14 +111,14 @@ class FileTest extends TestCase
             });
     }
 
-    public function testWithContent()
+    public function testWithContent(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 FName::any(),
                 FMediaType::any(),
             )
-            ->then(function($name, $mediaType) {
+            ->prove(function($name, $mediaType) {
                 $file = File::of(
                     $name,
                     $content = Content::none(),
@@ -133,14 +133,14 @@ class FileTest extends TestCase
             });
     }
 
-    public function testWithContentKeepsTheMediaTypeByDefault()
+    public function testWithContentKeepsTheMediaTypeByDefault(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 FName::any(),
                 FMediaType::any(),
             )
-            ->then(function($name, $mediaType) {
+            ->prove(function($name, $mediaType) {
                 $file = File::of(
                     $name,
                     Content::none(),
@@ -153,14 +153,14 @@ class FileTest extends TestCase
             });
     }
 
-    public function testRename()
+    public function testRename(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 FName::any(),
                 FName::any(),
             )
-            ->then(function($name1, $name2) {
+            ->prove(function($name1, $name2) {
                 $file1 = File::of(
                     $name1,
                     Content::none(),

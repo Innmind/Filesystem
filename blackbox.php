@@ -13,6 +13,10 @@ Application::new($argv)
     ->disableMemoryLimit() // because the generated trees can be quite large
     ->scenariiPerProof(20)
     ->when(
+        \getenv('BLACKBOX_SET_SIZE') !== false,
+        static fn(Application $app) => $app->scenariiPerProof((int) \getenv('BLACKBOX_SET_SIZE')),
+    )
+    ->when(
         \getenv('ENABLE_COVERAGE') !== false,
         static fn(Application $app) => $app
             ->codeCoverage(
@@ -26,9 +30,6 @@ Application::new($argv)
             )
             ->scenariiPerProof(1),
     )
-    ->when(
-        \method_exists(Application::class, 'allowProofsToNotMakeAnyAssertions'),
-        static fn($app) => $app->allowProofsToNotMakeAnyAssertions(),
-    )
+    ->allowProofsToNotMakeAnyAssertions()
     ->tryToProve(Load::everythingIn(__DIR__.'/proofs/'))
     ->exit();

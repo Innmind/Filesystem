@@ -4,7 +4,7 @@
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
+    Adapter,
     File,
     Name,
 };
@@ -19,7 +19,7 @@ $print = static function(File $file): void {
         });
 };
 
-$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$filesystem = Adapter::mount(Path::of('/var/data/'))->unwrap();
 $filesystem
     ->get(Name::of('some file'))
     ->keep(Instance::of(File::class))
@@ -35,7 +35,7 @@ This example will print each line to the screen, or nothing if the file doesn't 
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
+    Adapter,
     File,
     Name,
     Directory,
@@ -51,7 +51,7 @@ $print = static function(File $file): void {
         });
 };
 
-$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$filesystem = Adapter::mount(Path::of('/var/data/'))->unwrap();
 $filesystem
     ->get(Name::of('some directory'))
     ->keep(Instance::of(Directory::class)) //(1)

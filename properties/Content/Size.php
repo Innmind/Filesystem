@@ -28,12 +28,13 @@ final class Size implements Property
     public function ensureHeldBy(Assert $assert, object $systemUnderTest): object
     {
         $expected = \mb_strlen($systemUnderTest->toString(), 'ascii');
-        $systemUnderTest
+        $size = $systemUnderTest
             ->size()
             ->match(
-                static fn($size) => $assert->same($expected, $size->toInt()),
+                static fn($size) => $size->toInt(),
                 static fn() => null,
             );
+        $assert->same($expected, $size);
 
         return $systemUnderTest;
     }

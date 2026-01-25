@@ -53,7 +53,7 @@ final class RemoveAddRemoveModificationsDoesntAddTheFile implements Property
 
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        $adapter
+        $_ = $adapter
             ->add(
                 $this
                     ->directory

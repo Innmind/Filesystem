@@ -80,7 +80,7 @@ final class AddDirectory implements Property
         }
 
         if ($target instanceof Directory) {
-            $target->foreach(function($file) use ($assert, $source) {
+            $_ = $target->foreach(function($file) use ($assert, $source) {
                 $assert->true($source->contains($file->name()));
 
                 $this->assertSame(

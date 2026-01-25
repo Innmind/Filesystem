@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Filesystem\Exception\DomainException;
 use Innmind\Immutable\Str;
 
 /**
@@ -20,29 +19,29 @@ final class Name
     private function __construct(string $value)
     {
         if (Str::of($value)->empty()) {
-            throw new DomainException('A file name can\'t be empty');
+            throw new \DomainException('A file name can\'t be empty');
         }
 
         if (Str::of($value, Str\Encoding::ascii)->length() > 255) {
-            throw new DomainException($value);
+            throw new \DomainException($value);
         }
 
         if (Str::of($value)->contains('/')) {
-            throw new DomainException("A file name can't contain a slash, $value given");
+            throw new \DomainException("A file name can't contain a slash, $value given");
         }
 
         if (Str::of($value)->contains(\chr(0))) {
-            throw new DomainException("A file name can't contain the null control character, $value given");
+            throw new \DomainException("A file name can't contain the null control character, $value given");
         }
 
         // name with only _spaces_ are not accepted as it is not as valid path
         if (Str::of($value)->matches('~^\s+$~')) {
-            throw new DomainException($value);
+            throw new \DomainException($value);
         }
 
         if ($value === '.' || $value === '..') {
             // as they are special links on unix filesystems
-            throw new DomainException("'.' and '..' can't be used");
+            throw new \DomainException("'.' and '..' can't be used");
         }
 
         $this->value = $value;
@@ -53,18 +52,21 @@ final class Name
      *
      * @param non-empty-string $value
      *
-     * @throws DomainException
+     * @throws \DomainException
      */
+    #[\NoDiscard]
     public static function of(string $value): self
     {
         return new self($value);
     }
 
+    #[\NoDiscard]
     public function equals(self $name): bool
     {
         return $this->value === $name->value;
     }
 
+    #[\NoDiscard]
     public function str(): Str
     {
         return Str::of($this->value);
@@ -73,6 +75,7 @@ final class Name
     /**
      * @return non-empty-string
      */
+    #[\NoDiscard]
     public function toString(): string
     {
         return $this->value;

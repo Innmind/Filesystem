@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Filesystem\Exception\DuplicatedFile;
 use Innmind\Immutable\{
     Set,
     Sequence,
@@ -16,30 +15,23 @@ use Innmind\Immutable\{
  */
 final class Directory
 {
-    private Name $name;
-    /** @var Sequence<File|self> */
-    private Sequence $files;
-    /** @var Set<Name> */
-    private Set $removed;
-
     /**
      * @param Sequence<File|self> $files
      * @param Set<Name> $removed
      */
-    private function __construct(Name $name, Sequence $files, Set $removed)
-    {
-        $this->name = $name;
-        $this->files = $files;
-        $this->removed = $removed;
+    private function __construct(
+        private Name $name,
+        private Sequence $files,
+        private Set $removed,
+    ) {
     }
 
     /**
      * @psalm-pure
      *
      * @param Sequence<File|self>|null $files
-     *
-     * @throws DuplicatedFile
      */
+    #[\NoDiscard]
     public static function of(Name $name, ?Sequence $files = null): self
     {
         return new self(
@@ -54,9 +46,8 @@ final class Directory
      *
      * @param non-empty-string $name
      * @param Sequence<File|self>|null $files
-     *
-     * @throws DuplicatedFile
      */
+    #[\NoDiscard]
     public static function named(string $name, ?Sequence $files = null): self
     {
         return new self(
@@ -72,6 +63,7 @@ final class Directory
      *
      * @param Sequence<File|self> $files
      */
+    #[\NoDiscard]
     public static function lazy(Name $name, Sequence $files): self
     {
         // we prevent the contrusctor from checking for duplicates when
@@ -82,11 +74,13 @@ final class Directory
         return new self($name, $files, Set::of());
     }
 
+    #[\NoDiscard]
     public function name(): Name
     {
         return $this->name;
     }
 
+    #[\NoDiscard]
     public function rename(Name $name): self
     {
         return new self(
@@ -96,13 +90,14 @@ final class Directory
         );
     }
 
+    #[\NoDiscard]
     public function add(File|self $file): self
     {
         return new self(
             $this->name,
             $this
                 ->files
-                ->filter(static fn(File|self $known): bool => !$known->name()->equals($file->name()))
+                ->exclude(static fn(File|self $known): bool => $known->name()->equals($file->name()))
                 ->add($file),
             $this->removed,
         );
@@ -111,11 +106,13 @@ final class Directory
     /**
      * @return Maybe<File|self>
      */
+    #[\NoDiscard]
     public function get(Name $name): Maybe
     {
         return $this->files->find(static fn($file) => $file->name()->equals($name));
     }
 
+    #[\NoDiscard]
     public function contains(Name $name): bool
     {
         return $this->get($name)->match(
@@ -124,11 +121,12 @@ final class Directory
         );
     }
 
+    #[\NoDiscard]
     public function remove(Name $name): self
     {
         return new self(
             $this->name,
-            $this->files->filter(static fn(File|self $file) => !$file->name()->equals($name)),
+            $this->files->exclude(static fn(File|self $file) => $file->name()->equals($name)),
             ($this->removed)($name),
         );
     }
@@ -136,6 +134,7 @@ final class Directory
     /**
      * @param callable(File|self): void $function
      */
+    #[\NoDiscard]
     public function foreach(callable $function): SideEffect
     {
         return $this->files->foreach($function);
@@ -144,6 +143,7 @@ final class Directory
     /**
      * @param callable(File|self): bool $predicate
      */
+    #[\NoDiscard]
     public function filter(callable $predicate): self
     {
         // it is safe to not check for duplicates here as either the current
@@ -160,9 +160,8 @@ final class Directory
 
     /**
      * @param callable(File|self): File $map
-     *
-     * @throws DuplicatedFile
      */
+    #[\NoDiscard]
     public function map(callable $map): self
     {
         return new self(
@@ -174,9 +173,8 @@ final class Directory
 
     /**
      * @param callable(File|self): self $map
-     *
-     * @throws DuplicatedFile
      */
+    #[\NoDiscard]
     public function flatMap(callable $map): self
     {
         /** @var callable(File|self): Sequence<File|self> */
@@ -197,6 +195,7 @@ final class Directory
      *
      * @return R
      */
+    #[\NoDiscard]
     public function reduce($carry, callable $reducer)
     {
         return $this->files->reduce($carry, $reducer);
@@ -206,8 +205,11 @@ final class Directory
      * This method should only be used for implementations of the Adapter
      * interface, normal users should never have to use this method
      *
+     * @internal
+     *
      * @return Set<Name>
      */
+    #[\NoDiscard]
     public function removed(): Set
     {
         return $this->removed;
@@ -216,6 +218,7 @@ final class Directory
     /**
      * @return Sequence<File|self>
      */
+    #[\NoDiscard]
     public function all(): Sequence
     {
         return $this->files;
@@ -226,8 +229,6 @@ final class Directory
      *
      * @param Sequence<File|self> $files
      *
-     * @throws DuplicatedFile
-     *
      * @return Sequence<File|self>
      */
     private static function safeguard(Sequence $files): Sequence
@@ -235,7 +236,10 @@ final class Directory
         return $files->safeguard(
             Set::strings(),
             static fn(Set $names, $file) => match ($names->contains($file->name()->toString())) {
-                true => throw new DuplicatedFile($file->name()),
+                true => throw new \LogicException(\sprintf(
+                    "Same file '%s' found multiple times",
+                    $file->name()->toString(),
+                )),
                 false => ($names)($file->name()->toString()),
             },
         );
