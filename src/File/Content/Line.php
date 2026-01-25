@@ -17,6 +17,7 @@ final class Line
     /**
      * @psalm-pure
      */
+    #[\NoDiscard]
     public static function of(Str $content): self
     {
         if ($content->contains("\n")) {
@@ -30,6 +31,7 @@ final class Line
      * @internal
      * @psalm-pure
      */
+    #[\NoDiscard]
     public static function fromStream(Str $content): self
     {
         return new self($content->rightTrim("\n"));
@@ -38,17 +40,20 @@ final class Line
     /**
      * @param callable(Str): Str $map
      */
+    #[\NoDiscard]
     public function map(callable $map): self
     {
         /** @psalm-suppress ImpureFunctionCall */
         return self::of($map($this->content));
     }
 
+    #[\NoDiscard]
     public function str(): Str
     {
         return $this->content;
     }
 
+    #[\NoDiscard]
     public function toString(): string
     {
         return $this->content->toString();

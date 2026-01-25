@@ -22,6 +22,7 @@ final class MountPathDoesntExist extends \RuntimeException
     /**
      * @return Attempt<Implementation>
      */
+    #[\NoDiscard]
     public function recover(): Attempt
     {
         return ($this->recover)();

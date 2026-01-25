@@ -21,6 +21,7 @@ final class File
     /**
      * @psalm-pure
      */
+    #[\NoDiscard]
     public static function of(
         Name $name,
         Content $content,
@@ -34,6 +35,7 @@ final class File
      *
      * @param non-empty-string $name
      */
+    #[\NoDiscard]
     public static function named(
         string $name,
         Content $content,
@@ -42,26 +44,31 @@ final class File
         return self::of(Name::of($name), $content, $mediaType);
     }
 
+    #[\NoDiscard]
     public function name(): Name
     {
         return $this->name;
     }
 
+    #[\NoDiscard]
     public function content(): Content
     {
         return $this->content;
     }
 
+    #[\NoDiscard]
     public function mediaType(): MediaType
     {
         return $this->mediaType;
     }
 
+    #[\NoDiscard]
     public function rename(Name $name): self
     {
         return new self($name, $this->content, $this->mediaType);
     }
 
+    #[\NoDiscard]
     public function withContent(Content $content, ?MediaType $mediaType = null): self
     {
         return new self(
@@ -74,6 +81,7 @@ final class File
     /**
      * @param callable(Content): Content $map
      */
+    #[\NoDiscard]
     public function mapContent(callable $map): self
     {
         /** @psalm-suppress ImpureFunctionCall */
