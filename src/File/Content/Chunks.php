@@ -19,15 +19,11 @@ use Innmind\Immutable\{
  */
 final class Chunks implements Implementation
 {
-    /** @var Sequence<Str> */
-    private Sequence $chunks;
-
     /**
      * @param Sequence<Str> $chunks
      */
-    private function __construct(Sequence $chunks)
+    private function __construct(private Sequence $chunks)
     {
-        $this->chunks = $chunks->pad(1, Str::of(''));
     }
 
     /**
@@ -37,7 +33,7 @@ final class Chunks implements Implementation
      */
     public static function of(Sequence $chunks): self
     {
-        return new self($chunks);
+        return new self($chunks->pad(1, Str::of('')));
     }
 
     #[\Override]
@@ -114,7 +110,7 @@ final class Chunks implements Implementation
     {
         return $this
             ->chunks
-            ->fold(new Concat)
+            ->fold(Concat::monoid)
             ->toString();
     }
 

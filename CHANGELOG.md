@@ -1,5 +1,30 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `Innmind\Filesystem\Recover`
+
+### Changed
+
+- Requires PHP `8.4`
+- Links are not silently ignored when listing files/directories. An error is still returned when trying to remove a link.
+- `Innmind\Filesystem\Adapter\Filesystem::mount()` now returns an `Innmind\Immutable\Attempt`
+- `Innmind\Filesystem\Directory::removed()` is now flagged as internal
+- `Innmind\Filesystem\Adapter` is now a final class
+- `Innmind\Filesystem\Adapter\Filesystem` is now flagged as internal
+- `Innmind\Filesystem\Adapter\InMemory` is now flagged as internal
+- `Innmind\Filesystem\Adapter\Logger` is now flagged as internal
+- `Innmind\Filesystem\Adapter::mount()` no longer automatically create the directory if it doesn't exist
+
+### Removed
+
+- `Innmind\Filesystem\Adapter\InMemory::new()`
+- `Innmind\Filesystem\Adapter\Filesystem::withCaseSensitivity()`, case sensitivity can be specified as the second argument of `::mount()`
+- `Innmind\Filesystem\Exception\*`
+- `Innmind\Filesystem\File\Content::atPath()`, use `Content::io()` instead
+
 ## 8.1.0 - 2025-05-09
 
 ### Added

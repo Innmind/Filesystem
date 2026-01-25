@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem\File\Content;
 
-use Innmind\Filesystem\Exception\LogicException;
 use Innmind\IO\{
     Streams\Stream,
     Frame,
@@ -21,12 +20,10 @@ use Innmind\Immutable\{
  */
 final class OneShot implements Implementation
 {
-    private Stream $io;
     private bool $loaded = false;
 
-    private function __construct(Stream $io)
+    private function __construct(private Stream $io)
     {
-        $this->io = $io;
     }
 
     /**
@@ -97,7 +94,7 @@ final class OneShot implements Implementation
     {
         return $this
             ->chunks()
-            ->fold(new Concat)
+            ->fold(Concat::monoid)
             ->toString();
     }
 
@@ -120,7 +117,7 @@ final class OneShot implements Implementation
     private function guard(): void
     {
         if ($this->loaded) {
-            throw new LogicException("Content can't be loaded twice");
+            throw new \LogicException("Content can't be loaded twice");
         }
 
         /** @psalm-suppress InaccessibleProperty */

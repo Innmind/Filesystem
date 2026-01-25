@@ -28,7 +28,7 @@ final class Lines implements Property
     public function ensureHeldBy(Assert $assert, object $systemUnderTest): object
     {
         $content = $assert->string($systemUnderTest->toString());
-        $systemUnderTest
+        $_ = $systemUnderTest
             ->lines()
             ->foreach(static fn($line) => $content->contains($line->toString()));
 

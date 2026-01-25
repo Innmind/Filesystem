@@ -4,263 +4,223 @@ declare(strict_types = 1);
 namespace Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    Adapter,
+    Adapter\Name as Name_,
     File,
+    File\Content,
     Name,
-    Directory,
-    CaseSensitivity,
-    Exception\PathDoesntRepresentADirectory,
-    Exception\PathTooLong,
-    Exception\LinksAreNotSupported,
+    Exception\MountPathDoesntExist,
 };
-use Innmind\IO\IO;
+use Innmind\IO\{
+    IO,
+    Files,
+};
 use Innmind\MediaType\MediaType;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
     Str,
-    Maybe,
     Attempt,
     SideEffect,
-    Set,
 };
-use Symfony\Component\Filesystem\Filesystem as FS;
 
-final class Filesystem implements Adapter
+final class Filesystem implements Implementation
 {
-    private const INVALID_FILES = ['.', '..'];
-    private IO $io;
-    private Path $path;
-    private CaseSensitivity $case;
-    private FS $filesystem;
-    /** @var \WeakMap<File|Directory, Path> */
-    private \WeakMap $loaded;
-
     private function __construct(
-        IO $io,
-        Path $path,
-        CaseSensitivity $case,
+        private IO $io,
+        private Path $path,
     ) {
-        if (!$path->directory()) {
-            throw new PathDoesntRepresentADirectory($path->toString());
-        }
-
-        $this->io = $io;
-        $this->path = $path;
-        $this->case = $case;
-        $this->filesystem = new FS;
-        /** @var \WeakMap<File|Directory, Path> */
-        $this->loaded = new \WeakMap;
-
-        if (!$this->filesystem->exists($this->path->toString())) {
-            $this->filesystem->mkdir($this->path->toString());
-        }
     }
 
+    /**
+     * @return Attempt<self>
+     */
     public static function mount(
         Path $path,
         ?IO $io = null,
-    ): self {
-        return new self(
-            $io ?? IO::fromAmbientAuthority(),
-            $path,
-            CaseSensitivity::sensitive,
+    ): Attempt {
+        if (!$path->directory()) {
+            return Attempt::error(new \LogicException(\sprintf(
+                "Path doesn't represent a directory '%s'",
+                $path->toString(),
+            )));
+        }
+
+        $io ??= IO::fromAmbientAuthority();
+
+        return self::assert($path)
+            ->map($io->files()->exists(...))
+            ->flatMap(static fn($exist) => match ($exist) {
+                false => Attempt::error(new MountPathDoesntExist(
+                    static fn() => $io
+                        ->files()
+                        ->create($path)
+                        ->map(static fn() => new self(
+                            $io,
+                            $path,
+                        )),
+                )),
+                default => Attempt::result(SideEffect::identity),
+            })
+            ->map(static fn() => new self(
+                $io,
+                $path,
+            ));
+    }
+
+    #[\Override]
+    public function exists(TreePath $path): Attempt
+    {
+        return self::assert($path->asPath($this->path))->map(
+            $this->io->files()->exists(...),
         );
     }
 
-    public function withCaseSensitivity(CaseSensitivity $case): self
-    {
-        return new self($this->io, $this->path, $case);
-    }
-
     #[\Override]
-    public function add(File|Directory $file): Attempt
-    {
-        return $this->createFileAt($this->path, $file);
-    }
-
-    #[\Override]
-    public function get(Name $file): Maybe
-    {
-        if (!$this->contains($file)) {
-            /** @var Maybe<File|Directory> */
-            return Maybe::nothing();
+    public function access(
+        TreePath $parent,
+        Name_\File|Name_\Directory|Name_\Unknown $name,
+    ): Attempt {
+        if ($name instanceof Name_\Directory) {
+            return Attempt::result($name);
         }
 
-        return Maybe::just($this->open($this->path, $file));
-    }
+        $name = $name->unwrap();
+        $path = TreePath::of($name)
+            ->under($parent)
+            ->asPath($this->path);
 
-    #[\Override]
-    public function contains(Name $file): bool
-    {
-        return $this->filesystem->exists($this->path->toString().'/'.$file->toString());
-    }
-
-    #[\Override]
-    public function remove(Name $file): Attempt
-    {
-        return Attempt::of(
-            fn() => $this->filesystem->remove(
-                $this->path->toString().'/'.$file->toString(),
-            ),
-        )->map(static fn() => SideEffect::identity());
-    }
-
-    #[\Override]
-    public function root(): Directory
-    {
-        return Directory::lazy(
-            Name::of('root'),
-            $this->list($this->path),
-        );
-    }
-
-    /**
-     * Create the wished file at the given absolute path
-     *
-     * @return Attempt<SideEffect>
-     */
-    private function createFileAt(Path $path, File|Directory $file): Attempt
-    {
-        $name = $file->name()->toString();
-
-        if ($file instanceof Directory) {
-            $name .= '/';
-        }
-
-        $path = $path->resolve(Path::of($name));
-
-        /** @psalm-suppress PossiblyNullReference */
-        if ($this->loaded->offsetExists($file) && $this->loaded[$file]->equals($path)) {
-            // no need to persist untouched file where it was loaded from
-            return Attempt::result(SideEffect::identity());
-        }
-
-        $this->loaded[$file] = $path;
-
-        if ($file instanceof Directory) {
-            /** @var Set<Name> */
-            $names = Set::of();
-
-            return Attempt::of(
-                fn() => $this->filesystem->mkdir($path->toString()),
-            )
-                ->flatMap(
-                    fn() => $file
-                        ->all()
-                        ->sink($names)
-                        ->attempt(
-                            fn($persisted, $file) => $this
-                                ->createFileAt($path, $file)
-                                ->map(static fn() => ($persisted)($file->name())),
+        return self::assert($path)
+            ->flatMap($this->io->files()->access(...))
+            ->flatMap(static fn($file) => match (true) {
+                $file instanceof Files\Link => Attempt::error(new \RuntimeException('Links are not supported')),
+                default => Attempt::result($file),
+            })
+            ->map(static fn($file) => match (true) {
+                $file instanceof Files\Directory => Name_\Directory::of($name),
+                default => File::of(
+                    $name,
+                    Content::io($file->read()),
+                    $file
+                        ->mediaType()
+                        ->maybe()
+                        ->flatMap(MediaType::maybe(...))
+                        ->match(
+                            static fn($mediaType) => $mediaType,
+                            static fn() => null,
                         ),
-                )
-                ->flatMap(
-                    fn($persisted) => $file
-                        ->removed()
-                        ->filter(fn($file): bool => !$this->case->contains(
-                            $file,
-                            $persisted,
-                        ))
-                        ->unsorted()
-                        ->sink(null)
-                        ->attempt(
-                            fn($_, $file) => Attempt::of(
-                                fn() => $this->filesystem->remove(
-                                    $path->toString().$file->toString(),
-                                ),
-                            ),
-                        )
-                        ->map(static fn() => SideEffect::identity()),
-                );
-        }
+                ),
+            });
+    }
 
-        if (\is_dir($path->toString())) {
-            try {
-                $this->filesystem->remove($path->toString());
-            } catch (\Throwable $e) {
-                return Attempt::error($e);
-            }
-        }
-
-        $chunks = $file->content()->chunks();
-
-        try {
-            $this->filesystem->touch($path->toString());
-        } catch (\Throwable $e) {
-            if (\PHP_OS === 'Darwin' && Str::of($path->toString(), Str\Encoding::ascii)->length() > 1014) {
-                return Attempt::error(new PathTooLong($path->toString(), 0, $e));
-            }
-
-            return Attempt::error($e);
-        }
-
+    #[\Override]
+    public function list(TreePath $parent): Sequence
+    {
         return $this
             ->io
             ->files()
-            ->write($path)
-            ->watch()
-            ->sink($chunks);
+            ->access($parent->asPath($this->path))
+            ->flatMap(static fn($file) => match (true) {
+                $file instanceof Files\Directory => Attempt::result($file),
+                default => Attempt::error(new \RuntimeException('Path is not a directory')),
+            })
+            ->unwrap() // todo silently return an empty sequence ?
+            ->list()
+            ->map(static fn($name) => match ($name->kind()) {
+                Files\Kind::directory => Name_\Directory::of(Name::of($name->toString())),
+                default => Name_\File::of(Name::of($name->toString())), // let the read function handle the links
+            });
     }
 
     /**
-     * Open the file in the given folder
+     * This method only relies on the returned boolean to know if the deletion
+     * was successful or not. It doesn't check afterward if the content is no
+     * longer there as it may lead to race conditions with other processes.
+     *
+     * Such race condition could be P1 removes a file, P2 creates the same file
+     * and then P1 check the file doesn't exist. This scenario would report a
+     * failure.
+     *
+     * This package doesn't want to bleed this global state between processes.
+     * If you end up here, know that you should design your app in a way that
+     * there is as little as possible race conditions like these.
      */
-    private function open(Path $folder, Name $file): File|Directory
+    #[\Override]
+    public function remove(TreePath $parent, Name $name): Attempt
     {
-        $path = $folder->resolve(Path::of($file->toString()));
+        $path = TreePath::of($name)
+            ->under($parent)
+            ->asPath($this->path);
 
-        if (\is_dir($path->toString())) {
-            $directoryPath = $folder->resolve(Path::of($file->toString().'/'));
-            $files = $this->list($directoryPath);
+        return self::assert($path)
+            ->map($this->io->files()->access(...))
+            ->flatMap(static fn($file) => $file->eitherWay(
+                static fn($file) => match (true) {
+                    $file instanceof Files\Link => Attempt::error(new \RuntimeException('Links are not supported')),
+                    default => $file->remove(),
+                },
+                static fn() => Attempt::result(SideEffect::identity),
+            ));
+    }
 
-            $directory = Directory::lazy($file, $files);
-            $this->loaded[$directory] = $directoryPath;
+    #[\Override]
+    public function createDirectory(TreePath $parent, Name $name): Attempt
+    {
+        $path = TreePath::directory($name)
+            ->under($parent)
+            ->asPath($this->path);
 
-            return $directory;
-        }
+        return self::assert($path)
+            ->map($this->io->files()->access(...))
+            ->flatMap(fn($file) => $file->eitherWay(
+                fn($file) => match (true) {
+                    $file instanceof Files\Link => Attempt::error(new \RuntimeException('Links are not supported')),
+                    $file instanceof Files\Directory => Attempt::result($file),
+                    default => $this
+                        ->remove($parent, $name)
+                        ->flatMap(
+                            fn() => $this
+                                ->io
+                                ->files()
+                                ->create($path),
+                        ),
+                },
+                fn() => $this
+                    ->io
+                    ->files()
+                    ->create($path),
+            ))
+            ->flatMap(static fn($file) => match (true) {
+                $file instanceof Files\Directory => Attempt::result(SideEffect::identity),
+                default => Attempt::error(new \RuntimeException('File created instead of a directory')),
+            });
+    }
 
-        if (\is_link($path->toString())) {
-            throw new LinksAreNotSupported($path->toString());
-        }
+    #[\Override]
+    public function write(TreePath $parent, File $file): Attempt
+    {
+        $absolutePath = TreePath::of($file)->under($parent)->asPath($this->path);
+        $chunks = $file->content()->chunks();
 
-        $file = File::of(
-            $file,
-            File\Content::atPath(
-                $this->io,
-                $path,
-            ),
-            MediaType::maybe(match ($mediaType = @\mime_content_type($path->toString())) {
-                false => '',
-                default => $mediaType,
-            })->match(
-                static fn($mediaType) => $mediaType,
-                static fn() => MediaType::null(),
-            ),
-        );
-        $this->loaded[$file] = $path;
-
-        return $file;
+        return self::assert($absolutePath)
+            ->flatMap($this->io->files()->create(...))
+            ->flatMap(static fn($file) => match (true) {
+                $file instanceof Files\Directory => Attempt::error(new \RuntimeException('Directory created instead of a file')),
+                default => $file
+                    ->write()
+                    ->watch()
+                    ->sink($chunks),
+            });
     }
 
     /**
-     * @return Sequence<File|Directory>
+     * @return Attempt<Path>
      */
-    private function list(Path $path): Sequence
+    private static function assert(Path $path): Attempt
     {
-        /** @var Sequence<File> */
-        return Sequence::lazy(function() use ($path): \Generator {
-            $files = new \FilesystemIterator($path->toString());
+        if (Str::of($path->toString())->length() > \PHP_MAXPATHLEN) {
+            return Attempt::error(new \RuntimeException('Path too long'));
+        }
 
-            /** @var \SplFileInfo $file */
-            foreach ($files as $file) {
-                if (\is_link($file->getPathname())) {
-                    throw new LinksAreNotSupported($file->getPathname());
-                }
-
-                /** @psalm-suppress ArgumentTypeCoercion */
-                yield $this->open($path, Name::of($file->getBasename()));
-            }
-        });
+        return Attempt::result($path);
     }
 }

@@ -7,7 +7,7 @@
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
+    Adapter,
     File,
     Name,
 };
@@ -34,8 +34,8 @@ $release = static function(File $changelog) use ($insertRelease): File {
         ),
     );
 }
-$filesystem = Filesystem::mount(Path::of('some/repository/'));
-$tmp = Filesystem::mount(Path::of('/tmp/'));
+$filesystem = Adapter::mount(Path::of('some/repository/'))->unwrap();
+$tmp = Adapter::mount(Path::of('/tmp/'))->unwrap();
 $filesystem
     ->get(Name::of('CHANGELOG.md'))
     ->keep(Instance::of(File::class))
@@ -59,7 +59,7 @@ This example modifies the `CHANGELOG.md` file to replace the `## [Unreleased]` t
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
+    Adapter,
     File,
     File\Content,
     File\Content\Line,
@@ -88,8 +88,8 @@ $update = static function(File $users) use ($updateUser): File {
         static fn($content) => $content->flatMap(static fn($line) => $updateUser($line)),
     );
 };
-$filesystem = Filesystem::mount(Path::of('/var/data/'));
-$tmp = Filesystem::mount(Path::of('/tmp/'));
+$filesystem = Adapter::mount(Path::of('/var/data/'))->unwrap();
+$tmp = Adapter::mount(Path::of('/tmp/'))->unwrap();
 $filesystem
     ->get(Name::of('users.csv'))
     ->keep(Instance::of(File::class))
@@ -113,7 +113,7 @@ This example will insert the user `Jane Doe` after `John Doe` wherever he is in 
 
 ```php
 use Innmind\Filesystem\{
-    Adapter\Filesystem,
+    Adapter,
     File,
     File\Content,
     Name,
@@ -134,7 +134,7 @@ $merge = static function(File $file1, File $file2): File {
         ),
     );
 };
-$filesystem = Filesystem::mount(Path::of('/var/data/'));
+$filesystem = Adapter::mount(Path::of('/var/data/'))->unwrap();
 $users1 = $filesystem
     ->get(Name::of('users1.csv'))
     ->keep(Instance::of(File::class));

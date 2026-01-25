@@ -17,15 +17,11 @@ use Innmind\Immutable\{
  */
 final class Lines implements Implementation
 {
-    /** @var Sequence<Line> */
-    private Sequence $lines;
-
     /**
      * @param Sequence<Line> $lines
      */
-    private function __construct(Sequence $lines)
+    private function __construct(private Sequence $lines)
     {
-        $this->lines = $lines->pad(1, Line::of(Str::of('')));
     }
 
     /**
@@ -35,7 +31,7 @@ final class Lines implements Implementation
      */
     public static function of(Sequence $lines): self
     {
-        return new self($lines);
+        return new self($lines->pad(1, Line::of(Str::of(''))));
     }
 
     #[\Override]
@@ -53,7 +49,7 @@ final class Lines implements Implementation
     #[\Override]
     public function flatMap(callable $map): Implementation
     {
-        return new self($this->lines->flatMap(
+        return self::of($this->lines->flatMap(
             static fn($line) => $map($line)->lines(),
         ));
     }
@@ -61,7 +57,7 @@ final class Lines implements Implementation
     #[\Override]
     public function filter(callable $filter): Implementation
     {
-        return new self($this->lines->filter($filter));
+        return self::of($this->lines->filter($filter));
     }
 
     #[\Override]

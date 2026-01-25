@@ -8,12 +8,10 @@ use Innmind\Filesystem\File\Content\{
     Line,
 };
 use Innmind\IO\{
-    IO,
     Streams\Stream,
     Files\Read,
     Stream\Size,
 };
-use Innmind\Url\Path;
 use Innmind\Immutable\{
     Str,
     Sequence,
@@ -26,21 +24,8 @@ use Innmind\Immutable\{
  */
 final class Content
 {
-    private Implementation $implementation;
-
-    private function __construct(Implementation $implementation)
+    private function __construct(private Implementation $implementation)
     {
-        $this->implementation = $implementation;
-    }
-
-    /**
-     * @psalm-pure
-     */
-    public static function atPath(
-        IO $io,
-        Path $path,
-    ): self {
-        return new self(Content\AtPath::of($io, $path));
     }
 
     /**

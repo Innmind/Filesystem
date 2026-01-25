@@ -30,10 +30,10 @@ final class ReAddingFilesHasNoSideEffect implements Property
 
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        $adapter
+        $_ = $adapter
             ->root()
             ->foreach(static function($file) use ($assert, $adapter) {
-                $adapter->add($file)->unwrap();
+                $_ = $adapter->add($file)->unwrap();
                 $assert->true($adapter->contains($file->name()));
 
                 if ($file instanceof Directory) {

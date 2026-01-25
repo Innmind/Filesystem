@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Filesystem\Adapter;
 
 use Innmind\Filesystem\{
-    Adapter\InMemory,
     Adapter,
     Directory,
     File,
@@ -21,7 +20,7 @@ class InMemoryTest extends TestCase
 {
     public function testInterface()
     {
-        $a = InMemory::new();
+        $a = Adapter::inMemory();
 
         $this->assertInstanceOf(Adapter::class, $a);
         $this->assertFalse($a->contains(Name::of('foo')));
@@ -32,8 +31,8 @@ class InMemoryTest extends TestCase
                 ->unwrap(),
         );
         $this->assertTrue($a->contains(Name::of('foo')));
-        $this->assertSame(
-            $d,
+        $this->assertInstanceOf(
+            Directory::class,
             $a->get(Name::of('foo'))->match(
                 static fn($file) => $file,
                 static fn() => null,
@@ -50,7 +49,7 @@ class InMemoryTest extends TestCase
 
     public function testReturnNothingWhenGettingUnknownFile()
     {
-        $this->assertNull(InMemory::new()->get(Name::of('foo'))->match(
+        $this->assertNull(Adapter::inMemory()->get(Name::of('foo'))->match(
             static fn($file) => $file,
             static fn() => null,
         ));
@@ -60,7 +59,7 @@ class InMemoryTest extends TestCase
     {
         $this->assertInstanceOf(
             SideEffect::class,
-            InMemory::new()
+            Adapter::inMemory()
                 ->remove(Name::of('foo'))
                 ->unwrap(),
         );
@@ -68,14 +67,14 @@ class InMemoryTest extends TestCase
 
     public function testRoot()
     {
-        $adapter = InMemory::new();
-        $adapter
+        $adapter = Adapter::inMemory();
+        $_ = $adapter
             ->add($foo = File::of(
                 Name::of('foo'),
                 Content::ofString('foo'),
             ))
             ->unwrap();
-        $adapter
+        $_ = $adapter
             ->add($bar = File::of(
                 Name::of('bar'),
                 Content::ofString('bar'),
@@ -91,15 +90,15 @@ class InMemoryTest extends TestCase
 
     public function testEmulateFilesystem()
     {
-        $adapter = InMemory::emulateFilesystem();
-        $adapter->add(Directory::of(
+        $adapter = Adapter::inMemory();
+        $_ = $adapter->add(Directory::of(
             Name::of('foo'),
             Sequence::of(
                 Directory::named('bar'),
                 File::named('baz', Content::none()),
             ),
         ))->unwrap();
-        $adapter->add(Directory::of(
+        $_ = $adapter->add(Directory::of(
             Name::of('foo'),
             Sequence::of(
                 Directory::of(

@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace Innmind\Filesystem;
 
-use Innmind\Filesystem\Exception\DuplicatedFile;
 use Innmind\Immutable\{
     Set,
     Sequence,
@@ -16,29 +15,21 @@ use Innmind\Immutable\{
  */
 final class Directory
 {
-    private Name $name;
-    /** @var Sequence<File|self> */
-    private Sequence $files;
-    /** @var Set<Name> */
-    private Set $removed;
-
     /**
      * @param Sequence<File|self> $files
      * @param Set<Name> $removed
      */
-    private function __construct(Name $name, Sequence $files, Set $removed)
-    {
-        $this->name = $name;
-        $this->files = $files;
-        $this->removed = $removed;
+    private function __construct(
+        private Name $name,
+        private Sequence $files,
+        private Set $removed,
+    ) {
     }
 
     /**
      * @psalm-pure
      *
      * @param Sequence<File|self>|null $files
-     *
-     * @throws DuplicatedFile
      */
     public static function of(Name $name, ?Sequence $files = null): self
     {
@@ -54,8 +45,6 @@ final class Directory
      *
      * @param non-empty-string $name
      * @param Sequence<File|self>|null $files
-     *
-     * @throws DuplicatedFile
      */
     public static function named(string $name, ?Sequence $files = null): self
     {
@@ -102,7 +91,7 @@ final class Directory
             $this->name,
             $this
                 ->files
-                ->filter(static fn(File|self $known): bool => !$known->name()->equals($file->name()))
+                ->exclude(static fn(File|self $known): bool => $known->name()->equals($file->name()))
                 ->add($file),
             $this->removed,
         );
@@ -128,7 +117,7 @@ final class Directory
     {
         return new self(
             $this->name,
-            $this->files->filter(static fn(File|self $file) => !$file->name()->equals($name)),
+            $this->files->exclude(static fn(File|self $file) => $file->name()->equals($name)),
             ($this->removed)($name),
         );
     }
@@ -160,8 +149,6 @@ final class Directory
 
     /**
      * @param callable(File|self): File $map
-     *
-     * @throws DuplicatedFile
      */
     public function map(callable $map): self
     {
@@ -174,8 +161,6 @@ final class Directory
 
     /**
      * @param callable(File|self): self $map
-     *
-     * @throws DuplicatedFile
      */
     public function flatMap(callable $map): self
     {
@@ -206,6 +191,8 @@ final class Directory
      * This method should only be used for implementations of the Adapter
      * interface, normal users should never have to use this method
      *
+     * @internal
+     *
      * @return Set<Name>
      */
     public function removed(): Set
@@ -226,8 +213,6 @@ final class Directory
      *
      * @param Sequence<File|self> $files
      *
-     * @throws DuplicatedFile
-     *
      * @return Sequence<File|self>
      */
     private static function safeguard(Sequence $files): Sequence
@@ -235,7 +220,10 @@ final class Directory
         return $files->safeguard(
             Set::strings(),
             static fn(Set $names, $file) => match ($names->contains($file->name()->toString())) {
-                true => throw new DuplicatedFile($file->name()),
+                true => throw new \LogicException(\sprintf(
+                    "Same file '%s' found multiple times",
+                    $file->name()->toString(),
+                )),
                 false => ($names)($file->name()->toString()),
             },
         );

@@ -11,18 +11,11 @@ use Innmind\MediaType\MediaType;
  */
 final class File
 {
-    private Name $name;
-    private Content $content;
-    private MediaType $mediaType;
-
     private function __construct(
-        Name $name,
-        Content $content,
-        ?MediaType $mediaType = null,
+        private Name $name,
+        private Content $content,
+        private MediaType $mediaType,
     ) {
-        $this->name = $name;
-        $this->content = $content;
-        $this->mediaType = $mediaType ?? MediaType::null();
     }
 
     /**
@@ -33,7 +26,7 @@ final class File
         Content $content,
         ?MediaType $mediaType = null,
     ): self {
-        return new self($name, $content, $mediaType);
+        return new self($name, $content, $mediaType ?? MediaType::null());
     }
 
     /**
@@ -46,7 +39,7 @@ final class File
         Content $content,
         ?MediaType $mediaType = null,
     ): self {
-        return new self(Name::of($name), $content, $mediaType);
+        return self::of(Name::of($name), $content, $mediaType);
     }
 
     public function name(): Name

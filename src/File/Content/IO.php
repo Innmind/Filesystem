@@ -105,7 +105,7 @@ final class IO implements Implementation
     {
         return $this
             ->chunks()
-            ->fold(new Concat)
+            ->fold(Concat::monoid)
             ->toString();
     }
 

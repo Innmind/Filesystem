@@ -51,7 +51,7 @@ final class AddFileWithSameNameAsDirectoryDeleteTheDirectory implements Property
 
     public function ensureHeldBy(Assert $assert, object $adapter): object
     {
-        $adapter->remove($this->file->name())->unwrap();
+        $_ = $adapter->remove($this->file->name())->unwrap();
         $assert
             ->object($adapter->add($this->directory)->unwrap())
             ->instance(SideEffect::class);

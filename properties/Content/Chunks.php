@@ -32,7 +32,7 @@ final class Chunks implements Property
             $systemUnderTest->toString(),
             $systemUnderTest
                 ->chunks()
-                ->fold(new Concat)
+                ->fold(Concat::monoid)
                 ->toString(),
         );
         $assert

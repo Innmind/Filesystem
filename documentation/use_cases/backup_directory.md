@@ -1,11 +1,11 @@
 # Backup a directory
 
 ```php
-use Innmind\Filesystem\Adapter\Filesystem;
+use Innmind\Filesystem\Adapter;
 use Innmind\Url\Path;
 
-$source = Filesystem::mount(Path::of('/var/data/'));
-$backup = Filesystem::mount(Path::of('/volumes/backup/'));
+$source = Adapter::mount(Path::of('/var/data/'))->unwrap();
+$backup = Adapter::mount(Path::of('/volumes/backup/'))->unwrap();
 $source
     ->root()
     ->foreach(static fn($file) => $backup->add($file)->unwrap());
