@@ -45,7 +45,7 @@ Its `MediaType` is here mostly as an helper. There's no guarantee that the detec
 
 A directory is represented as a `Sequence` of [`File`s](#file) or directories.
 
-Because it uses a `Sequence` the data can come from anywhere. That's why this package provides both a filesystem and in memory adapters and that an [S3 adapter](https://github.com/Innmind/S3/) can be provided as an extension.
+Because it uses a `Sequence` the data can come from anywhere. That's why this package provides both a filesystem and in memory adapters.
 
 This means that in order to access a file/directory from a directory via its name it will iterate over the `Sequence` until it finds the value. Bear in mind that depending on your filesystem structures this may cause performance issues as it will take longer to access a file/directory than a direct call to the filesystem by providing the path.
 
