@@ -4,13 +4,46 @@ on: [push]
 
 jobs:
   blackbox:
-    uses: innmind/github-workflows/.github/workflows/black-box-matrix.yml@main
+    uses: innmind/github-workflows/.github/workflows/black-box.yml@main
+    name: 'BlackBox'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        php-version: ['8.5']
+        dependency-versions: ['lowest', 'highest']
     with:
       scenarii: 20
+      os: ${{ matrix.os }}
+      php-version: ${{ matrix.php-version }}
+      dependency-versions: ${{ matrix.dependency-versions }}
   coverage:
-    uses: innmind/github-workflows/.github/workflows/coverage-matrix.yml@main
+    uses: innmind/github-workflows/.github/workflows/coverage.yml@main
+    name: 'Coverage'
     secrets: inherit
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        php-version: ['8.5']
+        dependency-versions: ['lowest', 'highest']
+    with:
+      os: ${{ matrix.os }}
+      php-version: ${{ matrix.php-version }}
+      dependency-versions: ${{ matrix.dependency-versions }}
   psalm:
-    uses: innmind/github-workflows/.github/workflows/psalm-matrix.yml@main
+    uses: innmind/github-workflows/.github/workflows/psalm.yml@main
+    name: 'Psalm'
+    strategy:
+      matrix:
+        php-version: ['8.5']
+        run-php-version: ['8.5']
+    with:
+      php-version: ${{ matrix.php-version }}
+      run-php-version: ${{ matrix.run-php-version }}
   cs:
     uses: innmind/github-workflows/.github/workflows/cs.yml@main
+    name: 'CS'
+    strategy:
+      matrix:
+        php-version: ['8.5']
+    with:
+      php-version: ${{ matrix.php-version }}

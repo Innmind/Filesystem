@@ -11,11 +11,11 @@ use Innmind\BlackBox\{
 final class Directory
 {
     /**
-     * @return Set\Provider<Property>|Set<Properties>
+     * @return Set<Properties>
      */
-    public static function properties(): Set\Provider|Set
+    public static function properties(): Set
     {
-        return Set\Properties::any(...self::list())->atMost(50);
+        return Set::properties(...self::list())->atMost(50);
     }
 
     /**

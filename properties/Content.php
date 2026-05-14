@@ -13,16 +13,16 @@ use Innmind\BlackBox\{
 final class Content
 {
     /**
-     * @return Set\Provider<Properties>|Set<Properties>
+     * @return Set<Properties>
      */
-    public static function properties(): Set\Provider|Set
+    public static function properties(): Set
     {
-        return Set\Properties::any(
+        return Set::properties(
             ...\array_map(
                 static fn($class) => $class::any(),
                 self::all(),
             ),
-        );
+        )->toSet();
     }
 
     /**

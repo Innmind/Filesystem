@@ -10,13 +10,16 @@ use Fixtures\Innmind\Immutable\Sequence;
 use Properties\Innmind\Filesystem\Directory as PDirectory;
 use Innmind\BlackBox\Set;
 
-return static function() {
-    yield properties(
+return static function($prove) {
+    yield $prove->properties(
         'Empty Directory properties',
         PDirectory::properties(),
-        Name::any()->map(Directory::of(...)),
+        Name::any()
+            ->map(Directory::of(...))
+            ->map(static fn($directory) => static fn() => $directory),
     );
-    yield properties(
+
+    yield $prove->properties(
         'Non empty Directory properties',
         PDirectory::properties(),
         Set::compose(
@@ -32,30 +35,37 @@ return static function() {
                     ->groupBy(static fn($file) => $file->name()->toString())
                     ->size() === $files->size(), // do not accept duplicated files
             ),
-        ),
+        )->map(static fn($directory) => static fn() => $directory),
     );
 
     foreach (PDirectory::alwaysApplicable() as $property) {
-        yield property(
-            $property,
-            Name::any()->map(Directory::of(...)),
-        )->named('Empty Directory');
-        yield property(
-            $property,
-            Set::compose(
-                Directory::of(...),
-                Name::any(),
-                Sequence::of(
-                    File::any()->randomize(),
-                    Set::integers()
-                        ->between(1, 5) // only to speed up tests
-                        ->toSet(),
-                )->filter(
-                    static fn($files) => $files
-                        ->groupBy(static fn($file) => $file->name()->toString())
-                        ->size() === $files->size(), // do not accept duplicated files
-                ),
-            ),
-        )->named('Non empty Directory');
+        yield $prove
+            ->property(
+                $property,
+                Name::any()
+                    ->map(Directory::of(...))
+                    ->map(static fn($directory) => static fn() => $directory),
+            )
+            ->named('Empty Directory');
+
+        yield $prove
+            ->property(
+                $property,
+                Set::compose(
+                    Directory::of(...),
+                    Name::any(),
+                    Sequence::of(
+                        File::any()->randomize(),
+                        Set::integers()
+                            ->between(1, 5) // only to speed up tests
+                            ->toSet(),
+                    )->filter(
+                        static fn($files) => $files
+                            ->groupBy(static fn($file) => $file->name()->toString())
+                            ->size() === $files->size(), // do not accept duplicated files
+                    ),
+                )->map(static fn($directory) => static fn() => $directory),
+            )
+            ->named('Non empty Directory');
     }
 };
