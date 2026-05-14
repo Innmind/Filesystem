@@ -16,7 +16,7 @@ use Innmind\Immutable\{
     Monoid\Concat,
 };
 
-return static function() {
+return static function($prove) {
     $io = IO::fromAmbientAuthority();
 
     $implementations = [
@@ -73,21 +73,23 @@ return static function() {
     ];
 
     foreach ($implementations as [$name, $content]) {
-        yield properties(
+        yield $prove->properties(
             $name,
             Content::properties(),
-            $content,
+            $content->map(static fn($content) => static fn() => $content),
         );
 
         foreach (Content::all() as $property) {
-            yield property(
-                $property,
-                $content,
-            )->named($name);
+            yield $prove
+                ->property(
+                    $property,
+                    $content->map(static fn($content) => static fn() => $content),
+                )
+                ->named($name);
         }
     }
 
-    yield test(
+    yield $prove->test(
         'Content::oneShot()->foreach()',
         static function($assert) use ($io) {
             $content = Model::oneShot($io->streams()->acquire(
@@ -103,9 +105,9 @@ return static function() {
         },
     );
 
-    yield proof(
-        'Content::oneShot()->map()',
-        given(
+    yield $prove
+        ->proof('Content::oneShot()->map()')
+        ->given(
             Set::strings()
                 ->madeOf(
                     Set::strings()
@@ -115,8 +117,8 @@ return static function() {
                 )
                 ->map(Str::of(...))
                 ->map(Line::of(...)),
-        ),
-        static function($assert, $replacement) use ($io) {
+        )
+        ->test(static function($assert, $replacement) use ($io) {
             $content = Model::oneShot($io->streams()->acquire(
                 \fopen('LICENSE', 'r'),
             ));
@@ -129,12 +131,11 @@ return static function() {
                 ->toList();
 
             $assert->same([$replacement->toString()], $lines);
-        },
-    );
+        });
 
-    yield proof(
-        'Content::oneShot()->flatMap()',
-        given(
+    yield $prove
+        ->proof('Content::oneShot()->flatMap()')
+        ->given(
             Set::strings()->madeOf(
                 Set::strings()
                     ->unicode()
@@ -147,8 +148,9 @@ return static function() {
                     ->char()
                     ->filter(static fn($char) => $char !== "\n"),
             ),
-        )->filter(static fn($a, $b) => $a !== $b),
-        static function($assert, $replacement1, $replacement2) use ($io) {
+        )
+        ->filter(static fn($a, $b) => $a !== $b)
+        ->test(static function($assert, $replacement1, $replacement2) use ($io) {
             $content = Model::oneShot($io->streams()->acquire(
                 \fopen('LICENSE', 'r'),
             ));
@@ -161,10 +163,9 @@ return static function() {
                 ->toList();
 
             $assert->same([$replacement1, $replacement2], $lines);
-        },
-    );
+        });
 
-    yield test(
+    yield $prove->test(
         'Content::oneShot()->filter()',
         static function($assert) use ($io) {
             $content = Model::oneShot($io->streams()->acquire(
@@ -180,7 +181,7 @@ return static function() {
         },
     );
 
-    yield test(
+    yield $prove->test(
         'Content::oneShot()->reduce()',
         static function($assert) use ($io) {
             $content = Model::oneShot($io->streams()->acquire(
@@ -196,7 +197,7 @@ return static function() {
         },
     );
 
-    yield test(
+    yield $prove->test(
         'Content::oneShot()->toString()',
         static function($assert) use ($io) {
             $content = Model::oneShot($io->streams()->acquire(
@@ -207,7 +208,7 @@ return static function() {
         },
     );
 
-    yield test(
+    yield $prove->test(
         'Content::oneShot()->chunks()',
         static function($assert) use ($io) {
             $content = Model::oneShot($io->streams()->acquire(
@@ -237,20 +238,19 @@ return static function() {
             ->toString(),
     );
 
-    yield proof(
-        'Content::oneShot() throws when loaded multiple times',
-        given($actions, $actions),
-        static function($assert, $a, $b) use ($io) {
+    yield $prove
+        ->proof('Content::oneShot() throws when loaded multiple times')
+        ->given($actions, $actions)
+        ->test(static function($assert, $a, $b) use ($io) {
             $content = Model::oneShot($io->streams()->acquire(
                 \fopen('LICENSE', 'r'),
             ));
 
             $a($content);
             $assert->throws(static fn() => $b($content));
-        },
-    );
+        });
 
-    yield test(
+    yield $prove->test(
         'Content::ofChunks()->size() does not load the whole file in memory',
         static function($assert) use ($io) {
             $atPath = $io

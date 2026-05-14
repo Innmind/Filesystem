@@ -25,8 +25,7 @@ Application::new($argv)
                     __DIR__.'/proofs/',
                     __DIR__.'/fixtures/',
                 )
-                    ->dumpTo('coverage.clover')
-                    ->enableWhen(true),
+                    ->dumpTo('coverage.clover'),
             )
             ->scenariiPerProof(1),
     )

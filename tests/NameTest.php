@@ -26,10 +26,12 @@ class NameTest extends TestCase
 
     public function testThrowWhenABuildingNameWithASlash()
     {
-        $this->expectException(\DomainException::class);
-        $this->expectExceptionMessage('A file name can\'t contain a slash, foo/bar given');
-
-        $_ = Name::of('foo/bar');
+        $this
+            ->assert()
+            ->throws(
+                static fn() => Name::of('foo/bar'),
+                \DomainException::class,
+            );
     }
 
     public function testEquals()
@@ -40,10 +42,12 @@ class NameTest extends TestCase
 
     public function testEmptyNameIsNotAllowed()
     {
-        $this->expectException(\DomainException::class);
-        $this->expectExceptionMessage('A file name can\'t be empty');
-
-        $_ = Name::of('');
+        $this
+            ->assert()
+            ->throws(
+                static fn() => Name::of(''),
+                \DomainException::class,
+            );
     }
 
     public function testAcceptsAnyValueNotContainingASlash(): BlackBox\Proof
@@ -67,9 +71,12 @@ class NameTest extends TestCase
                 Fixture::strings(),
             )
             ->prove(function($a, $b) {
-                $this->expectException(\DomainException::class);
-
-                $_ = Name::of("$a/$b");
+                $this
+                    ->assert()
+                    ->throws(
+                        static fn() => Name::of("$a/$b"),
+                        \DomainException::class,
+                    );
             });
     }
 
@@ -121,9 +128,12 @@ class NameTest extends TestCase
 
     public function testChr0IsNotAccepted()
     {
-        $this->expectException(\DomainException::class);
-
-        $_ = Name::of('a'.\chr(0).'a');
+        $this
+            ->assert()
+            ->throws(
+                static fn() => Name::of('a'.\chr(0).'a'),
+                \DomainException::class,
+            );
     }
 
     public function testNamesLongerThan255AreNotAccepted(): BlackBox\Proof

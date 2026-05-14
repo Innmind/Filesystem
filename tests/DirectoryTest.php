@@ -194,16 +194,18 @@ class DirectoryTest extends TestCase
                 FName::any(),
             )
             ->prove(function($directory, $file) {
-                $this->expectException(\LogicException::class);
-                $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
-
-                $_ = Directory::of(
-                    $directory,
-                    Sequence::of(
-                        File::named($file->toString(), Content::none()),
-                        File::named($file->toString(), Content::none()),
-                    ),
-                );
+                $this
+                    ->assert()
+                    ->throws(
+                        static fn() => Directory::of(
+                            $directory,
+                            Sequence::of(
+                                File::named($file->toString(), Content::none()),
+                                File::named($file->toString(), Content::none()),
+                            ),
+                        ),
+                        \LogicException::class,
+                    );
             });
     }
 
@@ -215,16 +217,18 @@ class DirectoryTest extends TestCase
                 FName::any(),
             )
             ->prove(function($directory, $file) {
-                $this->expectException(\LogicException::class);
-                $this->expectExceptionMessage("Same file '{$file->toString()}' found multiple times");
-
-                $_ = Directory::named(
-                    $directory->toString(),
-                    Sequence::of(
-                        File::named($file->toString(), Content::none()),
-                        File::named($file->toString(), Content::none()),
-                    ),
-                );
+                $this
+                    ->assert()
+                    ->throws(
+                        static fn() => Directory::named(
+                            $directory->toString(),
+                            Sequence::of(
+                                File::named($file->toString(), Content::none()),
+                                File::named($file->toString(), Content::none()),
+                            ),
+                        ),
+                        \LogicException::class,
+                    );
             });
     }
 
