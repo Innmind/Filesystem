@@ -195,7 +195,7 @@ class NameTest extends TestCase
 
                 $this->assertInstanceOf(
                     Path::class,
-                    Path::of($path),
+                    Path::file($path),
                 );
             });
     }
