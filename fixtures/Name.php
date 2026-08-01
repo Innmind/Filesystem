@@ -44,11 +44,14 @@ final class Name implements Set\Provider
     #[\Override]
     public function toSet(): Set
     {
-        return Set::strings()->madeOf(
-            Set::integers()->between(32, 46)->map(\chr(...)),
-            Set::integers()->between(48, 126)->map(\chr(...)),
-            Set::strings()->unicode()->emoticons(),
-        )
+        return Set::strings()
+            ->madeOf(
+                Set::integers()->between(32, 46)->map(\chr(...)),
+                Set::integers()->between(48, 91)->map(\chr(...)),
+                // the backslash is excluded as it oftens creates parsing errors in Path::file()
+                Set::integers()->between(93, 126)->map(\chr(...)),
+                Set::strings()->unicode()->emoticons(),
+            )
             ->between(1, 255 - \mb_strlen($this->prefix, 'ASCII'))
             ->map(fn($name) => $this->prefix.$name)
             ->filter(static fn($name) => \mb_strlen($name, 'ASCII') <= 255)
