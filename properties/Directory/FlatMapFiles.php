@@ -31,7 +31,7 @@ final class FlatMapFiles implements Property
         $this->file2 = $file2;
     }
 
-    public static function any(): Set\Provider
+    public static function any(): Set
     {
         return Set::compose(
             static fn(...$args) => new self(...$args),

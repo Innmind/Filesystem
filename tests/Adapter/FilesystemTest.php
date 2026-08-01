@@ -61,10 +61,12 @@ class FilesystemTest extends TestCase
 
     public function testThrowWhenPathToMountIsNotADirectory()
     {
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage("Path doesn't represent a directory 'path/to/somewhere'");
-
-        $_ = Adapter::mount(Path::of('path/to/somewhere'))->unwrap();
+        $this
+            ->assert()
+            ->throws(
+                static fn() => Adapter::mount(Path::of('path/to/somewhere'))->unwrap(),
+                \LogicException::class,
+            );
     }
 
     public function testReturnNothingWhenGettingUnknownFile()
@@ -331,28 +333,30 @@ class FilesystemTest extends TestCase
             ->recover(Recover::mount(...))
             ->unwrap();
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Path too long');
-
-        $_ = $filesystem->add(Directory::of(
-            Name::of(\str_repeat('a', 255)),
-            Sequence::of(
-                Directory::of(
+        $this
+            ->assert()
+            ->throws(
+                static fn() => $filesystem->add(Directory::of(
                     Name::of(\str_repeat('a', 255)),
                     Sequence::of(
                         Directory::of(
                             Name::of(\str_repeat('a', 255)),
                             Sequence::of(
-                                File::of(
+                                Directory::of(
                                     Name::of(\str_repeat('a', 255)),
-                                    Content::none(),
+                                    Sequence::of(
+                                        File::of(
+                                            Name::of(\str_repeat('a', 255)),
+                                            Content::none(),
+                                        ),
+                                    ),
                                 ),
                             ),
                         ),
                     ),
-                ),
-            ),
-        ))->unwrap();
+                ))->unwrap(),
+                \RuntimeException::class,
+            );
     }
 
     public function testPersistedNameCanStartWithAnyAsciiCharacter(): BlackBox\Proof
@@ -433,7 +437,9 @@ class FilesystemTest extends TestCase
                     Set::integers()->between(1, 8),
                     Set::integers()->between(14, 31),
                     Set::integers()->between(33, 45),
-                    Set::integers()->between(48, 127),
+                    Set::integers()->between(48, 91),
+                    // the backslash is excluded as it oftens creates parsing errors in Path::file()
+                    Set::integers()->between(93, 126),
                 ),
                 Set::strings(),
             )

@@ -18,13 +18,13 @@ use Properties\Innmind\Filesystem\Adapter as PAdapter;
 use Innmind\BlackBox\Set;
 use Symfony\Component\Filesystem\Filesystem as FS;
 
-return static function() {
+return static function($prove) {
     $path = \rtrim(\sys_get_temp_dir(), '/').'/innmind/filesystem/';
 
-    yield properties(
+    yield $prove->properties(
         'Filesystem properties',
         PAdapter::properties(),
-        Set::call(static function() use ($path) {
+        Set::of(static function() use ($path) {
             (new FS)->remove($path);
 
             return Adapter::mount(
@@ -40,25 +40,27 @@ return static function() {
     );
 
     foreach (PAdapter::alwaysApplicable() as $property) {
-        yield property(
-            $property,
-            Set::call(static function() use ($path) {
-                (new FS)->remove($path);
+        yield $prove
+            ->property(
+                $property,
+                Set::of(static function() use ($path) {
+                    (new FS)->remove($path);
 
-                return Adapter::mount(
-                    Path::of($path),
-                    match (\PHP_OS) {
-                        'Darwin' => CaseSensitivity::insensitive,
-                        default => CaseSensitivity::sensitive,
-                    },
-                )
-                    ->recover(Recover::mount(...))
-                    ->unwrap();
-            }),
-        )->named('Filesystem');
+                    return Adapter::mount(
+                        Path::of($path),
+                        match (\PHP_OS) {
+                            'Darwin' => CaseSensitivity::insensitive,
+                            default => CaseSensitivity::sensitive,
+                        },
+                    )
+                        ->recover(Recover::mount(...))
+                        ->unwrap();
+                }),
+            )
+            ->named('Filesystem');
     }
 
-    yield test(
+    yield $prove->test(
         'Regression adding file in directory due to case sensitivity',
         static function($assert) use ($path) {
             $property = new PAdapter\AddRemoveAddModificationsStillAddTheFile(
@@ -86,10 +88,10 @@ return static function() {
     );
 
     foreach (CaseSensitivity::cases() as $case) {
-        yield properties(
+        yield $prove->properties(
             'Filesystem properties on simulated disk',
             PAdapter::properties(),
-            Set::call(static fn() => Adapter::mount(
+            Set::of(static fn() => Adapter::mount(
                 Path::of('/'),
                 $case,
                 IO::simulation(
@@ -100,17 +102,19 @@ return static function() {
         );
 
         foreach (PAdapter::alwaysApplicable() as $property) {
-            yield property(
-                $property,
-                Set::call(static fn() => Adapter::mount(
-                    Path::of('/'),
-                    $case,
-                    IO::simulation(
-                        IO::fromAmbientAuthority(),
-                        Disk::new(),
-                    ),
-                )->unwrap()),
-            )->named('Filesystem on simulated disk');
+            yield $prove
+                ->property(
+                    $property,
+                    Set::of(static fn() => Adapter::mount(
+                        Path::of('/'),
+                        $case,
+                        IO::simulation(
+                            IO::fromAmbientAuthority(),
+                            Disk::new(),
+                        ),
+                    )->unwrap()),
+                )
+                ->named('Filesystem on simulated disk');
         }
     }
 };

@@ -11,25 +11,20 @@ use Innmind\BlackBox\{
 
 Application::new($argv)
     ->disableMemoryLimit() // because the generated trees can be quite large
-    ->scenariiPerProof(20)
-    ->when(
-        \getenv('BLACKBOX_SET_SIZE') !== false,
-        static fn(Application $app) => $app->scenariiPerProof((int) \getenv('BLACKBOX_SET_SIZE')),
-    )
-    ->when(
-        \getenv('ENABLE_COVERAGE') !== false,
-        static fn(Application $app) => $app
+    ->map(static fn($app) => match (\getenv('BLACKBOX_ENV')) {
+        'extensive' => $app->scenariiPerProof(1_000),
+        'coverage' => $app
             ->codeCoverage(
                 CodeCoverage::of(
                     __DIR__.'/src/',
                     __DIR__.'/proofs/',
                     __DIR__.'/fixtures/',
                 )
-                    ->dumpTo('coverage.clover')
-                    ->enableWhen(true),
+                    ->dumpTo('coverage.clover'),
             )
             ->scenariiPerProof(1),
-    )
+        default => $app->scenariiPerProof(20),
+    })
     ->allowProofsToNotMakeAnyAssertions()
     ->tryToProve(Load::everythingIn(__DIR__.'/proofs/'))
     ->exit();

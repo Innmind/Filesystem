@@ -23,6 +23,6 @@ final class File
             Name::any(),
             Set::strings(),
             MediaType::any(),
-        )->toSet();
+        );
     }
 }

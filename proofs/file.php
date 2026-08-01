@@ -3,14 +3,14 @@ declare(strict_types = 1);
 
 use Fixtures\Innmind\Filesystem\File;
 
-return static function() {
-    yield proof(
-        'File::mapContent()',
-        given(
+return static function($prove) {
+    yield $prove
+        ->proof('File::mapContent()')
+        ->given(
             File::any(),
             File::any(),
-        ),
-        static function($assert, $file, $replacement) {
+        )
+        ->test(static function($assert, $file, $replacement) {
             $new = $file->mapContent(static function($content) use ($assert, $file, $replacement) {
                 $assert->same($file->content(), $content);
 
@@ -24,6 +24,5 @@ return static function() {
             $assert->same($file->name(), $new->name());
             $assert->same($file->mediaType(), $new->mediaType());
             $assert->same($replacement->content(), $new->content());
-        },
-    );
+        });
 };
