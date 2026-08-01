@@ -48,7 +48,7 @@ final class Adapter
         CaseSensitivity $case = CaseSensitivity::sensitive,
         ?IO $io = null,
     ): Attempt {
-        return Filesystem::mount($path, $io)
+        return Filesystem::mount(Path::file($path->toString()), $io)
             ->map(static fn($implementation) => new self(
                 $implementation,
                 $case,

@@ -75,7 +75,7 @@ final class TreePath
 
     public function equals(self $other): bool
     {
-        $root = Path::of('/');
+        $root = Path::file('/');
 
         return $this->asPath($root)->equals($other->asPath($root));
     }
@@ -96,6 +96,6 @@ final class TreePath
             $path = $path->dropEnd(1); // remove trailing '/'
         }
 
-        return $root->resolve(Path::of($path->toString()));
+        return $root->resolve(Path::file($path->toString()));
     }
 }

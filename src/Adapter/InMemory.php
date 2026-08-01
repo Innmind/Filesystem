@@ -169,6 +169,6 @@ final class InMemory implements Implementation
 
     private function path(TreePath $path): string
     {
-        return $path->asPath(Path::of('/'))->toString();
+        return $path->asPath(Path::file('/'))->toString();
     }
 }
